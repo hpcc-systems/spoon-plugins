@@ -2,9 +2,26 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.hpccsystems.pentaho</groupId>
-	<artifactId>jobs</artifactId>
-	<packaging>jar</packaging>
-	<name>HPCC Systems Pentaho Data Integration Job Plugins</name>
+	<artifactId>job</artifactId>
+	<packaging>pom</packaging>
+	<name>HPCC Systems Pentaho Data Integration Job Plugin Modules</name>
 	<description></description>
 	<version>0.1-SNAPSHOT</version>
+	<modules>
+	  <module>ecldataset</module>
+	  <module>ecldedup</module>
+	  <module>ecldistribute</module>
+	  <module>eclgeneric</module>
+	  <module>eclglobalvariables</module>
+	  <module>ecliterate</module>
+	  <module>ecljoin</module>
+	  <module>eclml</module>
+	  <module>eclmergepaths</module>
+	  <module>ecloutput</module>
+	  <module>eclproject</module>
+	  <module>eclrollup</module>
+	  <module>eclsort</module>
+	  <module>eclsprayfile</module>
+	  <module>ecltable</module>
+	</modules>
 </project>
