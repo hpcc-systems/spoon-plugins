@@ -164,6 +164,13 @@ copy /Y "Jobs\%varDir%\dist\%varJar%.jar" "C:\Program Files\data-integration\plu
 copy /Y "ECLDirect\dist\ECLDirect.jar" "C:\Program Files\data-integration\plugins\jobentries\%varDir%\lib\ECLDirect.jar"
 copy /Y "ECLGUIFeatures\dist\ECLGUIFeatures.jar" "C:\Program Files\data-integration\plugins\jobentries\%varDir%\lib\ECLGUIFeatures.jar"
 
+set varDir=ECLIndexJob
+set varJar=%varDir%
+
+copy /Y "Jobs\%varDir%\dist\%varJar%.jar" "C:\Program Files\data-integration\plugins\jobentries\%varDir%\%varJar%.jar"
+copy /Y "ECLDirect\dist\ECLDirect.jar" "C:\Program Files\data-integration\plugins\jobentries\%varDir%\lib\ECLDirect.jar"
+copy /Y "ECLGUIFeatures\dist\ECLGUIFeatures.jar" "C:\Program Files\data-integration\plugins\jobentries\%varDir%\lib\ECLGUIFeatures.jar"
+
 
 
 @echo on

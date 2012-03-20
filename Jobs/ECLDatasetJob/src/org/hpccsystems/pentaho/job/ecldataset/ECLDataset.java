@@ -196,6 +196,7 @@ public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInter
                 setRecordDef(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "record_def")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordSet")) != null)
                 setRecordSet(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordSet")));
+            
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
                 openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
 

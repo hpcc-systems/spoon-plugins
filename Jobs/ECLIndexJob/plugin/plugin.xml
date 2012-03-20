@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="ECLJoin"
+	iconfile="join.png"
+	description="Join"
+	tooltip="Join" 
+	category="HPCC Systems"
+	classname="org.hpccsystems.pentaho.job.ecljoin.ECLJoin">
+            
+    <libraries>
+        <library name="ECLJoinJob.jar"/>
+    </libraries>            
+</plugin>
