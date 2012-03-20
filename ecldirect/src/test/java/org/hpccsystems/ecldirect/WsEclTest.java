@@ -1,5 +1,6 @@
+package org.hpccsystems.ecldirect;
 
-import org.hpccsystems.ecldirect.WsEcl;
+import org.junit.Test;
 
 /*
  * To change this template, choose Tools | Templates
@@ -11,7 +12,9 @@ import org.hpccsystems.ecldirect.WsEcl;
  * @author chalaax
  */
 public class WsEclTest {
-    public static void main(String[] args) {
+    
+    @Test
+    public void must_work() {
         WsEcl wsEcl = new WsEcl("192.168.59.129", "thor", "personandcontact.1");
         wsEcl.execute();
     }
