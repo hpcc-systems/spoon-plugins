@@ -7,4 +7,9 @@
 	<name>Pentaho Data Integration ECL Results Perspective</name>
 	<description></description>
 	<version>0.1-SNAPSHOT</version>
+	<parent>
+		<groupId>org.pentaho.di.plugins</groupId>
+		<artifactId>perspectives</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</parent>
 </project>
