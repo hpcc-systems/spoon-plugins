@@ -10,4 +10,30 @@
 		<artifactId>spoon-plugins</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>pentaho-kettle</groupId>
+				<artifactId>kettle-core</artifactId>
+				<version>4.2.0-GA</version>
+			</dependency>
+			<dependency>
+				<groupId>pentaho.kettle</groupId>
+				<artifactId>kettle-engine</artifactId>
+				<version>4.1.1-GA</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>pentaho-kettle</groupId>
+			<artifactId>kettle-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>pentaho.kettle</groupId>
+			<artifactId>kettle-engine</artifactId>
+		</dependency>
+	</dependencies>
 </project>
