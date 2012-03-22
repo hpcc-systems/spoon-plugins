@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="ECLIndex"
+	iconfile="join.png"
+	description="Index"
+	tooltip="Index" 
+	category="HPCC Systems"
+	classname="org.hpccsystems.pentaho.job.eclindex.ECLIndex">
+            
+    <libraries>
+        <library name="eclindex.jar"/>
+    </libraries>            
+</plugin>
