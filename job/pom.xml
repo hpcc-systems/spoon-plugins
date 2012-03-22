@@ -11,22 +11,32 @@
 		<version>0.1-SNAPSHOT</version>
 	</parent>
 	<modules>
-		<module>ecldataset</module>
-		<module>ecldedup</module>
-		<module>ecldistribute</module>
-		<module>eclgeneric</module>
-		<module>eclglobalvariables</module>
-		<module>ecliterate</module>
-		<module>ecljoin</module>
-		<module>eclml</module>
-		<module>eclmergepaths</module>
-		<module>ecloutput</module>
-		<module>eclproject</module>
-		<module>eclrollup</module>
-		<module>eclsort</module>
-		<module>eclsprayfile</module>
-		<module>ecltable</module>
-	</modules>
+    <module>ecldataset</module>
+    <module>ecldedup</module>
+    <module>ecldistribute</module>
+    <module>eclexecute</module>
+    <module>eclgeneric</module>
+    <module>eclglobalvariables</module>
+    <module>eclgroup</module>
+    <module>eclindex</module>
+    <module>ecliterate</module>
+    <module>ecljoin</module>
+    <module>eclmergepaths</module>
+    <module>eclml</module>
+    <module>eclmlassociate</module>
+    <module>eclmlbuildnaivebayes</module>
+    <module>eclmlclassification</module>
+    <module>eclmldiscretize</module>
+    <module>eclmlfromfield</module>
+    <module>eclmlkmeans</module>
+    <module>eclmltofield</module>
+    <module>ecloutput</module>
+    <module>eclproject</module>
+    <module>eclrollup</module>
+    <module>eclsort</module>
+    <module>eclsprayfile</module>
+    <module>ecltable</module>	
+  </modules>
 
 	<dependencyManagement>
 		<dependencies>
