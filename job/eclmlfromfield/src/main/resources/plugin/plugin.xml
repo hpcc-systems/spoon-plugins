@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="ECLML_ToField"
+	iconfile="dataset.png"
+	description="ML_ToField"
+	tooltip="ML_ToField" 
+	category="HPCC Systems"
+	classname="org.hpccsystems.pentaho.job.ecldataset.ECLDataset">
+            
+    <libraries>
+        <library name="ECLDatasetJob.jar"/>
+    </libraries>            
+</plugin>
