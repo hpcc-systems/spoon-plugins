@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="ECLML_Classification"
+	iconfile="dataset.png"
+	description="ML_Classification"
+	tooltip="ML_Classification" 
+	category="HPCC Systems"
+	classname="org.hpccsystems.pentaho.job.eclmlclassification.ECLML_Classification">
+            
+    <libraries>
+        <library name="eclmlclassification.jar"/>
+    </libraries>            
+</plugin>
