@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="ECLML_KMeans"
+	iconfile="dataset.png"
+	description="ML_KMeans"
+	tooltip="ML_KMeans" 
+	category="HPCC Systems"
+	classname="org.hpccsystems.pentaho.job.eclmlkmeans.ECLML_KMeans">
+            
+    <libraries>
+        <library name="eclmlkmeans.jar"/>
+    </libraries>            
+</plugin>

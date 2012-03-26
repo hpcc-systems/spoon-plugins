@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="ECLML_FromField"
+	iconfile="dataset.png"
+	description="ML_FromField"
+	tooltip="ML_FromField" 
+	category="HPCC Systems"
+	classname="org.hpccsystems.pentaho.job.eclmlfromfield.ECLML_FromField">
+            
+    <libraries>
+        <library name="eclmlfromfield.jar"/>
+    </libraries>            
+</plugin>
