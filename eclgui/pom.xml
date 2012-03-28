@@ -24,10 +24,15 @@
 				<version>4.1.1-GA</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse</groupId>
+				<groupId>org.mod4j.org.eclipse</groupId>
 				<artifactId>jface</artifactId>
-				<version>3.3.0-I20070606-0010</version>
+				<version>3.5.0</version>
 			</dependency>
+            <dependency>
+                <groupId>org.eclipse</groupId>
+                <artifactId>swt</artifactId>
+                <version>3.3.0-v3346</version>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -41,8 +46,12 @@
 			<artifactId>kettle-engine</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse</groupId>
+			<groupId>org.mod4j.org.eclipse</groupId>
 			<artifactId>jface</artifactId>
 		</dependency>
+            <dependency>
+                <groupId>org.eclipse</groupId>
+                <artifactId>swt</artifactId>
+            </dependency>
 	</dependencies>
 </project>

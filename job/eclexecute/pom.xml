@@ -12,12 +12,48 @@
 		<version>0.1-SNAPSHOT</version>
 	</parent>
 
+	<properties>
+		<iconfile>output.png</iconfile>
+	</properties>
+
 	<dependencies>
 		<dependency>
-			<groupId>org.hpccsystems.pentaho</groupId>
-			<artifactId>ecldirect</artifactId>
+			<groupId>org.pentaho.di.plugins.perspectives</groupId>
+			<artifactId>eclresults</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>${maven.assembly.plugin.version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+				<descriptors>
+					<descriptor>../assembly.xml</descriptor>
+				</descriptors>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

@@ -1,0 +1,25 @@
+<assembly>
+   <id>dist</id>
+   <formats>
+     <format>tar</format>
+     <format>zip</format>
+   </formats>
+   <files>
+     <file>
+       <source>target/${project.artifactId}.jar</source>
+       <outputDirectory></outputDirectory>
+       <fileMode>0644</fileMode>
+     </file>
+     <file>
+       <source>src/main/resources/plugin/${iconfile}</source>
+       <outputDirectory>plugin</outputDirectory>
+       <fileMode>0644</fileMode>
+     </file>
+     <file>
+       <source>src/main/resources/plugin/plugin.xml</source>
+       <outputDirectory>plugin</outputDirectory>
+       <fileMode>0644</fileMode>
+     </file>
+   </files>
+</assembly>
+
