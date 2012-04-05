@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.hpccsystems.pentaho.job.eclmlbuildnaivebayes;
+package org.hpccsystems.pentaho.job.eclbuildnaivebayes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -153,11 +153,11 @@ public class ECLML_BuildNaiveBayes extends JobEntryBase implements Cloneable, Jo
         String retval = "";
         
         retval += super.getXML();
-        retval += "             <recordset_name>"+this.recordsetName+"</recordset_name>"+Const.CR;
+        retval += "             <recordset_name><![CDATA["+this.recordsetName+"]]></recordset_name>"+Const.CR;
                 
         
-        retval += "             <dependentVar>"+this.dependentVar+"</dependentVar>"+Const.CR;
-        retval += "             <independentVar>"+this.independentVar+"</independentVar>"+Const.CR;
+        retval += "             <dependentVar><![CDATA["+this.dependentVar+"]]></dependentVar>"+Const.CR;
+        retval += "             <independentVar><![CDATA["+this.independentVar+"]]></independentVar>"+Const.CR;
         
         return retval;
 

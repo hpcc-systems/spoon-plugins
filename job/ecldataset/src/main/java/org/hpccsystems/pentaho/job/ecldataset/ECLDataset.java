@@ -96,8 +96,12 @@ public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInter
                     System.out.println("Size: "+recordList.getRecords().size());
                     for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
                             RecordBO record = (RecordBO) iterator.next();
-                            
-                            out += record.getColumnType() + " " + record.getColumnName() + ";\r\n";
+                            int rLen = record.getColumnWidth();
+                            if(rLen != 0){
+                                out += record.getColumnType()+rLen + " " + record.getColumnName() + ";\r\n";
+                            }else{
+                                out += record.getColumnType() + " " + record.getColumnName() + ";\r\n";
+                            }
                     }
             }
         }
@@ -118,6 +122,7 @@ public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInter
         dataset.setRecordName(getRecordName());
         dataset.setFileType("CSV");
         dataset.setRecordSet(getRecordSet());
+        
 
         logBasic("{Dataset Job} Execute = " + dataset.ecl());
         
@@ -196,6 +201,7 @@ public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInter
                 setRecordDef(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "record_def")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordSet")) != null)
                 setRecordSet(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordSet")));
+            
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
                 openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
 

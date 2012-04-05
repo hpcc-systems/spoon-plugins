@@ -56,6 +56,7 @@ public class ECLIterateDialog extends JobEntryDialog implements JobEntryDialogIn
     private Text recordsetNameIterate;
     
     private Text transformCall;
+    private Text returnType;
     
     private Button wOK, wCancel;
     private boolean backupChanged;
@@ -165,12 +166,13 @@ public class ECLIterateDialog extends JobEntryDialog implements JobEntryDialogIn
         FormData iterateGroupFormat = new FormData();
         iterateGroupFormat.top = new FormAttachment(recordGroup, margin);
         iterateGroupFormat.width = 400;
-        iterateGroupFormat.height = 85;
+        iterateGroupFormat.height = 95;
         iterateGroupFormat.left = new FormAttachment(middle, 0);
         iterateGroup.setLayoutData(iterateGroupFormat);
         
+        //returnType = buildText("Return Type", null, lsMod, middle, margin, iterateGroup);
         recordsetNameIterate = buildText("Resulting Recordset", null, lsMod, middle, margin, iterateGroup);
-        transformCall = buildText("Transform Call", recordsetName, lsMod, middle, margin, iterateGroup);
+        transformCall = buildText("Transform Call", recordsetNameIterate, lsMod, middle, margin, iterateGroup);
         runLocal = buildCombo("RUNLOCAL", transformCall, lsMod, middle, margin, iterateGroup,new String[]{"false", "true"});
      
         wOK = new Button(shell, SWT.PUSH);
@@ -246,6 +248,10 @@ public class ECLIterateDialog extends JobEntryDialog implements JobEntryDialogIn
         }
         if (jobEntry.getRecordName() != null) {
             recordName.setText(jobEntry.getRecordName());
+        }
+        
+        if (jobEntry.getReturnType() != null) {
+            //returnType.setText(jobEntry.getReturnType());
         }
         
        // if (jobEntry.getRunLocalString() != null) {
@@ -372,6 +378,7 @@ public class ECLIterateDialog extends JobEntryDialog implements JobEntryDialogIn
         jobEntry.setRecordName(recordName.getText());
         jobEntry.setRunLocalString(runLocal.getText());
         jobEntry.setTransformCall(transformCall.getText());
+       // jobEntry.setReturnType(returnType.getText());
 
         dispose();
     }

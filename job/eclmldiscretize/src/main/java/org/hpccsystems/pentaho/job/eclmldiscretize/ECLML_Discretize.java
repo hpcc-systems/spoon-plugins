@@ -6,7 +6,7 @@ package org.hpccsystems.pentaho.job.eclmldiscretize;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hpccsystems.ecldirect.ML_Associate;
+import org.hpccsystems.ecldirect.ML_Discretize;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;
@@ -77,10 +77,10 @@ public class ECLML_Discretize extends JobEntryBase implements Cloneable, JobEntr
         
         Result result = prevResult;
         
-        
+        //create direct populate here
     
     
-        ML_Associate ml = new ML_Associate();
+        ML_Discretize ml = new ML_Discretize();
         ml.setName(this.getRecordsetName());
        
         ml.setRecordName(this.getRecordName());

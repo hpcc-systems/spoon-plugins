@@ -33,6 +33,15 @@ public class ECLML_FromField extends JobEntryBase implements Cloneable, JobEntry
     private String inDS = "";
     private String outDS = "";
     private String fromType = "";
+    private String map = "";
+
+    public String getMap() {
+        return map;
+    }
+
+    public void setMap(String map) {
+        this.map = map;
+    }
 
     public String getFromType() {
         return fromType;
@@ -75,6 +84,7 @@ public class ECLML_FromField extends JobEntryBase implements Cloneable, JobEntry
         ff.setName(name);
         ff.setOutDS(outDS);
         ff.setFromType(fromType);
+        ff.setMap(map);
         
         
 
@@ -129,6 +139,9 @@ public class ECLML_FromField extends JobEntryBase implements Cloneable, JobEntry
           
           if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"fromType")) != null)
             this.setFromType(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"fromType")));
+          
+          if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"map")) != null)
+            this.setMap(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"map")));
          
         
         } catch (Exception e) {
@@ -145,7 +158,7 @@ public class ECLML_FromField extends JobEntryBase implements Cloneable, JobEntry
         retval += "             <inDS>"+this.inDS+"</inDS>"+Const.CR;
         retval += "             <outDS>"+this.outDS+"</outDS>"+Const.CR;  
         retval += "             <fromType>"+this.fromType+"</fromType>"+Const.CR;  
-        
+        retval += "             <map>"+this.map+"</map>"+Const.CR;
 
         return retval;
 
@@ -164,7 +177,8 @@ public class ECLML_FromField extends JobEntryBase implements Cloneable, JobEntry
             if(rep.getStepAttributeString(id_jobentry, "fromType") != null)
                 fromType = rep.getStepAttributeString(id_jobentry, "fromType");
             
-           
+            if(rep.getStepAttributeString(id_jobentry, "map") != null)
+                map = rep.getStepAttributeString(id_jobentry, "map");
             
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -178,7 +192,7 @@ public class ECLML_FromField extends JobEntryBase implements Cloneable, JobEntry
 
             rep.saveStepAttribute(id_job, getObjectId(), "outDS", outDS);
             rep.saveStepAttribute(id_job, getObjectId(), "fromType", fromType);
-
+            rep.saveStepAttribute(id_job, getObjectId(), "map", map);
            
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);

@@ -48,6 +48,7 @@ public class ECLML_FromFieldDialog extends JobEntryDialog implements JobEntryDia
     private Text inDS;
     private Text outDS;
     private Text fromType;
+    private Text map;
 
 
     private Button wOK, wCancel;
@@ -128,6 +129,7 @@ public class ECLML_FromFieldDialog extends JobEntryDialog implements JobEntryDia
 
         inDS = buildText("Input Dataset", null, lsMod, middle, margin, recordGroup);
         fromType = buildText("Layout Record", inDS, lsMod, middle, margin, recordGroup);
+        map = buildText("Mapping Table", fromType, lsMod, middle, margin, recordGroup);
            
 
        
@@ -208,6 +210,9 @@ public class ECLML_FromFieldDialog extends JobEntryDialog implements JobEntryDia
         
         if (jobEntry.getFromType() != null) {
             fromType.setText(jobEntry.getFromType());
+        }
+        if (jobEntry.getMap() != null) {
+            map.setText(jobEntry.getMap());
         }
         
        
@@ -310,6 +315,7 @@ public class ECLML_FromFieldDialog extends JobEntryDialog implements JobEntryDia
         jobEntry.setInDS(inDS.getText());
         jobEntry.setOutDS(outDS.getText());  
         jobEntry.setFromType(fromType.getText());
+        jobEntry.setMap(map.getText());
       
         dispose();
     }

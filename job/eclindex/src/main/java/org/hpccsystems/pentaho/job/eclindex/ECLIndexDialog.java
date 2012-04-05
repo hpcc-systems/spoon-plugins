@@ -47,7 +47,8 @@ import org.eclipse.swt.widgets.TabItem;
  * @author ChalaAX
  */
 public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInterface {
-
+    
+    private TabFolder tabFolder;
     private ECLIndex jobEntry;    
     private Text jobEntryName;
     
@@ -60,8 +61,11 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
     private Combo opt;
     private Combo compressed;
     private Combo distributed;
+    private Combo isDuplicate;
+    private Combo overwrite;
     private Text index;
     private Text newindexfile;
+    
   
     
     private Button wOK, wCancel;
@@ -81,7 +85,65 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
             this.jobEntry.setName("Join");
         }
     }
+    
+    public final void toggleEnable(){
+        Color white = new Color(null,255,255,255);
+        Color grey = new Color(null,245,245,245);
+         if(isDuplicate.getText().equals("Yes")){
+                            
+                            baserecset.setEnabled(false);
+                            baserecset.setBackground(grey);
+                            indexfile.setEnabled(false);
+                            indexfile.setBackground(grey);
+                            sorted.setEnabled(false);
+                            sorted.setBackground(grey);
+                            preload.setEnabled(false);
+                            preload.setBackground(grey);
+                            opt.setEnabled(false);
+                            opt.setBackground(grey);
+                            compressed.setEnabled(false);
+                            compressed.setBackground(grey);
+                            distributed.setEnabled(false);
+                            distributed.setBackground(grey);
+                            
+                            index.setBackground(white);
+                            index.setEnabled(true);
+                            newindexfile.setBackground(white);
+                            newindexfile.setEnabled(true);
+                            
+                            tabFolder.getTabList()[1].setEnabled(false);
+                            tabFolder.getTabList()[2].setEnabled(false);
+  
+                            tabFolder.redraw();
+                        }else{
+                            index.setBackground(grey);
+                            index.setEnabled(false);
+                            newindexfile.setBackground(grey);
+                            newindexfile.setEnabled(false);
+                            
+                            
+                            baserecset.setEnabled(true);
+                            baserecset.setBackground(white);
+                            indexfile.setEnabled(true);
+                            indexfile.setBackground(white);
+                            sorted.setEnabled(true);
+                            sorted.setBackground(white);
+                            preload.setEnabled(true);
+                            preload.setBackground(white);
+                            opt.setEnabled(true);
+                            opt.setBackground(white);
+                            compressed.setEnabled(true);
+                            compressed.setBackground(white);
+                            distributed.setEnabled(true);
+                            distributed.setBackground(white);
+                            
+                            tabFolder.getTabList()[1].setEnabled(true);
+                            tabFolder.getTabList()[2].setEnabled(true);
 
+                            tabFolder.redraw();
+                            
+                        }
+    }
     public JobEntryInterface open() {
         Shell parentShell = getParent();
         Display display = parentShell.getDisplay();
@@ -98,10 +160,13 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         }
         
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
+        String[] columnNames = new String[] {"column_name"};
         keysCT = new CreateTable(shell);
+        keysCT.setColumnNames(columnNames);
         payloadCT = new CreateTable(shell);
+        payloadCT.setColumnNames(columnNames);
         
-        TabFolder tabFolder = new TabFolder (shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
+        tabFolder = new TabFolder (shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
         FormData data = new FormData();
         
         data.height = 400;
@@ -156,12 +221,14 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         FormData generalGroupFormat = new FormData();
         generalGroupFormat.top = new FormAttachment(0, margin);
         generalGroupFormat.width = 400;
-        generalGroupFormat.height = 65;
+        generalGroupFormat.height = 85;
         generalGroupFormat.left = new FormAttachment(middle, 0);
         generalGroup.setLayoutData(generalGroupFormat);
         
         jobEntryName = buildText("Job Entry Name", null, lsMod, middle, margin, generalGroup);
-
+        this.isDuplicate = buildCombo("Duplicate Existing Index?", jobEntryName, lsMod, middle, margin, generalGroup, new String[]{"No", "Yes"});
+        this.overwrite = buildCombo("Overwrite existing files?", isDuplicate, lsMod, middle, margin, generalGroup, new String[]{"No", "Yes"});
+        
         //All other contols
         //Join Declaration
         Group indexGroup = new Group(compForGrp, SWT.SHADOW_NONE);
@@ -186,10 +253,14 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         this.compressed = buildCombo("Is Compressed", opt, lsMod, middle, margin, indexGroup, new String[]{"", "LZW", "ROW", "FIRST"});
         this.distributed = buildCombo("Is Distributed", compressed, lsMod, middle, margin, indexGroup, new String[]{"", "Yes", "No"});
         
-        this.index = buildText("Resulting Recordset", distributed, lsMod, middle, margin, indexGroup);
-        this.newindexfile = buildText("Resulting Recordset", index, lsMod, middle, margin, indexGroup);
+        this.index = buildText("Index", distributed, lsMod, middle, margin, indexGroup);
+        this.newindexfile = buildText("New Indexfile", index, lsMod, middle, margin, indexGroup);
         
-         generalTab.setControl(compForGrp);
+        //this.index.setBackground(null);
+        
+        
+        
+        generalTab.setControl(compForGrp);
          
         if(jobEntry.getKeys() != null){
             keysRecordList = jobEntry.getKeys();
@@ -203,7 +274,16 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
             }
         }
         
+        this.isDuplicate.addSelectionListener(new SelectionAdapter() {
+                    public void widgetSelected(SelectionEvent e) {
+                       toggleEnable();  
+                    };
+            });
+       
+        
+       // keysCT.redrawTable(true);
         TabItem keysTab = keysCT.buildDefTab("Keys", tabFolder);
+       
         
         
         if(jobEntry.getPayload() != null){
@@ -310,6 +390,21 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         if (jobEntry.getNewindexfile() != null) {
             newindexfile.setText(jobEntry.getNewindexfile());
         }
+        if (jobEntry.getIsDuplicate() != null) {
+            isDuplicate.setText(jobEntry.getIsDuplicate());
+            toggleEnable();
+        }else{
+            isDuplicate.setText("No");
+            toggleEnable();
+        }
+        
+        if (jobEntry.getOverwrite() != null) {
+            overwrite.setText(jobEntry.getOverwrite());
+        }else{
+            overwrite.setText("No");
+        }
+        
+        
 
 
         shell.pack();
@@ -432,6 +527,8 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         
         jobEntry.setKeys(keysCT.getRecordList());
         jobEntry.setPayload(payloadCT.getRecordList());
+        jobEntry.setIsDuplicate(isDuplicate.getText());
+        jobEntry.setOverwrite(overwrite.getText());
 
         dispose();
     }

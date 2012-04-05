@@ -92,11 +92,11 @@ public class ML_Classification implements EclCommand {
         //ITERATE(recordset, transform [, LOCAL ] )
         
          
-        String ecl = "";
+        String ecl = this.name + ":=";
         
         //need to define and rework all the imports
       
-        ecl += "ML.Classify."+this.algType+"("+this.independentVar+","+this.dependentVar+")";
+        ecl += "ML.Classify."+this.algType+"("+this.independentVar+","+this.dependentVar+");";
 
        
         //close out the ecl call

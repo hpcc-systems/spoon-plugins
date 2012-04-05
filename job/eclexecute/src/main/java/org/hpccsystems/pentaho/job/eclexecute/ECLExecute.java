@@ -235,7 +235,7 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
                         System.out.println("Throw Exception");
                         logError("Syntax Check Failed:\n\r"+error);
                         this.logRowlevel("Syntax Check Failed:\n\r"+error);
-                        en.openDialog("Syntax Check Failed:", error);
+                        en.openDialog("Syntax Check Failed:", error,eclCode);
                         isValid = false;
                         result.setResult(false);
                         throw new KettleException("ECL failed Validation, please correct and re-run." + error);

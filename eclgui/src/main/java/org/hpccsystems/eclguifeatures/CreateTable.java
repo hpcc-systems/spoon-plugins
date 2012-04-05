@@ -75,6 +75,14 @@ public class CreateTable {
 
 	// Set column names
 	private String[] columnNames = new String[] { NAME_COLUMN, DEFAULT_VALUE, TYPE_COLUMN, WIDTH_COLUMN };
+
+        public void setColumnNames(String[] columnNames) {
+            this.columnNames = columnNames;
+        }
+
+
+
+
         
         
         public TabItem buildDefTab(String tabName, TabFolder tabFolder){
@@ -293,21 +301,24 @@ public class CreateTable {
 		tableColumn0.setText("Column Name");
 		tableColumn0.setWidth(150);
 
-		// 2nd column - DEFAULT_VALUE
-		TableColumn column = new TableColumn(table, SWT.CENTER, 1);
-		column.setText("Default Value");
-		column.setWidth(100);
-		
+                if(columnNames.length >= 2){
+                    // 2nd column - DEFAULT_VALUE
+                    TableColumn column = new TableColumn(table, SWT.CENTER, 1);
+                    column.setText("Default Value");
+                    column.setWidth(100);
+                }
+                 if(columnNames.length >= 3){
 		// 3rd column - COLUMN_TYPE
-		 column = new TableColumn(table, SWT.LEFT, 2);
-		column.setText("Column Type");
-		column.setWidth(100);
-
-		// 4th column - COLUMN_WIDTH
-		column = new TableColumn(table, SWT.CENTER, 3);
-		column.setText("Column Width");
-		column.setWidth(100);
-		
+                    TableColumn column = new TableColumn(table, SWT.LEFT, 2);
+                    column.setText("Column Type");
+                    column.setWidth(100);
+                 }
+                 if(columnNames.length >= 4){
+                    // 4th column - COLUMN_WIDTH
+                    TableColumn column = new TableColumn(table, SWT.CENTER, 3);
+                    column.setText("Column Width");
+                    column.setWidth(100);
+                 }
 		tableColumn0.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -377,33 +388,39 @@ public class CreateTable {
 
 		// Create the cell editors
 		CellEditor[] editors = new CellEditor[columnNames.length];
+                
+                if(columnNames.length >= 1){
+                    // Column 1 : Column Name(Free text)
+                    TextCellEditor colNameTextEditor = new TextCellEditor(table);
+                    ((Text) colNameTextEditor.getControl()).setTextLimit(30);
+                    editors[0] = colNameTextEditor;
+                }
+                
+                if(columnNames.length >= 2){
+                    // Column 2 : Default Value(Free text)
+                    TextCellEditor colDefaultTextEditor = new TextCellEditor(table);
+                    ((Text) colDefaultTextEditor.getControl()).setTextLimit(30);
+                    editors[1] = colDefaultTextEditor;
+                }
+                
+                if(columnNames.length >= 3){
+                    // Column 3 : Column Type (Combo Box) 
+                    editors[2] = new ComboBoxCellEditor(table, recordList.getColTypes(), SWT.DROP_DOWN|SWT.READ_ONLY);
+                }
+                if(columnNames.length >= 4){
+                    // Column 4 : Column Width (Text with digits only)
+                    TextCellEditor colWidthTextEditor = new TextCellEditor(table);
+                    ((Text) colWidthTextEditor.getControl()).addVerifyListener(
 
-		// Column 1 : Column Name(Free text)
-		TextCellEditor colNameTextEditor = new TextCellEditor(table);
-		((Text) colNameTextEditor.getControl()).setTextLimit(30);
-		editors[0] = colNameTextEditor;
-		
-		// Column 2 : Default Value(Free text)
-		TextCellEditor colDefaultTextEditor = new TextCellEditor(table);
-		((Text) colDefaultTextEditor.getControl()).setTextLimit(30);
-		editors[1] = colDefaultTextEditor;
-		
-		// Column 3 : Column Type (Combo Box) 
-		editors[2] = new ComboBoxCellEditor(table, recordList.getColTypes(), SWT.DROP_DOWN|SWT.READ_ONLY);
-		
-		// Column 4 : Column Width (Text with digits only)
-		TextCellEditor colWidthTextEditor = new TextCellEditor(table);
-		((Text) colWidthTextEditor.getControl()).addVerifyListener(
-		
-			new VerifyListener() {
-				public void verifyText(VerifyEvent e) {
-					// Here, we could use a RegExp such as the following 
-					// if using JRE1.4 such as  e.doit = e.text.matches("[\\-0-9]*");
-					e.doit = "0123456789".indexOf(e.text) >= 0 ;
-				}
-			});
-		editors[3] = colWidthTextEditor;
-
+                            new VerifyListener() {
+                                    public void verifyText(VerifyEvent e) {
+                                            // Here, we could use a RegExp such as the following 
+                                            // if using JRE1.4 such as  e.doit = e.text.matches("[\\-0-9]*");
+                                            e.doit = "0123456789".indexOf(e.text) >= 0 ;
+                                    }
+                            });
+                    editors[3] = colWidthTextEditor;
+                }
 		// Assign the cell editors to the viewer 
 		tableViewer.setCellEditors(editors);
 		// Set the cell modifier for the viewer

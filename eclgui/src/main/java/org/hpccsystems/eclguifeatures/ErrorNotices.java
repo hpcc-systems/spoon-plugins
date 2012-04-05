@@ -89,7 +89,7 @@ public class ErrorNotices {
     }
     
     
-    public void openDialog(String notice, String details){
+    public void openDialog(String notice, String details, String eclCode){
         Display display = new Display ();
 	//Shell shell = new Shell (display);
 	//shell.pack ();
@@ -128,6 +128,8 @@ public class ErrorNotices {
 	
         Text detailsBox = this.buildMultiText(okButton, lsMod, 0, 5, dialog);
 	detailsBox.setText(details);
+        Text codeBox = this.buildMultiText(detailsBox, lsMod, 0, 5, dialog);
+	codeBox.setText(eclCode);
 	dialog.setDefaultButton (okButton);
 	dialog.pack ();
 	dialog.open ();

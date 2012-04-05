@@ -45,7 +45,36 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
     private String distributed;
     private String index;
     private String newindexfile;
+    private String isDuplicate;
+    private String overwrite;
+    /*
+    private String name = "";
+    
+    
+    public String getName(){
+        return name;
+    }
+    public void setName(String name){
+        this.name=name;
+    }*/
 
+    public String getOverwrite() {
+        return overwrite;
+    }
+
+    public void setOverwrite(String overwrite) {
+        this.overwrite = overwrite;
+    }
+
+    public String getIsDuplicate() {
+        return isDuplicate;
+    }
+
+    public void setIsDuplicate(String isDuplicate) {
+        this.isDuplicate = isDuplicate;
+    }
+    
+    
     public RecordList getKeys() {
         return keys;
     }
@@ -146,8 +175,10 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
                     System.out.println("Size: "+recordList.getRecords().size());
                     for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
                             RecordBO record = (RecordBO) iterator.next();
-                            
-                            out += record.getColumnType() + " " + record.getColumnName() + ";\r\n";
+                            if(!out.equals("")){
+                                out += ",";
+                            }
+                            out += record.getColumnName();
                     }
             }
         }
@@ -166,25 +197,29 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         }else{
         
             Index index = new Index();
-            index.setBaserecset(baserecset);
-            index.setKeys(resultListToString(keys));
-            index.setPayload(resultListToString(payload));
-            index.setIndexfile(indexfile);
-            index.setSorted(sorted);
-            index.setOpt(opt);
-            index.setCompressed(compressed);
-            index.setDistributed(distributed);
-            index.setIndex(this.index);
-            index.setNewindexfile(newindexfile);
-
-
+            index.setName(this.getName());
+            index.setOverwrite(this.getOverwrite());
+            if(isDuplicate.equals("Yes")){
+                index.setIndex(this.index);
+                index.setNewindexfile(newindexfile);
+            }else{
+                index.setBaserecset(baserecset);
+                index.setKeys(resultListToString(keys));
+                index.setPayload(resultListToString(payload));
+                index.setIndexfile(indexfile);
+                index.setSorted(sorted);
+                index.setOpt(opt);
+                index.setCompressed(compressed);
+                index.setDistributed(distributed);
+            }
+            
             //logBasic("{Join Job} Previous =" + result.getLogText());
 
             result.setResult(true);
 
             RowMetaAndData data = new RowMetaAndData();
-            //data.addValue("ecl", Value.VALUE_TYPE_STRING, joinResults);
-
+            data.addValue("ecl", Value.VALUE_TYPE_STRING, index.ecl());
+           
 
             List list = result.getRows();
             list.add(data);
@@ -192,13 +227,18 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
             if (list == null) {
                 list = new ArrayList();
             } else {
-
+                try{
                 for (int i = 0; i < list.size(); i++) {
                     RowMetaAndData rowData = (RowMetaAndData) list.get(i);
+                    
                     String code = rowData.getString("ecl", null);
                     if (code != null) {
                         eclCode += code;
                     }
+                    
+                     }
+                }catch (Exception e){
+
                 }
                 logBasic("{Join Job} ECL Code =" + eclCode);
             }
@@ -287,8 +327,8 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         try {
             super.loadXML(node, list, list1);
             
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "join_name")) != null)
-                setName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "join_name")));
+           // if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "index_name")) != null)
+           //     setName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "index_name")));
             
             this.setBaserecset(loadXMLElement(node,"baserecset"));
            // this.setKeys(loadXMLElement(node,"keys"));
@@ -307,6 +347,8 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
             this.setDistributed(loadXMLElement(node,"distributed"));
             this.setIndex(loadXMLElement(node,"index"));
             this.setNewindexfile(loadXMLElement(node,"newindexfile"));
+            this.setIsDuplicate(loadXMLElement(node,"isDuplicate"));
+             this.setOverwrite(loadXMLElement(node,"overwrite"));
 
         } catch (Exception e) {
             throw new KettleXMLException("ECL Join Job Plugin Unable to read step info from XML node", e);
@@ -336,6 +378,8 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
          retval += getXMLElement("distributed", this.getDistributed());
          retval += getXMLElement("index", this.getIndex());
          retval += getXMLElement("newindexfile", this.getNewindexfile());
+         retval += getXMLElement("isDuplicate", this.getIsDuplicate());
+         retval += getXMLElement("overwrite", this.getOverwrite());
          
   
         return retval;
@@ -374,6 +418,8 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
             this.setDistributed(getRepElement(rep, id_jobentry, "distributed"));
             this.setIndex(getRepElement(rep, id_jobentry, "index"));
             this.setNewindexfile(getRepElement(rep, id_jobentry, "newindexfile"));
+            this.setIsDuplicate(getRepElement(rep, id_jobentry, "isDuplicate"));
+             this.setOverwrite(getRepElement(rep, id_jobentry, "overwrite"));
                 
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -417,6 +463,8 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
            saveRepElement(rep,id_job,"distributed",this.getDistributed());
            saveRepElement(rep,id_job,"index",this.getIndex());
            saveRepElement(rep,id_job,"newindexfile",this.getNewindexfile());
+           saveRepElement(rep,id_job,"isDuplicate",this.getIsDuplicate());
+           saveRepElement(rep,id_job,"overwrite",this.getOverwrite());
            
            
         } catch (Exception e) {

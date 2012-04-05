@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.hpccsystems.pentaho.job.eclmlclassification;
+package org.hpccsystems.pentaho.job.eclclassification;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -129,10 +129,9 @@ public class ECLML_ClassificationDialog extends JobEntryDialog implements JobEnt
         //name = buildText("Distribute Name", null, lsMod, middle, margin, distributeGroup);
 
 
-    
-        dependentVar = buildText("Dependent Variable", null, lsMod, middle, margin, recordGroup);
-        independentVar = buildText("Independent Variable", dependentVar, lsMod, middle, margin, recordGroup);
-        algType = buildCombo("Algorithm", independentVar, lsMod, middle, margin, recordGroup,new String[]{"Logistic", "NaiveBayes"});
+        independentVar = buildText("Independent Variable", null, lsMod, middle, margin, recordGroup);
+        dependentVar = buildText("Dependent Variable", independentVar, lsMod, middle, margin, recordGroup);
+         algType = buildCombo("Algorithm", independentVar, lsMod, middle, margin, recordGroup,new String[]{"Logistic", "NaiveBayes"});
         
         
         

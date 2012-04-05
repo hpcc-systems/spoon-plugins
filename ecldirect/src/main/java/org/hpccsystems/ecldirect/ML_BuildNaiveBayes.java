@@ -86,11 +86,11 @@ public class ML_BuildNaiveBayes implements EclCommand {
         //ITERATE(recordset, transform [, LOCAL ] )
         
          
-        String ecl = "";
+        String ecl = this.name + " := ";
         
         //need to define and rework all the imports
       
-        ecl += "ML.Classify.BuildNaiveBayes("+this.independentVar+","+this.dependentVar+")";
+        ecl += "ML.Classify.NaiveBayes.LearnD("+this.independentVar+","+this.dependentVar+");";
 
        
         //close out the ecl call

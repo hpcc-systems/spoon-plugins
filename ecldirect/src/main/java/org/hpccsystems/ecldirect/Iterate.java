@@ -19,6 +19,17 @@ public class Iterate implements EclCommand {
     private String recordsetName;
     private String recordset;
     private Boolean runLocal;
+    private String returnType;
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
+    }
+    
+    
 
     public String getTransformCall() {
         return transformCall;
@@ -103,13 +114,15 @@ public class Iterate implements EclCommand {
         
          
         String ecl = "";
-        ecl += recordName + " := RECORD\r\n" + record + "\r\nEND; \r\n\r\n";
-        
-        if(recordset != null && !recordset.equals("")){
+        if(record != null && !record.equals("") && !record.equals("null")){
+            ecl += recordName + " := RECORD\r\n" + record + "\r\nEND; \r\n\r\n";
+        }
+        if(recordset != null && !recordset.equals("") && !recordset.equals("null")){
             
             ecl += recordsetName + " := DATASET(["+recordset+"],"+recordName+");\r\n";
         }
-        ecl += transformName + ":= TRANSFORM \r\n" + transform + "\r\nEND;\r\n\r\n";
+        //ecl += returnType + " " + transformName + "(" + returnType + " L, " + returnType + " R) := TRANSFORM \r\n" + transform + "\r\nEND;\r\n\r\n";
+      ecl += transformName + " := TRANSFORM \r\n" + transform + "\r\nEND;\r\n\r\n";
      
         ecl += name + " := ITERATE(" + recordsetName + "," + transformCall;
         //add local if its set if not its optional

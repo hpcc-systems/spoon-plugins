@@ -32,6 +32,8 @@ public class ECLML_ToField extends JobEntryBase implements Cloneable, JobEntryIn
     private String name = "";
     private String inDS = "";
     private String outDS = "";
+    private String idColumn = "";
+    private String parseToNumeric = "";
 
     public String getInDS() {
         return inDS;
@@ -48,6 +50,22 @@ public class ECLML_ToField extends JobEntryBase implements Cloneable, JobEntryIn
     public void setOutDS(String outDS) {
         this.outDS = outDS;
     }
+
+    public String getIdColumn() {
+        return idColumn;
+    }
+
+    public void setIdColumn(String idColumn) {
+        this.idColumn = idColumn;
+    }
+
+    public String getParseToNumeric() {
+        return parseToNumeric;
+    }
+
+    public void setParseToNumeric(String parseToNumeric) {
+        this.parseToNumeric = parseToNumeric;
+    }
     
     
 
@@ -63,6 +81,8 @@ public class ECLML_ToField extends JobEntryBase implements Cloneable, JobEntryIn
         tf.setInDS(inDS);
         tf.setName(name);
         tf.setOutDS(outDS);
+        tf.setIdColumn(idColumn);
+        tf.setParseToNumeric(parseToNumeric);
         
 
 
@@ -112,6 +132,11 @@ public class ECLML_ToField extends JobEntryBase implements Cloneable, JobEntryIn
           if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"outDS")) != null)
             this.setOutDS(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"outDS")));
          
+          if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"idColumn")) != null)
+            this.setIdColumn(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"idColumn")));
+          if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"parseToNumeric")) != null)
+            this.setParseToNumeric(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"parseToNumeric")));
+         
         
         } catch (Exception e) {
             throw new KettleXMLException("ECL Distribute Job Plugin Unable to read step info from XML node", e);
@@ -126,6 +151,8 @@ public class ECLML_ToField extends JobEntryBase implements Cloneable, JobEntryIn
     
         retval += "             <inDS>"+this.inDS+"</inDS>"+Const.CR;
         retval += "             <outDS>"+this.outDS+"</outDS>"+Const.CR;  
+        retval += "             <idColumn>"+this.idColumn+"</idColumn>"+Const.CR;  
+        retval += "             <parseToNumeric>"+this.parseToNumeric+"</parseToNumeric>"+Const.CR;  
         
 
         return retval;
@@ -142,6 +169,11 @@ public class ECLML_ToField extends JobEntryBase implements Cloneable, JobEntryIn
             if(rep.getStepAttributeString(id_jobentry, "outDS") != null)
                 outDS = rep.getStepAttributeString(id_jobentry, "outDS");
             
+            if(rep.getStepAttributeString(id_jobentry, "idColumn") != null)
+                idColumn = rep.getStepAttributeString(id_jobentry, "idColumn");
+            if(rep.getStepAttributeString(id_jobentry, "parseToNumeric") != null)
+                parseToNumeric = rep.getStepAttributeString(id_jobentry, "parseToNumeric");
+            
            
             
         } catch (Exception e) {
@@ -155,6 +187,9 @@ public class ECLML_ToField extends JobEntryBase implements Cloneable, JobEntryIn
             rep.saveStepAttribute(id_job, getObjectId(), "inDS", inDS);
 
             rep.saveStepAttribute(id_job, getObjectId(), "outDS", outDS);
+            
+             rep.saveStepAttribute(id_job, getObjectId(), "idColumn", idColumn);
+              rep.saveStepAttribute(id_job, getObjectId(), "parseToNumeric", parseToNumeric);
 
            
         } catch (Exception e) {

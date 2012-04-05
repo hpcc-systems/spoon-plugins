@@ -50,7 +50,7 @@ public class ECLML_DiscretizeDialog extends JobEntryDialog implements JobEntryDi
     
     private Text recordName;
     private Text cooccur;
-    private Text routine;
+    private Combo routine;
 
     private Button wOK, wCancel;
     private boolean backupChanged;
@@ -107,7 +107,7 @@ public class ECLML_DiscretizeDialog extends JobEntryDialog implements JobEntryDi
         FormData generalGroupFormat = new FormData();
         generalGroupFormat.top = new FormAttachment(0, margin);
         generalGroupFormat.width = 600;
-        generalGroupFormat.height = 100;
+        generalGroupFormat.height = 75;
         generalGroupFormat.left = new FormAttachment(0, 0);
         generalGroup.setLayoutData(generalGroupFormat);
         
@@ -122,7 +122,7 @@ public class ECLML_DiscretizeDialog extends JobEntryDialog implements JobEntryDi
         FormData recordGroupFormat = new FormData();
         recordGroupFormat.top = new FormAttachment(generalGroup, margin);
         recordGroupFormat.width = 600;
-        recordGroupFormat.height = 310;
+        recordGroupFormat.height = 100;
         recordGroupFormat.left = new FormAttachment(0, 0);
         recordGroup.setLayoutData(recordGroupFormat);
         
@@ -132,28 +132,29 @@ public class ECLML_DiscretizeDialog extends JobEntryDialog implements JobEntryDi
         recordName = buildText("Record Name", null, lsMod, middle, margin, recordGroup);
            
         cooccur = buildText("Minimum co-occur", recordName, lsMod, middle, margin, recordGroup);
-        routine = buildText("Routine", cooccur, lsMod, middle, margin, recordGroup);
+        //routine = buildText("Routine", cooccur, lsMod, middle, margin, recordGroup);
+        routine = buildCombo("Routine", cooccur, lsMod, middle, margin, recordGroup, new String[]{"", "ByBucketing", "ByRounding", "ByTiling"});
        
-        Group iterateGroup = new Group(shell, SWT.SHADOW_NONE);
-        props.setLook(iterateGroup);
-        iterateGroup.setText("Output");
-        iterateGroup.setLayout(groupLayout);
+        Group outputGroup = new Group(shell, SWT.SHADOW_NONE);
+        props.setLook(outputGroup);
+        outputGroup.setText("Output");
+        outputGroup.setLayout(groupLayout);
         FormData iterateGroupFormat = new FormData();
         iterateGroupFormat.top = new FormAttachment(recordGroup, margin);
         iterateGroupFormat.width = 600;
-        iterateGroupFormat.height = 100;
+        iterateGroupFormat.height = 75;
         iterateGroupFormat.left = new FormAttachment(0, 0);
-        iterateGroup.setLayoutData(iterateGroupFormat);
+        outputGroup.setLayoutData(iterateGroupFormat);
         
         
-        recordsetName = buildText("Output Recordset", null, lsMod, middle, margin, iterateGroup);
+        recordsetName = buildText("Output Recordset", null, lsMod, middle, margin, outputGroup);
         
         wOK = new Button(shell, SWT.PUSH);
         wOK.setText("OK");
         wCancel = new Button(shell, SWT.PUSH);
         wCancel.setText("Cancel");
 
-        BaseStepDialog.positionBottomButtons(shell, new Button[]{wOK, wCancel}, margin, iterateGroup);
+        BaseStepDialog.positionBottomButtons(shell, new Button[]{wOK, wCancel}, margin, outputGroup);
 
         // Add listeners
         Listener cancelListener = new Listener() {

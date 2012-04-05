@@ -21,6 +21,25 @@ public class Index implements EclCommand {
     private String distributed = "";
     private String index = "";
     private String newindexfile = "";
+    private String overwrite = "No";
+    
+    private String name = "";
+
+    public String getOverwrite() {
+        return overwrite;
+    }
+
+    public void setOverwrite(String overwrite) {
+        this.overwrite = overwrite;
+    }
+    
+    
+    public String getName(){
+        return name;
+    }
+    public void setName(String name){
+        this.name=name;
+    }
 
     public String getBaserecset() {
         return baserecset;
@@ -121,58 +140,60 @@ public class Index implements EclCommand {
         
         //TODO: update this to build recordsets keys and payload
         
-        ecl += "keyRec := RECORD\r\n";
-        
-        ecl += "END;\r\n\r\n";
-        
-        ecl += "payloadRec := RECORD\r\n";
-        
-        ecl += "END;\r\n\r\n";
+       
         
         
-        ecl += "INDEX(";
+        ecl += this.name+" := INDEX(";
         
         if(this.newindexfile != null && !this.newindexfile.equals("")){
             //attr := INDEX(index,newindexfile);
-            ecl += this.index + "," + this.newindexfile;
+            ecl += this.index + ",'" + this.newindexfile + "'";
         }else{
-            ecl += baserecset + ",";
-            ecl += keys + ",";
-            if(payload != null && !payload.equals("")){
-                ecl += payload + ",";
+            if(baserecset != null && !baserecset.equals("")){
+                ecl += baserecset + ",";
             }
-            ecl += indexfile + ",";
+            if(keys != null && !keys.equals("")){
+                ecl += "{" + keys + "},";
+            }else{
+                //error
+            }
+            if(payload != null && !payload.equals("")){
+                ecl += "{" + payload + "},";
+            }else{
+                //error
+            }
+            ecl += "'" + indexfile + "'";
             
             if(this.sorted.equals("Yes")){
-                ecl += "SORTED" + ",";
+                ecl += ",SORTED" + "";
             }else{
-                ecl += ",";
+                ecl += "";
             }
             
             if(this.preload.equals("Yes")){
-                ecl += "PRELOAD" + ",";
+                ecl += ",PRELOAD" + "";
             }else{
-                ecl += ",";
+                ecl += "";
             }
             
             if(this.opt.equals("Yes")){
-                ecl += "OPT" + ",";
+                ecl += ",OPT" + "";
             }else{
-                ecl += ",";
+                ecl += "";
             }
             
             if(this.compressed.equals("LZW")){
-                ecl += "COMPRESSED(LZW)" + ",";
+                ecl += ",COMPRESSED(LZW)" + "";
             }else if(this.compressed.equals("ROW")){
-                ecl += "COMPRESSED(ROW)" + ",";
+                ecl += ",COMPRESSED(ROW)" + "";
             }else if(this.compressed.equals("FIRST")){
-                ecl += "COMPRESSED(FIRST)" + ",";
+                ecl += ",COMPRESSED(FIRST)" + "";
             }else{
-                ecl += ",";
+                ecl += "";
             }
             
             if(this.distributed.equals("Yes")){
-                ecl += "DISTRIBUTED";
+                ecl += ",DISTRIBUTED";
             }else{
                 ecl += "";
             }
@@ -186,6 +207,12 @@ public class Index implements EclCommand {
         //close out the ecl call
         ecl += ");\r\n\r\n";
         
+        //ecl += this.name + "Bld := BUILDINDEX(" + this.name+"Index" + ");\r\n\r\n";
+        ecl += "BUILDINDEX(" + this.name;
+        if(this.overwrite.equals("Yes")){
+            ecl += ",OVERWRITE";
+        }
+        ecl += ");\r\n\r\n";
         return ecl;
     }
 

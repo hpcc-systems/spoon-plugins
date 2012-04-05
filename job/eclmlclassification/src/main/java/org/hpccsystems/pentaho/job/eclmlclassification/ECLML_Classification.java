@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.hpccsystems.pentaho.job.eclmlclassification;
+package org.hpccsystems.pentaho.job.eclclassification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,11 +163,11 @@ public class ECLML_Classification extends JobEntryBase implements Cloneable, Job
         String retval = "";
         
         retval += super.getXML();
-        retval += "             <recordset_name>"+this.recordsetName+"</recordset_name>"+Const.CR;
+        retval += "             <recordset_name><![CDATA["+this.recordsetName+"]]></recordset_name>"+Const.CR;
                 
-        retval += "             <algType>"+this.algType+"</algType>"+Const.CR;
-        retval += "             <dependentVar>"+this.dependentVar+"</dependentVar>"+Const.CR;
-        retval += "             <independentVar>"+this.independentVar+"</independentVar>"+Const.CR;
+        retval += "             <algType><![CDATA["+this.algType+"]]></algType>"+Const.CR;
+        retval += "             <dependentVar><![CDATA["+this.dependentVar+"]]></dependentVar>"+Const.CR;
+        retval += "             <independentVar><![CDATA["+this.independentVar+"]]></independentVar>"+Const.CR;
         
         return retval;
 

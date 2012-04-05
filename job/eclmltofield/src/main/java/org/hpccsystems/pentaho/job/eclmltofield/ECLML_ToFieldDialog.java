@@ -47,6 +47,9 @@ public class ECLML_ToFieldDialog extends JobEntryDialog implements JobEntryDialo
 
     private Text inDS;
     private Text outDS;
+    private Text idColumn;
+    private Text parseToNumeric;
+    
 
 
     private Button wOK, wCancel;
@@ -126,8 +129,8 @@ public class ECLML_ToFieldDialog extends JobEntryDialog implements JobEntryDialo
 
 
         inDS = buildText("Input Dataset", null, lsMod, middle, margin, recordGroup);
-           
-
+        idColumn = buildText("ID", inDS, lsMod, middle, margin, recordGroup);   
+        this.parseToNumeric = buildText("Fileds to translate to Numeric", idColumn, lsMod, middle, margin, recordGroup);
        
         Group iterateGroup = new Group(shell, SWT.SHADOW_NONE);
         props.setLook(iterateGroup);
@@ -202,6 +205,14 @@ public class ECLML_ToFieldDialog extends JobEntryDialog implements JobEntryDialo
        
         if (jobEntry.getOutDS() != null) {
             outDS.setText(jobEntry.getOutDS());
+        }
+        
+        if (jobEntry.getIdColumn() != null) {
+            idColumn.setText(jobEntry.getIdColumn());
+        }
+        
+        if (jobEntry.getParseToNumeric() != null) {
+            parseToNumeric.setText(jobEntry.getParseToNumeric());
         }
         
        
@@ -303,8 +314,9 @@ public class ECLML_ToFieldDialog extends JobEntryDialog implements JobEntryDialo
         jobEntry.setName(jobEntryName.getText());
         jobEntry.setInDS(inDS.getText());
         jobEntry.setOutDS(outDS.getText());
-       
-
+        jobEntry.setIdColumn(idColumn.getText());
+        jobEntry.setParseToNumeric(parseToNumeric.getText());
+      
         dispose();
     }
 

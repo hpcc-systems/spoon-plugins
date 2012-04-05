@@ -39,10 +39,22 @@ public class ECLIterate extends JobEntryBase implements Cloneable, JobEntryInter
     private String recordName = "";
     private String recordsetName = "";
     
+    private String returnType = "";
+    
     private String recordsetNameIterate = "";
     
     private String transformCall = "";
 
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
+    }
+
+    
+    
     public String getTransformCall() {
         return transformCall;
     }
@@ -161,6 +173,7 @@ public class ECLIterate extends JobEntryBase implements Cloneable, JobEntryInter
         iterate.setRecordName(this.getRecordName());
         iterate.setRecordsetName(this.getRecordsetName());
         iterate.setTransformCall(this.getTransformCall());
+        iterate.setReturnType(returnType);
 
         logBasic("{Iterate Job} Execute = " + iterate.ecl());
         
@@ -217,7 +230,8 @@ public class ECLIterate extends JobEntryBase implements Cloneable, JobEntryInter
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"transformCall")) != null)
                 this.setTransformCall(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"transformCall")));
            
-            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"returnType")) != null)
+                this.setReturnType(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"returnType")));
             
             
             this.setRecordset(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"recordset")));
@@ -250,6 +264,7 @@ public class ECLIterate extends JobEntryBase implements Cloneable, JobEntryInter
         retval += "             <transformCall>"+this.transformCall+"</transformCall>"+Const.CR;
         retval += "             <recordset>"+this.recordset+"</recordset>"+Const.CR;
         retval += "             <runLocal>"+this.getRunLocalString()+"</runLocal>"+Const.CR;
+        retval += "             <returnType>"+this.getReturnType()+"</returnType>"+Const.CR;
        
        
        
@@ -284,6 +299,8 @@ public class ECLIterate extends JobEntryBase implements Cloneable, JobEntryInter
                 recordset = rep.getStepAttributeString(id_jobentry, "recordset");
             if(rep.getStepAttributeString(id_jobentry, "runLocal") != null)
                 this.setRunLocalString(rep.getStepAttributeString(id_jobentry, "runLocal"));
+            if(rep.getStepAttributeString(id_jobentry, "returnType") != null)
+                this.setReturnType(rep.getStepAttributeString(id_jobentry, "returnType"));
 
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -306,6 +323,7 @@ public class ECLIterate extends JobEntryBase implements Cloneable, JobEntryInter
             rep.saveStepAttribute(id_job, getObjectId(), "transformCall", transformCall);
             rep.saveStepAttribute(id_job, getObjectId(), "recordset", recordset);
             rep.saveStepAttribute(id_job, getObjectId(), "runLocal", this.getRunLocalString());
+            rep.saveStepAttribute(id_job, getObjectId(), "returnType", this.getReturnType());
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);
         }

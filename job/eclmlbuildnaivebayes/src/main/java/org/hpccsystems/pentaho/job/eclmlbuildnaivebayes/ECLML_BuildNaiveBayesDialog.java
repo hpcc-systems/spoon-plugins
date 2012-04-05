@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.hpccsystems.pentaho.job.eclmlbuildnaivebayes;
+package org.hpccsystems.pentaho.job.eclbuildnaivebayes;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -131,9 +131,9 @@ public class ECLML_BuildNaiveBayesDialog extends JobEntryDialog implements JobEn
         //name = buildText("Distribute Name", null, lsMod, middle, margin, distributeGroup);
 
 
-    
-        dependentVar = buildText("Dependent Variable", null, lsMod, middle, margin, recordGroup);
-        independentVar = buildText("Independent Variable", dependentVar, lsMod, middle, margin, recordGroup);
+        independentVar = buildText("Independent Variable", null, lsMod, middle, margin, recordGroup);
+        
+        dependentVar = buildText("Dependent Variable", independentVar, lsMod, middle, margin, recordGroup);
         
         
         Group iterateGroup = new Group(shell, SWT.SHADOW_NONE);

@@ -246,7 +246,7 @@ public class Output implements EclCommand {
                     
                     
                     if(!this.file.equals("")){
-                             ecl += "," + file;
+                             ecl += ",'" + file +"'";
 
                             if(!this.cluster.equals("")){
                                 ecl += ",CLUSTER("+this.cluster+")";
@@ -257,7 +257,7 @@ public class Output implements EclCommand {
                             if(this.compressed.equals("Yes")){
                                 ecl += ",COMPRESSED";
                             }else{
-                                ecl += ",";
+                               // ecl += ",";
                             }
                             if(this.overwrite.equals("Yes")){
                                 ecl += ",OVERWRITE";
@@ -278,7 +278,7 @@ public class Output implements EclCommand {
                     //[attr := ] OUTPUT(recordset, [ format ] ,file , CSV [ (csvoptions) ] [, CLUSTER( target )] [,ENCRYPT(key) ]
                         //[, OVERWRITE ] [, EXPIRE( [ days ] ) ] )
                     if(!this.file.equals("")){
-                        ecl += "," +this.file +",CSV";
+                        ecl += ",'" +this.file +"',CSV";
                         if(!this.typeOptions.equals("")){
                             ecl += "(" + this.typeOptions + ")";
                         }
@@ -291,7 +291,7 @@ public class Output implements EclCommand {
                         if(this.overwrite.equals("Yes")){
                             ecl += ",OVERWRITE";
                         }else{
-                            ecl += ",";
+                            ecl += "";
                         }
                         if(!this.expire.equals("")){
                             ecl += ",EXPIRE(" + this.expire + ")";
@@ -309,7 +309,7 @@ public class Output implements EclCommand {
                     
                     
                    if(!this.file.equals("")){
-                        ecl += "," +this.file +",XML";
+                        ecl += ",'" +this.file +"',XML";
                         if(!this.typeOptions.equals("")){
                             ecl += "(" + this.typeOptions + ")";
                         }
