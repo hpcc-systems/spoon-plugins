@@ -19,9 +19,9 @@
 				<version>4.2.0-GA</version>
 			</dependency>
 			<dependency>
-				<groupId>pentaho.kettle</groupId>
+				<groupId>pentaho-kettle</groupId>
 				<artifactId>kettle-engine</artifactId>
-				<version>4.1.1-GA</version>
+				<version>4.2.1-GA</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mod4j.org.eclipse</groupId>
@@ -42,7 +42,7 @@
 			<artifactId>kettle-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>pentaho.kettle</groupId>
+			<groupId>pentaho-kettle</groupId>
 			<artifactId>kettle-engine</artifactId>
 		</dependency>
 		<dependency>
