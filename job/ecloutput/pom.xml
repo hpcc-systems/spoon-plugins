@@ -51,7 +51,7 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>org.pentaho.di.plugins.perspectives</groupId>
+			<groupId>org.hpccsystems.pentaho.perspectives</groupId>
 			<artifactId>eclresults</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
