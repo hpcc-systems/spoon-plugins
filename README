@@ -1,3 +1,6 @@
 ** UNDER CONSTRUCTION **
 
-Not ready to build yet!
+Before first building spoon-plugins you must execute either
+run-once.sh (Linux/Unix) or  run-once.bat (Windows) to add
+Eclipse SWT libraries and metadata. 
+
