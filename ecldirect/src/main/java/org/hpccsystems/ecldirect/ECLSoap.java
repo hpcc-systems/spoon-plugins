@@ -157,8 +157,9 @@ public class ECLSoap {
             if(this.includeML){
                 include = " -I \"" + this.mlPath +"\"";
             }
-
-            String c = "\"" + eclccInstallDir + "eclcc\" -c -syntax " + include + " " + inFilePath;
+            String logFile = "--logfile " + this.tempDir + this.outputName + "_syntax_log.log ";
+            
+            String c = "\"" + eclccInstallDir + "eclcc\" " + logFile + "-c -syntax " + include + " " + inFilePath;
 
 
             ProcessBuilder pb = new ProcessBuilder(c);
@@ -169,8 +170,8 @@ public class ECLSoap {
             pb.directory(path);
 
             Process p = pb.start();
-             InputStream iError = p.getErrorStream();
-             InputStreamReader isrError = new InputStreamReader(iError);
+            InputStream iError = p.getErrorStream();
+            InputStreamReader isrError = new InputStreamReader(iError);
             BufferedReader brErr = new BufferedReader(isrError);
             String lineErr;
             while((lineErr = brErr.readLine()) != null){
@@ -963,7 +964,8 @@ public class ECLSoap {
             if(this.includeML){
                 include = " -I \"" + this.mlPath +"\"";
             }
-            String c = "\"" + eclccInstallDir + "eclcc\" -E -v " + include + " -o" + outFilePath + " " + inFilePath;
+            String logFile = "--logfile " + this.tempDir + this.outputName + "_log.log ";
+            String c = "\"" + eclccInstallDir + "eclcc\" " + logFile + "-E -v " + include + " -o" + outFilePath + " " + inFilePath;
             
             System.out.println("_________________________ECLCC_______________________________");
             System.out.println(c);

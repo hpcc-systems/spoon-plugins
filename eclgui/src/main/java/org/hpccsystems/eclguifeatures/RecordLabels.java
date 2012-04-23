@@ -1,6 +1,3 @@
-
-
-
 package org.hpccsystems.eclguifeatures;
 
 import org.eclipse.jface.resource.ImageDescriptor;
