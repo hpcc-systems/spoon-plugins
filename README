@@ -4,3 +4,39 @@ Before first building spoon-plugins you must execute either
 run-once.sh (Linux/Unix) or  run-once.bat (Windows) to add
 Eclipse SWT libraries and metadata. 
 
+To build a "drop-in" zip file to using in Pentaho Data Integration (Kettle):
+
+1. From the spoon-plugins directory (the project root), run the following 
+   command to build the individual project components:    
+   
+   mvn install
+
+2. Upon successful execution of the previous step, run the following command
+   to create the distributable zip file: 
+   
+   mvn -f plugin-distribution/pom.xml install
+   
+3. Upon successful execution the file "spoon-plugins-distribution.zip" will be
+   found in the plugin-distribution/target directory.
+
+4. To install in Pentaho Data Integration (Kettle), unzip the above file into
+   the "data-integration/plugins" directory of the Kettle installation.
+   
+5. The directory structure of Kettle should look like this:
+   data-integration/
+       /plugins
+           /spoon 
+               /eclresults
+                   eclresults.jar
+           /hpcc-common
+               ecldirect.jar
+               eclgui.jar
+       /jobentries
+           /ecldataset
+               ecldataset.jar
+           /ecldedup
+               ecldedup.jar
+           ...   
+
+6. If the installation is successful delete the zip file from the Kettle
+   installation.
