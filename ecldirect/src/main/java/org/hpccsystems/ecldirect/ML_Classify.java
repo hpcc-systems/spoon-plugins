@@ -22,6 +22,13 @@ public class ML_Classify implements EclCommand {
    
     
     private String recordsetName;
+    
+    private String ridge;
+    private String epsilon;
+    private String maxIter;
+    
+    private String passes;
+    private String alpha;
 
     public String getName() {
         return name;
@@ -75,6 +82,46 @@ public class ML_Classify implements EclCommand {
     }
 
 
+    public String getRidge() {
+		return ridge;
+	}
+
+	public void setRidge(String ridge) {
+		this.ridge = ridge;
+	}
+
+	public String getEpsilon() {
+		return epsilon;
+	}
+
+	public void setEpsilon(String epsilon) {
+		this.epsilon = epsilon;
+	}
+
+	public String getMaxIter() {
+		return maxIter;
+	}
+
+	public void setMaxIter(String maxIter) {
+		this.maxIter = maxIter;
+	}
+
+	public String getPasses() {
+		return passes;
+	}
+
+	public void setPasses(String passes) {
+		this.passes = passes;
+	}
+
+	public String getAlpha() {
+		return alpha;
+	}
+
+	public void setAlpha(String alpha) {
+		this.alpha = alpha;
+	}
+
 
     private static String openFile(String filePath){
         StringBuffer fileData = new StringBuffer(1000);
@@ -120,12 +167,15 @@ public class ML_Classify implements EclCommand {
             ecl += "NaiveBayesMod."+type+"("+this.independentVar+ "," + this.model + ");";
 
         }else if(classifyType.equals("Logistic Regression")){
-            ecl += "LogisticMod := ML.Classify.Logistic(.00001,.000000001,200); \r\n";
+        	//EXPORT Logistic(REAL8 Ridge=0.00001, REAL8 Epsilon=0.000000001, UNSIGNED2 MaxIter=200) := MODULE(DEFAULT)
+            
+            ecl += "LogisticMod := ML.Classify.Logistic(" + ridge + "," + epsilon + "," + maxIter + "); \r\n";
             ecl += this.name + " := ";
             ecl += "LogisticMod."+type+"("+this.independentVar+ "," + this.model + ");";
 
         }else if(classifyType.equals("Perceptron")){
-            ecl += "PerceptronMod := ML.Classify.Perceptron(10,0.1); \r\n";
+        	// EXPORT Perceptron(UNSIGNED Passes,REAL8 Alpha = 0.1) := MODULE(DEFAULT)
+            ecl += "PerceptronMod := ML.Classify.Perceptron(" + passes + "," + alpha + "); \r\n";
             ecl += this.name + " := ";
             ecl += "PerceptronMod."+type+"("+this.independentVar+ "," + this.model + ");";
 

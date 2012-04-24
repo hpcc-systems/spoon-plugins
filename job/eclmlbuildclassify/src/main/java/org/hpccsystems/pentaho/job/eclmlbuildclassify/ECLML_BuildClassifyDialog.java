@@ -35,6 +35,8 @@ import org.pentaho.di.ui.job.dialog.JobDialog;
 import org.pentaho.di.ui.job.entry.JobEntryDialog;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
+import org.eclipse.swt.graphics.Color;
+
 /**
  *
  * @author ChalaAX
@@ -46,6 +48,13 @@ public class ECLML_BuildClassifyDialog extends JobEntryDialog implements JobEntr
     private Text jobEntryName;
 
     private Text recordsetName;
+    
+    private Text ridge;
+    private Text epsilon;
+    private Text maxIter;
+    
+    private Text passes;
+    private Text alpha;
     
     
     
@@ -118,6 +127,31 @@ public class ECLML_BuildClassifyDialog extends JobEntryDialog implements JobEntr
         jobEntryName = buildText("Job Entry Name", null, lsMod, middle, margin, generalGroup);
         classifyType = buildCombo("Classify Type", jobEntryName, lsMod, middle, margin, generalGroup,new String[]{"", "NaiveBayes", "Logistic Regression", "Perceptron"});
 
+        
+        Group constGroup = new Group(shell, SWT.SHADOW_NONE);
+        props.setLook(constGroup);
+        constGroup.setText("Constructor Details");
+        constGroup.setLayout(groupLayout);
+        FormData constGroupFormat = new FormData();
+        constGroupFormat.top = new FormAttachment(generalGroup, margin);
+        constGroupFormat.width = 600;
+        constGroupFormat.height = 200;
+        constGroupFormat.left = new FormAttachment(0, 0);
+        constGroup.setLayoutData(constGroupFormat);
+        
+
+         ridge = buildText("Ridge", null, lsMod, middle, margin, constGroup);
+         epsilon = buildText("Epsilon", ridge, lsMod, middle, margin, constGroup);
+         maxIter = buildText("Max Iterations", epsilon, lsMod, middle, margin, constGroup);
+         
+         passes = buildText("Passes", maxIter, lsMod, middle, margin, constGroup);
+         alpha = buildText("Learning Rate", passes, lsMod, middle, margin, constGroup);
+        
+        
+        
+        
+        //classifyType = buildCombo("Classify Type", jobEntryName, lsMod, middle, margin, generalGroup,new String[]{"", "NaiveBayes", "Logistic Regression", "Perceptron"});
+
 
 
         Group recordGroup = new Group(shell, SWT.SHADOW_NONE);
@@ -125,7 +159,7 @@ public class ECLML_BuildClassifyDialog extends JobEntryDialog implements JobEntr
         recordGroup.setText("Record Details");
         recordGroup.setLayout(groupLayout);
         FormData recordGroupFormat = new FormData();
-        recordGroupFormat.top = new FormAttachment(generalGroup, margin);
+        recordGroupFormat.top = new FormAttachment(constGroup, margin);
         recordGroupFormat.width = 600;
         recordGroupFormat.height = 150;
         recordGroupFormat.left = new FormAttachment(0, 0);
@@ -179,33 +213,23 @@ public class ECLML_BuildClassifyDialog extends JobEntryDialog implements JobEntr
             }
         };
         
-        /*
+        
         this.classifyType.addSelectionListener(new SelectionAdapter() {
                     public void widgetSelected(SelectionEvent e) {
-                        String cType = classifyType.getText();
-                        String learnTypes[] = new String[]{""};
-                        //LearnC
-                        //LearnD
-                        //LearnDConcat
-                        //LearnCConcat
-                        
-                        //ClassifyC
-                        //ClassifyD
-                        
-                        //TestD
-                        //TestC
-                        if(cType.equals("NavieBayes")){
-                            learnTypes = new String[]{"LearnD"};
+                    	disableConstFields();
+                    	String cType = classifyType.getText();
+                        if(cType.equals("NaiveBayes")){
+                        	disableConstFields();
                         }else if(cType.equals("Logistic Regression")){
-                            learnTypes = new String[]{"LearnD", "LearnCS"};
-                        }else if(cType.equals("Perception")){
-                            
+                        	disableConstFields();
+                        	enableLogisticConstFields();
+                        }else if(cType.equals("Perceptron")){
+                        	disableConstFields();
+                        	enablePerceptronConstFields();
                         }
-                            
-                        
-                        learnType.setItems(learnTypes);
+
                     }
-        });*/
+        });
 
         wCancel.addListener(SWT.Selection, cancelListener);
         wOK.addListener(SWT.Selection, okListener);
@@ -257,12 +281,40 @@ public class ECLML_BuildClassifyDialog extends JobEntryDialog implements JobEntr
         
         if (jobEntry.getClassifyType() != null) {
             classifyType.setText(jobEntry.getClassifyType());
+            disableConstFields();
+            String cType = classifyType.getText();
+            if(cType.equals("NaiveBayes")){
+            	disableConstFields();
+            }else if(cType.equals("Logistic Regression")){
+            	disableConstFields();
+            	enableLogisticConstFields();
+            }else if(cType.equals("Perceptron")){
+            	disableConstFields();
+            	enablePerceptronConstFields();
+            }
         }
         if (jobEntry.getLearnType() != null) {
             learnType.setText(jobEntry.getLearnType());
         }
 
+
         
+        if (jobEntry.getRidge() != null) {
+            ridge.setText(jobEntry.getRidge());
+        }
+        if (jobEntry.getEpsilon() != null) {
+            epsilon.setText(jobEntry.getEpsilon());
+        }
+        if (jobEntry.getMaxIter() != null) {
+            maxIter.setText(jobEntry.getMaxIter());
+        }
+        
+        if (jobEntry.getPasses() != null) {
+            passes.setText(jobEntry.getPasses());
+        }
+        if (jobEntry.getAlpha() != null) {
+            alpha.setText(jobEntry.getAlpha());
+        }
 
 
 
@@ -278,6 +330,42 @@ public class ECLML_BuildClassifyDialog extends JobEntryDialog implements JobEntr
         return jobEntry;
 
     }
+    
+   private final void disableConstFields(){
+	   Color white = new Color(null,255,255,255);
+       Color grey = new Color(null,245,245,245);
+	   ridge.setBackground(grey);
+       epsilon.setBackground(grey);
+       maxIter.setBackground(grey);
+       ridge.setEnabled(false);
+       epsilon.setEnabled(false);
+       maxIter.setEnabled(false);
+       
+       passes.setBackground(grey);
+       alpha.setBackground(grey);
+       passes.setEnabled(false);
+       alpha.setEnabled(false);
+   }
+   
+   private final void enableLogisticConstFields(){
+	   Color white = new Color(null,255,255,255);
+       Color grey = new Color(null,245,245,245);
+	   ridge.setBackground(white);
+       epsilon.setBackground(white);
+       maxIter.setBackground(white);
+       ridge.setEnabled(true);
+       epsilon.setEnabled(true);
+       maxIter.setEnabled(true);
+   }
+   
+   private final void enablePerceptronConstFields(){
+	   Color white = new Color(null,255,255,255);
+       Color grey = new Color(null,245,245,245);
+	   passes.setBackground(white);
+       alpha.setBackground(white);
+       passes.setEnabled(true);
+       alpha.setEnabled(true);
+   }
 
     private Text buildText(String strLabel, Control prevControl,
             ModifyListener lsMod, int middle, int margin, Composite groupBox) {
@@ -371,6 +459,15 @@ public class ECLML_BuildClassifyDialog extends JobEntryDialog implements JobEntr
         jobEntry.setIndependentVar(independentVar.getText());
         jobEntry.setClassifyType(classifyType.getText());
         jobEntry.setLearnType(learnType.getText());
+        
+
+        
+        jobEntry.setRidge(ridge.getText());
+        jobEntry.setEpsilon(epsilon.getText());
+        jobEntry.setMaxIter(maxIter.getText());
+        
+        jobEntry.setPasses(passes.getText());
+        jobEntry.setAlpha(alpha.getText());
         
 
         dispose();

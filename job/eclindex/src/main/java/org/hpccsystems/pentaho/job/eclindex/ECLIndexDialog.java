@@ -82,7 +82,7 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         super(parent, jobEntryInt, rep, jobMeta);
         jobEntry = (ECLIndex) jobEntryInt;
         if (this.jobEntry.getName() == null) {
-            this.jobEntry.setName("Join");
+            this.jobEntry.setName("Index");
         }
     }
     
@@ -201,13 +201,13 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
 
 
         shell.setLayout(formLayout);
-        shell.setText("Join");
+        shell.setText("Index");
 
         int middle = props.getMiddlePct();
         int margin = Const.MARGIN;
 
         shell.setLayout(formLayout);
-        shell.setText("Define an ECL Join");
+        shell.setText("Define an ECL Index");
 
         FormLayout groupLayout = new FormLayout();
         groupLayout.marginWidth = 10;
@@ -233,7 +233,7 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         //Join Declaration
         Group indexGroup = new Group(compForGrp, SWT.SHADOW_NONE);
         props.setLook(indexGroup);
-        indexGroup.setText("Join Details");
+        indexGroup.setText("Index Details");
         indexGroup.setLayout(groupLayout);
         FormData joinGroupFormat = new FormData();
         joinGroupFormat.top = new FormAttachment(generalGroup, margin);

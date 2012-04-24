@@ -23,6 +23,13 @@ public class ML_BuildClassify implements EclCommand {
     private String classifyType;
     private String learnType;
 
+    private String ridge;
+    private String epsilon;
+    private String maxIter;
+    
+    private String passes;
+    private String alpha;
+    
     public String getName() {
         return name;
     }
@@ -73,10 +80,52 @@ public class ML_BuildClassify implements EclCommand {
     public void setLearnType(String learnType) {
         this.learnType = learnType;
     }
+    
+    
+    
 
 
+    public String getRidge() {
+		return ridge;
+	}
 
-    private static String openFile(String filePath){
+	public void setRidge(String ridge) {
+		this.ridge = ridge;
+	}
+
+	public String getEpsilon() {
+		return epsilon;
+	}
+
+	public void setEpsilon(String epsilon) {
+		this.epsilon = epsilon;
+	}
+
+	public String getMaxIter() {
+		return maxIter;
+	}
+
+	public void setMaxIter(String maxIter) {
+		this.maxIter = maxIter;
+	}
+
+	public String getPasses() {
+		return passes;
+	}
+
+	public void setPasses(String passes) {
+		this.passes = passes;
+	}
+
+	public String getAlpha() {
+		return alpha;
+	}
+
+	public void setAlpha(String alpha) {
+		this.alpha = alpha;
+	}
+
+	private static String openFile(String filePath){
         StringBuffer fileData = new StringBuffer(1000);
         System.out.println("++++++++++++++++ Open File: " + filePath);
          try{
@@ -112,13 +161,15 @@ public class ML_BuildClassify implements EclCommand {
         
         if(classifyType.equals("NaiveBayes")){
             type = "NaiveBayes";
-            ecl = type + "Mod := " + "ML.Classify.NaiveBayes;\r\n";
+            ecl = type + "Mod := ML.Classify.NaiveBayes;\r\n";
         }else if(classifyType.equals("Logistic Regression")){
             type = "Logistic";
-            ecl = type + "Mod := " + "ML.Classify.Logistic(.00001,.000000001,200);\r\n";
+            //EXPORT Logistic(REAL8 Ridge=0.00001, REAL8 Epsilon=0.000000001, UNSIGNED2 MaxIter=200) := MODULE(DEFAULT)
+            ecl = type + "Mod := ML.Classify.Logistic(" + ridge + "," + epsilon + "," + maxIter + ");\r\n";
         }else if(classifyType.equals("Perceptron")){
             type = "Perceptron";
-            ecl = type + "Mod := " + "ML.Classify.Perceptron(10,0.1);\r\n";
+            // EXPORT Perceptron(UNSIGNED Passes,REAL8 Alpha = 0.1) := MODULE(DEFAULT)
+            ecl = type + "Mod := ML.Classify.Perceptron(" + passes + "," + alpha + ");\r\n";
         }
         //LearnC
         //LearnD

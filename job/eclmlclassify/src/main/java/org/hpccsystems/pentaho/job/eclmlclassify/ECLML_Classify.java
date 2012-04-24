@@ -39,6 +39,13 @@ public class ECLML_Classify extends JobEntryBase implements Cloneable, JobEntryI
     
     private String classifyType = "";
     private String dataType = "";
+    
+    private String ridge = "0.00001";
+    private String epsilon = "0.000000001";
+    private String maxIter = "200";
+    
+    private String passes = "5";
+    private String alpha = "0.1";
 
     public String getModel() {
         return model;
@@ -79,7 +86,47 @@ public class ECLML_Classify extends JobEntryBase implements Cloneable, JobEntryI
     public void setDataType(String dataType) {
         this.dataType = dataType;
     }
-        
+
+    public String getRidge() {
+		return ridge;
+	}
+
+	public void setRidge(String ridge) {
+		this.ridge = ridge;
+	}
+
+	public String getEpsilon() {
+		return epsilon;
+	}
+
+	public void setEpsilon(String epsilon) {
+		this.epsilon = epsilon;
+	}
+
+	public String getMaxIter() {
+		return maxIter;
+	}
+
+	public void setMaxIter(String maxIter) {
+		this.maxIter = maxIter;
+	}
+
+	public String getPasses() {
+		return passes;
+	}
+
+	public void setPasses(String passes) {
+		this.passes = passes;
+	}
+
+	public String getAlpha() {
+		return alpha;
+	}
+
+	public void setAlpha(String alpha) {
+		this.alpha = alpha;
+	}
+    
 
     
     
@@ -102,6 +149,13 @@ public class ECLML_Classify extends JobEntryBase implements Cloneable, JobEntryI
         direct.setIndependentVar(independentVar);
         direct.setClassifyType(classifyType);
         direct.setDataType(dataType);
+        
+        direct.setRidge(ridge);
+        direct.setEpsilon(epsilon);
+        direct.setMaxIter(maxIter);
+        direct.setPasses(passes);
+        direct.setAlpha(alpha);
+        
       
         //private Text algType; //NaiveBayes, Logistic    
         //private Text dependentVar; // 1
@@ -168,7 +222,18 @@ public class ECLML_Classify extends JobEntryBase implements Cloneable, JobEntryI
           if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"dataType")) != null)
             this.setDataType(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"dataType")));
           
-        
+          if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"alpha")) != null)
+              this.setAlpha(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"alpha")));
+          
+          if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"passes")) != null)
+              this.setPasses(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"passes")));
+          
+          if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"ridge")) != null)
+              this.setRidge(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"ridge")));
+          if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"epsilon")) != null)
+              this.setEpsilon(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"epsilon")));
+          if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"maxIter")) != null)
+              this.setMaxIter(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"maxIter")));
         } catch (Exception e) {
             throw new KettleXMLException("ECL Distribute Job Plugin Unable to read step info from XML node", e);
         }
@@ -186,6 +251,13 @@ public class ECLML_Classify extends JobEntryBase implements Cloneable, JobEntryI
         retval += "             <independentVar><![CDATA["+this.independentVar+"]]></independentVar>"+Const.CR;
         retval += "             <classifyType><![CDATA["+this.classifyType+"]]></classifyType>"+Const.CR;
         retval += "             <dataType><![CDATA["+this.dataType+"]]></dataType>"+Const.CR;
+        
+        retval += "             <alpha><![CDATA["+this.alpha+"]]></alpha>"+Const.CR;
+        retval += "             <passes><![CDATA["+this.passes+"]]></passes>"+Const.CR;
+        
+        retval += "             <ridge><![CDATA["+this.ridge+"]]></ridge>"+Const.CR;
+        retval += "             <epsilon><![CDATA["+this.epsilon+"]]></epsilon>"+Const.CR;
+        retval += "             <maxIter><![CDATA["+this.maxIter+"]]></maxIter>"+Const.CR;
         
         return retval;
 
@@ -213,6 +285,18 @@ public class ECLML_Classify extends JobEntryBase implements Cloneable, JobEntryI
             if(rep.getStepAttributeString(id_jobentry, "dataType") != null)
                 dataType = rep.getStepAttributeString(id_jobentry, "dataType");
             
+            if(rep.getStepAttributeString(id_jobentry, "alpha") != null)
+                alpha = rep.getStepAttributeString(id_jobentry, "alpha");
+            if(rep.getStepAttributeString(id_jobentry, "passes") != null)
+                passes = rep.getStepAttributeString(id_jobentry, "passes");
+            
+            if(rep.getStepAttributeString(id_jobentry, "epsilon") != null)
+                epsilon = rep.getStepAttributeString(id_jobentry, "epsilon");
+            if(rep.getStepAttributeString(id_jobentry, "ridge") != null)
+                ridge = rep.getStepAttributeString(id_jobentry, "ridge");
+            if(rep.getStepAttributeString(id_jobentry, "maxIter") != null)
+                maxIter = rep.getStepAttributeString(id_jobentry, "maxIter");
+            
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
         }
@@ -232,6 +316,13 @@ public class ECLML_Classify extends JobEntryBase implements Cloneable, JobEntryI
             rep.saveStepAttribute(id_job, getObjectId(), "independentVar", independentVar);
             rep.saveStepAttribute(id_job, getObjectId(), "classifyType", classifyType);
             rep.saveStepAttribute(id_job, getObjectId(), "dataType", dataType);
+            
+            rep.saveStepAttribute(id_job, getObjectId(), "alpha", alpha);
+            rep.saveStepAttribute(id_job, getObjectId(), "passes", passes);
+            
+            rep.saveStepAttribute(id_job, getObjectId(), "ridge", ridge);
+            rep.saveStepAttribute(id_job, getObjectId(), "epsilon", epsilon);
+            rep.saveStepAttribute(id_job, getObjectId(), "maxIter", maxIter);
            
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);
