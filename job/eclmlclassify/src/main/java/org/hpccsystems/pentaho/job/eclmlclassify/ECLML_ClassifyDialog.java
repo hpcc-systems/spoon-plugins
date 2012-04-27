@@ -104,7 +104,7 @@ public class ECLML_ClassifyDialog extends JobEntryDialog implements JobEntryDial
         int margin = Const.MARGIN;
 
         shell.setLayout(formLayout);
-        shell.setText("Define an ECL ML Maive Bayes");
+        shell.setText("Define Classification - Classify");
 
         FormLayout groupLayout = new FormLayout();
         groupLayout.marginWidth = 10;

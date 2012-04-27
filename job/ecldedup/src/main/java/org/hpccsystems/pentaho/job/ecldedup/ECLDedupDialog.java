@@ -108,13 +108,13 @@ public class ECLDedupDialog extends JobEntryDialog implements JobEntryDialogInte
 
 
         shell.setLayout(formLayout);
-        shell.setText("Iterate");
+        shell.setText("Dedup");
 
         int middle = props.getMiddlePct();
         int margin = Const.MARGIN;
 
         shell.setLayout(formLayout);
-        shell.setText("Define an ECL Iterate");
+        shell.setText("Define an ECL Dedup");
 
         FormLayout groupLayout = new FormLayout();
         groupLayout.marginWidth = 10;
@@ -138,7 +138,7 @@ public class ECLDedupDialog extends JobEntryDialog implements JobEntryDialogInte
         //Distribute Declaration
         Group iterateGroup = new Group(shell, SWT.SHADOW_NONE);
         props.setLook(iterateGroup);
-        iterateGroup.setText("Distribute Details");
+        iterateGroup.setText("Dedup Details");
         iterateGroup.setLayout(groupLayout);
         FormData datasetGroupFormat = new FormData();
         datasetGroupFormat.top = new FormAttachment(generalGroup, margin);

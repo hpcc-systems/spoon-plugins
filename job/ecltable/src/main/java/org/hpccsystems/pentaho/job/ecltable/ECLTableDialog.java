@@ -140,7 +140,7 @@ public class ECLTableDialog extends JobEntryDialog implements JobEntryDialogInte
         //Distribute Declaration
         Group tableGroup = new Group(shell, SWT.SHADOW_NONE);
         props.setLook(tableGroup);
-        tableGroup.setText("Distribute Details");
+        tableGroup.setText("Table Details");
         tableGroup.setLayout(groupLayout);
         FormData datasetGroupFormat = new FormData();
         datasetGroupFormat.top = new FormAttachment(generalGroup, margin);

@@ -180,7 +180,7 @@ public class ECLRollupDialog extends JobEntryDialog implements JobEntryDialogInt
         super(parent, jobEntryInt, rep, jobMeta);
         jobEntry = (ECLRollup) jobEntryInt;
         if (this.jobEntry.getName() == null) {
-            this.jobEntry.setName("Iterate");
+            this.jobEntry.setName("Rollup");
         }
     }
 
@@ -221,13 +221,13 @@ public class ECLRollupDialog extends JobEntryDialog implements JobEntryDialogInt
 
 
         shell.setLayout(formLayout);
-        shell.setText("Iterate");
+        shell.setText("Rollup");
 
         int middle = props.getMiddlePct();
         int margin = Const.MARGIN;
 
         shell.setLayout(formLayout);
-        shell.setText("Define an ECL Iterate");
+        shell.setText("Define an ECL Rollup");
 
         FormLayout groupLayout = new FormLayout();
         groupLayout.marginWidth = 10;
@@ -251,7 +251,7 @@ public class ECLRollupDialog extends JobEntryDialog implements JobEntryDialogInt
         //Distribute Declaration
         Group iterateGroup = new Group(shell, SWT.SHADOW_NONE);
         props.setLook(iterateGroup);
-        iterateGroup.setText("Distribute Details");
+        iterateGroup.setText("Rollup Details");
         iterateGroup.setLayout(groupLayout);
         FormData datasetGroupFormat = new FormData();
         datasetGroupFormat.top = new FormAttachment(generalGroup, margin);

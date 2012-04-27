@@ -129,7 +129,7 @@ public class ECLMergePathsDialog extends JobEntryDialog implements JobEntryDialo
         //Output Declaration
         Group outputGroup = new Group(shell, SWT.SHADOW_NONE);
         props.setLook(outputGroup);
-        outputGroup.setText("Output Details");
+        outputGroup.setText("Configuration Details");
         outputGroup.setLayout(groupLayout);
         FormData datasetGroupFormat = new FormData();
         datasetGroupFormat.top = new FormAttachment(generalGroup, margin);

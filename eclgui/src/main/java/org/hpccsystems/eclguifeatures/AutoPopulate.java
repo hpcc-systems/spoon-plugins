@@ -61,6 +61,25 @@ public class AutoPopulate {
                    String record = XMLHandler.getNodeValue(
                        XMLHandler.getSubNode(nNode, "record_name")
                        );
+                   /*
+                   recordsetName
+                   recordName
+                   datasetName
+                   */
+                   String recordsetName = XMLHandler.getNodeValue(
+                           XMLHandler.getSubNode(nNode, "recordsetName")
+                           );
+                   String recordName = XMLHandler.getNodeValue(
+                           XMLHandler.getSubNode(nNode, "recordName")
+                           );
+                   String datasetName = XMLHandler.getNodeValue(
+                           XMLHandler.getSubNode(nNode, "datasetName")
+                           );
+                   
+                   //outDS
+                   String outDS = XMLHandler.getNodeValue(
+                           XMLHandler.getSubNode(nNode, "outDS")
+                           );
                    System.out.println("XMLParse Type: " + type);
                    if(!type.equals("ECLMergePaths") && !type.equals("SPECIAL") && !type.equals("SUCCESS")){
                        // System.out.println("XML Parse Value: " + name);
@@ -79,6 +98,29 @@ public class AutoPopulate {
                             k++;
                         }
                         
+                        /*
+                        recordsetName
+                        recordName
+                        datasetName
+                        */
+                        if(recordsetName != null){
+                            adDS.add((String)recordsetName);
+                            k++;
+                        }
+                        if(recordName != null){
+                            adDS.add((String)recordName);
+                            k++;
+                        }
+                        if(datasetName != null){
+                            adDS.add((String)datasetName);
+                            k++;
+                        }
+                        
+                      //outDS
+                        if(outDS != null){
+                            adDS.add((String)outDS);
+                            k++;
+                        }
                         
                    }
                    //dataset_name
@@ -148,6 +190,26 @@ public class AutoPopulate {
                    String recordset = XMLHandler.getNodeValue(
                        XMLHandler.getSubNode(nNode, "recordset_name")
                        );
+                   /*
+                   recordsetName
+                   recordName
+                   datasetName
+                   */
+                   String recordsetName = XMLHandler.getNodeValue(
+                           XMLHandler.getSubNode(nNode, "recordsetName")
+                           );
+                   String recordName = XMLHandler.getNodeValue(
+                           XMLHandler.getSubNode(nNode, "recordName")
+                           );
+                   String datasetName = XMLHandler.getNodeValue(
+                           XMLHandler.getSubNode(nNode, "datasetName")
+                           );
+                   
+                 //outDS
+                   String outDS = XMLHandler.getNodeValue(
+                           XMLHandler.getSubNode(nNode, "outDS")
+                           );
+                   
                    System.out.println("XMLParse Type: " + type);
                    if(!type.equals("ECLMergePaths") && !type.equals("SPECIAL") && !type.equals("SUCCESS")){
     
@@ -163,7 +225,30 @@ public class AutoPopulate {
                             adDS.add((String)recordset);
                             k++;
                         }
-
+                        
+                        /*
+                        recordsetName
+                        recordName
+                        datasetName
+                        */
+                        if(datasetName != null && !datasetName.equals("")){
+                            adDS.add((String)datasetName);
+                            k++;
+                        }
+                        if(recordName != null && !recordName.equals("")){
+                            adDS.add((String)recordName);
+                            k++;
+                        }
+                        if(recordsetName != null && !recordsetName.equals("")){
+                            adDS.add((String)recordsetName);
+                            k++;
+                        }
+                        
+                      //outDS
+                        if(outDS != null && !outDS.equals("")){
+                            adDS.add((String)outDS);
+                            k++;
+                        }
                         
                    }
 
@@ -224,6 +309,27 @@ public class AutoPopulate {
                        String record = XMLHandler.getNodeValue(
                            XMLHandler.getSubNode(nNode, "record_name")
                            );
+                       
+                       /*
+                       recordsetName
+                       recordName
+                       datasetName
+                       */
+                       String recordsetName = XMLHandler.getNodeValue(
+                               XMLHandler.getSubNode(nNode, "recordsetName")
+                               );
+                       String recordName = XMLHandler.getNodeValue(
+                               XMLHandler.getSubNode(nNode, "recordName")
+                               );
+                       String datasetName = XMLHandler.getNodeValue(
+                               XMLHandler.getSubNode(nNode, "datasetName")
+                               );
+                       
+                       //outDS
+                       String outDS = XMLHandler.getNodeValue(
+                               XMLHandler.getSubNode(nNode, "outDS")
+                               );
+                       
                        System.out.println("XMLParse Type: " + type);
                        if(!type.equals("ECLMergePaths") && !type.equals("SPECIAL") && !type.equals("SUCCESS")){
 

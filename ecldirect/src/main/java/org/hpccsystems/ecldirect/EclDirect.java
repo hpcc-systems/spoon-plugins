@@ -125,7 +125,7 @@ public class EclDirect {
       this.serverPort = clusterPort;
       urlString = "http://" + clusterAddress + ":"+ clusterPort+"/EclDirect/RunEcl";
       
-      System.out.println("URLString: " + urlString);
+      //System.out.println("URLString: " + urlString);
       this.clusterName = clusterName;
     }
 
@@ -161,7 +161,7 @@ public class EclDirect {
                 InputStream is = es.ResultsSoapCall(wuid,"");
                 results = es.parseResults(is);
             }else{
-                System.out.println("ECL Failed");
+               // System.out.println("ECL Failed");
             }
         }catch(Exception e){
              System.out.println(e);
@@ -189,6 +189,8 @@ public class EclDirect {
          * 
          */
         ECLSoap es = getECLSoap();
+        
+        
         Boolean proceed = es.executeECL(eclCode);
         this.wuid = es.getWuid();
         return proceed;
@@ -284,7 +286,7 @@ public class EclDirect {
                         rowArray.add(columnsArray);
                         
                         for (int k = 0; k < columnList.getLength(); k++) {
-                            System.out.println(columnList.item(k).getNodeName());
+                            //System.out.println(columnList.item(k).getNodeName());
                            columnsArray.add(new Column(columnList.item(k).getNodeName(), columnList.item(k).getTextContent()));
                         }
                     }

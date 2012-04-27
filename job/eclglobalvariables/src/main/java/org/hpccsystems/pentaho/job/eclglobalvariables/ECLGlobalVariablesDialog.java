@@ -4,6 +4,8 @@
  */
 package org.hpccsystems.pentaho.job.eclglobalvariables;
 
+
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -34,8 +36,10 @@ import org.pentaho.di.ui.core.gui.WindowProperty;
 import org.pentaho.di.ui.job.dialog.JobDialog;
 import org.pentaho.di.ui.job.entry.JobEntryDialog;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
+import java.io.*;
 
 import org.hpccsystems.eclguifeatures.*;
+
 
 /**
  *
@@ -190,7 +194,13 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
         Listener okListener = new Listener() {
 
             public void handleEvent(Event e) {
-                ok();
+            	updatePaths();
+            	boolean isReady = verifySettings();
+            	if(isReady){
+            		ok();
+            	}else{
+            		
+            	}
             }
         };
 
@@ -200,7 +210,13 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
         lsDef = new SelectionAdapter() {
 
             public void widgetDefaultSelected(SelectionEvent e) {
-                ok();
+            	updatePaths();
+            	boolean isReady = verifySettings();
+            	if(isReady){
+            		ok();
+            	}else{
+            		
+            	}
             }
         };
 
@@ -266,6 +282,95 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
 
         return jobEntry;
 
+    }
+    private void updatePaths(){
+    	String eclPath = eclccInstallDir.getText();
+    	boolean eclLast = false;
+    	if(eclPath.lastIndexOf("\\") == (eclPath.length()-1)){
+    		//has last \
+    		eclLast = true;
+    	}
+    	if(!eclLast && eclPath.lastIndexOf("/") == (eclPath.length()-1)){
+    		eclLast = true;
+    	}
+    	if(!eclLast){
+    		eclccInstallDir.setText(eclccInstallDir.getText() + "\\");
+    	}
+    	
+    	if(includeML.getText().equals("true")){
+	    	String mlP = mlPath.getText();
+	    	boolean mlLast = false;
+	    	if(mlP.lastIndexOf("\\") == (mlP.length()-1)){
+	    		//has last \
+	    		mlLast = true;
+	    	}
+	    	if(!mlLast && mlP.lastIndexOf("/") == (mlP.length()-1)){
+	    		mlLast = true;
+	    	}
+	    	if(mlLast){	    		
+	    		String noSlash = (mlPath.getText()).substring(0,(mlPath.getText()).length()-1);
+	    		mlPath.setText(noSlash);
+	    	}
+    	}
+    }
+    private boolean verifySettings(){
+    	boolean isReady = false;
+    	
+    	boolean eclccExists = true;
+    	boolean mlExists = true;
+    	
+    	String errorTxt = "Some Fields Were Not Correct:\r\n";
+    	
+    	eclccExists = (new File(eclccInstallDir.getText())).exists();
+    	if(!eclccExists){
+    		//warn
+    		System.out.println("no eclcc install found");
+    		errorTxt += "The \"eclcc Install Dir\" could not be located\r\n";
+    	}
+    	if(includeML.getText().equals("true")){
+    		mlExists = (new File(mlPath.getText())).exists();
+    		if(!mlExists){
+    			//warn
+    			errorTxt += "The \"Path to ML Library\" could not be located\r\n";
+    			System.out.println("No ML Library found");
+    		}
+    	}
+    	if(eclccExists && mlExists){
+    		isReady = true;
+    		System.out.println("paths validated");
+    	}else{
+    		Shell parentShell = getParent();
+            //Display display = parentShell.getDisplay();
+    		//final Shell dialog = new Shell (display, SWT.DIALOG_TRIM);
+    		final Shell dialog = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
+
+    		Label label = new Label (dialog, SWT.NONE);
+    		label.setText (errorTxt);
+    		Button okButton = new Button (dialog, SWT.PUSH);
+    		okButton.setText ("&OK");
+   
+	        Listener cancelListener = new Listener() {
+
+	            public void handleEvent(Event e) {
+	                dialog.close();
+	            }
+	        };
+	        
+	        okButton.addListener(SWT.Selection, cancelListener);
+	        
+	        FormLayout form = new FormLayout ();
+	    	form.marginWidth = form.marginHeight = 8;
+	    	dialog.setLayout (form);
+	    	FormData okData = new FormData ();
+	    	okData.top = new FormAttachment (label, 8);
+	    	okButton.setLayoutData (okData);
+	    	
+	        
+	        dialog.setDefaultButton (okButton);
+	    	dialog.pack ();
+	    	dialog.open ();
+    	}
+    	return isReady;
     }
 
     private Text buildText(String strLabel, Control prevControl,

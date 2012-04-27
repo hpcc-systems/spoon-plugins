@@ -35,11 +35,11 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
     
     private String landingZone = "";
     
-    private String mlPath = "ecl-ml";
+    private String mlPath = "";
     private String eclccInstallDir = "C:\\Program Files\\HPCC Systems\\HPCC\\bin\\ver_3_0\\";
     private String jobName = "Spoon-job";
     private String cluster = "hthor";
-    private boolean includeML = true;
+    private boolean includeML = false;
 
     public String getServerIP() {
         return serverIP;
