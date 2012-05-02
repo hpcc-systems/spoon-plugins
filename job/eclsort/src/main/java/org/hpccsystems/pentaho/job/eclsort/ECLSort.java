@@ -30,7 +30,7 @@ public class ECLSort extends JobEntryBase implements Cloneable, JobEntryInterfac
     
     //private String logicalFileName;
     private String datasetName = "";
-    private String fields = "";//Comma seperated list of fieldNames. a "-" prefix to the field name will indicate descending order
+    private String fields = "";//Comma separated list of fieldNames. a "-" prefix to the field name will indicate descending order
     private String recordsetName = "";
 
     public String getDatasetName() {

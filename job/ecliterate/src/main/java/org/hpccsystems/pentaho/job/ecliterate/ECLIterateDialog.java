@@ -47,7 +47,7 @@ public class ECLIterateDialog extends JobEntryDialog implements JobEntryDialogIn
 
     private Text transform;
      private Text transformName;
-    private Text recordset;//Comma seperated list of fieldNames. a "-" prefix to the field name will indicate descending order
+    private Text recordset;//Comma separated list of fieldNames. a "-" prefix to the field name will indicate descending order
     private Combo runLocal;
     
     private Text record;

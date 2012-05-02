@@ -69,7 +69,7 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
     private Text filePath;
     private Text logicalFileName;
     private Combo fileType;
-    private Text csvSeperator;
+    private Text csvSeparator;
     private Text csvQuote;
     private Text csvTerminator;
     private Text fixedRecordSize;
@@ -226,8 +226,8 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         csvGroupFormat.left = new FormAttachment(0, 0);
         csvGroup.setLayoutData(csvGroupFormat);
 
-        csvSeperator = buildText("CSV Seperator", null, lsMod, middle, margin, csvGroup);
-        csvTerminator = buildText("CSV Terminator", csvSeperator, lsMod, middle, margin, csvGroup);
+        csvSeparator = buildText("CSV Separator", null, lsMod, middle, margin, csvGroup);
+        csvTerminator = buildText("CSV Terminator", csvSeparator, lsMod, middle, margin, csvGroup);
         csvQuote = buildText("CSV Quote", csvTerminator, lsMod, middle, margin, csvGroup);
 
         //Fixed  Definition
@@ -330,8 +330,8 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         if (jobEntry.getFileType() != null) {
             fileType.setText(jobEntry.getFileType());
         }
-        if (jobEntry.getCsvSeperator() != null) {
-            csvSeperator.setText(jobEntry.getCsvSeperator());
+        if (jobEntry.getCsvSeparator() != null) {
+            csvSeparator.setText(jobEntry.getCsvSeparator());
         }
         if (jobEntry.getCsvTerminator() != null) {
             csvTerminator.setText(jobEntry.getCsvTerminator());
@@ -474,7 +474,7 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         jobEntry.setFilePath(filePath.getText());
         jobEntry.setLogicalFileName(logicalFileName.getText());
         jobEntry.setFileType(fileType.getText());
-        jobEntry.setCsvSeperator(csvSeperator.getText());
+        jobEntry.setCsvSeparator(csvSeparator.getText());
         jobEntry.setCsvQuote(csvQuote.getText());
         jobEntry.setCsvTerminator(csvTerminator.getText());
         jobEntry.setFixedRecordSize(fixedRecordSize.getText());

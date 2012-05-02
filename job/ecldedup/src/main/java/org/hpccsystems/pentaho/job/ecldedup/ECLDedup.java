@@ -32,7 +32,7 @@ public class ECLDedup extends JobEntryBase implements Cloneable, JobEntryInterfa
     private String name = "";
     
     private String RecordsetName = "";
-    private String recordset = "";//Comma seperated list of fieldNames. a "-" prefix to the field name will indicate descending order
+    private String recordset = "";//Comma separated list of fieldNames. a "-" prefix to the field name will indicate descending order
     private String condition = "";
     private Boolean isAll = false;
     private Boolean isHash = false;
@@ -305,7 +305,7 @@ public class ECLDedup extends JobEntryBase implements Cloneable, JobEntryInterfa
             //rep.saveStepAttribute(id_job, getObjectId(), "name", name); //$NON-NLS-1$
                 
                    /*
-        private String recordset;//Comma seperated list of fieldNames. a "-" prefix to the field name will indicate descending order
+        private String recordset;//Comma separated list of fieldNames. a "-" prefix to the field name will indicate descending order
     private String condition;
     private Boolean isAll;
     private Boolean isHash;

@@ -12,7 +12,7 @@ public class Sort implements EclCommand {
 
     private String name;
     private String datasetName;
-    private String fields;//Comma seperated list of fieldNames. a "-" prefix to the field name will indicate descending order
+    private String fields;//Comma separated list of fieldNames. a "-" prefix to the field name will indicate descending order
     private boolean runLocal;
 
     public String getDatasetName() {

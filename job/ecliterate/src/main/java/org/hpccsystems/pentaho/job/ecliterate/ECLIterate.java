@@ -32,7 +32,7 @@ public class ECLIterate extends JobEntryBase implements Cloneable, JobEntryInter
     private String name = "";
     private String transform = "";
     private String transformName = "";
-    private String recordset = "";//Comma seperated list of fieldNames. a "-" prefix to the field name will indicate descending order
+    private String recordset = "";//Comma separated list of fieldNames. a "-" prefix to the field name will indicate descending order
     private Boolean runLocal = false;
     
     private String record = "";

@@ -11,7 +11,7 @@ package org.hpccsystems.ecldirect;
 public class Dedup implements EclCommand {
 
     private String name;
-    private String recordset;//Comma seperated list of fieldNames. a "-" prefix to the field name will indicate descending order
+    private String recordset;//Comma separated list of fieldNames. a "-" prefix to the field name will indicate descending order
     private String condition;
     private Boolean isAll = false;
     private Boolean isHash = false;

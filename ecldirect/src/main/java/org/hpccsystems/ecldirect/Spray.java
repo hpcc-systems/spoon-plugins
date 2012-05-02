@@ -14,7 +14,7 @@ public class Spray implements EclCommand {
     private String filePath;
     private String logicalFileName;
     private String fileType;
-    private String csvSeperator;
+    private String csvSeparator;
     private String csvTerminator;
     private String csvQuote;
     private String recordSize;
@@ -32,12 +32,12 @@ public class Spray implements EclCommand {
         this.csvQuote = csvQuote;
     }
 
-    public String getCsvSeperator() {
-        return csvSeperator;
+    public String getCsvSeparator() {
+        return csvSeparator;
     }
 
-    public void setCsvSeperator(String csvSeperator) {
-        this.csvSeperator = csvSeperator;
+    public void setCsvSeparator(String csvSeparator) {
+        this.csvSeparator = csvSeparator;
     }
 
     public String getCsvTerminator() {

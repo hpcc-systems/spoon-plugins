@@ -49,7 +49,7 @@ public class ECLSortDialog extends JobEntryDialog implements JobEntryDialogInter
    
     private Text recordsetName;
     private Combo datasetName;
-    private Text fields;//Comma seperated list of fieldNames. a "-" prefix to the field name will indicate descending order
+    private Text fields;//Comma separated list of fieldNames. a "-" prefix to the field name will indicate descending order
     
     
     
@@ -145,7 +145,7 @@ public class ECLSortDialog extends JobEntryDialog implements JobEntryDialogInter
         
         datasetName = buildCombo("Dataset to be Sorted", recordsetName, lsMod, middle, margin, datasetGroup, datasets);
         fields = buildText("Fields", datasetName, lsMod, middle, margin, datasetGroup);
-        Label lb = buildLabel("comma seperated, prefix field with - for descending order", fields, lsMod, middle, margin, datasetGroup);
+        Label lb = buildLabel("comma separated, prefix field with - for descending order", fields, lsMod, middle, margin, datasetGroup);
 
         
        

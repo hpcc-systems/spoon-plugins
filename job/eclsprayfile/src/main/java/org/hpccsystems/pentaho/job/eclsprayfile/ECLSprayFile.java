@@ -40,7 +40,7 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
     private String filePath = "";
     private String logicalFileName = "";
     private String fileType = "";
-    private String csvSeperator = "";
+    private String csvSeparator = "";
     private String csvTerminator = "";
     private String csvQuote = "";
     private String fixedRecordSize = "";
@@ -75,12 +75,12 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         this.csvQuote = csvQuote;
     }
 
-    public String getCsvSeperator() {
-        return csvSeperator;
+    public String getCsvSeparator() {
+        return csvSeparator;
     }
 
-    public void setCsvSeperator(String csvSeperator) {
-        this.csvSeperator = csvSeperator;
+    public void setCsvSeparator(String csvSeparator) {
+        this.csvSeparator = csvSeparator;
     }
 
     public String getCsvTerminator() {
@@ -171,7 +171,7 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         spray.setLogicalFileName(getLogicalFileName());
         spray.setFileType(getFileType());
         spray.setCsvQuote(getCsvQuote());
-        spray.setCsvSeperator(getCsvSeperator());
+        spray.setCsvSeparator(getCsvSeparator());
         spray.setCsvTerminator(getCsvTerminator());
         spray.setRecordSize(getFixedRecordSize());
 
@@ -256,8 +256,8 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
                 setLogicalFileName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "logical_file_name")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "file_type")) != null)
                 setFileType(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "file_type")));
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csv_seperator")) != null)
-                setCsvSeperator(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csv_seperator")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csv_separator")) != null)
+                setCsvSeparator(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csv_separator")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csv_terminator")) != null)
                 setCsvTerminator(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csv_terminator")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csv_quote")) != null)
@@ -282,7 +282,7 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         //retval += "		<ip_address>" + ipAddress + "</ip_address>" + Const.CR;
         retval += "		<file_path>" + filePath + "</file_path>" + Const.CR;
         retval += "		<file_type>" + fileType + "</file_type>" + Const.CR;
-        retval += "		<csv_seperator>" + csvSeperator + "</csv_seperator>" + Const.CR;
+        retval += "		<csv_separator>" + csvSeparator + "</csv_separator>" + Const.CR;
         retval += "		<csv_terminator>" + csvTerminator + "</csv_terminator>" + Const.CR;
         retval += "		<csv_quote>" + csvQuote + "</csv_quote>" + Const.CR;
         retval += "		<csv_quote>" + csvQuote + "</csv_quote>" + Const.CR;
@@ -305,8 +305,8 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
                 filePath = rep.getStepAttributeString(id_jobentry, "filePath"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "fileType") != null)
                 fileType = rep.getStepAttributeString(id_jobentry, "fileType"); //$NON-NLS-1$
-            if(rep.getStepAttributeString(id_jobentry, "csvSeperator") != null)
-                csvSeperator = rep.getStepAttributeString(id_jobentry, "csvSeperator"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "csvSeparator") != null)
+                csvSeparator = rep.getStepAttributeString(id_jobentry, "csvSeparator"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "csvTerminator") != null)
                 csvTerminator = rep.getStepAttributeString(id_jobentry, "csvTerminator"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "csvQuote") != null)
@@ -330,7 +330,7 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
            // rep.saveStepAttribute(id_job, getObjectId(), "ipAddress", ipAddress); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "filePath", filePath); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "fileType", fileType); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "csvSeperator", csvSeperator); //$NON-NLS-1$
+            rep.saveStepAttribute(id_job, getObjectId(), "csvSeparator", csvSeparator); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "csvTerminator", csvTerminator); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "csvQuote", csvQuote); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "fixedRecordSize", fixedRecordSize); //$NON-NLS-1$
