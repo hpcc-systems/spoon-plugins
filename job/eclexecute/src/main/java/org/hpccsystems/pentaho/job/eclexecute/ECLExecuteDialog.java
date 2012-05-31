@@ -70,6 +70,7 @@ public class ECLExecuteDialog extends JobEntryDialog implements JobEntryDialogIn
     private Button wOK, wCancel, fileOpenButton;
     private boolean backupChanged;
     private SelectionAdapter lsDef;
+    private Combo debugLevel;
    
     //private Combo attributeName;
     private Text fileName;
@@ -82,7 +83,7 @@ public class ECLExecuteDialog extends JobEntryDialog implements JobEntryDialogIn
         super(parent, jobEntryInt, rep, jobMeta);
         jobEntry = (ECLExecute) jobEntryInt;
         if (this.jobEntry.getName() == null) {
-            this.jobEntry.setName("Output");
+            this.jobEntry.setName("Execute");
         }
         
         
@@ -129,13 +130,13 @@ public class ECLExecuteDialog extends JobEntryDialog implements JobEntryDialogIn
 
 
         shell.setLayout(formLayout);
-        shell.setText("Output");
+        shell.setText("Execute");
 
         int middle = props.getMiddlePct();
         int margin = Const.MARGIN;
 
         shell.setLayout(formLayout);
-        shell.setText("Define an ECL Output");
+        shell.setText("ECL Execute");
 
         FormLayout groupLayout = new FormLayout();
         groupLayout.marginWidth = 10;
@@ -165,15 +166,18 @@ public class ECLExecuteDialog extends JobEntryDialog implements JobEntryDialogIn
         FormData fileGroupFormat = new FormData();
         fileGroupFormat.top = new FormAttachment(generalGroup, margin);
         fileGroupFormat.width = 400;
-        fileGroupFormat.height = 100;
+        fileGroupFormat.height = 150;
         fileGroupFormat.left = new FormAttachment(middle, 0);
         fileGroup.setLayoutData(fileGroupFormat);
         
         
         //this.serverAddress = buildText("Server Address", fileGroup, lsMod, middle, margin, fileGroup);
         //controls.put("serverAddress", serverAddress);
+        this.debugLevel = buildCombo("Compile Check", null, lsMod, middle, margin, fileGroup, new String[]{"None", "Stop on Errors", "Stop on Errors or Warnings"});
+        Label lb = buildLabel("Compile Check will occur before passing the code to the Cluster.\r\n\r\n", this.debugLevel, lsMod, 0, margin, fileGroup);
+
         
-        this.fileName = buildText("Output File(s) Directory", fileGroup, lsMod, middle, margin, fileGroup);
+        this.fileName = buildText("Output File(s) Directory", lb, lsMod, middle, margin, fileGroup);
         controls.put("fileName", fileName);
         
         this.fileOpenButton = buildButton("Choose Location", fileName, lsMod, middle, margin, fileGroup);
@@ -243,6 +247,9 @@ public class ECLExecuteDialog extends JobEntryDialog implements JobEntryDialogIn
 
         if (jobEntry.getFileName() != null) {
             this.fileName.setText(jobEntry.getFileName());
+        }
+        if (jobEntry.getDebugLevel() != null) {
+            this.debugLevel.setText(jobEntry.getDebugLevel());
         }
 
 
@@ -384,9 +391,27 @@ private String buildFileDialog() {
 
         return combo;
     }
+    
+    private Label buildLabel(String strLabel, Control prevControl,
+            ModifyListener lsMod, int middle, int margin, Composite groupBox){
+            Label fmt = new Label(groupBox, SWT.RIGHT);
+            fmt.setText(strLabel);
+            props.setLook(fmt);
+            FormData labelFormat = new FormData();
+            //labelFormat.left = new FormAttachment(0, 0);
+            //labelFormat.top = new FormAttachment(prevControl, margin);
+           // labelFormat.right = new FormAttachment(middle, -margin);
+            
+            labelFormat.left = new FormAttachment(middle, 0);
+            labelFormat.top = new FormAttachment(prevControl, margin);
+            labelFormat.right = new FormAttachment(100, 0);
+            fmt.setLayoutData(labelFormat);
+            return fmt;
+        }
 
     private void ok() {
         jobEntry.setName(jobEntryName.getText());
+        
         AutoPopulate ap = new AutoPopulate();
         String serverHost = "";
         String serverPort = "";
@@ -395,6 +420,7 @@ private String buildFileDialog() {
                 
                 serverHost = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_ip");
                 serverPort = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_port");
+                
             }catch (Exception e){
                 System.out.println("Error Parsing existing Global Variables ");
                 System.out.println(e.toString());
@@ -405,6 +431,7 @@ private String buildFileDialog() {
         jobEntry.setServerPort(serverPort);
         
         jobEntry.setFileName(this.fileName.getText());
+        jobEntry.setDebugLevel(this.debugLevel.getText());
         
         dispose();
     }

@@ -40,6 +40,7 @@ public class ECLMergePaths extends JobEntryBase implements Cloneable, JobEntryIn
     private static Result globalResult;
     
     public static boolean isReady = false;
+    public static boolean isValid = false;
 
 
     public String getNumberOfPaths() {
@@ -82,6 +83,7 @@ public class ECLMergePaths extends JobEntryBase implements Cloneable, JobEntryIn
         
        if(ECLMergePaths.numberOfPathsRemaining != 0){
            result.setStopped(true);
+           isValid = false;
            //result.setResult(false);
            
            //try to find exitstatus documentation
@@ -105,6 +107,7 @@ public class ECLMergePaths extends JobEntryBase implements Cloneable, JobEntryIn
                count++;
            }
        }else{
+    	   isValid = true;
            result.setStopped(false);
            result.setResult(true);
            globalResult = result;
@@ -189,10 +192,10 @@ public class ECLMergePaths extends JobEntryBase implements Cloneable, JobEntryIn
     }
 
     public boolean evaluates() {
-        return true;
+        return isValid;
     }
 
     public boolean isUnconditional() {
-        return true;
+        return false;
     }
 }

@@ -23,8 +23,10 @@ public class AutoPopulate {
     
     
     
-    public String[] parseDatasetsRecordsets(List<JobEntryCopy> jobs) throws Exception{
-        System.out.println(" ------------ parseDatasetsRecordsets ------------- ");
+    
+    
+    public String[] parseDefinitions(List<JobEntryCopy> jobs, String attributeName, String attributeValue) throws Exception{
+        //System.out.println(" ------------ parseDataSet ------------- ");
         String datasets[] = null;
         ArrayList<String> adDS = new ArrayList<String>();
       
@@ -46,318 +48,103 @@ public class AutoPopulate {
                NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
                for (int temp = 0; temp < nl.getLength(); temp++){
                    Node nNode = nl.item(temp);
-                   String name = XMLHandler.getNodeValue(
-                       XMLHandler.getSubNode(nNode, "name")
-                       );
                    
-                   String dataset = XMLHandler.getNodeValue(
-                       XMLHandler.getSubNode(nNode, "dataset_name")
-                       );
                    
-                   String type = XMLHandler.getNodeValue(
-                       XMLHandler.getSubNode(nNode, "type")
-                       );
+                   NodeList children;
+                   Node childnode;
+                   String defValue = null;
+                   String type = null;
+                  
+                   children=nNode.getChildNodes();
                    
-                   String record = XMLHandler.getNodeValue(
-                       XMLHandler.getSubNode(nNode, "record_name")
-                       );
-                   /*
-                   recordsetName
-                   recordName
-                   datasetName
-                   */
-                   String recordsetName = XMLHandler.getNodeValue(
-                           XMLHandler.getSubNode(nNode, "recordsetName")
-                           );
-                   String recordName = XMLHandler.getNodeValue(
-                           XMLHandler.getSubNode(nNode, "recordName")
-                           );
-                   String datasetName = XMLHandler.getNodeValue(
-                           XMLHandler.getSubNode(nNode, "datasetName")
-                           );
-                   
-                   //outDS
-                   String outDS = XMLHandler.getNodeValue(
-                           XMLHandler.getSubNode(nNode, "outDS")
-                           );
-                   System.out.println("XMLParse Type: " + type);
-                   if(!type.equals("ECLMergePaths") && !type.equals("SPECIAL") && !type.equals("SUCCESS")){
-                       // System.out.println("XML Parse Value: " + name);
-                       // System.out.println("XML Parse Value: " + dataset);
-                       // System.out.println("XML Parse Value: " + record);
-                       // System.out.println("XML Parse Value: " + type);
-                       // System.out.println("--");
-                        //if(dataset != null)
-                            //adDS.add((String)name);
-                        if(dataset != null){
-                            adDS.add((String)dataset);
-                            k++;
-                        }
-                        if(record != null){
-                            adDS.add((String)record);
-                            k++;
-                        }
-                        
-                        /*
-                        recordsetName
-                        recordName
-                        datasetName
-                        */
-                        if(recordsetName != null){
-                            adDS.add((String)recordsetName);
-                            k++;
-                        }
-                        if(recordName != null){
-                            adDS.add((String)recordName);
-                            k++;
-                        }
-                        if(datasetName != null){
-                            adDS.add((String)datasetName);
-                            k++;
-                        }
-                        
-                      //outDS
-                        if(outDS != null){
-                            adDS.add((String)outDS);
-                            k++;
-                        }
-                        
+                   for (int i=0;i<children.getLength();i++)
+                   {
+                	   try{
+	                	  
+	                	   childnode=children.item(i);
+	                	  // System.out.println("NODE_NAME: " + childnode.getNodeName());
+	                	   //if (childnode.getNodeName().equalsIgnoreCase("type"))  // <hop>
+	                       //{
+	                		   
+	                		   //type = XMLHandler.getNodeValue(childnode);
+	                		 //  System.out.println("TYPE: " + type);
+	                       //}
+	                	   if(childnode != null){
+	                		   if(childnode.getAttributes() != null){
+				                   Node attribute = childnode.getAttributes().getNamedItem(attributeName);
+				                   if (attribute!=null && attributeValue.equals(attribute.getTextContent())){
+				                	   
+				                	   defValue = XMLHandler.getNodeValue(childnode);
+				                	  
+				                	   if(defValue != null){
+				                		   //System.out.println("NODE_VALUE: " + defValue);
+				                		   adDS.add((String)defValue);
+				                		   k++;
+				                		   
+				                	   }else{
+				                		   //System.out.println("NODE_VALUE: IS NULL");
+				                	   }
+				                   }
+	                		   }
+	                	   }
+                	   }catch (Exception exc){
+                		   System.out.println("Failed to Read XML");
+                		   //System.out.println(exc);
+                		   //exc.printStackTrace();
+                	   }
+
                    }
-                   //dataset_name
-                   //name
-                   //type
-                   //record_name
                }
-               //XMLHandler.getNodeValue(
-
-                //       XMLHandler.getSubNode(xml, "attribute_name")
-               //        );
-                
-                
-                
             }
-
-            //System.out.println(((JobEntryCopy)jec[j]).getXML());
-
         }
         //saving the loop code using arraylists
         datasets = adDS.toArray(new String[k]);
-
-
-        
         return datasets;
     }
     
-    public String[] parseDatasets(List<JobEntryCopy> jobs) throws Exception{
-        System.out.println(" ------------ parseDataSet ------------- ");
-        String datasets[] = null;
-        ArrayList<String> adDS = new ArrayList<String>();
-      
-        
-        Object[] jec = jobs.toArray();
-
-        int k = 0;
-
-        for(int j = 0; j<jec.length; j++){
-            //System.out.println("Node(i): " + j + " | " +((JobEntryCopy)jec[j]).getName());
-
-            if(!((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("START") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("OUTPUT") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("SUCCESS")){
-                //System.out.println("Node(k): " + k);
-                
-                //adDS.add((String)((JobEntryCopy)jec[j]).getName());
-                String xml = ((JobEntryCopy)jec[j]).getXML();
-                //System.out.println(xml);
-                
-               NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
-               for (int temp = 0; temp < nl.getLength(); temp++){
-                   Node nNode = nl.item(temp);
-                   String name = XMLHandler.getNodeValue(
-                       XMLHandler.getSubNode(nNode, "name")
-                       );
-                   
-                   String dataset = XMLHandler.getNodeValue(
-                       XMLHandler.getSubNode(nNode, "dataset_name")
-                       );
-                   
-                   String type = XMLHandler.getNodeValue(
-                       XMLHandler.getSubNode(nNode, "type")
-                       );
-                   
-                   String record = XMLHandler.getNodeValue(
-                       XMLHandler.getSubNode(nNode, "record_name")
-                       );
-        
-                   String recordset = XMLHandler.getNodeValue(
-                       XMLHandler.getSubNode(nNode, "recordset_name")
-                       );
-                   /*
-                   recordsetName
-                   recordName
-                   datasetName
-                   */
-                   String recordsetName = XMLHandler.getNodeValue(
-                           XMLHandler.getSubNode(nNode, "recordsetName")
-                           );
-                   String recordName = XMLHandler.getNodeValue(
-                           XMLHandler.getSubNode(nNode, "recordName")
-                           );
-                   String datasetName = XMLHandler.getNodeValue(
-                           XMLHandler.getSubNode(nNode, "datasetName")
-                           );
-                   
-                 //outDS
-                   String outDS = XMLHandler.getNodeValue(
-                           XMLHandler.getSubNode(nNode, "outDS")
-                           );
-                   
-                   System.out.println("XMLParse Type: " + type);
-                   if(!type.equals("ECLMergePaths") && !type.equals("SPECIAL") && !type.equals("SUCCESS")){
+    public String[] parseAllDefinitions(List<JobEntryCopy> jobs) throws Exception{
+        return parseDefinitions(jobs,"eclIsDef","true");
+    }
     
-                        if(dataset != null && !dataset.equals("")){
-                            adDS.add((String)dataset);
-                            k++;
-                        }
-                        if(record != null && !record.equals("")){
-                            adDS.add((String)record);
-                            k++;
-                        }
-                        if(recordset != null && !recordset.equals("")){
-                            adDS.add((String)recordset);
-                            k++;
-                        }
-                        
-                        /*
-                        recordsetName
-                        recordName
-                        datasetName
-                        */
-                        if(datasetName != null && !datasetName.equals("")){
-                            adDS.add((String)datasetName);
-                            k++;
-                        }
-                        if(recordName != null && !recordName.equals("")){
-                            adDS.add((String)recordName);
-                            k++;
-                        }
-                        if(recordsetName != null && !recordsetName.equals("")){
-                            adDS.add((String)recordsetName);
-                            k++;
-                        }
-                        
-                      //outDS
-                        if(outDS != null && !outDS.equals("")){
-                            adDS.add((String)outDS);
-                            k++;
-                        }
-                        
-                   }
-
-               }
-
-                
-            }
-
-            //System.out.println(((JobEntryCopy)jec[j]).getXML());
-
-        }
-        //saving the loop code using arraylists
-        datasets = adDS.toArray(new String[k]);
-
-
-        
-        return datasets;
+    public String[] parseDatasetsRecordsets(List<JobEntryCopy> jobs) throws Exception{
+    	String datasets1[] = parseDefinitions(jobs, "eclType", "dataset");
+    	String datasets2[] = parseDefinitions(jobs, "eclType", "recordset");
+    	
+    	return merge(datasets1,datasets2);
+    	
+    	
+    }
+    public String[] parseDatasets(List<JobEntryCopy> jobs) throws Exception{
+    	return parseDefinitions(jobs, "eclType", "dataset");
     }
     
     public String[] parseRecordsets(List<JobEntryCopy> jobs) throws Exception{
-        System.out.println(" ------------ parseRecordSets ------------- ");
-        String datasets[] = null;
-        ArrayList<String> adDS = new ArrayList<String>();
-      
-        
-        Object[] jec = jobs.toArray();
-
-        int k = 0;
-        
-        if(jec != null){
-            
-
-            for(int j = 0; j<jec.length; j++){
-                //System.out.println("Node(i): " + j + " | " +((JobEntryCopy)jec[j]).getName());
-
-                if(!((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("START") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("OUTPUT") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("SUCCESS")){
-                    //System.out.println("Node(k): " + k);
-
-                    //adDS.add((String)((JobEntryCopy)jec[j]).getName());
-                    String xml = ((JobEntryCopy)jec[j]).getXML();
-                    //System.out.println(xml);
-
-                   NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
-                   for (int temp = 0; temp < nl.getLength(); temp++){
-                       Node nNode = nl.item(temp);
-                       String name = XMLHandler.getNodeValue(
-                           XMLHandler.getSubNode(nNode, "name")
-                           );
-
-                       String dataset = XMLHandler.getNodeValue(
-                           XMLHandler.getSubNode(nNode, "dataset_name")
-                           );
-
-                       String type = XMLHandler.getNodeValue(
-                           XMLHandler.getSubNode(nNode, "type")
-                           );
-
-                       String record = XMLHandler.getNodeValue(
-                           XMLHandler.getSubNode(nNode, "record_name")
-                           );
-                       
-                       /*
-                       recordsetName
-                       recordName
-                       datasetName
-                       */
-                       String recordsetName = XMLHandler.getNodeValue(
-                               XMLHandler.getSubNode(nNode, "recordsetName")
-                               );
-                       String recordName = XMLHandler.getNodeValue(
-                               XMLHandler.getSubNode(nNode, "recordName")
-                               );
-                       String datasetName = XMLHandler.getNodeValue(
-                               XMLHandler.getSubNode(nNode, "datasetName")
-                               );
-                       
-                       //outDS
-                       String outDS = XMLHandler.getNodeValue(
-                               XMLHandler.getSubNode(nNode, "outDS")
-                               );
-                       
-                       System.out.println("XMLParse Type: " + type);
-                       if(!type.equals("ECLMergePaths") && !type.equals("SPECIAL") && !type.equals("SUCCESS")){
-
-                            //if(dataset != null){
-                            //    adDS.add((String)dataset);
-                            //    k++;
-                            //}
-                            if(record != null && !record.equals("")){
-                                adDS.add((String)record);
-                                k++;
-                            }
-
-
-                       }
-
-                   }
-
-                }
-
-
-            }
-            //saving the loop code using arraylists
-            datasets = adDS.toArray(new String[k]);
-
-        }
-        
-        return datasets;
+    	return parseDefinitions(jobs, "eclType", "recordset");
+    	
     }
+    public String[] parseRecords(List<JobEntryCopy> jobs) throws Exception{
+    	return parseDefinitions(jobs, "eclType", "record");
+    	
+    }
+    
+    
+    public String[] merge(String[] x, String[] y) {
+
+        String[] merged = new String[x.length + y.length];
+        int m = 0;
+        for(int i = 0; i<x.length;i++) {
+            merged[m] = (String)x[i];
+            m++;
+        }
+        for(int i = 0; i<y.length;i++) {
+            merged[m] = (String)y[i];
+            m++;
+        }
+        return merged;
+    }
+        		
+        		
+   
     
     /*
      * Gets the Dataset fields from all existing nodes

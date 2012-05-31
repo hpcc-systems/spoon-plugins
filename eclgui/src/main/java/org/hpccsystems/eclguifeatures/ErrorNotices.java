@@ -16,6 +16,7 @@ import org.eclipse.swt.layout.*;
 public class ErrorNotices {
     
     private boolean validateCode;
+    private boolean isCont = true;
 
     public boolean isValidateCode() {
         return validateCode;
@@ -163,5 +164,68 @@ public class ErrorNotices {
 
         return text;
     }
+     
+     public boolean openValidateDialog(Shell parentShell, String notice){
+     	
+     	
+         Display display = parentShell.getDisplay();
+         
+        
+ 		final Shell dialog = new Shell (display, SWT.DIALOG_TRIM);
+ 		Label label = new Label (dialog, SWT.NONE);
+ 		label.setText (notice);
+ 		Button yesButton = new Button (dialog, SWT.PUSH);
+ 		yesButton.setText ("&Contine Saving");
+ 		
+ 	        Button noButton = new Button (dialog, SWT.PUSH);
+ 		noButton.setText ("&Cancel Saving");
+ 	        
+ 	        
+ 	        Listener yesListener = new Listener() {
+ 	
+ 	            public void handleEvent(Event e) {
+ 	            	isCont = true;
+ 	                dialog.close();
+ 	            }
+ 	        };
+ 	        
+ 	         Listener noListener = new Listener() {
+ 	
+ 	            public void handleEvent(Event e) {
+ 	            	isCont= false;
+ 	                dialog.close();
+ 	                
+ 	            }
+ 	        };
+ 	        
+ 	        yesButton.addListener(SWT.Selection, yesListener);
+ 	        noButton.addListener(SWT.Selection, noListener);
+ 		
+ 		FormLayout form = new FormLayout ();
+ 		form.marginWidth = form.marginHeight = 8;
+ 		dialog.setLayout (form);
+ 		FormData yesData = new FormData ();
+ 		yesData.top = new FormAttachment (label, 8);
+ 		yesButton.setLayoutData (yesData);
+ 		//FormData cancelData = new FormData ();
+ 	        
+ 	        FormData noData = new FormData ();
+ 	        
+ 	        noData.left = new FormAttachment (yesButton, 8);
+ 		noData.top = new FormAttachment (yesButton, 0, SWT.TOP);
+ 	
+ 		noButton.setLayoutData (noData);
+ 		
+ 		
+ 		dialog.setDefaultButton (yesButton);
+ 		dialog.pack ();
+ 		dialog.open ();
+ 		
+ 		while (!dialog.isDisposed ()) {
+ 			if (!display.readAndDispatch ()) display.sleep ();
+ 		}
+ 		dialog.dispose();
+ 		return isCont;
+     }
     
 }

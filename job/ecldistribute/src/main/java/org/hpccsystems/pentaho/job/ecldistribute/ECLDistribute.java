@@ -28,8 +28,7 @@ import org.w3c.dom.Node;
  */
 public class ECLDistribute extends JobEntryBase implements Cloneable, JobEntryInterface {
     
-    //private String jobName;
-    private String name = "";
+
     private String recordsetName = "";
     private String datasetName = "";
     private String expression = "";
@@ -51,13 +50,7 @@ public class ECLDistribute extends JobEntryBase implements Cloneable, JobEntryIn
    // public void setJobName(String jobName){
    //     this.jobName = jobName;
    // }
-    
-    public String getName(){
-        return name;
-    }
-    public void setName(String name){
-        this.name = name;
-    }
+
     
     public String getDatasetName() {
         return datasetName;
@@ -153,8 +146,8 @@ public class ECLDistribute extends JobEntryBase implements Cloneable, JobEntryIn
             super.loadXML(node, list, list1);
             //setJobName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "jobName")));
            
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "name")) != null)
-                setName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "name")));
+            //if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "name")) != null)
+            //    setName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "name")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset_name")) != null)
                 setRecordsetName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset_name")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dataset_name")) != null)
@@ -179,13 +172,14 @@ public class ECLDistribute extends JobEntryBase implements Cloneable, JobEntryIn
         
         retval += super.getXML();
         //retval += "		<job_name>" + jobName + "</jobName>" + Const.CR;
-        retval += "		<name>" + name + "</name>" + Const.CR;
-        retval += "		<recordset_name>" + recordsetName + "</recordset_name>" + Const.CR;
-        retval += "		<dataset_name>" + datasetName + "</dataset_name>" + Const.CR;
-        retval += "		<expression>" + expression + "</expression>" + Const.CR;
-        retval += "		<index>" + index + "</index>" + Const.CR;
-        retval += "		<join_condition>" + joinCondition + "</join_condition>" + Const.CR;
-        retval += "		<skew>" + skew + "</skew>" + Const.CR;
+        //retval += "		<name>" + name + "</name>" + Const.CR;
+      
+        retval += "		<recordset_name eclIsDef=\"true\" eclType=\"recordset\"><![CDATA[" + recordsetName + "]]></recordset_name>" + Const.CR;
+        retval += "		<dataset_name><![CDATA[" + datasetName + "]]></dataset_name>" + Const.CR;
+        retval += "		<expression><![CDATA[" + expression + "]]></expression>" + Const.CR;
+        retval += "		<index><![CDATA[" + index + "]]></index>" + Const.CR;
+        retval += "		<join_condition><![CDATA[" + joinCondition + "]]></join_condition>" + Const.CR;
+        retval += "		<skew><![CDATA[" + skew + "]]></skew>" + Const.CR;
        
        
        
@@ -199,8 +193,8 @@ public class ECLDistribute extends JobEntryBase implements Cloneable, JobEntryIn
             throws KettleException {
         try {
             //jobName = rep.getStepAttributeString(id_jobentry, "jobName"); //$NON-NLS-1$
-            if(rep.getStepAttributeString(id_jobentry, "name") != null)
-                name = rep.getStepAttributeString(id_jobentry, "name"); //$NON-NLS-1$
+           // if(rep.getStepAttributeString(id_jobentry, "name") != null)
+            //    name = rep.getStepAttributeString(id_jobentry, "name"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "recordsetName") != null)
                 recordsetName = rep.getStepAttributeString(id_jobentry, "recordsetName"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "datasetName") != null)
@@ -223,7 +217,7 @@ public class ECLDistribute extends JobEntryBase implements Cloneable, JobEntryIn
         try {
             //rep.saveStepAttribute(id_job, getObjectId(), "jobName", jobName); //$NON-NLS-1$
            
-            rep.saveStepAttribute(id_job, getObjectId(), "name", name); //$NON-NLS-1$
+           // rep.saveStepAttribute(id_job, getObjectId(), "name", name); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "recordsetName", recordsetName); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "datasetName", datasetName); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "expression", expression); //$NON-NLS-1$

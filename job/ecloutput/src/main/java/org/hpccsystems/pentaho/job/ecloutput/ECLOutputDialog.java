@@ -63,14 +63,16 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
+import org.hpccsystems.pentaho.job.ecljobentry.*;
 //import org.eclipse.swt.layout.FillLayout;
 
 /**
  *
  * @author ChalaAX
  */
-public class ECLOutputDialog extends JobEntryDialog implements JobEntryDialogInterface {
-
+public class ECLOutputDialog extends ECLJobEntryDialog {
+	
+	
     private ECLOutput jobEntry;
     private Text jobEntryName;
 
@@ -179,6 +181,7 @@ public class ECLOutputDialog extends JobEntryDialog implements JobEntryDialogInt
             }
         }
         
+        
         return jobEntry;
     
     }
@@ -199,7 +202,7 @@ public class ECLOutputDialog extends JobEntryDialog implements JobEntryDialogInt
         try{
             //Object[] jec = this.jobMeta.getJobCopies().toArray();
             
-            datasets = ap.parseDatasets(this.jobMeta.getJobCopies());
+            datasets = ap.parseDatasetsRecordsets(this.jobMeta.getJobCopies());
         }catch (Exception e){
             System.out.println("Error Parsing existing Datasets");
             System.out.println(e.toString());
@@ -723,252 +726,166 @@ public class ECLOutputDialog extends JobEntryDialog implements JobEntryDialogInt
     }
     
     
+ 
     
-private Button buildButton(String strLabel, Control prevControl, 
-         ModifyListener isMod, int middle, int margin, Composite groupBox){
     
-        Button nButton = new Button(groupBox, SWT.PUSH | SWT.SINGLE | SWT.CENTER);
-        nButton.setText(strLabel);
-        props.setLook(nButton);
-        //nButton.addModifyListener(lsMod)
-        FormData fieldFormat = new FormData();
-        
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(75, 0);
-        fieldFormat.height = 25;
-
-        nButton.setLayoutData(fieldFormat);
     
-        return nButton;
-        
-       
-}
-private String buildFileDialog() {
     
-        //file field
-        FileDialog fd = new FileDialog(shell, SWT.SAVE);
-
-        fd.setText("Save");
-        fd.setFilterPath("C:/");
-        String[] filterExt = { "*.csv", ".xml", "*.txt", "*.*" };
-        fd.setFilterExtensions(filterExt);
-        String selected = fd.open();
-        if(fd.getFileName() != ""){
-            return fd.getFilterPath() + System.getProperty("file.separator") + fd.getFileName();
-        }else{
-            return "";
-        }
-        
+    
+    
+    
+    
+    
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	//check to see that the minimum required fields are populated
+    	//if errors are recorded depatch promp
+    	if(isDef.getText().equalsIgnoreCase("")){
+    		isValid = false;
+    		errors += "\"Is Definition\" is a required field!\r\n";
+    	}
+    	if(!isValid){
+    		ErrorNotices en = new ErrorNotices();
+    		isValid = en.openValidateDialog(getParent(),errors);
+    	}
+    	return isValid;
+    	
     }
-
-    private Text buildText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Text buildMultiText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.V_SCROLL);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 100;
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Combo buildCombo(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox, String[] items) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // combo field
-        Combo combo = new Combo(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-        props.setLook(combo);
-        combo.setItems(items);
-        combo.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 50;
-        combo.setLayoutData(fieldFormat);
-
-        return combo;
-    }
-
+    
     private void ok() {
-        jobEntry.setName(jobEntryName.getText());
-        AutoPopulate ap = new AutoPopulate();
-        String serverHost = "";
-        String serverPort = "";
-            try{
-            //Object[] jec = this.jobMeta.getJobCopies().toArray();
-                
-                serverHost = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_ip");
-                serverPort = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_port");
-            }catch (Exception e){
-                System.out.println("Error Parsing existing Global Variables ");
-                System.out.println(e.toString());
-                
-            }
-            
-////        jobEntry.setServerAddress(serverHost);
-////        jobEntry.setServerPort(serverPort);
-        
-        if(this.attributeName != null && !this.attributeName.isDisposed()){
-            jobEntry.setAttributeName(this.attributeName.getText());
-        }else{
-            jobEntry.setAttributeName("");
-        }
-        if(this.isDef != null && !this.isDef.isDisposed()){
-            jobEntry.setIsDef(this.isDef.getText());
-        }else{
-            jobEntry.setIsDef("");
-        }
-        if(this.inputType != null && !this.inputType.isDisposed()){
-            jobEntry.setInputType(this.inputType.getText());
-        }else{
-            jobEntry.setInputType("");
-        }
-        //if(this.includeFormat != null && !this.includeFormat.isDisposed()){
-        //    jobEntry.setIncludeFormat(this.includeFormat.getText());
-        //}else{
-        //    jobEntry.setIncludeFormat("");
-        //}
-        if(this.outputType != null && !this.outputType.isDisposed()){
-            jobEntry.setOutputType(this.outputType.getText());
-        }else{
-            jobEntry.setOutputType("");
-        }
-        if(this.outputFormat != null && !this.outputFormat.isDisposed()){
-            jobEntry.setOutputFormat(this.outputFormat.getText());
-        }else{
-            jobEntry.setOutputFormat("");
-        }
-        if(this.expression != null && !this.expression.isDisposed()){
-            jobEntry.setExpression(this.expression.getText());
-        }else{
-            jobEntry.setExpression("");
-        }
-        if(this.file != null && !this.file.isDisposed()){
-            jobEntry.setFile(this.file.getText());
-        }else{
-            jobEntry.setFile("");
-        }
-        if(this.typeOptions != null && !this.typeOptions.isDisposed()){
-            jobEntry.setTypeOptions(this.typeOptions.getText());
-        }else{
-            jobEntry.setTypeOptions("");
-        }
-        if(this.fileOptions != null && !this.fileOptions.isDisposed()){
-            jobEntry.setFileOptions(this.fileOptions.getText());
-        }else{
-            jobEntry.setFileOptions("");
-        }
-        if(this.named != null && !this.named.isDisposed()){
-            jobEntry.setNamed(this.named.getText());
-        }else{
-            jobEntry.setNamed("");
-        }
-        if(this.extend != null && !this.extend.isDisposed()){
-            jobEntry.setExtend(this.extend.getText());
-        }else{
-            jobEntry.setExtend("");
-        }
-        if(this.returnAll != null && !this.returnAll.isDisposed()){
-            jobEntry.setReturnAll(this.returnAll.getText());
-        }else{
-            jobEntry.setReturnAll("");
-        }
-        if(this.thor != null && !this.thor.isDisposed()){
-            jobEntry.setThor(this.thor.getText());
-        }else{
-            jobEntry.setThor("");
-        }
-        if(this.cluster != null && !this.cluster.isDisposed()){
-            jobEntry.setCluster(this.cluster.getText());
-        }else{
-            jobEntry.setCluster("");
-        }
-        if(this.encrypt != null && !this.encrypt.isDisposed()){
-            jobEntry.setEncrypt(this.encrypt.getText());
-        }else{
-            jobEntry.setEncrypt("");
-        }
-        if(this.compressed != null && !this.compressed.isDisposed()){
-            jobEntry.setCompressed(this.compressed.getText());
-        }else{
-            jobEntry.setCompressed("");
-        }
-        if(this.overwrite != null && !this.overwrite.isDisposed()){
-            jobEntry.setOverwrite(this.overwrite.getText());
-        }else{
-            jobEntry.setOverwrite("");
-        }
-        if(this.expire != null && !this.expire.isDisposed()){
-            jobEntry.setExpire(this.expire.getText());
-        }else{
-            jobEntry.setExpire("");
-        }
-        if(this.repeat != null && !this.repeat.isDisposed()){
-            jobEntry.setRepeat(this.repeat.getText());
-        }else{
-            jobEntry.setRepeat("");
-        }
-        if(this.pipeType != null && !this.pipeType.isDisposed()){
-            jobEntry.setPipeType(this.pipeType.getText());
-        }else{
-            jobEntry.setPipeType("");
-        }
-        
-
-
-        
-        dispose();
+    	if(!validate()){
+    		return;
+    	}else{
+	        jobEntry.setName(jobEntryName.getText());
+	        AutoPopulate ap = new AutoPopulate();
+	        String serverHost = "";
+	        String serverPort = "";
+	            try{
+	            //Object[] jec = this.jobMeta.getJobCopies().toArray();
+	                
+	                serverHost = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_ip");
+	                serverPort = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_port");
+	            }catch (Exception e){
+	                System.out.println("Error Parsing existing Global Variables ");
+	                System.out.println(e.toString());
+	                
+	            }
+	            
+	////        jobEntry.setServerAddress(serverHost);
+	////        jobEntry.setServerPort(serverPort);
+	        
+	        if(this.attributeName != null && !this.attributeName.isDisposed()){
+	            jobEntry.setAttributeName(this.attributeName.getText());
+	        }else{
+	            jobEntry.setAttributeName("");
+	        }
+	        if(this.isDef != null && !this.isDef.isDisposed()){
+	            jobEntry.setIsDef(this.isDef.getText());
+	        }else{
+	            jobEntry.setIsDef("");
+	        }
+	        if(this.inputType != null && !this.inputType.isDisposed()){
+	            jobEntry.setInputType(this.inputType.getText());
+	        }else{
+	            jobEntry.setInputType("");
+	        }
+	        //if(this.includeFormat != null && !this.includeFormat.isDisposed()){
+	        //    jobEntry.setIncludeFormat(this.includeFormat.getText());
+	        //}else{
+	        //    jobEntry.setIncludeFormat("");
+	        //}
+	        if(this.outputType != null && !this.outputType.isDisposed()){
+	            jobEntry.setOutputType(this.outputType.getText());
+	        }else{
+	            jobEntry.setOutputType("");
+	        }
+	        if(this.outputFormat != null && !this.outputFormat.isDisposed()){
+	            jobEntry.setOutputFormat(this.outputFormat.getText());
+	        }else{
+	            jobEntry.setOutputFormat("");
+	        }
+	        if(this.expression != null && !this.expression.isDisposed()){
+	            jobEntry.setExpression(this.expression.getText());
+	        }else{
+	            jobEntry.setExpression("");
+	        }
+	        if(this.file != null && !this.file.isDisposed()){
+	            jobEntry.setFile(this.file.getText());
+	        }else{
+	            jobEntry.setFile("");
+	        }
+	        if(this.typeOptions != null && !this.typeOptions.isDisposed()){
+	            jobEntry.setTypeOptions(this.typeOptions.getText());
+	        }else{
+	            jobEntry.setTypeOptions("");
+	        }
+	        if(this.fileOptions != null && !this.fileOptions.isDisposed()){
+	            jobEntry.setFileOptions(this.fileOptions.getText());
+	        }else{
+	            jobEntry.setFileOptions("");
+	        }
+	        if(this.named != null && !this.named.isDisposed()){
+	            jobEntry.setNamed(this.named.getText());
+	        }else{
+	            jobEntry.setNamed("");
+	        }
+	        if(this.extend != null && !this.extend.isDisposed()){
+	            jobEntry.setExtend(this.extend.getText());
+	        }else{
+	            jobEntry.setExtend("");
+	        }
+	        if(this.returnAll != null && !this.returnAll.isDisposed()){
+	            jobEntry.setReturnAll(this.returnAll.getText());
+	        }else{
+	            jobEntry.setReturnAll("");
+	        }
+	        if(this.thor != null && !this.thor.isDisposed()){
+	            jobEntry.setThor(this.thor.getText());
+	        }else{
+	            jobEntry.setThor("");
+	        }
+	        if(this.cluster != null && !this.cluster.isDisposed()){
+	            jobEntry.setCluster(this.cluster.getText());
+	        }else{
+	            jobEntry.setCluster("");
+	        }
+	        if(this.encrypt != null && !this.encrypt.isDisposed()){
+	            jobEntry.setEncrypt(this.encrypt.getText());
+	        }else{
+	            jobEntry.setEncrypt("");
+	        }
+	        if(this.compressed != null && !this.compressed.isDisposed()){
+	            jobEntry.setCompressed(this.compressed.getText());
+	        }else{
+	            jobEntry.setCompressed("");
+	        }
+	        if(this.overwrite != null && !this.overwrite.isDisposed()){
+	            jobEntry.setOverwrite(this.overwrite.getText());
+	        }else{
+	            jobEntry.setOverwrite("");
+	        }
+	        if(this.expire != null && !this.expire.isDisposed()){
+	            jobEntry.setExpire(this.expire.getText());
+	        }else{
+	            jobEntry.setExpire("");
+	        }
+	        if(this.repeat != null && !this.repeat.isDisposed()){
+	            jobEntry.setRepeat(this.repeat.getText());
+	        }else{
+	            jobEntry.setRepeat("");
+	        }
+	        if(this.pipeType != null && !this.pipeType.isDisposed()){
+	            jobEntry.setPipeType(this.pipeType.getText());
+	        }else{
+	            jobEntry.setPipeType("");
+	        }
+	        
+	
+	
+	        
+	        dispose();
+    	}
     }
 
     private void cancel() {

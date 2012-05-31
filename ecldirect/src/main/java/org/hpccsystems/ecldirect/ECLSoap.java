@@ -14,6 +14,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
+
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 //import org.xml.sax.InputSource;
 
 
@@ -42,8 +45,29 @@ public class ECLSoap {
     private String wuid = "";
     
     private String tempDir = "";
+    
+    private int errorCount = 0;
+    private int warningCount = 0;
+    
+    
 
-    public String getOutputName() {
+    public int getErrorCount() {
+		return errorCount;
+	}
+
+	public void setErrorCount(int errorCount) {
+		this.errorCount = errorCount;
+	}
+
+	public int getWarningCount() {
+		return warningCount;
+	}
+
+	public void setWarningCount(int warningCount) {
+		this.warningCount = warningCount;
+	}
+
+	public String getOutputName() {
         return outputName;
     }
 
@@ -170,46 +194,47 @@ public class ECLSoap {
             pb.directory(path);
 
             Process p = pb.start();
+            int pStatus = p.waitFor();
+            
+            InputStream is = p.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+            
+            //System.out.println("STATUS: " + pStatus);
+            while((line = br.readLine()) != null){
+            	//System.out.println("#####<InputStream> "+line);
+                //res += "<InputStream> " + line+"\r\n";
+                res += cleanError(line)+"\r\n";
+            }
+            
+            
             InputStream iError = p.getErrorStream();
             InputStreamReader isrError = new InputStreamReader(iError);
             BufferedReader brErr = new BufferedReader(isrError);
             String lineErr;
             while((lineErr = brErr.readLine()) != null){
-               // System.out.println("#####"+lineErr);
-                res += lineErr+"\r\n";
+                //System.out.println("#####<ErrorStream> "+lineErr);
+                //res += "<ErrorStream> " + lineErr+"\r\n";
+                res += cleanError(lineErr)+"\r\n";
             }
-            InputStream is = p.getInputStream();
-
+            
+                        
            
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader br = new BufferedReader(isr);
-            String line;
             
-
-            //System.out.println("(((((((((((("+c+"))))))))))))))))))))");
-            
-            int pStatus = p.waitFor();
-            
-            //System.out.println("STATUS: " + pStatus);
-            while((line = br.readLine()) != null){
-                res += line+"\r\n";
-            }
+            /*
 
             InputStream is2 = p.getErrorStream();
             int pStatus2 = p.waitFor();
             InputStreamReader isr2 = new InputStreamReader(is2);
             BufferedReader br2 = new BufferedReader(isr2);
             String line2;
-            
-
-            //System.out.println("(((((((((((("+c+"))))))))))))))))))))");
-            
 
             while((line2 = br2.readLine()) != null){
                 //System.out.println("****"+line2);
                 res += line2 +"\r\n";
             }
-
+			*/
 
 
             //deleteFile(eclccInstallDir+inFile);
@@ -226,6 +251,77 @@ public class ECLSoap {
         return res;
     }
    
+    public String cleanError(String in){
+    	int start = in.indexOf(".ecl");
+    	if(start >= 0 ){
+    		start += 4;
+    		return in.substring(start);
+    	}else{
+    		//this is the line of
+    		//1 error, 0 warning
+    		//3 errors, 0 warning
+    		
+    		//full string            [0-9] error[s]?, [0-9] warning[s]?
+    		
+    		
+    		String regex = "[0-9]+ error[s]?";
+    		Pattern pattern = 
+            Pattern.compile(regex);
+
+            Matcher matcher = 
+            pattern.matcher(in);
+            if(matcher.find()){
+	            String e = matcher.group();
+	            
+	            regex = "[0-9]+";
+	    		pattern = 
+	            Pattern.compile(regex);
+	
+	            matcher = 
+	            pattern.matcher(e);
+	            if(matcher.find()){
+	            	String ec = matcher.group();
+	            	
+	            	try{
+	                 	this.errorCount = Integer.parseInt(ec);
+	                }catch (Exception ee){
+	                 	
+	                }
+	            }
+            }
+            
+
+            regex = "[0-9]+ warning[s]?";
+    		pattern = 
+            Pattern.compile(regex);
+
+            matcher = 
+            pattern.matcher(in);
+            if(matcher.find()){
+	            String w = matcher.group();
+	            
+	            regex = "[0-9]+";
+	    		pattern = 
+	            Pattern.compile(regex);
+	
+	            matcher = 
+	            pattern.matcher(w);
+	            if(matcher.find()){
+	            	String wc = matcher.group();
+	            	
+	            	try{
+	                	this.warningCount = Integer.parseInt(wc);
+	                }catch (Exception we){
+	                 	
+	                }
+	            }
+            }
+
+           
+           
+    	}
+    	return in;
+    }
 
     
     /*executeECL

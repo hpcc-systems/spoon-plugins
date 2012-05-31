@@ -277,17 +277,17 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         String retval = "";
         
         retval += super.getXML();
-        
-        retval += "		<outputfield>" + outputField + "</outputfield>" + Const.CR;
+      
+        retval += "		<outputfield><![CDATA[" + outputField + "]]></outputfield>" + Const.CR;
         //retval += "		<ip_address>" + ipAddress + "</ip_address>" + Const.CR;
-        retval += "		<file_path>" + filePath + "</file_path>" + Const.CR;
-        retval += "		<file_type>" + fileType + "</file_type>" + Const.CR;
-        retval += "		<csv_separator>" + csvSeparator + "</csv_separator>" + Const.CR;
-        retval += "		<csv_terminator>" + csvTerminator + "</csv_terminator>" + Const.CR;
-        retval += "		<csv_quote>" + csvQuote + "</csv_quote>" + Const.CR;
-        retval += "		<csv_quote>" + csvQuote + "</csv_quote>" + Const.CR;
-        retval += "		<fixed_record_size>" + fixedRecordSize + "</fixed_record_size>" + Const.CR;
-        retval += "		<logical_file_name>" + logicalFileName + "</logical_file_name>" + Const.CR;
+        retval += "		<file_path><![CDATA[" + filePath + "]]></file_path>" + Const.CR;
+        retval += "		<file_type><![CDATA[" + fileType + "]]></file_type>" + Const.CR;
+        retval += "		<csv_separator><![CDATA[" + csvSeparator + "]]></csv_separator>" + Const.CR;
+        retval += "		<csv_terminator><![CDATA[" + csvTerminator + "]]></csv_terminator>" + Const.CR;
+        retval += "		<csv_quote><![CDATA[" + csvQuote + "]]></csv_quote>" + Const.CR;
+        retval += "		<csv_quote><![CDATA[" + csvQuote + "]]></csv_quote>" + Const.CR;
+        retval += "		<fixed_record_size><![CDATA[" + fixedRecordSize + "]]></fixed_record_size>" + Const.CR;
+        retval += "		<logical_file_name><![CDATA[" + logicalFileName + "]]></logical_file_name>" + Const.CR;
         
        // retval += "		<recordList>" + this.saveRecordList() + "</recordList>" + Const.CR;
         return retval;

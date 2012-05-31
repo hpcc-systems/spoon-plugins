@@ -383,14 +383,15 @@ public class ECLOutput extends JobEntryBase implements Cloneable, JobEntryInterf
     }
 
     public String getXMLElement(String key, String value){
-        return "        <" + key + ">"+value+"</"+key+">"+ Const.CR;
+    	
+        return "        <" + key + "><![CDATA["+value+"]]></"+key+">"+ Const.CR;
     }
     public String getXML() {
         String retval = "";
         // System.out.println(" ------------ getXML ------------- ");
         retval += super.getXML();
-
-        retval += "		<attributeName>" + attributeName + "</attributeName>" + Const.CR;
+     
+        retval += "		<attributeName><![CDATA[" + attributeName + "]]></attributeName>" + Const.CR;
             //private String isDef; //true set output into attr using job entry name
     
         retval += getXMLElement("isDef", this.getIsDef());

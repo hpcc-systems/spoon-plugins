@@ -150,11 +150,11 @@ public class ECLML_Associate extends JobEntryBase implements Cloneable, JobEntry
         String retval = "";
         
         retval += super.getXML();
-    
-        retval += "             <recordName>"+this.recordName+"</recordName>"+Const.CR;
-        retval += "             <cooccur>"+this.cooccur+"</cooccur>"+Const.CR;  
-        retval += "             <routine>"+this.routine+"</routine>"+Const.CR; 
-        retval += "             <recordset_name>"+this.recordsetName+"</recordset_name>"+Const.CR;
+      
+        retval += "             <recordName><![CDATA["+this.recordName+"]]></recordName>"+Const.CR;
+        retval += "             <cooccur><![CDATA["+this.cooccur+"]]></cooccur>"+Const.CR;  
+        retval += "             <routine><![CDATA["+this.routine+"]]></routine>"+Const.CR; 
+        retval += "             <recordset_name eclIsDef=\"true\" eclType=\"recordset\"><![CDATA["+this.recordsetName+"]]></recordset_name>"+Const.CR;
 
         return retval;
 

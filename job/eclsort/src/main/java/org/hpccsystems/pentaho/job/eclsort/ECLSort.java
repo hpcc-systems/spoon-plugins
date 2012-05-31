@@ -135,9 +135,10 @@ public class ECLSort extends JobEntryBase implements Cloneable, JobEntryInterfac
         retval += super.getXML();
         
         //retval += "		<record_name>" + recordName + "</record_name>" + Const.CR;
-        retval += "		<dataset_name>" + datasetName + "</dataset_name>" + Const.CR;
-        retval += "		<fields>" + fields + "</fields>" + Const.CR;
-        retval += "		<recordset_name>" + recordsetName + "</recordset_name>" + Const.CR;
+        
+        retval += "		<dataset_name ><![CDATA[" + datasetName + "]]></dataset_name>" + Const.CR;
+        retval += "		<fields><![CDATA[" + fields + "]]></fields>" + Const.CR;
+        retval += "		<recordset_name eclIsDef=\"true\" eclType=\"recordset\"><![CDATA[" + recordsetName + "]]></recordset_name>" + Const.CR;
 
         return retval;
 

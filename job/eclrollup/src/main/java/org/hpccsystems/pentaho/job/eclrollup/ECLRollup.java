@@ -29,7 +29,7 @@ import org.w3c.dom.Node;
 public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterface {
     
     //private String jobName;
-    private String name = "";
+
 
     private String recordsetName = "";
     private String recordset = "";
@@ -239,16 +239,16 @@ public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterf
         String retval = "";
         
         retval += super.getXML();
-        
-        retval += "             <recordset_name>"+this.recordsetName+"</recordset_name>"+Const.CR;
-        retval += "             <recordset>"+this.recordset+"</recordset>"+Const.CR;
-        retval += "             <condition>"+this.condition+"</condition>"+Const.CR;
-        retval += "             <transformName>"+this.transformName+"</transformName>"+Const.CR;
-        retval += "             <transform>"+this.transform+"</transform>"+Const.CR;
-        retval += "             <transformCall>"+this.transformCall+"</transformCall>"+Const.CR;
-        retval += "             <fieldlist>"+this.fieldlist+"</fieldlist>"+Const.CR;
-        retval += "             <group>"+this.group+"</group>"+Const.CR;
-        retval += "             <runLocal>"+this.getRunLocalString()+"</runLocal>"+Const.CR;
+       
+        retval += "             <recordset_name eclIsDef=\"true\" eclType=\"recordset\"><![CDATA["+this.recordsetName+"]]></recordset_name>"+Const.CR;
+        retval += "             <recordset><![CDATA["+this.recordset+"]]></recordset>"+Const.CR;
+        retval += "             <condition><![CDATA["+this.condition+"]]></condition>"+Const.CR;
+        retval += "             <transformName eclIsDef=\"true\" eclType=\"recordset\"><![CDATA["+this.transformName+"]]></transformName>"+Const.CR;
+        retval += "             <transform><![CDATA["+this.transform+"]]></transform>"+Const.CR;
+        retval += "             <transformCall><![CDATA["+this.transformCall+"]]></transformCall>"+Const.CR;
+        retval += "             <fieldlist><![CDATA["+this.fieldlist+"]]></fieldlist>"+Const.CR;
+        retval += "             <group><![CDATA["+this.group+"]]></group>"+Const.CR;
+        retval += "             <runLocal><![CDATA["+this.getRunLocalString()+"]]></runLocal>"+Const.CR;
        
 
        

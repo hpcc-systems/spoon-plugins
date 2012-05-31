@@ -7,8 +7,8 @@
 	classname="org.hpccsystems.pentaho.job.eclgroup.ECLGroup">
             
     <libraries>
-        <library name="lib/ECLDirect.jar"/>
-	  <library name="lib/ECLGUIFeatures.jar"/>
+       <library name="../../hpcc-common/ecldirect.jar"/>
+        <library name="../../hpcc-common/eclgui.jar"/>
         <library name="eclgroup.jar"/>
     </libraries>            
 </plugin>

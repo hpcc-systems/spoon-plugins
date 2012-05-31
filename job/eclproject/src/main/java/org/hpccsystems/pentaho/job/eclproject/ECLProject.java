@@ -29,7 +29,7 @@ import org.w3c.dom.Node;
 public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInterface {
     
     //private String jobName;
-    private String name = "";
+
     private String recordsetName = "";
     private boolean declareCounter = false;
     private String inRecordName = "";
@@ -54,12 +54,7 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
    //     this.jobName = jobName;
    // }
     
-    public String getName(){
-        return name;
-    }
-    public void setName(String name){
-        this.name = name;
-    }
+
     
     public boolean getDeclareCounter() {
         return declareCounter;
@@ -207,8 +202,8 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
         try {
             super.loadXML(node, list, list1);
 
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "name")) != null)
-                setName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "name")));
+            //if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "name")) != null)
+            //    setName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "name")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "declareCounter")) != null)
                 setDeclareCounterString(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "declareCounter")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset_name")) != null)
@@ -239,15 +234,17 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
         retval += super.getXML();
         //System.out.println(" ------------ getXML ------------- ");
         
-        retval += "		<name>" + name + "</name>" + Const.CR;
-        retval += "		<declareCounter>" + this.getDeclareCounterString() + "</declareCounter>" + Const.CR;
-        retval += "		<recordset_name>" + recordsetName + "</recordset_name>" + Const.CR;
-        retval += "		<inRecordName>" + inRecordName + "</inRecordName>" + Const.CR;
-        retval += "		<outRecordName>" + outRecordName + "</outRecordName>" + Const.CR;
-        retval += "		<outRecordFormat>" + outRecordFormat + "</outRecordFormat>" + Const.CR;
-        retval += "		<transformName>" + transformName + "</transformName>" + Const.CR;
-        retval += "		<transformFormat>" + transformFormat + "</transformFormat>" + Const.CR;
-        retval += "		<parameterName>" + parameterName + "</parameterName>" + Const.CR;
+        //retval += "		<name>" + name + "</name>" + Const.CR;
+        
+       
+        retval += "		<declareCounter><![CDATA[" + this.getDeclareCounterString() + "]]></declareCounter>" + Const.CR;
+        retval += "		<recordset_name eclIsDef=\"true\" eclType=\"recordset\"><![CDATA[" + recordsetName + "]]></recordset_name>" + Const.CR;
+        retval += "		<inRecordName><![CDATA[" + inRecordName + "]]></inRecordName>" + Const.CR;
+        retval += "		<outRecordName eclIsDef=\"true\" eclType=\"record\"><![CDATA[" + outRecordName + "]]></outRecordName>" + Const.CR;
+        retval += "		<outRecordFormat><![CDATA[" + outRecordFormat + "]]></outRecordFormat>" + Const.CR;
+        retval += "		<transformName eclIsDef=\"true\" eclType=\"recordset\"><![CDATA[" + transformName + "]]></transformName>" + Const.CR;
+        retval += "		<transformFormat><![CDATA[" + transformFormat + "]]></transformFormat>" + Const.CR;
+        retval += "		<parameterName><![CDATA[" + parameterName + "]]></parameterName>" + Const.CR;
         
        
        //System.out.println(" end getXML ");
@@ -262,8 +259,8 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
         try {
             //jobName = rep.getStepAttributeString(id_jobentry, "jobName"); //$NON-NLS-1$
 
-            if(rep.getStepAttributeString(id_jobentry, "name") != null)
-                name = rep.getStepAttributeString(id_jobentry, "name"); //$NON-NLS-1$
+           // if(rep.getStepAttributeString(id_jobentry, "name") != null)
+           //     name = rep.getStepAttributeString(id_jobentry, "name"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "declareCounter") != null)
                 setDeclareCounterString(rep.getStepAttributeString(id_jobentry, "declareCounter")); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "recordsetName") != null)
@@ -291,7 +288,7 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
             //rep.saveStepAttribute(id_job, getObjectId(), "jobName", jobName); //$NON-NLS-1$
 
             
-            rep.saveStepAttribute(id_job, getObjectId(), "name", name); //$NON-NLS-1$
+           // rep.saveStepAttribute(id_job, getObjectId(), "name", name); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "declareCounter", this.getDeclareCounterString());
             rep.saveStepAttribute(id_job, getObjectId(), "recordsetName", recordsetName); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "inRecordName", inRecordName); //$NON-NLS-1$

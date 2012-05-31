@@ -249,15 +249,15 @@ public class ECLDedup extends JobEntryBase implements Cloneable, JobEntryInterfa
         
         retval += super.getXML();
                     
-
-        retval += "             <recordset_name>"+this.RecordsetName+"</recordset_name>"+Const.CR;
-        retval += "             <recordset>"+this.recordset+"</recordset>"+Const.CR;
-        retval += "             <condition>"+this.condition+"</condition>"+Const.CR;
-        retval += "             <runLocal>"+this.getRunLocalString()+"</runLocal>"+Const.CR;
-        retval += "             <isAll>"+this.getIsAllString()+"</isAll>"+Const.CR;
-        retval += "             <isHash>"+this.getIsHashString()+"</isHash>"+Const.CR;
-        retval += "             <keep>"+this.getKeep()+"</keep>"+Const.CR;
-        retval += "             <keeper>"+this.getKeeper()+"</keeper>"+Const.CR;
+     
+        retval += "             <recordset_name eclIsDef=\"true\" eclType=\"recordset\"><![CDATA["+this.RecordsetName+"]]></recordset_name>"+Const.CR;
+        retval += "             <recordset><![CDATA["+this.recordset+"]]></recordset>"+Const.CR;
+        retval += "             <condition><![CDATA["+this.condition+"]]></condition>"+Const.CR;
+        retval += "             <runLocal><![CDATA["+this.getRunLocalString()+"]]></runLocal>"+Const.CR;
+        retval += "             <isAll><![CDATA["+this.getIsAllString()+"]]></isAll>"+Const.CR;
+        retval += "             <isHash><![CDATA["+this.getIsHashString()+"]]></isHash>"+Const.CR;
+        retval += "             <keep><![CDATA["+this.getKeep()+"]]></keep>"+Const.CR;
+        retval += "             <keeper><![CDATA["+this.getKeeper()+"]]></keeper>"+Const.CR;
         
 
        

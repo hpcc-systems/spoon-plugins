@@ -86,7 +86,7 @@ public class Group implements EclCommand {
 	
 	@Override
 	public String ecl() {
-		// GROUP(recordset [, breakcriteria [,ALL] ] [,LOCAL])
+		// name := GROUP(recordset [, breakcriteria [,ALL] ] [,LOCAL])
 		String ecl = name + " := GROUP(" + recordset;
 		
 		if (breakCriteria != null && breakCriteria != "" && !breakCriteria.equals("")) {

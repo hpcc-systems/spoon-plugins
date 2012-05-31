@@ -115,9 +115,9 @@ public class ECLGeneric extends JobEntryBase implements Cloneable, JobEntryInter
         
         retval += super.getXML();
 
-
-        retval += "             <recordset_name>"+this.recordsetName+"</recordset_name>"+Const.CR;
-        retval += "             <ECLCode>"+this.ECLCode+"</ECLCode>"+Const.CR;
+      
+        retval += "             <recordset_name><![CDATA["+this.recordsetName+"]]></recordset_name>"+Const.CR;
+        retval += "             <ECLCode><![CDATA["+this.ECLCode+"]]></ECLCode>"+Const.CR;
 
        
        

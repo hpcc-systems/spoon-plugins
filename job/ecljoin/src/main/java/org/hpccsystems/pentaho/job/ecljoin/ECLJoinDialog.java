@@ -76,7 +76,7 @@ public class ECLJoinDialog extends JobEntryDialog implements JobEntryDialogInter
         try{
             //Object[] jec = this.jobMeta.getJobCopies().toArray();
             
-            datasets = ap.parseDatasets(this.jobMeta.getJobCopies());
+            datasets = ap.parseDatasetsRecordsets(this.jobMeta.getJobCopies());
         }catch (Exception e){
             System.out.println("Error Parsing existing Datasets");
             System.out.println(e.toString());

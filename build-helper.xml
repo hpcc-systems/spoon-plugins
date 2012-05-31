@@ -26,6 +26,7 @@
 		<zip destfile="./target/spoon-plugins-distribution.zip">
 			<zipfileset dir="./ecldirect/target" includes="ecldirect.jar" prefix="hpcc-common" />
 			<zipfileset dir="./eclgui/target" includes="eclgui.jar" prefix="hpcc-common" />
+			<zipfileset dir="./ecljobentry/target" includes="ecljobentry.jar" prefix="hpcc-common" />
 			<zipfileset dir="./perspectives/eclresults/target" includes="eclresults.jar" prefix="spoon/eclresults" />
 			<zipfileset dir="./perspectives/eclresults/src/main/resources/plugin" includes="plugin.xml" prefix="spoon/eclresults" />
 			<zipfileset dir="./job/ecldataset/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecldataset" />
@@ -76,6 +77,17 @@
 			<zipfileset dir="./job/eclsprayfile/target" includes="eclsprayfile.jar" prefix="jobentries/eclsprayfile" />
 			<zipfileset dir="./job/ecltable/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecltable" />
 			<zipfileset dir="./job/ecltable/target" includes="ecltable.jar" prefix="jobentries/ecltable" />
+			
+			<zipfileset dir="./job/eclcount/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclcount" />
+			<zipfileset dir="./job/eclcount/target" includes="eclcount.jar" prefix="jobentries/eclcount" />
+			<zipfileset dir="./job/ecldespray/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecldespray" />
+			<zipfileset dir="./job/ecldespray/target" includes="ecldespray.jar" prefix="jobentries/ecldespray" />
+			<zipfileset dir="./job/ecllimit/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecllimit" />
+			<zipfileset dir="./job/ecllimit/target" includes="ecllimit.jar" prefix="jobentries/ecllimit" />
+			<zipfileset dir="./job/eclloop/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclloop" />
+			<zipfileset dir="./job/eclloop/target" includes="eclloop.jar" prefix="jobentries/eclloop" />
+			<zipfileset dir="./job/eclmerge/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmerge" />
+			<zipfileset dir="./job/eclmerge/target" includes="eclmerge.jar" prefix="jobentries/eclmerge" />
 		</zip>
 	</target>
 

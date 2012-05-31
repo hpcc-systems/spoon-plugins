@@ -241,14 +241,14 @@ public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInter
         String retval = "";
         
         retval += super.getXML();
-        
-        retval += "		<logical_file_name>" + logicalFileName + "</logical_file_name>" + Const.CR;
-        retval += "		<record_name>" + recordName + "</record_name>" + Const.CR;
-        retval += "		<dataset_name>" + datasetName + "</dataset_name>" + Const.CR;
-        retval += "		<record_def>" + recordDef + "</record_def>" + Const.CR;
-        retval += "		<recordSet>" + recordSet + "</recordSet>" + Const.CR;
-        retval += "		<recordList>" + this.saveRecordList() + "</recordList>" + Const.CR;
-        retval += "		<fileType>" + fileType + "</fileType>" + Const.CR;
+      
+        retval += "		<logical_file_name><![CDATA[" + logicalFileName + "]]></logical_file_name>" + Const.CR;
+        retval += "		<record_name eclIsDef=\"true\" eclType=\"record\"><![CDATA[" + recordName + "]]></record_name>" + Const.CR;
+        retval += "		<dataset_name eclIsDef=\"true\" eclType=\"dataset\"><![CDATA[" + datasetName + "]]></dataset_name>" + Const.CR;
+        retval += "		<record_def><![CDATA[" + recordDef + "]]></record_def>" + Const.CR;
+        retval += "		<recordSet><![CDATA[" + recordSet + "]]></recordSet>" + Const.CR;
+        retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
+        retval += "		<fileType><![CDATA[" + fileType + "]]></fileType>" + Const.CR;
         
         return retval;
 

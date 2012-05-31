@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="ECLCount"
+	iconfile="count.png"
+	description="Count"
+	tooltip="Count" 
+	category="HPCC Systems"
+	classname="org.hpccsystems.pentaho.job.eclcount.ECLCount">
+            
+    <libraries>
+		<library name="../../hpcc-common/ecldirect.jar"/>
+        <library name="../../hpcc-common/eclgui.jar"/>
+        <library name="eclcount.jar"/>
+        
+    </libraries>            
+</plugin>

@@ -165,12 +165,12 @@ public class ECLML_KMeans extends JobEntryBase implements Cloneable, JobEntryInt
         String retval = "";
         
         retval += super.getXML();
-    
-        retval += "             <recordName>"+this.recordName+"</recordName>"+Const.CR;
-        retval += "             <record2Name>"+this.record2Name+"</record2Name>"+Const.CR;  
-        retval += "             <recordset_name>"+this.recordsetName+"</recordset_name>"+Const.CR;
-        retval += "             <iterations>"+this.iterations+"</iterations>"+Const.CR;
-        retval += "             <threshold>"+this.threshold+"</threshold>"+Const.CR;
+      
+        retval += "             <recordName><![CDATA["+this.recordName+"]]></recordName>"+Const.CR;
+        retval += "             <record2Name><![CDATA["+this.record2Name+"]]></record2Name>"+Const.CR;  
+        retval += "             <recordset_name eclIsDef=\"true\" eclType=\"recordset\"><![CDATA["+this.recordsetName+"]]></recordset_name>"+Const.CR;
+        retval += "             <iterations><![CDATA["+this.iterations+"]]></iterations>"+Const.CR;
+        retval += "             <threshold><![CDATA["+this.threshold+"]]></threshold>"+Const.CR;
 
         return retval;
 

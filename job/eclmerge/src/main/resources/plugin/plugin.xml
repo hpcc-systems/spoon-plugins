@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="ECLMerge"
+	iconfile="merge.png"
+	description="Merge"
+	tooltip="Merge" 
+	category="HPCC Systems"
+	classname="org.hpccsystems.pentaho.job.eclmerge.ECLMerge">
+            
+    <libraries>
+		<library name="../../hpcc-common/ecldirect.jar"/>
+        <library name="../../hpcc-common/eclgui.jar"/>
+        <library name="eclmerge.jar"/>
+        
+    </libraries>            
+</plugin>

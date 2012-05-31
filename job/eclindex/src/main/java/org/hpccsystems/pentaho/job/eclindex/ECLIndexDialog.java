@@ -152,7 +152,7 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         try{
             //Object[] jec = this.jobMeta.getJobCopies().toArray();
             
-            datasets = ap.parseDatasets(this.jobMeta.getJobCopies());
+            datasets = ap.parseDatasetsRecordsets(this.jobMeta.getJobCopies());
         }catch (Exception e){
             System.out.println("Error Parsing existing Datasets");
             System.out.println(e.toString());

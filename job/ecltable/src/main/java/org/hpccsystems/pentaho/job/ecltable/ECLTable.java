@@ -274,17 +274,17 @@ public class ECLTable extends JobEntryBase implements Cloneable, JobEntryInterfa
         String retval = "";
         
         retval += super.getXML();
+      //<![CDATA["+this.model+"]]>
+        retval += "             <recordset_name eclIsDef=\"true\" eclType=\"recordset\"><![CDATA["+this.recordsetName+"]]></recordset_name>"+Const.CR;
         
-        retval += "             <recordset_name>"+this.recordsetName+"</recordset_name>"+Const.CR;
-        
-        retval += "             <recordset>"+this.recordset+"</recordset>"+Const.CR;
-        retval += "             <format>"+this.format+"</format>"+Const.CR;
-        retval += "             <expression>" + this.expression + "</expression>"+Const.CR;
-        retval += "             <size>"+this.size+"</size>"+Const.CR;
-        retval += "             <isUnsorted>"+this.getIsUnsortedString()+"</isUnsorted>"+Const.CR;
-        retval += "             <runLocal>"+this.getRunLocalString()+"</runLocal>"+Const.CR;
-        retval += "             <isKeyed>"+this.getIsKeyedString()+"</isKeyed>"+Const.CR;
-        retval += "             <isMerge>"+this.getIsMergeString()+"</isMerge>"+Const.CR;
+        retval += "             <recordset><![CDATA["+this.recordset+"]]></recordset>"+Const.CR;
+        retval += "             <format><![CDATA["+this.format+"]]></format>"+Const.CR;
+        retval += "             <expression><![CDATA[" + this.expression + "]]></expression>"+Const.CR;
+        retval += "             <size><![CDATA["+this.size+"]]></size>"+Const.CR;
+        retval += "             <isUnsorted><![CDATA["+this.getIsUnsortedString()+"]]></isUnsorted>"+Const.CR;
+        retval += "             <runLocal><![CDATA["+this.getRunLocalString()+"]]></runLocal>"+Const.CR;
+        retval += "             <isKeyed><![CDATA["+this.getIsKeyedString()+"]]></isKeyed>"+Const.CR;
+        retval += "             <isMerge><![CDATA["+this.getIsMergeString()+"]]></isMerge>"+Const.CR;
         
         
        

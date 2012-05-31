@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="ECLDeSpray"
+	iconfile="despray.png"
+	description="DeSpray"
+	tooltip="DeSpray" 
+	category="HPCC Systems"
+	classname="org.hpccsystems.pentaho.job.ecldespray.ECLDeSpray">
+            
+    <libraries>
+		<library name="../../hpcc-common/ecldirect.jar"/>
+        <library name="../../hpcc-common/eclgui.jar"/>
+        <library name="ecldespray.jar"/>
+        
+    </libraries>            
+</plugin>

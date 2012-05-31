@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryDialogInterface;
@@ -46,7 +47,7 @@ public class ECLGroupDialog extends JobEntryDialog implements JobEntryDialogInte
 	private Text jobEntryName;
 	
 	private Text recordsetName;
-	private Text recordset;
+	private Combo recordset;
 	private Text breakCriteria;
 	private Combo isAll;
 	private Combo runLocal;
@@ -77,6 +78,18 @@ public class ECLGroupDialog extends JobEntryDialog implements JobEntryDialogInte
 			}
 		};
 		
+		String datasets[] = null;
+        AutoPopulate ap = new AutoPopulate();
+        try{
+            
+            datasets = ap.parseDatasetsRecordsets(this.jobMeta.getJobCopies());
+            
+        }catch (Exception e){
+            System.out.println("Error Parsing existing Datasets");
+            System.out.println(e.toString());
+            datasets = new String[]{""};
+        }
+		
 		backupChanged = jobEntry.hasChanged();
 		
 		FormLayout formLayout = new FormLayout();
@@ -104,7 +117,7 @@ public class ECLGroupDialog extends JobEntryDialog implements JobEntryDialogInte
         FormData generalGroupFormat = new FormData();
         generalGroupFormat.top = new FormAttachment(0, margin);
         generalGroupFormat.width = 400;
-        generalGroupFormat.height = 65;
+        generalGroupFormat.height = 100;
         generalGroupFormat.left = new FormAttachment(middle, 0);
         generalGroup.setLayoutData(generalGroupFormat);
         
@@ -114,18 +127,18 @@ public class ECLGroupDialog extends JobEntryDialog implements JobEntryDialogInte
         //Distribute Declaration
         Group groupGroup = new Group(shell, SWT.SHADOW_NONE);
         props.setLook(groupGroup);
-        groupGroup.setText("Group Details");
+        groupGroup.setText("Distribute Details");
         groupGroup.setLayout(groupLayout);
         FormData datasetGroupFormat = new FormData();
         datasetGroupFormat.top = new FormAttachment(generalGroup, margin);
         datasetGroupFormat.width = 400;
-        datasetGroupFormat.height = 160;
+        datasetGroupFormat.height = 300;
         datasetGroupFormat.left = new FormAttachment(middle, 0);
         groupGroup.setLayoutData(datasetGroupFormat);
         
         
         recordsetName = buildText("Result Recordset", null, lsMod, middle, margin, groupGroup);
-        recordset = buildText("Recordset", recordsetName, lsMod, middle, margin, groupGroup);
+        recordset = buildCombo("Recordset", recordsetName, lsMod, middle, margin, groupGroup, datasets);
         breakCriteria = buildText("Break Criteria", recordset, lsMod, middle, margin, groupGroup);
         
         isAll = buildCombo("All", breakCriteria, lsMod, middle, margin, groupGroup,new String[]{"false", "true"});

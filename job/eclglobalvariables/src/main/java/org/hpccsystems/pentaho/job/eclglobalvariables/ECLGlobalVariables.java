@@ -172,22 +172,22 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
         String retval = "";
         
         retval += super.getXML();
+      
+        retval += "             <server_ip><![CDATA["+this.serverIP+"]]></server_ip>"+Const.CR;
         
-        retval += "             <server_ip>"+this.serverIP+"</server_ip>"+Const.CR;
+        retval += "             <server_port><![CDATA["+this.serverPort+"]]></server_port>"+Const.CR;
         
-        retval += "             <server_port>"+this.serverPort+"</server_port>"+Const.CR;
+        retval += "             <landing_zone><![CDATA["+this.landingZone+"]]></landing_zone>"+Const.CR;
         
-        retval += "             <landing_zone>"+this.landingZone+"</landing_zone>"+Const.CR;
+        retval += "             <mlPath><![CDATA["+this.getMlPath()+"]]></mlPath>"+Const.CR;
         
-        retval += "             <mlPath>"+this.getMlPath()+"</mlPath>"+Const.CR;
-        
-        retval += "             <eclccInstallDir>"+this.getEclccInstallDir()+"</eclccInstallDir>"+Const.CR;
+        retval += "             <eclccInstallDir><![CDATA["+this.getEclccInstallDir()+"]]></eclccInstallDir>"+Const.CR;
        
-        retval += "             <jobName>"+this.getJobName()+"</jobName>"+Const.CR;
+        retval += "             <jobName><![CDATA["+this.getJobName()+"]]></jobName>"+Const.CR;
        
-        retval += "             <cluster>"+this.getCluster()+"</cluster>"+Const.CR;
+        retval += "             <cluster><![CDATA["+this.getCluster()+"]]></cluster>"+Const.CR;
         
-        retval += "             <includeML>"+this.getIncludeML() + "</includeML>"+Const.CR;
+        retval += "             <includeML><![CDATA["+this.getIncludeML() + "]]></includeML>"+Const.CR;
       
        
         return retval;
