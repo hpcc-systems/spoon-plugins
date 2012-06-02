@@ -36,10 +36,10 @@
 		<module>eclsprayfile</module>
 		<module>ecltable</module>
 		<module>eclcount</module>
-		<module>eclDeSpray</module>
+		<module>ecldespray</module>
 		<module>eclLimit</module>
 		<module>eclLoop</module>
-		<module>eclMerge</module>
+		<module>eclmerge</module>
 	</modules>
 
 	<properties>
