@@ -37,8 +37,8 @@
 		<module>ecltable</module>
 		<module>eclcount</module>
 		<module>ecldespray</module>
-		<module>ecllimit</module>
-		<module>eclloop</module>
+		<module>eclLimit</module>
+		<module>eclLoop</module>
 		<module>eclmerge</module>
 	</modules>
 

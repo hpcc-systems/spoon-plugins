@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="ECLExecute"
+	iconfile="execute.png"
+	description="Execute"
+	tooltip="Execute" 
+	category="HPCC Systems"
+	classname="org.hpccsystems.pentaho.job.eclexecute.ECLExecute">
+            
+    <libraries>
+	  <library name="../../hpcc-common/ecldirect.jar"/>
+        <library name="../../hpcc-common/eclgui.jar"/>
+        <library name="eclexecute.jar"/>
+    </libraries>            
+</plugin>

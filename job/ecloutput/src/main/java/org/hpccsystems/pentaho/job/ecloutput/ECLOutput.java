@@ -5,6 +5,7 @@
 package org.hpccsystems.pentaho.job.ecloutput;
 
 import java.util.ArrayList;
+
 import java.util.List;
 import org.hpccsystems.ecldirect.Output;
 import org.hpccsystems.ecldirect.EclDirect;
@@ -33,15 +34,16 @@ import org.pentaho.di.plugins.perspectives.eclresults.*;
 
 import org.hpccsystems.eclguifeatures.*;
 import org.pentaho.di.job.JobMeta;
+import org.hpccsystems.pentaho.job.ecljobentry.*;
 
 /**
  *
  * @author ChalaAX
  */
-public class ECLOutput extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLOutput extends ECLJobEntry {
     
 
-    private String attributeName = "";
+    private String recordset = "";
     //private String fileName = "";
     //private String serverAddress = "";
     //private String serverPort = "";
@@ -72,11 +74,11 @@ public class ECLOutput extends JobEntryBase implements Cloneable, JobEntryInterf
     private String pipeType = "";
 
 
-    public String getAttributeName() {
-        return attributeName;
+    public String getRecordset() {
+        return recordset;
     }
-    public void setAttributeName(String attributeName) {
-        this.attributeName = attributeName;
+    public void setRecordset(String recordset) {
+        this.recordset = recordset;
     }
     public String getCluster() {
         return cluster;
@@ -252,7 +254,7 @@ public class ECLOutput extends JobEntryBase implements Cloneable, JobEntryInterf
         //ECLOutput.isReady=true;
         //logBasic("not waiting: " + ECLOutput.isReady);
         Output op = new Output();
-        op.setAttributeName(getAttributeName());
+        op.setRecordset(getRecordset());
         op.setIsDef(getIsDef());
         op.setOutputType(getOutputType());
         op.setIncludeFormat(getIncludeFormat());
@@ -324,8 +326,8 @@ public class ECLOutput extends JobEntryBase implements Cloneable, JobEntryInterf
              //System.out.println(" ------------ loadXML ------------- ");
             super.loadXML(node, list, list1);
 
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "attributeName")) != null)
-                setAttributeName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "attributeName")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset")) != null)
+                setRecordset(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset")));
             
                 //private String isDef; //true set output into attr using job entry name
             this.setIsDef(loadXMLElement(node,"isDef"));
@@ -391,7 +393,7 @@ public class ECLOutput extends JobEntryBase implements Cloneable, JobEntryInterf
         // System.out.println(" ------------ getXML ------------- ");
         retval += super.getXML();
      
-        retval += "		<attributeName><![CDATA[" + attributeName + "]]></attributeName>" + Const.CR;
+        retval += "		<recordset><![CDATA[" + recordset + "]]></recordset>" + Const.CR;
             //private String isDef; //true set output into attr using job entry name
     
         retval += getXMLElement("isDef", this.getIsDef());
@@ -459,8 +461,8 @@ public class ECLOutput extends JobEntryBase implements Cloneable, JobEntryInterf
         //System.out.println(" ------------ loadRep " + id_jobentry + "------------- ");
         try {
           
-            if(rep.getStepAttributeString(id_jobentry, "attributeName") != null)
-                attributeName = rep.getStepAttributeString(id_jobentry, "attributeName"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "recordset") != null)
+                recordset = rep.getStepAttributeString(id_jobentry, "recordset"); //$NON-NLS-1$
             
         } catch (Exception e) {
              e.printStackTrace();
@@ -528,7 +530,7 @@ public class ECLOutput extends JobEntryBase implements Cloneable, JobEntryInterf
                 logBasic("ObjectID["+i+"] = " + allIDs[i]);
               //  System.out.println("ObjectID["+i+"] = " + allIDs[i]);
             }
-            rep.saveStepAttribute(id_job, getObjectId(), "attributeName", attributeName); //$NON-NLS-1$
+            rep.saveStepAttribute(id_job, getObjectId(), "recordset", recordset); //$NON-NLS-1$
             
             //private String isDef; //true set output into attr using job entry name
             saveRepElement(rep,id_job,"isDef",this.getIsDef());

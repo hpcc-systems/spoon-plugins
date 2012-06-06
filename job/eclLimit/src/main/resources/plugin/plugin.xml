@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin id="ECLCount"
-	iconfile="count.png"
-	description="Count"
-	tooltip="Count" 
+<plugin id="ECLLimit"
+	iconfile="limit.png"
+	description="Limit"
+	tooltip="Limit" 
 	category="HPCC Systems"
-	classname="org.hpccsystems.pentaho.job.eclcount.ECLCount">
+	classname="org.hpccsystems.pentaho.job.ecllimit.ECLLimit">
             
     <libraries>
 		<library name="../../hpcc-common/ecldirect.jar"/>
         <library name="../../hpcc-common/eclgui.jar"/>
-        <library name="../../hpcc-common/ecljobentry.jar"/>
-        <library name="eclcount.jar"/>
+        <library name="ecllimit.jar"/>
         
     </libraries>            
 </plugin>

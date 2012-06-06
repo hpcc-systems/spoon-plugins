@@ -182,7 +182,7 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
                         eclCode += code;
                     }
                 }
-                logBasic("{Output Job} Output Code =" + eclCode);
+                logBasic("{Execute Job} Execute Code =" + eclCode);
             }
           
             
@@ -204,7 +204,7 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
                     includes += "IMPORT * FROM ML.Cluster;\r\n\r\n";
                     includes += "IMPORT * FROM ML.Types;\r\n\r\n";
                 }
-                System.out.println("Output -- Finished Imports");
+                System.out.println("Execute -- Finished Imports");
                 eclCode = includes + eclCode;
                 
                 
@@ -212,24 +212,28 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
                 
                 
                 if(validate){
+                	System.out.println("Execute -- Validate");
                    // System.out.println("Output -- Start Validate");
                     ECLSoap es = new ECLSoap();
                     es.setEclccInstallDir(eclccInstallDir);
                     es.setCluster(cluster);
+                    System.out.println("Execute -- Validate 10");
                     es.setHostname(serverAddress);
                     es.setJobName(jobName);
                     es.setOutputName(this.getName());
+                    System.out.println("Execute -- Validate 20");
                     if(includeML.equals("true")){
                         es.setIncludeML(true);
-                        //System.out.println("includML");
+                        System.out.println("includML");
                     }else{
                         es.setIncludeML(false);
-                        //System.out.println("Dont includML");
+                        System.out.println("Dont includML");
                     }
                     es.setMlPath(mlPath);
                     es.setPort(Integer.parseInt(serverPort));
+                    System.out.println("Execute -- Validate 30");
                     error = (es.syntaxCheck(eclCode)).trim();
-                    
+                    System.out.println("Execute -- Validate 31");
                     boolean isError = false;
                     boolean isWarning = false;
                     
@@ -237,11 +241,13 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
                     
                     if(es.getErrorCount() > 0 &&  this.debugLevel.equalsIgnoreCase("Stop on Errors")){
                     	isError = true;
+                    	System.out.println("Execute -- Validate isError");
                     }
                     if(es.getWarningCount() > 0 && this.debugLevel.equalsIgnoreCase("Stop on Errors or Warnings")){
                     	isWarning = true;
+                    	System.out.println("Execute -- Validate isWarning");
                     }
-                   
+                    
                     if((isError || isWarning) && !error.equals("")){
                     	
                     	
@@ -265,6 +271,7 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
                         */
                         //throw new KettleException("ECL failed Validation, please correct and re-run." + error);
                     }else{
+                    	System.out.println("Execute -- No Validate");
                     	System.out.println("!!!!!!!!!!1 USE execute_noResults");
                         //isValid = eclDirect.execute_noResults(eclCode);
                     	

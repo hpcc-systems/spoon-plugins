@@ -9,7 +9,7 @@ package org.hpccsystems.ecldirect;
  * @author ChalaAX
  */
 public class Output implements EclCommand {
-    private String attributeName;
+    private String recordset;
     private String name;
     
     private String isDef = ""; //true set output into attr using job entry name
@@ -43,11 +43,11 @@ public class Output implements EclCommand {
 
 
     
-    public String getAttributeName() {
-        return attributeName;
+    public String getRecordset() {
+        return recordset;
     }
-    public void setAttributeName(String attributeName) {
-        this.attributeName = attributeName;
+    public void setRecordset(String recordset) {
+        this.recordset = recordset;
     }
     public String getCluster() {
         return cluster;
@@ -230,7 +230,7 @@ public class Output implements EclCommand {
             ecl += ");";
         }else if (this.inputType.equals("Recordset")){
             //add recrodset
-            ecl += "OUTPUT( " + this.attributeName;
+            ecl += "OUTPUT( " + this.recordset;
             if(this.thor.equals("No")){
                 if(!this.outputFormat.equals("")){
                     ecl += "," + this.outputFormat;
@@ -389,7 +389,7 @@ public class Output implements EclCommand {
         */
         
         return ecl += "\r\n";
-        //return "output(" + attributeName + ");";
+        //return "output(" + recordset + ");";
     }
 
     @Override

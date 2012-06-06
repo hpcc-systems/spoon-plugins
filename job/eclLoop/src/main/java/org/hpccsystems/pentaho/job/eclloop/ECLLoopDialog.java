@@ -1,8 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package org.hpccsystems.pentaho.job.eclcount;
+package org.hpccsystems.pentaho.job.eclloop;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -26,8 +22,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
-import org.hpccsystems.eclguifeatures.ErrorNotices;
-import org.hpccsystems.pentaho.job.eclcount.ECLCount;
+import org.hpccsystems.pentaho.job.eclloop.ECLLoop;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryDialogInterface;
@@ -38,31 +33,33 @@ import org.pentaho.di.ui.job.dialog.JobDialog;
 import org.pentaho.di.ui.job.entry.JobEntryDialog;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
-/**
- *
- * @author SimmonsJA
- */
-public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInterface {
+public class ECLLoopDialog extends JobEntryDialog implements JobEntryDialogInterface {
 
-	private ECLCount jobEntry;
-	
+	private ECLLoop jobEntry;
 	private Text jobEntryName;
 	
 	private Text recordsetName;
 	private Combo recordset;
-	private Text expression;
-	private Text keyed;
-	private Text valuelist;
+	
+	private Text loopCount;
+	private Text loopBody;
+	private Text iterations;
+	private Text iterationList;
+	private Text dfault;
+	private Text loopFilter;
+	private Text loopCondition;
+	private Text rowFilter;
 	
 	private Button wOK, wCancel;
 	private boolean backupChanged;
 	private SelectionAdapter lsDef;
 	
-	public ECLCountDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
+	public ECLLoopDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
         super(parent, jobEntryInt, rep, jobMeta);
-        jobEntry = (ECLCount) jobEntryInt;
-        if (this.jobEntry.getName() == null)
-            this.jobEntry.setName("Count");
+        jobEntry = (ECLLoop) jobEntryInt;
+        if (this.jobEntry.getName() == null) {
+            this.jobEntry.setName("Loop");
+        }
     }
 	
 	public JobEntryInterface open() {
@@ -99,13 +96,13 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
 		formLayout.marginHeight = Const.FORM_MARGIN;
 		
 		shell.setLayout(formLayout);
-		shell.setText("Count");
+		shell.setText("Loop");
 		
 		int middle = props.getMiddlePct();
 		int margin = Const.MARGIN;
 		
 		shell.setLayout(formLayout);
-        shell.setText("Define an ECL Count");
+        shell.setText("Define an ECL Loop");
 
         FormLayout groupLayout = new FormLayout();
         groupLayout.marginWidth = 10;
@@ -126,24 +123,40 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
         jobEntryName = buildText("Job Entry Name", null, lsMod, middle, margin, generalGroup);
 
         //All other contols
-        //Distribute Declaration
-        Group countGroup = new Group(shell, SWT.SHADOW_NONE);
-        props.setLook(countGroup);
-        countGroup.setText("Distribute Details");
-        countGroup.setLayout(groupLayout);
-        FormData datasetGroupFormat = new FormData();
-        datasetGroupFormat.top = new FormAttachment(generalGroup, margin);
-        datasetGroupFormat.width = 400;
-        datasetGroupFormat.height = 300;
-        datasetGroupFormat.left = new FormAttachment(middle, 0);
-        countGroup.setLayoutData(datasetGroupFormat);
+        Group loopGroup = new Group(shell, SWT.SHADOW_NONE);
+        props.setLook(loopGroup);
+        loopGroup.setText("Distribute Details");
+        loopGroup.setLayout(groupLayout);
+        FormData loopGroupFormat = new FormData();
+        loopGroupFormat.top = new FormAttachment(generalGroup, margin);
+        loopGroupFormat.width = 400;
+        loopGroupFormat.height = 200;
+        loopGroupFormat.left = new FormAttachment(middle, 0);
+        loopGroup.setLayoutData(loopGroupFormat);
         
+        recordsetName = buildText("Result Recordset", null, lsMod, middle, margin, loopGroup);
+        recordset = buildCombo("Recordset", recordsetName, lsMod, middle, margin, loopGroup, datasets);
+        loopCount = buildText("Loop Count", recordset, lsMod, middle, margin, loopGroup);
+        loopBody = buildText("Loop Body", loopCount, lsMod, middle, margin, loopGroup);
+        loopFilter = buildText("Loop filter", dfault, lsMod, middle, margin, loopGroup);
+        loopCondition = buildText("Loop Condition", loopFilter, lsMod, middle, margin, loopGroup);
+        rowFilter = buildText("Row Filter", loopCondition, lsMod, middle, margin, loopGroup);
         
-        recordsetName = buildText("Result Recordset", null, lsMod, middle, margin, countGroup);
-        recordset = buildCombo("Recordset", recordsetName, lsMod, middle, margin, countGroup, datasets);
-        expression = buildText("Expression", recordset, lsMod, middle, margin, countGroup);
-        keyed = buildText("Keyed", expression, lsMod, middle, margin, countGroup);
-        valuelist = buildText("Value List", keyed, lsMod, middle, margin, countGroup);
+        //Run in PARALLEL?
+        Group parallelGroup = new Group(shell, SWT.SHADOW_NONE);
+        props.setLook(parallelGroup);
+        parallelGroup.setText("PARALLEL");
+        parallelGroup.setLayout(groupLayout);
+        FormData parallelGroupFormat = new FormData();
+        parallelGroupFormat.top = new FormAttachment(loopGroup, margin);
+        parallelGroupFormat.width = 400;
+        parallelGroupFormat.height = 150;
+        parallelGroupFormat.left = new FormAttachment(middle, 0);
+        parallelGroup.setLayoutData(parallelGroupFormat);
+        
+        iterations = buildText("Iterations", null, lsMod, middle, margin, parallelGroup);
+        iterationList = buildText("Iteration List", iterations, lsMod, middle, margin, parallelGroup);
+        dfault = buildText("Default", iterationList, lsMod, middle, margin, parallelGroup);
         
         wOK = new Button(shell, SWT.PUSH);
         wOK.setText("OK");
@@ -151,7 +164,7 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
         wCancel.setText("Cancel");
         
         
-        BaseStepDialog.positionBottomButtons(shell, new Button[]{wOK, wCancel}, margin, countGroup);
+        BaseStepDialog.positionBottomButtons(shell, new Button[]{wOK, wCancel}, margin, parallelGroup);
 
         // Add listeners
         Listener cancelListener = new Listener() {
@@ -192,20 +205,34 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
             recordsetName.setText(jobEntry.getRecordsetName());
         }
         
-        if (jobEntry.getRecordSet() != null) {
-            recordset.setText(jobEntry.getRecordSet());
+        if (jobEntry.getRecordset() != null) {
+            recordset.setText(jobEntry.getRecordset());
         }
         
-        if (jobEntry.getExpression() != null) {
-            expression.setText(jobEntry.getExpression());
-        }
-        
-         if (jobEntry.getKeyed() != null) {
-            keyed.setText(jobEntry.getKeyed());
+         if (jobEntry.getLoopCount() != null) {
+            loopCount.setText(jobEntry.getLoopCount());
         }
          
-        if (jobEntry.getValueList() != null) {
-            valuelist.setText(jobEntry.getValueList());
+        if (jobEntry.getLoopBody() != null) {
+            loopBody.setText(jobEntry.getLoopBody());
+        }
+        if (jobEntry.getIterations() != null) {
+            iterations.setText(jobEntry.getIterations());
+        }
+        if (jobEntry.getIterationList() != null) {
+            iterationList.setText(jobEntry.getIterationList());
+        }
+        if (jobEntry.getDefault() != null) {
+            dfault.setText(jobEntry.getDefault());
+        }
+        if (jobEntry.getLoopFilter() != null) {
+            loopFilter.setText(jobEntry.getLoopFilter());
+        }
+        if (jobEntry.getLoopCondition() != null) {
+            loopCondition.setText(jobEntry.getLoopCondition());
+        }
+        if (jobEntry.getRowFilter() != null) {
+            rowFilter.setText(jobEntry.getRowFilter());
         }
         
         shell.pack();
@@ -298,54 +325,20 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
         return combo;
     }
 
-    private boolean validate(){
-    	boolean isValid = true;
-    	String errors = "";
-    	//either recordset or valuelist is required but never both, if valuelist, not other allowed
-    	
-    	if(this.recordset.getText().equals("") && this.valuelist.getText().equals("")){
-    		//one is required.
-    		isValid = false;
-    		errors += "You must provide either a \"Recordset\" or a \"Value List\"!\r\n";
-    	}
-    	
-    	if(!this.recordset.getText().equals("") && !this.valuelist.getText().equals("")){
-    		//one is required.
-    		isValid = false;
-    		errors += "You must provide either a \"Recordset\" or a \"Value List\" but not both!\r\n";
-    	}else{
-    		//ok assuming that one is set lets make sure they don't provide paraters to value list
-    		if(!this.valuelist.getText().equals("")){
-    			if(!this.expression.getText().equals("") ||
-    			   !this.keyed.getText().equals("")){
-    				isValid = false;
-    	    		errors += "When using a \"Value List\" \"Expression\" and \"Keyed\" must be blank!\r\n";
-    			}
-    		}
-    	}
-    	
-    	
-    	if(!isValid){
-    		ErrorNotices en = new ErrorNotices();
-    		errors += "\r\n";
-    		errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
-    		isValid = en.openValidateDialog(getParent(),errors);
-    	}
-    	return isValid;
-    	
-    }
     private void ok() {
-    	if(!validate()){
-    		return;
-    	}
-    	
+
         jobEntry.setName(jobEntryName.getText());
 
         jobEntry.setRecordsetName(recordsetName.getText());
-        jobEntry.setRecordSet(recordset.getText());
-        jobEntry.setExpression(expression.getText());
-        jobEntry.setKeyed(keyed.getText());
-        jobEntry.setValueList(valuelist.getText());
+        jobEntry.setRecordset(recordset.getText());
+        jobEntry.setLoopCount(loopCount.getText());
+        jobEntry.setLoopBody(loopBody.getText());
+        jobEntry.setIterations(iterations.getText());
+        jobEntry.setIterationList(iterationList.getText());
+        jobEntry.setDefault(dfault.getText());
+        jobEntry.setLoopFilter(loopFilter.getText());
+        jobEntry.setLoopCondition(loopCondition.getText());
+        jobEntry.setRowFilter(rowFilter.getText());
 
         dispose();
     }
@@ -361,5 +354,4 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
         props.setScreen(winprop);
         shell.dispose();
     }
-	
 }

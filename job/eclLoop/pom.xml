@@ -2,9 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.hpccsystems.pentaho.job</groupId>
-	<artifactId>eclgroup</artifactId>
+	<artifactId>eclloop</artifactId>
 	<packaging>jar</packaging>
-	<name>HPCC Systems Pentaho Data Integration ECL Group Job Plugin</name>
+	<name>HPCC Systems Pentaho Data Integration ECL Loop Job Plugin</name>
 	<description></description>
 	<version>0.1-SNAPSHOT</version>
     <parent>
@@ -12,8 +12,9 @@
         <artifactId>job</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
+
     <properties>
-        <iconfile>group.png</iconfile>
+        <iconfile>loop.png</iconfile>
     </properties>
     
 	<build>

@@ -80,7 +80,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
     private boolean backupChanged;
     private SelectionAdapter lsDef;
    
-    private Combo attributeName;
+    private Combo recordset;
     
     
 
@@ -401,7 +401,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
     
     
     private void disposeOutputGroup(){
-         if(this.attributeName != null)this.attributeName.dispose();
+         if(this.recordset != null)this.recordset.dispose();
          if(this.outputGroup != null){
             this.outputGroup.dispose();
         }
@@ -411,7 +411,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
         final int margin = 10;
         outputGroup = new Group(parent, SWT.SHADOW_NONE);
         outputGroup.setBackground(new Color(outputGroup.getDisplay(),255,255,255));
-        outputGroup.setText("Output Details");
+        outputGroup.setText("Input Details");
         outputGroup.setLayout(groupLayout);
         GridData groupFormat = new GridData(SWT.FILL);
         groupFormat.minimumWidth = 530;
@@ -424,11 +424,11 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
 
 
 
-        this.attributeName = buildCombo("Recordset Name", null, lsMod, middle, margin, outputGroup, datasets);
+        this.recordset = buildCombo("Recordset Name", null, lsMod, middle, margin, outputGroup, datasets);
         
-        if (jobEntry.getAttributeName() != null) {
+        if (jobEntry.getRecordset() != null) {
             
-            this.attributeName.setText(jobEntry.getAttributeName());
+            this.recordset.setText(jobEntry.getRecordset());
         }
         
 
@@ -741,12 +741,43 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
     	String errors = "";
     	//check to see that the minimum required fields are populated
     	//if errors are recorded depatch promp
+    	
+    	
+    	if(this.jobEntryName.getText().equalsIgnoreCase("")){
+    		isValid = false;
+    		errors += "\"Job Entry Name\" is a required field!\r\n";
+    	}
     	if(isDef.getText().equalsIgnoreCase("")){
     		isValid = false;
     		errors += "\"Is Definition\" is a required field!\r\n";
     	}
+    	
+    	if(this.inputType.getText().equals("Expression")){
+    		//require expression
+    		if(this.expression.getText().equals("")){
+    			isValid = false;
+        		errors += "\"Expression\" is a Required field for \"Input Type\" Expression!\r\n";
+        	}
+    		
+    	}else if(this.inputType.getText().equals("Recordset")){
+    		//require recordset
+    		if(this.recordset.getText().equals("")){
+    			isValid = false;
+        		errors += "\"Recordset Name\" is a Required field for \"Input Type\" Recordset!\r\n";
+    		}
+    		
+    		//if File then require type
+    	}else{
+    		//error
+    		isValid = false;
+    		errors += "\"Input Type\" can not be blank!\r\n";
+    	}
+
+    	
     	if(!isValid){
     		ErrorNotices en = new ErrorNotices();
+    		errors += "If you continue to save with errors you may encounter compile errors.\r\n\r\n";
+    		
     		isValid = en.openValidateDialog(getParent(),errors);
     	}
     	return isValid;
@@ -775,10 +806,10 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
 	////        jobEntry.setServerAddress(serverHost);
 	////        jobEntry.setServerPort(serverPort);
 	        
-	        if(this.attributeName != null && !this.attributeName.isDisposed()){
-	            jobEntry.setAttributeName(this.attributeName.getText());
+	        if(this.recordset != null && !this.recordset.isDisposed()){
+	            jobEntry.setRecordset(this.recordset.getText());
 	        }else{
-	            jobEntry.setAttributeName("");
+	            jobEntry.setRecordset("");
 	        }
 	        if(this.isDef != null && !this.isDef.isDisposed()){
 	            jobEntry.setIsDef(this.isDef.getText());

@@ -1,8 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package org.hpccsystems.pentaho.job.eclcount;
+package org.hpccsystems.pentaho.job.ecllimit;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -26,8 +22,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
-import org.hpccsystems.eclguifeatures.ErrorNotices;
-import org.hpccsystems.pentaho.job.eclcount.ECLCount;
+import org.hpccsystems.pentaho.job.ecllimit.ECLLimit;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryDialogInterface;
@@ -38,31 +33,31 @@ import org.pentaho.di.ui.job.dialog.JobDialog;
 import org.pentaho.di.ui.job.entry.JobEntryDialog;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
-/**
- *
- * @author SimmonsJA
- */
-public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInterface {
+public class ECLLimitDialog extends JobEntryDialog implements JobEntryDialogInterface {
 
-	private ECLCount jobEntry;
-	
+	private ECLLimit jobEntry;
 	private Text jobEntryName;
 	
 	private Text recordsetName;
 	private Combo recordset;
-	private Text expression;
-	private Text keyed;
-	private Text valuelist;
+	private Text maxRecs;
+	private Text failClause;
+	private Combo keyed;
+	private Combo count;
+	private Combo skip;
+	private Text onFailTransform;
+	
 	
 	private Button wOK, wCancel;
 	private boolean backupChanged;
 	private SelectionAdapter lsDef;
 	
-	public ECLCountDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
+	public ECLLimitDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
         super(parent, jobEntryInt, rep, jobMeta);
-        jobEntry = (ECLCount) jobEntryInt;
-        if (this.jobEntry.getName() == null)
-            this.jobEntry.setName("Count");
+        jobEntry = (ECLLimit) jobEntryInt;
+        if (this.jobEntry.getName() == null) {
+            this.jobEntry.setName("Limit");
+        }
     }
 	
 	public JobEntryInterface open() {
@@ -99,13 +94,13 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
 		formLayout.marginHeight = Const.FORM_MARGIN;
 		
 		shell.setLayout(formLayout);
-		shell.setText("Count");
+		shell.setText("Limit");
 		
 		int middle = props.getMiddlePct();
 		int margin = Const.MARGIN;
 		
 		shell.setLayout(formLayout);
-        shell.setText("Define an ECL Count");
+        shell.setText("Define an ECL Limit");
 
         FormLayout groupLayout = new FormLayout();
         groupLayout.marginWidth = 10;
@@ -126,24 +121,25 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
         jobEntryName = buildText("Job Entry Name", null, lsMod, middle, margin, generalGroup);
 
         //All other contols
-        //Distribute Declaration
-        Group countGroup = new Group(shell, SWT.SHADOW_NONE);
-        props.setLook(countGroup);
-        countGroup.setText("Distribute Details");
-        countGroup.setLayout(groupLayout);
-        FormData datasetGroupFormat = new FormData();
-        datasetGroupFormat.top = new FormAttachment(generalGroup, margin);
-        datasetGroupFormat.width = 400;
-        datasetGroupFormat.height = 300;
-        datasetGroupFormat.left = new FormAttachment(middle, 0);
-        countGroup.setLayoutData(datasetGroupFormat);
+        Group limitGroup = new Group(shell, SWT.SHADOW_NONE);
+        props.setLook(limitGroup);
+        limitGroup.setText("Limit Details");
+        limitGroup.setLayout(groupLayout);
+        FormData limitGroupFormat = new FormData();
+        limitGroupFormat.top = new FormAttachment(generalGroup, margin);
+        limitGroupFormat.width = 400;
+        limitGroupFormat.height = 300;
+        limitGroupFormat.left = new FormAttachment(middle, 0);
+        limitGroup.setLayoutData(limitGroupFormat);
         
-        
-        recordsetName = buildText("Result Recordset", null, lsMod, middle, margin, countGroup);
-        recordset = buildCombo("Recordset", recordsetName, lsMod, middle, margin, countGroup, datasets);
-        expression = buildText("Expression", recordset, lsMod, middle, margin, countGroup);
-        keyed = buildText("Keyed", expression, lsMod, middle, margin, countGroup);
-        valuelist = buildText("Value List", keyed, lsMod, middle, margin, countGroup);
+        recordsetName = buildText("Result Recordset", null, lsMod, middle, margin, limitGroup);
+        recordset = buildCombo("Recordset", recordsetName, lsMod, middle, margin, limitGroup, datasets);
+        maxRecs = buildText("Maximum Records", recordset, lsMod, middle, margin, limitGroup);
+       	failClause = buildText("FAIL(<clause>)", maxRecs, lsMod, middle, margin, limitGroup);
+       	keyed = buildCombo("KEYED", failClause, lsMod, middle, margin, limitGroup, new String[] {"false","true"});
+       	count = buildCombo("COUNT", keyed, lsMod, middle, margin, limitGroup, new String[] {"false","true"});
+       	skip = buildCombo("SKIP", count, lsMod, middle, margin, limitGroup, new String[] {"false","true"});
+       	onFailTransform = buildText("ONFAIL(<transform>)", skip, lsMod, middle, margin, limitGroup);
         
         wOK = new Button(shell, SWT.PUSH);
         wOK.setText("OK");
@@ -151,7 +147,7 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
         wCancel.setText("Cancel");
         
         
-        BaseStepDialog.positionBottomButtons(shell, new Button[]{wOK, wCancel}, margin, countGroup);
+        BaseStepDialog.positionBottomButtons(shell, new Button[]{wOK, wCancel}, margin, limitGroup);
 
         // Add listeners
         Listener cancelListener = new Listener() {
@@ -187,25 +183,29 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
         if (jobEntry.getName() != null) {
             jobEntryName.setText(jobEntry.getName());
         }
-        
         if (jobEntry.getRecordsetName() != null) {
-            recordsetName.setText(jobEntry.getRecordsetName());
+        	recordsetName.setText(jobEntry.getRecordsetName());
         }
-        
-        if (jobEntry.getRecordSet() != null) {
-            recordset.setText(jobEntry.getRecordSet());
+        if (jobEntry.getRecordset() != null) {
+            recordset.setText(jobEntry.getRecordset());
         }
-        
-        if (jobEntry.getExpression() != null) {
-            expression.setText(jobEntry.getExpression());
+         if (jobEntry.getMaxRecs() != null) {
+            maxRecs.setText(jobEntry.getMaxRecs());
         }
-        
-         if (jobEntry.getKeyed() != null) {
-            keyed.setText(jobEntry.getKeyed());
+        if (jobEntry.getFailClause() != null) {
+            failClause.setText(jobEntry.getFailClause());
         }
-         
-        if (jobEntry.getValueList() != null) {
-            valuelist.setText(jobEntry.getValueList());
+        if (jobEntry.getKeyedString() != null) {
+            keyed.setText(jobEntry.getKeyedString());
+        }
+        if (jobEntry.getCountString() != null) {
+            count.setText(jobEntry.getCountString());
+        }
+        if (jobEntry.getSkipString() != null) {
+            skip.setText(jobEntry.getSkipString());
+        }
+        if (jobEntry.getOnFailTransform() != null) {
+            onFailTransform.setText(jobEntry.getOnFailTransform());
         }
         
         shell.pack();
@@ -298,54 +298,18 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
         return combo;
     }
 
-    private boolean validate(){
-    	boolean isValid = true;
-    	String errors = "";
-    	//either recordset or valuelist is required but never both, if valuelist, not other allowed
-    	
-    	if(this.recordset.getText().equals("") && this.valuelist.getText().equals("")){
-    		//one is required.
-    		isValid = false;
-    		errors += "You must provide either a \"Recordset\" or a \"Value List\"!\r\n";
-    	}
-    	
-    	if(!this.recordset.getText().equals("") && !this.valuelist.getText().equals("")){
-    		//one is required.
-    		isValid = false;
-    		errors += "You must provide either a \"Recordset\" or a \"Value List\" but not both!\r\n";
-    	}else{
-    		//ok assuming that one is set lets make sure they don't provide paraters to value list
-    		if(!this.valuelist.getText().equals("")){
-    			if(!this.expression.getText().equals("") ||
-    			   !this.keyed.getText().equals("")){
-    				isValid = false;
-    	    		errors += "When using a \"Value List\" \"Expression\" and \"Keyed\" must be blank!\r\n";
-    			}
-    		}
-    	}
-    	
-    	
-    	if(!isValid){
-    		ErrorNotices en = new ErrorNotices();
-    		errors += "\r\n";
-    		errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
-    		isValid = en.openValidateDialog(getParent(),errors);
-    	}
-    	return isValid;
-    	
-    }
     private void ok() {
-    	if(!validate()){
-    		return;
-    	}
-    	
-        jobEntry.setName(jobEntryName.getText());
 
+        jobEntry.setName(jobEntryName.getText());
+        
         jobEntry.setRecordsetName(recordsetName.getText());
-        jobEntry.setRecordSet(recordset.getText());
-        jobEntry.setExpression(expression.getText());
-        jobEntry.setKeyed(keyed.getText());
-        jobEntry.setValueList(valuelist.getText());
+        jobEntry.setRecordset(recordset.getText());
+        jobEntry.setMaxRecs(maxRecs.getText());
+        jobEntry.setFailClause(failClause.getText());
+        jobEntry.setKeyedString(keyed.getText());
+        jobEntry.setCountString(count.getText());
+        jobEntry.setSkipString(skip.getText());
+        jobEntry.setOnFailTransform(onFailTransform.getText());
 
         dispose();
     }
@@ -361,5 +325,4 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
         props.setScreen(winprop);
         shell.dispose();
     }
-	
 }
