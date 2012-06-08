@@ -258,6 +258,7 @@ public class ECLIterate extends JobEntryBase implements Cloneable, JobEntryInter
         retval += "             <record><![CDATA["+this.record+"]]></record>"+Const.CR;
         retval += "             <record_name eclIsDef=\"true\" eclType=\"record\"><![CDATA["+this.recordName+"]]></record_name>"+Const.CR;
         retval += "             <recordset_name eclIsDef=\"true\" eclType=\"recordset\"><![CDATA["+this.recordsetName+"]]></recordset_name>"+Const.CR;
+        //resulting recordset
         retval += "             <recordset_name_iterate eclIsDef=\"true\" eclType=\"recordset\"><![CDATA["+this.recordsetNameIterate+"]]></recordset_name_iterate>"+Const.CR;
         
         

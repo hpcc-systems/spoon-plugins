@@ -29,7 +29,7 @@ import org.w3c.dom.Node;
  */
 public class ECLDeSpray extends JobEntryBase implements Cloneable, JobEntryInterface {
 
-	private String name;
+	
 	private String logicalName;
 	private String destinationIP;
 	private String destinationPath;
@@ -38,13 +38,7 @@ public class ECLDeSpray extends JobEntryBase implements Cloneable, JobEntryInter
 	private String maxConnections;
 	private Boolean allowOverwrite = false;
 	
-	public String getName() {
-		return name;
-	}
 	
-	public void setName(String name) {
-		this.name = name;
-	}
 	
 	public String getLogicalName() {
 		return logicalName;

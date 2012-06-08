@@ -69,6 +69,7 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
     private Text filePath;
     private Text logicalFileName;
     private Combo fileType;
+    private Combo allowOverwrite;
     private Text csvSeparator;
     private Text csvQuote;
     private Text csvTerminator;
@@ -187,15 +188,15 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         FormData sourceGroupFormat = new FormData();
         sourceGroupFormat.top = new FormAttachment(generalGroup, margin);
         sourceGroupFormat.width = 400;
-        sourceGroupFormat.height = 100;
+        sourceGroupFormat.height = 120;
         sourceGroupFormat.left = new FormAttachment(middle, 0);
         sourceGroup.setLayoutData(sourceGroupFormat);
        
         //ipAddress = buildText("IP Address", jobEntryName, lsMod, middle, margin, sourceGroup);
         filePath = buildText("File Name", jobEntryName, lsMod, middle, margin, sourceGroup);
         logicalFileName = buildText("Logical File Name", filePath, lsMod, middle, margin, sourceGroup);
-        fileType = buildCombo("fileType", logicalFileName, lsMod, middle, margin, sourceGroup, new String[]{"Fixed", "Variable"});
-
+        fileType = buildCombo("File Type", logicalFileName, lsMod, middle, margin, sourceGroup, new String[]{"Fixed", "Variable"});
+        allowOverwrite = buildCombo("Allow Overwrite", fileType, lsMod, middle, margin, sourceGroup, new String[]{"True", "False"});
         
         Group defGroup = new Group(shell, SWT.SHADOW_NONE);
         props.setLook(defGroup);
@@ -212,7 +213,7 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         FormLayout defLayout = new FormLayout();
         defLayout.marginTop = 0;
         defLayout.marginHeight = 0;
-	defComp.setLayout(defLayout);
+        defComp.setLayout(defLayout);
         
         //CSV  Definition
         final Group csvGroup = new Group(defComp, SWT.SHADOW_NONE);
@@ -341,6 +342,10 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         }
         if (jobEntry.getFixedRecordSize() != null) {
             fixedRecordSize.setText(jobEntry.getFixedRecordSize());
+        }
+        
+        if (jobEntry.getAllowOverwrite() != null) {
+        	allowOverwrite.setText(jobEntry.getAllowOverwrite());
         }
         
         fileType.addSelectionListener(new SelectionAdapter() {
@@ -478,6 +483,7 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         jobEntry.setCsvQuote(csvQuote.getText());
         jobEntry.setCsvTerminator(csvTerminator.getText());
         jobEntry.setFixedRecordSize(fixedRecordSize.getText());
+        jobEntry.setAllowOverwrite(allowOverwrite.getText());
         //jobEntry.setRecordList(ct.getRecordList());
         dispose();
     }

@@ -369,8 +369,8 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
          retval += getXMLElement("baserecset", this.getBaserecset());
         // retval += getXMLElement("keys", this.getKeys());
          //retval += getXMLElement("payload", this.getPayload());
-         retval += "		<keys eclIsDef=\"true\" eclType=\"record\"><![CDATA[" + this.saveKeys() + "]]></keys>" + Const.CR;
-         retval += "		<payload eclIsDef=\"true\" eclType=\"record\"><![CDATA[" + this.savePayload() + "]]></payload>" + Const.CR;
+         retval += "		<keys eclIsDef=\"true\" eclType=\"keys\"><![CDATA[" + this.saveKeys() + "]]></keys>" + Const.CR;
+         retval += "		<payload eclIsDef=\"true\" eclType=\"payload\"><![CDATA[" + this.savePayload() + "]]></payload>" + Const.CR;
          retval += getXMLElement("indexfile", this.getIndexfile());
          retval += getXMLElement("sorted", this.getSorted());
          retval += getXMLElement("preload", this.getPreload());

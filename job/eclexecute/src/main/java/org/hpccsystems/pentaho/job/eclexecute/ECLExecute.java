@@ -212,28 +212,28 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
                 
                 
                 if(validate){
-                	System.out.println("Execute -- Validate");
+                	//System.out.println("Execute -- Validate");
                    // System.out.println("Output -- Start Validate");
                     ECLSoap es = new ECLSoap();
                     es.setEclccInstallDir(eclccInstallDir);
                     es.setCluster(cluster);
-                    System.out.println("Execute -- Validate 10");
+                   // System.out.println("Execute -- Validate 10");
                     es.setHostname(serverAddress);
                     es.setJobName(jobName);
                     es.setOutputName(this.getName());
-                    System.out.println("Execute -- Validate 20");
+                   // System.out.println("Execute -- Validate 20");
                     if(includeML.equals("true")){
                         es.setIncludeML(true);
-                        System.out.println("includML");
+                       // System.out.println("includML");
                     }else{
                         es.setIncludeML(false);
-                        System.out.println("Dont includML");
+                        //System.out.println("Dont includML");
                     }
                     es.setMlPath(mlPath);
                     es.setPort(Integer.parseInt(serverPort));
-                    System.out.println("Execute -- Validate 30");
+                    //System.out.println("Execute -- Validate 30");
                     error = (es.syntaxCheck(eclCode)).trim();
-                    System.out.println("Execute -- Validate 31");
+                    //System.out.println("Execute -- Validate 31");
                     boolean isError = false;
                     boolean isWarning = false;
                     
@@ -241,11 +241,11 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
                     
                     if(es.getErrorCount() > 0 &&  this.debugLevel.equalsIgnoreCase("Stop on Errors")){
                     	isError = true;
-                    	System.out.println("Execute -- Validate isError");
+                    	//System.out.println("Execute -- Validate isError");
                     }
                     if(es.getWarningCount() > 0 && this.debugLevel.equalsIgnoreCase("Stop on Errors or Warnings")){
                     	isWarning = true;
-                    	System.out.println("Execute -- Validate isWarning");
+                    	//System.out.println("Execute -- Validate isWarning");
                     }
                     
                     if((isError || isWarning) && !error.equals("")){
@@ -289,7 +289,7 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
                     }
                    // System.out.println("Output -- Finished Validating");
                 }else{
-                	System.out.println("!!!!!!!!!!2 USE execute_noResults");
+                	//System.out.println("!!!!!!!!!!2 USE execute_noResults");
                     //isValid = eclDirect.execute_noResults(eclCode);
                 	ECLSoap es = new ECLSoap();
                     es.setEclccInstallDir(eclccInstallDir);
@@ -297,7 +297,7 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
                     es.setHostname(serverAddress);
                     es.setJobName(jobName);
                     es.setOutputName(this.getName());
-                    System.out.println("@@@@@@@@@@@@@@@@@@@2" + includeML + "@@@@@@");
+                    //System.out.println("@@@@@@@@@@@@@@@@@@@2" + includeML + "@@@@@@");
                     if(includeML.equals("true")){
                         es.setIncludeML(true);
                         System.out.println("includML");

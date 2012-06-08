@@ -28,20 +28,12 @@ import org.w3c.dom.Node;
  */
 public class ECLCount extends JobEntryBase implements Cloneable, JobEntryInterface {
 
-	private String name;
+	
 	private String recordsetName;
 	private String recordset;
 	private String expression;
 	private String keyed;
 	private String valuelist;
-	
-	public String getName() {
-		return name;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
 	
 	public String getRecordsetName() {
 		return recordsetName;

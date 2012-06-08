@@ -24,6 +24,9 @@ public class AutoPopulate {
     private String[] recordSets;
     private Node datasetNode = null;//used internally to store the node in the load record list functions
     
+    private RecordList datasetFields = new RecordList();
+
+    
     
     
     
@@ -71,7 +74,7 @@ public class AutoPopulate {
 				                	   
 				                	   defValue = XMLHandler.getNodeValue(childnode);
 				                	  
-				                	   if(defValue != null){
+				                	   if(defValue != null && !defValue.equalsIgnoreCase("null")){
 				                		   //System.out.println("NODE_VALUE: " + defValue);
 				                		   adDS.add((String)defValue);
 				                		   k++;
@@ -228,7 +231,7 @@ public class AutoPopulate {
 				                    		   k++;
 				                    		   //to save execution time lets exit on the first find as it is most likely to be the one we want
 				                    		   
-				                    		  System.out.println("~~~~~~~~~~~~~type: " + type);
+				                    		  //System.out.println("~~~~~~~~~~~~~type: " + type);
 				                    		   return type;
 				                    	   }
 				                		   
@@ -256,6 +259,19 @@ public class AutoPopulate {
     	return type;
     }
     
+    public void buildRecordList(String in){
+        String[] strLine = in.split("[|]");
+        int len = strLine.length;
+        if(len>0){
+            datasetFields = new RecordList();
+            System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                RecordBO rb = new RecordBO(strLine[i]);
+                datasetFields.addRecordBO(rb);
+            }
+        }
+    }
+    
     public void getRecordListFromECLDataset(Node node, ArrayList<String> adDS, String datasetName,List<JobEntryCopy> jobs) throws KettleXMLException{
     	//ok we need to loop through fields and identify the one that is recordList and populate adDS
     	String columns = XMLHandler.getNodeValue(
@@ -263,11 +279,13 @@ public class AutoPopulate {
     	String[] colArr = columns.split("[|]");
     	 int len = colArr.length;
     	 if(len>0){
+    		 buildRecordList(columns);
     		 System.out.println("Len: " + len);
              for(int i =0; i<len; i++){
             	 //get just the name
             	 String[] fieldArr = colArr[i].split("[,]");
             	 if(fieldArr.length>1){
+            		 System.out.println(fieldArr[0]);
             		 adDS.add(fieldArr[0]);
             	 }
             	 
@@ -275,29 +293,205 @@ public class AutoPopulate {
     	 }
     }
 
+    private void fieldsByParent(String thisType, String parentField, ArrayList<String> adDS, String datasetName,List<JobEntryCopy> jobs) throws Exception{
+    	//look up entry and then look up parent and call fieldsByDatasetList
+    	
+    	String parentName = XMLHandler.getNodeValue(
+                XMLHandler.getSubNode(datasetNode, parentField));
+    	//String test = XMLHandler.getNodeValue(
+        //        XMLHandler.getSubNode(datasetNode, "left_recordset"));
+    	//System.out.println("ParentName ("+parentField+"): " + parentName);
+    	fieldsByDatasetList(adDS,parentName,jobs);
+    	
+    }
+    
     /*
      * Gets the Dataset fields from all existing nodes
      * This uses recursion to travel up from joins etc to the 
      * def of the datasets
      */
     public void fieldsByDatasetList(ArrayList<String> adDS, String datasetName,List<JobEntryCopy> jobs)throws Exception{
-        System.out.println(" ------------ fieldsByDatasetList ------------ ");
+        //System.out.println(" ------------ fieldsByDatasetList ------------ ");
         Object[] jec = jobs.toArray();
         Node node = null;
         
         String type = getType(jobs, datasetName);
+        //datasetNode is set in getType
         node = datasetNode;
-        if(type != null && type.equalsIgnoreCase("ECLDataset")){
-        	System.out.println("-------------GETTING RECORD LIST---------------");
-        	System.out.println("Type: " + type);
+        System.out.println("Type for "+ datasetName +": " + type);
+        //place any outliers above the else will catch all that has a single parent with filed name recordset
+        if(type != null && type.equalsIgnoreCase("ECLCount")){ 
+        	fieldsByParent("ECLCount","recordset", adDS,datasetName,jobs);
+        }else if(type != null && type.equalsIgnoreCase("ECLJoin")){ 
+            //need to pull from both parents
+        	//left_recordset
+        	//right_recordset
+        	
+        	//copy node so we have it for the next
+        	Node tnode = datasetNode.cloneNode(true);
+        	fieldsByParent("ECLJoin","left_recordset", adDS,datasetName,jobs);
+        	
+        	//copy node back to datasetNode so we can continue
+        	datasetNode = tnode.cloneNode(true);
+        	fieldsByParent("ECLJoin","right_recordset", adDS,datasetName,jobs);
+	
+        }else if(type != null && type.equalsIgnoreCase("ECLSort")){
+        	fieldsByParent("ECLSort","dataset_name", adDS,datasetName,jobs);
+        }else if(type != null && type.equalsIgnoreCase("ECLProject")){
+        	fieldsByParent("ECLProject","inRecordName", adDS,datasetName,jobs);
+        }else if(type != null && type.equalsIgnoreCase("ECLDistribute")){
+        	fieldsByParent("ECLDistribute","dataset_name", adDS,datasetName,jobs);
+        }else if(type != null && type.equalsIgnoreCase("ECLMerge")){
+        	fieldsByParent("ECLMerge","recordsetSet", adDS,datasetName,jobs);	
+        //need to add in statments for all the ML funtions
+        }else if(type != null && type.equalsIgnoreCase("ECLML_FromField")){
+        	
+        	if(node != null){
+        		System.out.println("We have fromField");
+        		String parentNodeName = getRecordListFromField(node, adDS, datasetName,jobs);
+        		fieldsByDatasetList(adDS,parentNodeName,jobs);
+        	}
+        	fieldsByParent("ECLMerge","recordsetSet", adDS,datasetName,jobs);	
+        	
+        }else if(type != null && type.equalsIgnoreCase("ECLDataset")){
+        	//System.out.println("-------------GETTING RECORD LIST---------------");
+        	//System.out.println("Type: " + type);
         	if(node != null){
         		System.out.println("We have Node");
         		getRecordListFromECLDataset(node, adDS, datasetName,jobs);
         	}
-        }//add additional types here
+        }else if(type != null && !type.equals("")){
+        	fieldsByParent(type,"recordset", adDS,datasetName,jobs);
+        	//add additional types here
+        }
        
     }
     
+    public String getRecordListFromField(Node node, ArrayList<String> adDS, String datasetName,List<JobEntryCopy> jobs) throws KettleXMLException{
+    	//use Layout Record -- fromType
+    	//find where fromType isDef and then get the record def
+    	String parentNodeName = "";
+    	String attributeName = "eclType";
+    	String attributeValue = "record";
+    	
+    	String recordName = XMLHandler.getNodeValue(
+                XMLHandler.getSubNode(node, "fromType"));
+    	//use recordName to find parent
+    	Node parentNode = null;
+    	
+    	Object[] jec = jobs.toArray();
+
+        int k = 0;
+
+        for(int j = 0; j<jec.length; j++){
+            //System.out.println("Node(i): " + j + " | " +((JobEntryCopy)jec[j]).getName());
+
+            if(!((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("START") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("OUTPUT") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("SUCCESS")){
+               String xml = ((JobEntryCopy)jec[j]).getXML();
+                
+               NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
+               for (int temp = 0; temp < nl.getLength(); temp++){
+                   Node nNode = nl.item(temp);
+
+                   NodeList children;
+                   Node childnode;
+                   String defValue = null;
+
+                   children=nNode.getChildNodes();
+                   
+                   for (int i=0;i<children.getLength();i++)
+                   {
+                	   
+                	   try{
+	                	   childnode=children.item(i);
+	                	   
+	                	   if(childnode != null){
+	                		   if(childnode.getAttributes() != null){
+	                			   
+	                			 //need to make sure its a def
+		                		   //eclIsDef","true"
+				                   Node attribute = childnode.getAttributes().getNamedItem(attributeName);
+				                   if (attribute!=null && attributeValue.equals(attribute.getTextContent())){
+				                	   //System.out.println(childnode.getNodeName());
+				                	   defValue = XMLHandler.getNodeValue(childnode);
+				                	  
+				                	   if(defValue != null){
+				                		   if(defValue.equals(recordName)){
+				                    		   k++;
+				                    		   parentNode = nNode;
+				                    	   }
+				                		   
+				                	   }else{
+				                		   //System.out.println("NODE_VALUE: IS NULL");
+				                	   }
+				                   }
+	                		   }
+	                	   }
+                	   }catch (Exception exc){
+                		   System.out.println("Failed to Read XML");
+                		   //System.out.println(exc);
+                		   //exc.printStackTrace();
+                	   }
+
+                   }//for
+                   //ok check to see if we have node
+                   if(parentNode != null){
+                	   //we have parent node now get name
+                	   String pAttributeName = "eclType";
+                   	   String pAttributeValue1 = "recordset";
+                   	   String pAttributeValue2 = "dataset";
+                   	   
+                	   children=parentNode.getChildNodes();
+                       
+                       for (int i=0;i<children.getLength();i++)
+                       {
+                    	   
+                    	   try{
+    	                	   childnode=children.item(i);
+    	                	   
+    	                	   if(childnode != null){
+    	                		   if(childnode.getAttributes() != null){
+    	                			   
+    	                			 //need to make sure its a def
+    		                		   //eclIsDef","true"
+    				                   Node attribute = childnode.getAttributes().getNamedItem(pAttributeName);
+    				                   if (attribute!=null && (pAttributeValue1.equals(attribute.getTextContent()) || pAttributeValue2.equals(attribute.getTextContent()))){
+    				                	   //System.out.println(childnode.getNodeName());
+    				                	   defValue = XMLHandler.getNodeValue(childnode);
+    				                	  
+    				                	   if(defValue != null){
+    				                    		   k++; 
+    				                    		   //parent node name found;
+    				                    		   parentNodeName = defValue;
+    				                    		   return parentNodeName;
+    				                	   }else{
+    				                		   //System.out.println("NODE_VALUE: IS NULL");
+    				                	   }
+    				                   }
+    	                		   }
+    	                	   }
+                    	   }catch (Exception exc){
+                    		   System.out.println("Failed to Read XML");
+                    		   //System.out.println(exc);
+                    		   //exc.printStackTrace();
+                    	   }
+
+                       }//for
+                	   
+                   }
+                   
+                   
+               }
+               
+               
+               
+               
+               
+            }
+        }
+        
+        return parentNodeName;
+    }
     
      /*
      * Gets the Dataset fields from all existing nodes
@@ -423,24 +617,24 @@ public class AutoPopulate {
     
     private void chunkFormat(String def, List<String> adDS){
          if(def != null && !def.equals("")){
-                           // System.out.println("has def");
-                            String[] pieces = def.split("\n");
-                            
-                            for (int p = pieces.length - 1; p >= 0; p--) {
-                             //  System.out.println("" + (String)pieces[p].trim());
-                               
-                               Pattern pattern = Pattern.compile("[ ;]+",Pattern.CASE_INSENSITIVE);
-                               
-                               String peice = (String)pieces[p].trim();
-                               
-                               String[] chunks = pattern.split(peice);
-                              // System.out.println("Chunks lenght " + chunks.length);
-                               if(chunks.length >= 2 && chunks[1]!=null){
-                                    adDS.add(chunks[1]);
-                               }
-                            }
+           // System.out.println("has def");
+            String[] pieces = def.split("\n");
+            
+            for (int p = pieces.length - 1; p >= 0; p--) {
+             //  System.out.println("" + (String)pieces[p].trim());
+               
+               Pattern pattern = Pattern.compile("[ ;]+",Pattern.CASE_INSENSITIVE);
+               
+               String peice = (String)pieces[p].trim();
+               
+               String[] chunks = pattern.split(peice);
+              // System.out.println("Chunks lenght " + chunks.length);
+               if(chunks.length >= 2 && chunks[1]!=null){
+                    adDS.add(chunks[1]);
+               }
+            }
 
-                        }
+        }
     }
     
     private String[] mergeArray(String[] a1, String[] a2){

@@ -39,7 +39,7 @@ public class ECLMergeDialog extends JobEntryDialog implements JobEntryDialogInte
 	private Text jobEntryName;
 	
 	private Text recordsetName;
-	private Text recordsetSet;
+	private Combo recordsetSet;
 	private Text recordsetList;
 	private Text fieldList;
 	private Combo dedup;
@@ -130,8 +130,10 @@ public class ECLMergeDialog extends JobEntryDialog implements JobEntryDialogInte
         mergeGroupFormat.left = new FormAttachment(middle, 0);
         mergeGroup.setLayoutData(mergeGroupFormat);
         
+        
         recordsetName = buildText("Result Recordset", null, lsMod, middle, margin, mergeGroup);
-        recordsetSet = buildText("Recordset Set", recordsetName, lsMod, middle, margin, mergeGroup);
+        this.recordsetSet = buildCombo("Left Recordset Name", recordsetName, lsMod, middle, margin, mergeGroup,datasets);
+        //recordsetSet = buildText("Recordset Set", recordsetName, lsMod, middle, margin, mergeGroup);
         recordsetList = buildText("Recordset List", recordsetSet, lsMod, middle, margin, mergeGroup);
        	fieldList = buildText("Field List", recordsetList, lsMod, middle, margin, mergeGroup);
        	dedup = buildCombo("DEDUP", fieldList, lsMod, middle, margin, mergeGroup, new String[] {"false","true"});

@@ -28,7 +28,7 @@ import org.w3c.dom.Node;
  */
 public class ECLGroup extends JobEntryBase implements Cloneable, JobEntryInterface {
 	
-	private String name;
+	
 	private String recordsetName;
 	private String recordset;
 	private String breakCriteria;
@@ -36,13 +36,7 @@ public class ECLGroup extends JobEntryBase implements Cloneable, JobEntryInterfa
 	private Boolean runLocal = false;
 	
 	
-	public String getName() {
-		return name;
-	}
 	
-	public void setName(String name) {
-		this.name = name;
-	}
 	
 	public String getRecordSetName() {
 		return recordsetName;

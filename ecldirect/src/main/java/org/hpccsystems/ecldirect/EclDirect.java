@@ -43,8 +43,20 @@ public class EclDirect {
     private String wuid;
     
      private String outputName = "";
+     
+    private boolean isValid = true;
 
-    public String getOutputName() {
+    
+    
+    public boolean isValid() {
+		return isValid;
+	}
+
+	public void setValid(boolean isValid) {
+		this.isValid = isValid;
+	}
+
+	public String getOutputName() {
         return outputName;
     }
 
@@ -160,7 +172,9 @@ public class EclDirect {
             if(proceed){
                 InputStream is = es.ResultsSoapCall(wuid,"");
                 results = es.parseResults(is);
+                isValid = proceed;
             }else{
+            	isValid = proceed;
                // System.out.println("ECL Failed");
             }
         }catch(Exception e){

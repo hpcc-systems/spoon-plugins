@@ -11,6 +11,7 @@ package org.hpccsystems.ecldirect;
 public class Spray implements EclCommand {
 
     private String ipAddress;
+    private String serverPort = "8010";
     private String filePath;
     private String logicalFileName;
     private String fileType;
@@ -20,11 +21,28 @@ public class Spray implements EclCommand {
     private String recordSize;
     private String clusterName;
     
+    private String allowOverWrite = "true";
    
     
     
 
-    public String getCsvQuote() {
+    public String getAllowOverWrite() {
+		return allowOverWrite;
+	}
+
+	public void setAllowOverWrite(String allowOverWrite) {
+		this.allowOverWrite = allowOverWrite;
+	}
+
+	public String getServerPort() {
+		return serverPort;
+	}
+
+	public void setServerPort(String serverPort) {
+		this.serverPort = serverPort;
+	}
+
+	public String getCsvQuote() {
         return csvQuote;
     }
 
@@ -107,7 +125,7 @@ public class Spray implements EclCommand {
                 outputField.append("'").append(filePath).append("',");
                 outputField.append("8192").append(",,,,'").append(clusterName).append("',");
                 outputField.append("'").append(logicalFileName).append("',-1,");
-                outputField.append("'http://").append(ipAddress).append(":8010/FileSpray'" + ",,true);");
+                outputField.append("'http://").append(ipAddress).append(":").append(serverPort).append("/FileSpray'").append(",,").append(allowOverWrite).append(");");
             } else {
                 //todo: Need to be developed
                 
@@ -118,7 +136,7 @@ public class Spray implements EclCommand {
                 outputField.append("group").append(",");
                 
                 outputField.append("'").append(logicalFileName).append("',-1,");
-                outputField.append("'http://").append(ipAddress).append(":8010/FileSpray'" + ",,true);");
+                outputField.append("'http://").append(ipAddress).append(":").append(serverPort).append("/FileSpray'").append(",,").append(allowOverWrite).append(");");
                 
             }
         } else {

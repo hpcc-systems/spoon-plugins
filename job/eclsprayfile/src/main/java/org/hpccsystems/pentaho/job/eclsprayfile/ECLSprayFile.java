@@ -44,6 +44,9 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
     private String csvTerminator = "";
     private String csvQuote = "";
     private String fixedRecordSize = "";
+    private String allowOverwrite = "True";
+    
+    private boolean isValid = true;
     
     //private RecordList recordList = new RecordList();
 
@@ -63,7 +66,15 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         return outputField;
     }
 
-    public void setOutputField(String outputField) {
+    public String getAllowOverwrite() {
+		return allowOverwrite;
+	}
+
+	public void setAllowOverwrite(String allowOverwrite) {
+		this.allowOverwrite = allowOverwrite;
+	}
+
+	public void setOutputField(String outputField) {
         this.outputField = outputField;
     }
 
@@ -174,6 +185,7 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         spray.setCsvSeparator(getCsvSeparator());
         spray.setCsvTerminator(getCsvTerminator());
         spray.setRecordSize(getFixedRecordSize());
+        spray.setAllowOverWrite(getAllowOverwrite());
 
          
         //logBasic(spray.ecl());
@@ -193,6 +205,14 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         eclDirect.setOutputName(this.getName());
         ArrayList dsList = eclDirect.execute(spray.ecl());
        
+        isValid = eclDirect.isValid();
+        if(!isValid){
+        	System.out.println("Not Valid Spray");
+        	logError("Failed to execute spray on the cluster, please verify your settings");
+        	result.setResult(false);
+        	result.setStopped(true);
+        }
+        
         RowMetaAndData data = new RowMetaAndData();
         data.addValue("ecl", Value.VALUE_TYPE_STRING, spray.ecl());
         
@@ -263,7 +283,9 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csv_quote")) != null)
                 setCsvQuote(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csv_quote")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fixed_record_size")) != null)
-                setFixedRecordSize(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fixed_record_size")));     
+                setFixedRecordSize(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fixed_record_size")));   
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "allowOverwrite")) != null)
+            	setAllowOverwrite(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "allowOverwrite")));
           //  if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
            //     openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
 
@@ -288,6 +310,7 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         retval += "		<csv_quote><![CDATA[" + csvQuote + "]]></csv_quote>" + Const.CR;
         retval += "		<fixed_record_size><![CDATA[" + fixedRecordSize + "]]></fixed_record_size>" + Const.CR;
         retval += "		<logical_file_name><![CDATA[" + logicalFileName + "]]></logical_file_name>" + Const.CR;
+        retval += "		<allowOverwrite><![CDATA[" + allowOverwrite + "]]></allowOverwrite>" + Const.CR;
         
        // retval += "		<recordList>" + this.saveRecordList() + "</recordList>" + Const.CR;
         return retval;
@@ -316,6 +339,9 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
             if(rep.getStepAttributeString(id_jobentry, "logicalFileName") != null)
                 logicalFileName = rep.getStepAttributeString(id_jobentry, "logicalFileName"); //$NON-NLS-1$
             
+            if(rep.getStepAttributeString(id_jobentry, "allowOverwrite") != null)
+            	allowOverwrite = rep.getStepAttributeString(id_jobentry, "allowOverwrite"); //$NON-NLS-1$
+            
           //  if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
           //      this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
             
@@ -335,6 +361,7 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
             rep.saveStepAttribute(id_job, getObjectId(), "csvQuote", csvQuote); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "fixedRecordSize", fixedRecordSize); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "logicalFileName", logicalFileName); //$NON-NLS-1$
+            rep.saveStepAttribute(id_job, getObjectId(), "allowOverwrite", allowOverwrite); //$NON-NLS-1$
             
           //  rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
         } catch (Exception e) {
@@ -343,10 +370,10 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
     }
 
     public boolean evaluates() {
-        return true;
+        return isValid;
     }
 
     public boolean isUnconditional() {
-        return true;
+        return false;
     }
 }
