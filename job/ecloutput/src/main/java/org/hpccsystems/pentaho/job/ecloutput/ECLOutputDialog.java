@@ -273,7 +273,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
         wCancel = new Button(shell, SWT.PUSH);
         wCancel.setText("Cancel");
         
-         GridData cancelGrid = new GridData();
+        GridData cancelGrid = new GridData();
         cancelGrid.widthHint = 55;
         cancelGrid.heightHint = 24;
         wCancel.setLayoutData(cancelGrid);

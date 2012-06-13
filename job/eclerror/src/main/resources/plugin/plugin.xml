@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin id="ECLExecute"
-	iconfile="execute.png"
-	description="Execute"
-	tooltip="Execute" 
+<plugin id="ECLError"
+	iconfile="icon.png"
+	description="Error"
+	tooltip="Error" 
 	category="HPCC Systems"
-	classname="org.hpccsystems.pentaho.job.eclexecute.ECLExecute">
+	classname="org.hpccsystems.pentaho.job.eclerror.ECLError">
             
     <libraries>
 	  <library name="../../hpcc-common/ecldirect.jar"/>
         <library name="../../hpcc-common/eclgui.jar"/>
-        <library name="eclexecute.jar"/>
+        <library name="eclerror.jar"/>
     </libraries>            
 </plugin>

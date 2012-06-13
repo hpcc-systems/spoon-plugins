@@ -13,8 +13,10 @@
 	<modules>
 		<module>ecldataset</module>
 		<module>ecldedup</module>
+		<module>ecldespray</module>
 		<module>ecldistribute</module>
 		<module>eclexecute</module>
+		<module>eclerror</module>
 		<module>eclgeneric</module>
 		<module>eclglobalvariables</module>
 		<module>eclgroup</module>
@@ -36,7 +38,6 @@
 		<module>eclsprayfile</module>
 		<module>ecltable</module>
 		<module>eclcount</module>
-		<module>ecldespray</module>
 		<module>ecllimit</module>
 		<module>eclloop</module>
 		<module>eclmerge</module>

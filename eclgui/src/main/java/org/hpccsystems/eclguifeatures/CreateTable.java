@@ -54,9 +54,10 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.custom.ScrolledComposite;
 
 public class CreateTable {
-         private Shell shell;
+    private Shell shell;
          
 	private Table table;
 	private TableViewer tableViewer;
@@ -76,40 +77,47 @@ public class CreateTable {
 	// Set column names
 	private String[] columnNames = new String[] { NAME_COLUMN, DEFAULT_VALUE, TYPE_COLUMN, WIDTH_COLUMN };
 
-        public void setColumnNames(String[] columnNames) {
-            this.columnNames = columnNames;
-        }
+	public void setColumnNames(String[] columnNames) {
+		this.columnNames = columnNames;
+	}
 
-
-
-
-        
-        
-        public TabItem buildDefTab(String tabName, TabFolder tabFolder){
-            this.tabFolder=tabFolder;
-            TabItem tabItem = new TabItem (tabFolder, SWT.NULL);
-            tabItem.setText (tabName);
-
-            Composite composite = new Composite(tabFolder, SWT.NONE);
-            tabItem.setControl(composite);
-
-            this.addChildControls(composite);
-                
-                
-            return tabItem;
-        }
-        public void setRecordList(RecordList rl){
-            this.recordList = rl;
-           // tableViewer.setInput(recordList);
-	   // table.setRedraw( true );
-        }
-        
-        public CreateTable(Shell shell) {
-		this.shell=shell;
+	public TabItem buildDefTab(String tabName, TabFolder tabFolder) {
+		this.tabFolder = tabFolder;
+		TabItem tabItem = new TabItem(tabFolder, SWT.NULL);
+		tabItem.setText(tabName);
 		
+		/*Composite composite = new Composite(tabFolder, SWT.NONE);
+		tabItem.setControl(composite);*/
+		
+		ScrolledComposite sc2 = new ScrolledComposite(tabFolder, SWT.H_SCROLL | SWT.V_SCROLL);
+		Composite compForGrp2 = new Composite(sc2, SWT.NONE);
+		sc2.setContent(compForGrp2);
+
+		// Set the minimum size
+		sc2.setMinSize(650, 450);
+
+		// Expand both horizontally and vertically
+		sc2.setExpandHorizontal(true);
+		sc2.setExpandVertical(true);
+        
+		tabItem.setControl(sc2);
+		
+		this.addChildControls(compForGrp2);
+
+		return tabItem;
+	}
+
+	public void setRecordList(RecordList rl) {
+		this.recordList = rl;
+		// tableViewer.setInput(recordList);
+		// table.setRedraw( true );
+	}
+
+	public CreateTable(Shell shell) {
+		this.shell = shell;
 	}
         
-        
+       
         
         
         
@@ -410,7 +418,9 @@ public class CreateTable {
                 if(columnNames.length >= 4){
                     // Column 4 : Column Width (Text with digits only)
                     TextCellEditor colWidthTextEditor = new TextCellEditor(table);
-                    ((Text) colWidthTextEditor.getControl()).addVerifyListener(
+                    ((Text) colWidthTextEditor.getControl()).setTextLimit(10);
+                    editors[3] = colWidthTextEditor;
+                    /*((Text) colWidthTextEditor.getControl()).addVerifyListener(
 
                             new VerifyListener() {
                                     public void verifyText(VerifyEvent e) {
@@ -419,7 +429,7 @@ public class CreateTable {
                                             e.doit = "0123456789".indexOf(e.text) >= 0 ;
                                     }
                             });
-                    editors[3] = colWidthTextEditor;
+                    editors[3] = colWidthTextEditor;*/
                 }
 		// Assign the cell editors to the viewer 
 		tableViewer.setCellEditors(editors);
@@ -497,8 +507,7 @@ public class CreateTable {
 						System.out.println("*******************");
 						System.out.println("Column Name: "+obj.getColumnName());
 						System.out.println("Column Type: "+obj.getColumnType());
-						if(obj.getColumnWidth() > 0)
-							System.out.println("Height: "+obj.getColumnWidth());
+						System.out.println("Height: "+obj.getColumnWidth());
 						System.out.println("*******************");
 						
 					}
@@ -586,6 +595,13 @@ public class CreateTable {
 		//gridData = new GridData (GridData.HORIZONTAL_ALIGN_END);
 		//gridData.widthHint = 80; 
 		//closeButton.setLayoutData(gridData);
+		
+		/*closeButton = new Button(parent, SWT.PUSH | SWT.CENTER);
+		closeButton.setText("Close");
+		gridData = new GridData (GridData.HORIZONTAL_ALIGN_END);
+		gridData.widthHint = 80; 
+		closeButton.setLayoutData(gridData);*/
+		
 		
 		//This filter is used to handle the CRTL+ENTER Event, which adds the new row to the Grid
 		table.getDisplay().addFilter( SWT.KeyDown, new Listener() {

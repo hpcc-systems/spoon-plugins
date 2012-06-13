@@ -96,8 +96,34 @@ public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInter
         this.fileType = fileType;
     }
     
-    
     public String resultListToString(){
+    	return resultListToString(this.recordList);
+    }
+    
+    public String fieldsValid(RecordList recordList){
+        String errors = "";
+        
+        if(recordList != null){
+            if(recordList.getRecords() != null && recordList.getRecords().size() > 0) {
+            	int i = 1;
+                    for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
+                            RecordBO record = (RecordBO) iterator.next();
+                            
+                            //name type required
+                            if(!(record.getColumnName() != null && !record.getColumnName().equals(""))){
+                            	errors += "On the Fields Tab Row " + i + " is missing \"Column Name \"!\r\n";
+                            }
+                            if(!(record.getColumnType() != null && !record.getColumnType().equals("")&& !record.getColumnType().equals("Select"))){
+                            	errors += "On the Fields Tab Row " + i + " is missing \"Column Type\"!\r\n";
+                            } 
+                            i++;
+                    }
+            }
+        }
+        
+        return errors;
+    }
+    public String resultListToString(RecordList recordList){
         String out = "";
         
         if(recordList != null){
@@ -105,8 +131,8 @@ public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInter
                     System.out.println("Size: "+recordList.getRecords().size());
                     for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
                             RecordBO record = (RecordBO) iterator.next();
-                            int rLen = record.getColumnWidth();
-                            if(rLen != 0){
+                        	String rLen = record.getColumnWidth();
+        					if (rLen != null && rLen.trim().length() >0) {
                                 if(record.getColumnName() != null && !record.getColumnName().equals("")){
                                     out += record.getColumnType()+rLen + " " + record.getColumnName();
                                     if(record.getDefaultValue() != ""){

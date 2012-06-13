@@ -5,7 +5,7 @@ public class RecordBO {
 	private String columnName 	= "";
 	private String defaultValue 	= "";
 	private String columnType 	= "";
-	private int columnWidth;
+	private String columnWidth = "";
 	
 	public RecordBO(){
 		super();
@@ -39,11 +39,11 @@ public class RecordBO {
 		this.columnType = columnType;
 	}
 
-	public int getColumnWidth() {
+	public String getColumnWidth() {
 		return columnWidth;
 	}
 
-	public void setColumnWidth(int columnWidth) {
+	public void setColumnWidth(String columnWidth) {
 		this.columnWidth = columnWidth;
 	}
         
@@ -62,13 +62,23 @@ public class RecordBO {
             if(strArr.length == 4){
                 columnName = strArr[0];
                 columnType = strArr[1];
-                columnWidth = Integer.parseInt(strArr[2]);
+                columnWidth = strArr[2];
                 defaultValue = strArr[3];
 
-            }else if(strArr.length == 3){
+            } else if(strArr.length == 3){
                 columnName = strArr[0];
                 columnType = strArr[1];
-                columnWidth = Integer.parseInt(strArr[2]);
+                columnWidth = strArr[2];
+                defaultValue = "";
+            } else if(strArr.length == 2){
+            	columnName = strArr[0];
+                columnType = strArr[1];
+                columnWidth = "";
+                defaultValue = "";
+            } else if(strArr.length == 1){
+            	columnName = strArr[0];
+                columnType = "";
+                columnWidth = "";
                 defaultValue = "";
             }
         }

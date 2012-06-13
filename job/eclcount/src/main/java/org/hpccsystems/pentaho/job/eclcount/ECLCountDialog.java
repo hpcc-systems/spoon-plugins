@@ -303,6 +303,19 @@ public class ECLCountDialog extends JobEntryDialog implements JobEntryDialogInte
     	String errors = "";
     	//either recordset or valuelist is required but never both, if valuelist, not other allowed
     	
+    	
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide either a \"Job Entry Name\"!\r\n";
+    	}
+    	
+    	if(this.recordsetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide either a \"Result Recordset\"!\r\n";
+    	}
+    	
     	if(this.recordset.getText().equals("") && this.valuelist.getText().equals("")){
     		//one is required.
     		isValid = false;

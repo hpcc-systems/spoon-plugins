@@ -17,7 +17,8 @@ public class Project implements EclCommand {
     private String outRecordFormat;
     private String transformName;
     private String transformFormat;
-
+    private String recordFormatString;
+    
     public boolean isDeclareCounter() {
         return declareCounter;
     }
@@ -82,9 +83,14 @@ public class Project implements EclCommand {
         this.parameterName = parameterName;
     }
     
+    public String getRecordFormatString() {
+        return recordFormatString;
+    }
+
+    public void setRecordFormatString(String recordFormatString) {
+        this.recordFormatString = recordFormatString;
+    }
     
-    
-          
     @Override
     public String ecl() {
         StringBuilder sb = new StringBuilder();

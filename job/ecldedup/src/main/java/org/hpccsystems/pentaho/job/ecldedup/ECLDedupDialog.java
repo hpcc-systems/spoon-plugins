@@ -354,9 +354,26 @@ public class ECLDedupDialog extends JobEntryDialog implements JobEntryDialogInte
 
         return combo;
     }
+    
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	
+    	if(!isValid){
+    		ErrorNotices en = new ErrorNotices();
+    		errors += "\r\n";
+    		errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+    		isValid = en.openValidateDialog(getParent(),errors);
+    	}
+    	return isValid;
+    	
+    }
 
     private void ok() {
-
+    	if(!validate()){
+    		return;
+    	}
         //jobEntry.setJobName(jobEntryName.getText());
         jobEntry.setName(jobEntryName.getText());
                                             /*

@@ -5,7 +5,10 @@
 package org.hpccsystems.eclguifeatures;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.xml.XMLHandler;
@@ -26,8 +29,88 @@ public class AutoPopulate {
     
     private RecordList datasetFields = new RecordList();
 
+    public void testExpression(List<JobEntryCopy> jobs){
+    	
+    	//to test call
+    	//ap.testExpression(this.jobMeta.getJobCopies());
+    	try{
+    		HashMap ds = parseDefExpressionBuilder(jobs);
+    		Iterator it = ds.entrySet().iterator();
+    		while(it.hasNext()){
+    			Map.Entry m = (Map.Entry)it.next();
+    			System.out.println("DataSet: " + m.getKey());
+    			String[] fields = (String[])m.getValue();
+    			
+    			for(int i=0; i<fields.length; i++ ){
+    				System.out.println("---- " + fields[i]);
+    			}
+    		}
+    		
+    	}catch (Exception e){
+    		System.out.println("Failed Expression Test");
+    		System.out.println(e);
+ 		    e.printStackTrace();
+    	}
+    }
     
     
+    public HashMap parseDefExpressionBuilder(List<JobEntryCopy> jobs) throws Exception{
+
+        HashMap ds = new HashMap();
+        String attributeName = "eclIsDef";
+        String attributeValue = "true";
+        
+        Object[] jec = jobs.toArray();
+        int k = 0;
+        for(int j = 0; j<jec.length; j++){
+            if(!((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("START") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("OUTPUT") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("SUCCESS")){
+               String xml = ((JobEntryCopy)jec[j]).getXML();
+               NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
+               for (int temp = 0; temp < nl.getLength(); temp++){
+                   Node nNode = nl.item(temp);
+                   
+                   
+                   NodeList children;
+                   Node childnode;
+                   String defValue = null;
+                   String type = null;
+                  
+                   children=nNode.getChildNodes();
+                   
+                   for (int i=0;i<children.getLength();i++)
+                   {
+                	   try{
+	                	  
+	                	   childnode=children.item(i);
+	                	   if(childnode != null){
+	                		   if(childnode.getAttributes() != null){
+				                   Node attribute = childnode.getAttributes().getNamedItem(attributeName);
+				                   if (attribute!=null && attributeValue.equals(attribute.getTextContent())){
+				                	   
+				                	   defValue = XMLHandler.getNodeValue(childnode);
+				                	  
+				                	   if(defValue != null && !defValue.equalsIgnoreCase("null")){
+				                		   //System.out.println("NODE_VALUE: " + defValue);
+				                		   ds.put(defValue, fieldsByDataset(defValue, jobs));
+				                		   k++;
+				                	   }else{
+				                		   //System.out.println("NODE_VALUE: IS NULL");
+				                	   }
+				                   }
+	                		   }
+	                	   }
+                	   }catch (Exception exc){
+                		   System.out.println("Failed to Read XML");
+                		   //System.out.println(exc);
+                		   //exc.printStackTrace();
+                	   }
+
+                   }
+               }
+            }
+        }
+        return ds;
+    }
     
     
     public String[] parseDefinitions(List<JobEntryCopy> jobs, String attributeName, String attributeValue) throws Exception{

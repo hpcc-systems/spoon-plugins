@@ -1,7 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+* To change this template, choose Tools | Templates
+* and open the template in the editor.
+*/
 package org.hpccsystems.pentaho.job.eclmlclassify;
 
 import org.eclipse.swt.SWT;
@@ -38,9 +38,9 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 import org.eclipse.swt.graphics.Color;
 
 /**
- *
- * @author ChalaAX
- */
+*
+* @author ChalaAX
+*/
 public class ECLML_ClassifyDialog extends JobEntryDialog implements JobEntryDialogInterface {
 
     private ECLML_Classify jobEntry;
@@ -60,7 +60,7 @@ public class ECLML_ClassifyDialog extends JobEntryDialog implements JobEntryDial
     private Text model; // 2
     private Text independentVar; // 1
     private Combo classifyType;
-    private Combo dataType; 
+    private Combo dataType;
 
 
     private Button wOK, wCancel;
@@ -211,16 +211,16 @@ public class ECLML_ClassifyDialog extends JobEntryDialog implements JobEntryDial
         
         this.classifyType.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-            	String cType = classifyType.getText();
-            	disableConstFields();
+             String cType = classifyType.getText();
+             disableConstFields();
                 if(cType.equals("NaiveBayes")){
-                	disableConstFields();
+                 disableConstFields();
                 }else if(cType.equals("Logistic Regression")){
-                	disableConstFields();
-                	enableLogisticConstFields();
+                 disableConstFields();
+                 enableLogisticConstFields();
                 }else if(cType.equals("Perceptron")){
-                	disableConstFields();
-                	enablePerceptronConstFields();
+                 disableConstFields();
+                 enablePerceptronConstFields();
                 }
 
             }
@@ -239,7 +239,7 @@ public class ECLML_ClassifyDialog extends JobEntryDialog implements JobEntryDial
 
 
         //if (jobEntry.getJobName() != null) {
-        //    jobEntryName.setText(jobEntry.getJobName());
+        // jobEntryName.setText(jobEntry.getJobName());
         //}
         if (jobEntry.getName() != null) {
             jobEntryName.setText(jobEntry.getName());
@@ -268,13 +268,13 @@ public class ECLML_ClassifyDialog extends JobEntryDialog implements JobEntryDial
             disableConstFields();
             String cType = classifyType.getText();
             if(cType.equals("NaiveBayes")){
-            	disableConstFields();
+             disableConstFields();
             }else if(cType.equals("Logistic Regression")){
-            	disableConstFields();
-            	enableLogisticConstFields();
+             disableConstFields();
+             enableLogisticConstFields();
             }else if(cType.equals("Perceptron")){
-            	disableConstFields();
-            	enablePerceptronConstFields();
+             disableConstFields();
+             enablePerceptronConstFields();
             }
         }
         if (jobEntry.getDataType() != null) {
@@ -314,9 +314,9 @@ public class ECLML_ClassifyDialog extends JobEntryDialog implements JobEntryDial
     }
     
     private final void disableConstFields(){
- 	   Color white = new Color(null,255,255,255);
+  Color white = new Color(null,255,255,255);
         Color grey = new Color(null,245,245,245);
- 	   ridge.setBackground(grey);
+  ridge.setBackground(grey);
         epsilon.setBackground(grey);
         maxIter.setBackground(grey);
         ridge.setEnabled(false);
@@ -330,9 +330,9 @@ public class ECLML_ClassifyDialog extends JobEntryDialog implements JobEntryDial
     }
     
     private final void enableLogisticConstFields(){
- 	   Color white = new Color(null,255,255,255);
+  Color white = new Color(null,255,255,255);
         Color grey = new Color(null,245,245,245);
- 	   ridge.setBackground(white);
+  ridge.setBackground(white);
         epsilon.setBackground(white);
         maxIter.setBackground(white);
         ridge.setEnabled(true);
@@ -341,9 +341,9 @@ public class ECLML_ClassifyDialog extends JobEntryDialog implements JobEntryDial
     }
     
     private final void enablePerceptronConstFields(){
- 	   Color white = new Color(null,255,255,255);
+  Color white = new Color(null,255,255,255);
         Color grey = new Color(null,245,245,245);
- 	   passes.setBackground(white);
+  passes.setBackground(white);
         alpha.setBackground(white);
         passes.setEnabled(true);
         alpha.setEnabled(true);
@@ -433,7 +433,7 @@ public class ECLML_ClassifyDialog extends JobEntryDialog implements JobEntryDial
         jobEntry.setName(jobEntryName.getText());
         jobEntry.setRecordsetName(recordsetName.getText());
         //jobEntry.setRecordName(recordName.getText());
-                    //private Text algType; //NaiveBayes, Logistic    
+                    //private Text algType; //NaiveBayes, Logistic
     //private Text dependentVar; // 1
     //private Text independentVar; // 2
         

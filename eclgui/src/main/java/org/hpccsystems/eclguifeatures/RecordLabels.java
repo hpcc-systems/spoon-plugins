@@ -43,7 +43,7 @@ public class RecordLabels extends LabelProvider implements ITableLabelProvider{
 			result = objRecord.getColumnType();
 			break;
 		case 3:
-			result = objRecord.getColumnWidth() + "";
+			result = objRecord.getColumnWidth();
 			break;
 		default:
 			break;

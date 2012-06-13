@@ -134,7 +134,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         this.indexfile = indexfile;
     }
 
-
     public String getNewindexfile() {
         return newindexfile;
     }

@@ -35,6 +35,8 @@
 			<zipfileset dir="./job/ecldedup/target" includes="ecldedup.jar" prefix="jobentries/ecldedup" />
 			<zipfileset dir="./job/ecldistribute/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecldistribute" />
 			<zipfileset dir="./job/ecldistribute/target" includes="ecldistribute.jar" prefix="jobentries/ecldistribute" />
+			<zipfileset dir="./job/eclerror/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclerror" />
+			<zipfileset dir="./job/eclerror/target" includes="eclerror.jar" prefix="jobentries/eclerror" />
 			<zipfileset dir="./job/eclexecute/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclexecute" />
 			<zipfileset dir="./job/eclexecute/target" includes="eclexecute.jar" prefix="jobentries/eclexecute" />
 			<zipfileset dir="./job/eclgeneric/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclgeneric" />
