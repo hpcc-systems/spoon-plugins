@@ -103,11 +103,11 @@ public class ECLError extends JobEntryBase implements Cloneable, JobEntryInterfa
 			    
 			}
 			
-			
-	            
-		    ErrorNotices en = new ErrorNotices();
-		    //String error = result.getLogText();
-		    en.openDialog("Syntax Check Failed:", error,eclCode);
+			if (isGuiMode()) {
+			    ErrorNotices en = new ErrorNotices();
+			    //String error = result.getLogText();
+			    en.openDialog("Syntax Check Failed:", error,eclCode);
+			}
 		    
 		}
 		return result;
@@ -173,9 +173,13 @@ public class ECLError extends JobEntryBase implements Cloneable, JobEntryInterfa
         return false;
     }
     
-    
-    
-    
-    
-   
+    public static boolean isGuiMode() {
+        boolean guiMode = false;
+        try {
+            guiMode = (org.pentaho.di.ui.spoon.Spoon.getInstance() != null);
+        } catch (NoClassDefFoundError e) {
+        }
+        
+        return guiMode;
+    }
 }
