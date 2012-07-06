@@ -45,7 +45,19 @@ public class MainMapper {
 	private String[] functionList = null;
 	private String[] operatorList = null;
 	private String[] cmbListValues = null;
+	private Tree treeInputDataSet = null;
 	
+	
+	public Tree getTreeInputDataSet() {
+		return treeInputDataSet;
+	}
+
+
+	public void setTreeInputDataSet(Tree treeInputDataSet) {
+		this.treeInputDataSet = treeInputDataSet;
+	}
+
+
 	/**
 	 * This method redraws the table.
 	 */
@@ -54,7 +66,7 @@ public class MainMapper {
 		mapperRecList = new MapperRecordList();
                 
 		if(oldRL.getRecords() != null && oldRL.getRecords().size() > 0) {
-			System.out.println("Size: "+oldRL.getRecords().size());
+			//System.out.println("Size: "+oldRL.getRecords().size());
 			for (Iterator<MapperBO> iterator = oldRL.getRecords().iterator(); iterator.hasNext();) {
 				MapperBO obj = (MapperBO) iterator.next();
 				mapperRecList.addRecord(obj);
@@ -93,7 +105,8 @@ public class MainMapper {
 	}
 	
 	private void populateOperatorList() {
-		String[] operatorList = {"+", "-", "*", "/", "%", "||", "(", ")", "=", "<>", ">", "<", "<=", ">="};
+		//String[] operatorList = {"+", "-", "*", "/", "%", "||", "(", ")", "=", "<>", ">", "<", "<=", ">="};
+		String operatorList[] = {":=","+", "-", "*", "/", "%", "||", "(", ")", "=", "<>", ">", "<", "<=", ">=","~","AND","IN","NOT","OR","XOR"};
 		setOperatorList(operatorList);
 	}
 	
@@ -349,7 +362,7 @@ public class MainMapper {
 		gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
 		lblOperators.setLayoutData(gridData);
 		
-		Tree treeInputDataSet = new Tree(compTreePanel, SWT.SINGLE | SWT.BORDER);
+		treeInputDataSet = new Tree(compTreePanel, SWT.SINGLE | SWT.BORDER);
 		gridData = new GridData(GridData.FILL_HORIZONTAL);
 	    gridData.heightHint = 100;
 	    treeInputDataSet.setLayoutData(gridData);

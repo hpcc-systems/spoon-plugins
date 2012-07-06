@@ -161,7 +161,7 @@ public class ECLOutput extends ECLJobEntry {
     }
 
     public String getIsDef() {
-        System.out.println("getIsDef() = " + isDef);
+        //System.out.println("getIsDef() = " + isDef);
         return isDef;
     }
 
@@ -234,7 +234,7 @@ public class ECLOutput extends ECLJobEntry {
     }
 
     public String getNamed() {
-        System.out.println("getNamed() - " + named + "}");
+        //System.out.println("getNamed() - " + named + "}");
         return named;
     }
 

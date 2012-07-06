@@ -58,7 +58,7 @@ public class RecordBO {
         }
         public void fromCSV(String in){
             String[] strArr = in.split("[,]");//"\\,"
-            System.out.println("in ---- " + in);
+            //System.out.println("in ---- " + in);
             if(strArr.length == 4){
                 columnName = strArr[0];
                 columnType = strArr[1];

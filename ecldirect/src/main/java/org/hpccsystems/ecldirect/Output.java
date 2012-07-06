@@ -130,7 +130,7 @@ public class Output implements EclCommand {
     }
 
     public String getIsDef() {
-        System.out.println("getIsDef() = " + isDef);
+        //System.out.println("getIsDef() = " + isDef);
         return isDef;
     }
 

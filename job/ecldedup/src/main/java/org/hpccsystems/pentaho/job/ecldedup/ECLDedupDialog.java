@@ -358,7 +358,36 @@ public class ECLDedupDialog extends JobEntryDialog implements JobEntryDialogInte
     private boolean validate(){
     	boolean isValid = true;
     	String errors = "";
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	if(this.recordsetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Result Recordset\"!\r\n";
+    	}
     	
+    	//if all,keep,keeper than require condition
+    	
+    	if(this.isAll.getText().equals("true") || !this.keeper.getText().equals("") || !this.keep.getText().equals("")){
+    		if(this.condition.getText().equals("")){
+    			isValid = false;
+        		errors += "You must provide a \"Condition\" if one of the following is true:\r\n" +
+        				"\t-All is True\r\n" +
+        				"\t-Keep has a value\r\n" +
+        				"\t-keeper has a value\r\n";
+    		}
+    	}
+    	
+    	//if hash require all
+    	if(this.isHash.getText().equals("true")){
+    		if(!this.isAll.getText().equals("true")){
+    			isValid = false;
+        		errors += "\"All\" must be true if \"Hash\" is true!\r\n";
+    		}
+    	}
     	
     	if(!isValid){
     		ErrorNotices en = new ErrorNotices();

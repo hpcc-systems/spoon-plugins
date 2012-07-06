@@ -73,7 +73,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
     private Text outRecordFormat;
     private Text transformName;
     private Text transformFormat;
-    private Text parameterName;
+    //private Text parameterName;
     private CreateTable tblOutput = null;
     private MainMapper tblMapper = null;
     private RecordList recordList = new RecordList();
@@ -148,7 +148,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
         				int count = 0;
         				for (Iterator<RecordBO> iterator = tblOutput.getRecordList().getRecords().iterator(); iterator.hasNext();) {
         					RecordBO obj = (RecordBO) iterator.next();
-        					cmbValues[count] = obj.getColumnName();
+        					cmbValues[count] = "self." + obj.getColumnName();
         					count++;
         				}
                       
@@ -248,7 +248,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
         //outRecordFormat = buildMultiText("Out Record Format", outRecordName, lsMod, middle, margin, distributeGroup);
         
         transformName = buildText("Transform Name", outRecordName, lsMod, middle, margin, distributeGroup);
-        parameterName = buildText("Parameter Name", transformName, lsMod, middle, margin, distributeGroup);
+       // parameterName = buildText("Parameter Name", transformName, lsMod, middle, margin, distributeGroup);
         
         //transformFormat = buildMultiText("Transform Format", parameterName, lsMod, middle, margin, distributeGroup);
         
@@ -258,7 +258,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
             tblOutput.setRecordList(jobEntry.getRecordList());
             
             if(recordList.getRecords() != null && recordList.getRecords().size() > 0) {
-                    System.out.println("Size: "+recordList.getRecords().size());
+                    //System.out.println("Size: "+recordList.getRecords().size());
                     for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
                             RecordBO obj = (RecordBO) iterator.next();
                     }
@@ -274,7 +274,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
 		TabItem item3 = new TabItem(tabFolder, SWT.NULL);
 		
 		ScrolledComposite sc3 = new ScrolledComposite(tabFolder, SWT.H_SCROLL | SWT.V_SCROLL);
-		Composite compForGrp3 = new Composite(sc3, SWT.NONE);
+		final Composite compForGrp3 = new Composite(sc3, SWT.NONE);
 		sc3.setContent(compForGrp3);
 
 		// Set the minimum size
@@ -347,6 +347,17 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
             }
         });
         
+        this.inRecordName.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                   System.out.print("inRecordName Listner");
+		        try{
+		        	populateDatasets();
+		        }catch (Exception excep){
+		        	System.out.println("Failed to load datasets");
+		        }
+            };
+        });
+
 
 
         //if (jobEntry.getJobName() != null) {
@@ -361,6 +372,11 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
         }
         if (jobEntry.getInRecordName() != null) {
             inRecordName.setText(jobEntry.getInRecordName());
+            try{
+            	populateDatasets();
+            }catch (Exception e){
+            	System.out.println("Failed to load datasets");
+            }
         }
          if (jobEntry.getRecordsetName() != null) {
             recordsetName.setText(jobEntry.getRecordsetName());
@@ -378,9 +394,9 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
         /*if (jobEntry.getTransformFormat() != null) {
             transformFormat.setText(jobEntry.getTransformFormat());
         }*/
-        if (jobEntry.getParameterName() != null) {
-            parameterName.setText(jobEntry.getParameterName());
-        }
+        //if (jobEntry.getParameterName() != null) {
+       //     parameterName.setText(jobEntry.getParameterName());
+       // }
 
 
         //shell.pack();
@@ -393,6 +409,21 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
 
         return jobEntry;
 
+    }
+    
+    private void populateDatasets() throws Exception{
+    	AutoPopulate ap = new AutoPopulate();
+    	Map<String, String[]> mapDataSets = null;
+		try {
+			mapDataSets = ap.parseDefExpressionBuilder(this.jobMeta.getJobCopies(), inRecordName.getText());
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		//(tblMapper.getTreeInputDataSet()).clearAll(false);
+		(tblMapper.getTreeInputDataSet()).removeAll();
+		Utils.fillTree(tblMapper.getTreeInputDataSet(), mapDataSets);
+		//System.out.println("Updated Input Recordsets");
+        tblMapper.reDrawTable();
     }
 
     private Text buildText(String strLabel, Control prevControl,
@@ -483,7 +514,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
         //jobEntry.setOutRecordFormat(outRecordFormat.getText());
         jobEntry.setTransformName(transformName.getText());
         //jobEntry.setTransformFormat(transformFormat.getText());
-        jobEntry.setParameterName(parameterName.getText());
+       // jobEntry.setParameterName(parameterName.getText());
         jobEntry.setRecordList(tblOutput.getRecordList());
         jobEntry.setMapperRecList(tblMapper.getMapperRecList());
         dispose();

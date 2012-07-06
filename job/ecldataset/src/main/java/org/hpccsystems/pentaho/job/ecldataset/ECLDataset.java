@@ -225,7 +225,7 @@ public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInter
         int len = strLine.length;
         if(len>0){
             recordList = new RecordList();
-            System.out.println("Open Record List");
+            //System.out.println("Open Record List");
             for(int i =0; i<len; i++){
                 //System.out.println("++++++++++++" + strLine[i]);
                 //this.recordDef.addRecord(new RecordBO(strLine[i]));

@@ -269,7 +269,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         int len = strLine.length;
         if(len>0){
             keys = new RecordList();
-            System.out.println("Open Record List");
+            //System.out.println("Open Record List");
             for(int i =0; i<len; i++){
                 System.out.println("++++++++++++" + strLine[i]);
                 //this.recordDef.addRecord(new RecordBO(strLine[i]));
@@ -300,7 +300,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         int len = strLine.length;
         if(len>0){
             payload = new RecordList();
-            System.out.println("Open Record List");
+           // System.out.println("Open Record List");
             for(int i =0; i<len; i++){
                 System.out.println("++++++++++++" + strLine[i]);
                 //this.recordDef.addRecord(new RecordBO(strLine[i]));

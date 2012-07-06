@@ -26,6 +26,7 @@ import org.hpccsystems.ecldirect.Dataset;
 import org.hpccsystems.eclguifeatures.RecordBO;
 import org.hpccsystems.eclguifeatures.RecordList;
 import org.hpccsystems.mapper.*;
+import org.hpccsystems.mapper.MapperRecordList;
 
 
 /**
@@ -41,7 +42,7 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
     private String outRecordFormat = "";
     private String transformName = "";
     private String transformFormat = "";
-    private String parameterName = "";
+    private String parameterName = "input";
     private RecordList recordList = new RecordList();
     private MapperRecordList mapperRecList = new MapperRecordList();
 
@@ -128,9 +129,9 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
         return parameterName;
     }
 
-    public void setParameterName(String parameterName) {
-        this.parameterName = parameterName;
-    }
+    //public void setParameterName(String parameterName) {
+    //    this.parameterName = parameterName;
+    //}
 
     public RecordList getRecordList() {
         return recordList;
@@ -152,7 +153,7 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
 		String out = "";
 		if (recordList != null) {
 			if (recordList.getRecords() != null && recordList.getRecords().size() > 0) {
-				System.out.println("Size: " + recordList.getRecords().size());
+				//System.out.println("Size: " + recordList.getRecords().size());
 				for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
 					RecordBO record = (RecordBO) iterator.next();
 					String rLen = record.getColumnWidth();
@@ -209,12 +210,12 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
 		int len = strLine.length;
 		if (len > 0) {
 			recordList = new RecordList();
-			System.out.println("Open Record List");
+			//System.out.println("Open Record List");
 			for (int i = 0; i < len; i++) {
 				//System.out.println("++++++++++++" + strLine[i]);
 				// this.recordDef.addRecord(new RecordBO(strLine[i]));
 				RecordBO rb = new RecordBO(strLine[i]);
-				System.out.println(rb.getColumnName());
+				//System.out.println(rb.getColumnName());
 				recordList.addRecordBO(rb);
 			}
 		}
@@ -229,7 +230,7 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
 		String out = "";
 		if (mapperRecList != null) {
 			if (mapperRecList.getRecords() != null && mapperRecList.getRecords().size() > 0) {
-				System.out.println("Size: " + mapperRecList.getRecords().size());
+				//System.out.println("Size: " + mapperRecList.getRecords().size());
 				for (Iterator<MapperBO> iterator = mapperRecList.getRecords().iterator(); iterator.hasNext();) {
 					MapperBO record = (MapperBO) iterator.next();
 					out += record.getOpVariable() + " := " + record.getExpression();
@@ -249,7 +250,7 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
 		Iterator<MapperBO> itr = list.iterator();
 		boolean isFirst = true;
 		while (itr.hasNext()) {
-			System.out.println("loop");
+			//System.out.println("loop");
 			if (!isFirst) {
 				out += "|";
 			}
@@ -270,7 +271,7 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
 		int len = strLine.length;
 		if (len > 0) {
 			mapperRecList = new MapperRecordList();
-			System.out.println("Open Record List");
+			//System.out.println("Open Record List");
 			for (int i = 0; i < len; i++) {
 				//System.out.println("++++++++++++" + strLine[i]);
 				// this.recordDef.addRecord(new RecordBO(strLine[i]));
@@ -308,7 +309,7 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
         
 
         logBasic("{Project Job} Execute = " + project.ecl());
-        System.out.println("PROJECT JOB ---->>>> : "+project.ecl());
+        //System.out.println("PROJECT JOB ---->>>> : "+project.ecl());
         
         logBasic("{Project Job} Previous =" + result.getLogText());
         
@@ -361,8 +362,8 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
                 setTransformName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "transformName")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "transformFormat")) != null)
                 setTransformFormat(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "transformFormat")));
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"parameterName")) != null)
-                setParameterName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"parameterName")));
+            //if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"parameterName")) != null)
+             //   setParameterName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"parameterName")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
                 openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "mapperRecList")) != null)
@@ -386,7 +387,7 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
         retval += "		<outRecordFormat><![CDATA[" + outRecordFormat + "]]></outRecordFormat>" + Const.CR;
         retval += "		<transformName><![CDATA[" + transformName + "]]></transformName>" + Const.CR;
         retval += "		<transformFormat><![CDATA[" + transformFormat + "]]></transformFormat>" + Const.CR;
-        retval += "		<parameterName><![CDATA[" + parameterName + "]]></parameterName>" + Const.CR;
+        //retval += "		<parameterName><![CDATA[" + parameterName + "]]></parameterName>" + Const.CR;
         retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
         retval += "		<mapperRecList><![CDATA[" + this.saveRecordListForMapper() + "]]></mapperRecList>" + Const.CR;
        //add cdata above see below for example
@@ -418,8 +419,8 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
                 transformName = rep.getStepAttributeString(id_jobentry, "transformName"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "transformFormat") != null)
                 transformFormat = rep.getStepAttributeString(id_jobentry, "transformFormat"); //$NON-NLS-1$
-            if(rep.getStepAttributeString(id_jobentry, "parameterName") != null)
-                parameterName = rep.getStepAttributeString(id_jobentry, "parameterName"); //$NON-NLS-1$
+            //if(rep.getStepAttributeString(id_jobentry, "parameterName") != null)
+               // parameterName = rep.getStepAttributeString(id_jobentry, "parameterName"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
                 this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "mapperRecList") != null)
@@ -441,7 +442,7 @@ public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInter
             rep.saveStepAttribute(id_job, getObjectId(), "outRecordFormat", outRecordFormat); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "transformName", transformName); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "transformFormat", transformFormat); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "parameterName", parameterName); //$NON-NLS-1$
+            //rep.saveStepAttribute(id_job, getObjectId(), "parameterName", parameterName); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "mapperRecList", this.saveRecordListForMapper()); //$NON-NLS-1$
             
