@@ -339,6 +339,25 @@ public class ECLDeSprayDialog extends JobEntryDialog implements JobEntryDialogIn
     		isValid = false;
     		errors += "You must provide a \"Job Entry Name\"!\r\n";
     	}
+    	//logicalname
+    	if(this.logicalName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Logical Name\"!\r\n";
+    	}
+    	//destinationIP
+    	if(this.destinationIP.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Destination IP\"!\r\n";
+    	}
+    	//destinationpath
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Destination Path\"!\r\n";
+    	}
+    	
     	
 		if(!isValid){
 			ErrorNotices en = new ErrorNotices();

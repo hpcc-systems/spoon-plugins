@@ -312,8 +312,38 @@ public class ECLDistributeDialog extends JobEntryDialog implements JobEntryDialo
 
         return combo;
     }
-
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	//recordset
+    	if(this.recordsetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Recoredset\"!\r\n";
+    	}
+    	
+    	// if skey require minskew ------ since its just a blank not needed yet will be needed in future version TODO:
+    	
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
+    
     private void ok() {
+    	if(!validate()){
+    		return;
+    	}
                     /*
      * private Text name;
     private Text datasetName;
