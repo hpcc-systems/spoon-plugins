@@ -54,6 +54,7 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
 
 import org.hpccsystems.eclguifeatures.CreateTable;
+import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.hpccsystems.eclguifeatures.RecordBO;
 
 
@@ -157,7 +158,7 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         int margin = Const.MARGIN;
 
         shell.setLayout(formLayout);
-        shell.setText("Define an ECL Dataset");
+        shell.setText("Define an ECL Spray");
 
         FormLayout groupLayout = new FormLayout();
         groupLayout.marginWidth = 10;
@@ -472,8 +473,91 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
 
         return combo;
     }
+    
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	//only need to require a entry name
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	
+    	if(this.filePath.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"File Name\"!\r\n";
+    	}
+    	
+    	if(this.logicalFileName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Logical File Name\"!\r\n";
+    	}
+    	
+    	if(this.fileType.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"File Type\"!\r\n";
+    	}
+    	
+    	if(this.allowOverwrite.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Allow Overwrite\"!\r\n";
+    	}
+    	
+    	if(this.fileType.getText().equals("Variable")){
+    		// csvSeparator
+    	    // csvQuote
+    	    // csvTerminator
+    		if(this.csvSeparator.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"CSV Separator\" for Variable File Type!\r\n";
+        	}
+    		if(this.csvTerminator.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"CSV Terminator\" for Variable File Type!\r\n";
+        	}
+    		if(this.csvQuote.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"CSV Quote\" for Variable File Type!\r\n";
+        	}
+    		
+    	}
+    	
+    	if(this.fileType.getText().equals("Fixed")){
+    		//fixedRecordSize
+    		if(this.fixedRecordSize.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"Fixed Record Size\" for Fixed File Type!\r\n";
+        	}
+    	}
+    	
+    	
+    	//File TYpe Variable,FIxed
+
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
 
     private void ok() {
+    	if(!validate()){
+    		return;
+    	}
+    	
         jobEntry.setName(jobEntryName.getText());
        // jobEntry.setIpAddress(ipAddress.getText());
         jobEntry.setFilePath(filePath.getText());

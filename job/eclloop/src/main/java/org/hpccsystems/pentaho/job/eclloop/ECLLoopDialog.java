@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
+import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.hpccsystems.pentaho.job.eclloop.ECLLoop;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.job.JobMeta;
@@ -325,7 +326,133 @@ public class ECLLoopDialog extends JobEntryDialog implements JobEntryDialogInter
         return combo;
     }
 
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	//only need to require a entry name
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	
+    	if(this.recordsetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Result Recordset\"!\r\n";
+    	}
+    	
+    	//dataset
+    	if(this.recordset.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Recordset\"!\r\n";
+    	}
+    	
+    	//need to requrie one of loopcount,loopfilter,loopcondition
+    	if(this.loopCount.getText().equals("") && this.loopFilter.getText().equals("") && this.loopCondition.getText().equals("")){
+    		//they can't all be ""
+    		isValid = false;
+    		errors += "You must provide one of the following \"Loop Count\", \"Loop Filter\", \"Loop Condition\"!\r\n";
+    	}
+    	
+    	//can't have booth loopcount and loopcondition
+    	if(!this.loopCount.getText().equals("") && !this.loopCondition.getText().equals("")){
+    		//can't have both
+    		isValid = false;
+    		errors += "You can not provide both a \"Loop Count\" and a \"Loop Condition\"!\r\n";
+    	}
+    	
+    	
+    	//loopcount, loopbody
+    	//loopcount, loopfilter, loopbody
+    	if(!this.loopCount.getText().equals("")){
+    		//we have loop count require atleast loop body
+    		if(this.loopBody.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"Loop Body\" when providing a \"Loop Count\"!\r\n";
+        	}
+    		
+    		
+    	}else{
+	    	
+	    	//loopfilter, loopbody
+	    	if(!this.loopFilter.getText().equals("")){
+	    		//no loopcount but loop filter
+	    		if(this.loopBody.getText().equals("")){
+	        		//one is required.
+	        		isValid = false;
+	        		errors += "You must provide a \"Loop Body\" when providing a \"Loop Filter\"!\r\n";
+	        	}
+	    		//canht have iterations,iterationlist,default fields
+	    		if(!this.iterations.getText().equals("")){
+	    			isValid = false;
+	        		errors += "You cannot set a \"Iterations\" when providing a \"Loop FIlter\" without a \"Loop Count\"!\r\n";
+	    		}
+	    		if(!this.iterationList.getText().equals("")){
+	    			isValid = false;
+	        		errors += "You cannot set a \"Iterations List\" when providing a \"Loop FIlter\" without a \"Loop Count\"!\r\n";
+	    		}
+	    		if(!this.dfault.getText().equals("")){
+	    			isValid = false;
+	        		errors += "You cannot set a \"Default\" when providing a \"Loop FIlter\" without a \"Loop Count\"!\r\n";
+	    		}
+	    	}
+    	}
+    	
+    	//loopcondition, loopbody
+    	if(!this.loopCount.getText().equals("")){
+    		//can't have loopcount, loopfilter, iterations,iterationlist,default
+    		
+    		//require loopbody
+    		if(this.loopBody.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"Loop Body\" when providing a \"Loop Count\"!\r\n";
+        	}
+    	}
+    	
+    	//loopcondition, rowfilter, loopbody
+    	
+    	if(!this.loopCondition.getText().equals("")){
+    		
+    		if(this.loopBody.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"Loop Body\" when providing a \"Loop Condition\"!\r\n";
+        	}
+    		
+	    	if(!this.iterations.getText().equals("")){
+				isValid = false;
+	    		errors += "You cannot set a \"Iterations\" when providing a \"Loop Condition\"!\r\n";
+			}
+			if(!this.iterationList.getText().equals("")){
+				isValid = false;
+	    		errors += "You cannot set a \"Iterations List\" hen providing a \"Loop Condition\"!\r\n";
+			}
+			if(!this.dfault.getText().equals("")){
+				isValid = false;
+	    		errors += "You cannot set a \"Default\" hen providing a \"Loop Condition\"!\r\n";
+			}
+    	}
+
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
+    
     private void ok() {
+    	
+    	if(!validate()){
+    		return;
+    	}
 
         jobEntry.setName(jobEntryName.getText());
 

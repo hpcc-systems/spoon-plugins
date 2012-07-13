@@ -451,8 +451,77 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
         return combo;
     }
 
-    private void ok() {
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	//only need to require a entry name
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	
+    	if(this.serverIP.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Server Host\"!\r\n";
+    	}
+    	
+    	if(this.serverPort.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Server Port\"!\r\n";
+    	}
+    	
+    	if(this.landingZone.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Landing Zone Dir\"!\r\n";
+    	}
+    	
+    	if(this.cluster.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Cluster\"!\r\n";
+    	}
+    	
+    	if(this.jobName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Name\"!\r\n";
+    	}
+    	if(this.eclccInstallDir.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"eclcc Install Dir\"!\r\n";
+    	}
+    	
+    	if(this.includeML.getText().equals("true")){
+    		if(this.mlPath.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"Path to ML Library\" when Include ML Library is set to ture!\r\n";
+        	}
+    	}
+    	
+    	
 
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
+    
+    private void ok() {
+    	if(!validate()){
+    		return;
+    	}
+    	
         //jobEntry.setJobName(jobEntryName.getText());
         jobEntry.setName(jobEntryName.getText());
         

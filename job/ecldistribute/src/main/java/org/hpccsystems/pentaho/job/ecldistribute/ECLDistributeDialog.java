@@ -325,7 +325,13 @@ public class ECLDistributeDialog extends JobEntryDialog implements JobEntryDialo
     	if(this.recordsetName.getText().equals("")){
     		//one is required.
     		isValid = false;
-    		errors += "You must provide a \"Recoredset\"!\r\n";
+    		errors += "You must provide a \"Resulting Recoredset\"!\r\n";
+    	}
+    	
+    	if(this.datasetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Dataset Name\"!\r\n";
     	}
     	
     	// if skey require minskew ------ since its just a blank not needed yet will be needed in future version TODO:

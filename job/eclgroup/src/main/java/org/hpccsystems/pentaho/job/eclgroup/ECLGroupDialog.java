@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
+import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryDialogInterface;
@@ -298,8 +299,44 @@ public class ECLGroupDialog extends JobEntryDialog implements JobEntryDialogInte
         return combo;
     }
 
-    private void ok() {
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	//only need to require a entry name
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	
+    	if(this.recordsetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Result Recordset\"!\r\n";
+    	}
+    	
+    	if(this.recordset.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Recordset\"!\r\n";
+    	}
 
+
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
+    
+    private void ok() {
+    	if(!validate()){
+    		return;
+    	}
         jobEntry.setName(jobEntryName.getText());
 
         jobEntry.setRecordSetName(recordsetName.getText());

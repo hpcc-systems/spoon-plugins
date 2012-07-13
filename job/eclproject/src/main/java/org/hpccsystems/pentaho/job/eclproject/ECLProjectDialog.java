@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
 import org.hpccsystems.eclguifeatures.CreateTable;
+import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.hpccsystems.eclguifeatures.RecordBO;
 import org.hpccsystems.eclguifeatures.RecordList;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
@@ -503,9 +504,68 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
 
         return combo;
     }
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	//only need to require a entry name
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	
+    	if(this.recordsetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Resulting Recordset\"!\r\n";
+    	}
+    	
+    	if(this.inRecordName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"In Record Name\"!\r\n";
+    	}
+    	
+    	if(this.outRecordName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Out Record Name\"!\r\n";
+    	}
+    	
+    	if(this.transformName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Transform Name\"!\r\n";
+    	}
+    	
+    	//requre outputformat to atleast not be ""
+    	if(tblOutput.getRecordList().equals("")){
+    		isValid = false;
+    		errors += "You must provide a \"Output Format\"!\r\n";
+    	}
+    	
+    	
+    	//require transform format to atleast not be ""
+    	if(tblMapper.getMapperRecList().equals("")){
+    		isValid = false;
+    		errors += "You must provide a \"Transform Format\"!\r\n";
+    	}
 
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
+    
     private void ok() {
-
+    	if(!validate()){
+    		return;
+    	}
         jobEntry.setName(jobEntryName.getText());
         jobEntry.setDeclareCounterString(declareCounter.getText());
         jobEntry.setRecordsetName(recordsetName.getText()); 

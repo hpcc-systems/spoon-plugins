@@ -311,7 +311,50 @@ public class ECLSortDialog extends JobEntryDialog implements JobEntryDialogInter
         return combo;
     }
 
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	//only need to require a entry name
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	
+    	if(this.recordsetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Resulting Recordset Name\"!\r\n";
+    	}
+    	
+    	if(this.datasetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Dataset to be Sorted\"!\r\n";
+    	}
+    	
+    	if(this.fields.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Fields\"!\r\n";
+    	}
+
+
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
+    
     private void ok() {
+    	if(!validate()){
+    		return;
+    	}
         jobEntry.setName(jobEntryName.getText());
         jobEntry.setFields(fields.getText());
         jobEntry.setDatasetName(datasetName.getText());

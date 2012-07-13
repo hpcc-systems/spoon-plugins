@@ -53,7 +53,7 @@ public class ECLTableDialog extends JobEntryDialog implements JobEntryDialogInte
 
     private Text format;
     private Text expression;
-    private Text size; //FEW,MANY
+    private Combo size; //FEW,MANY
     private Combo isUnsorted;
     private Combo runLocal;
     private Combo isKeyed;
@@ -157,7 +157,7 @@ public class ECLTableDialog extends JobEntryDialog implements JobEntryDialogInte
         recordset = buildCombo("Recordset", recordsetName, lsMod, middle, margin, tableGroup, datasets);
         expression = buildMultiText("Expression", recordset, lsMod, middle, margin, tableGroup);
         format = buildMultiText("Format", expression, lsMod, middle, margin, tableGroup);
-        size = buildText("Size", format, lsMod, middle, margin, tableGroup);
+        size = buildCombo("Size", format, lsMod, middle, margin, tableGroup, new String[]{"","FEW", "MANY"});
         isUnsorted = buildCombo("Unsorted", size, lsMod, middle, margin, tableGroup, new String[]{"false", "true"});
         isKeyed = buildCombo("Keyed", isUnsorted, lsMod, middle, margin, tableGroup, new String[]{"false", "true"});
         isMerge = buildCombo("Merge", isKeyed, lsMod, middle, margin, tableGroup, new String[]{"false", "true"});
@@ -341,7 +341,63 @@ public class ECLTableDialog extends JobEntryDialog implements JobEntryDialogInte
         return combo;
     }
 
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	//only need to require a entry name
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	if(this.recordsetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Resulting Recordset\"!\r\n";
+    	}
+    	
+    	//recordset
+    	if(this.recordset.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Recordset\"!\r\n";
+    	}
+    	
+    	//format
+    	if(this.format.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Format\"!\r\n";
+    	}
+    	
+    	//few|many only allowed with expression
+    	if(this.expression.getText().equals("")){
+    		//don't allow few|many
+    		if(!this.size.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide an \"Expression\" in order to provide a \"Size\"!\r\n";
+        	}
+    	}
+    	
+
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
+    
     private void ok() {
+    	
+    	if(!validate()){
+    		return;
+    	}
+    	
           /*
          * private Text format;
     private Text expression;

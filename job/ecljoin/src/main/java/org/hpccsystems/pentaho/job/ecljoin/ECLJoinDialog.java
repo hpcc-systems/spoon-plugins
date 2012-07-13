@@ -360,7 +360,69 @@ public class ECLJoinDialog extends JobEntryDialog implements JobEntryDialogInter
         return combo;
     }
 
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	//only need to require a entry name
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	
+    	if(this.leftRecordSet.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Left Recordset Name\"!\r\n";
+    	}
+    	
+    	if(this.rightRecordSet.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Right Recordset Name\"!\r\n";
+    	}
+    	
+    	
+    	if(this.leftJoinCondition.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Left Join Condition\"!\r\n";
+    	}
+    	
+    	if(this.rightJoinCondition.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Right Join Condition\"!\r\n";
+    	}
+    	
+    	if(this.joinType.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Join Type\"!\r\n";
+    	}
+    	
+    	if(this.joinRecordSet.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Resulting Recordset\"!\r\n";
+    	}
+
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
+    
     private void ok() {
+    	if(!validate()){
+    		return;
+    	}
+    	
          /*
          *      private Text joinCondition;
                 private Text joinType;
