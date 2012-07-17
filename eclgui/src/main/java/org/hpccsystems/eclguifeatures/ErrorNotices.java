@@ -175,7 +175,7 @@ public class ErrorNotices {
  		Label label = new Label (dialog, SWT.NONE);
  		label.setText (notice);
  		Button yesButton = new Button (dialog, SWT.PUSH);
- 		yesButton.setText ("&Contine Saving");
+ 		yesButton.setText ("&Continue Saving");
  		
  	        Button noButton = new Button (dialog, SWT.PUSH);
  		noButton.setText ("&Cancel Saving");
