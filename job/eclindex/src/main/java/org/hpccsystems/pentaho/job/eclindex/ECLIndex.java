@@ -35,8 +35,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
     private RecordList payload = new RecordList();
     
     private String baserecset;
-   // private String keys;
-   // private String payload;
     private String indexfile;
     private String sorted;
     private String preload;
@@ -47,16 +45,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
     private String newindexfile;
     private String isDuplicate;
     private String overwrite;
-    /*
-    private String name = "";
-    
-    
-    public String getName(){
-        return name;
-    }
-    public void setName(String name){
-        this.name=name;
-    }*/
 
     public String getOverwrite() {
         return overwrite;
@@ -74,7 +62,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         this.isDuplicate = isDuplicate;
     }
     
-    
     public RecordList getKeys() {
         return keys;
     }
@@ -91,9 +78,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         this.payload = payload;
     }
     
-    
-    
-
     public String getBaserecset() {
         return baserecset;
     }
@@ -166,6 +150,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
     public void setSorted(String sorted) {
         this.sorted = sorted;
     }
+
     public String resultListToString(RecordList recordList){
         String out = "";
         
@@ -207,6 +192,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
                 index.setPayload(resultListToString(payload));
                 index.setIndexfile(indexfile);
                 index.setSorted(sorted);
+                index.setPreload(preload);
                 index.setOpt(opt);
                 index.setCompressed(compressed);
                 index.setDistributed(distributed);
@@ -326,12 +312,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         try {
             super.loadXML(node, list, list1);
             
-           // if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "index_name")) != null)
-           //     setName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "index_name")));
-            
             this.setBaserecset(loadXMLElement(node,"baserecset"));
-           // this.setKeys(loadXMLElement(node,"keys"));
-           // this.setPayload(loadXMLElement(node,"payload"));
            
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "keys")) != null)
                 openKeys(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "keys")));
@@ -347,7 +328,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
             this.setIndex(loadXMLElement(node,"index"));
             this.setNewindexfile(loadXMLElement(node,"newindexfile"));
             this.setIsDuplicate(loadXMLElement(node,"isDuplicate"));
-             this.setOverwrite(loadXMLElement(node,"overwrite"));
+            this.setOverwrite(loadXMLElement(node,"overwrite"));
 
         } catch (Exception e) {
             throw new KettleXMLException("ECL Join Job Plugin Unable to read step info from XML node", e);
@@ -366,8 +347,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         
 
          retval += getXMLElement("baserecset", this.getBaserecset());
-        // retval += getXMLElement("keys", this.getKeys());
-         //retval += getXMLElement("payload", this.getPayload());
          retval += "		<keys eclIsDef=\"true\" eclType=\"keys\"><![CDATA[" + this.saveKeys() + "]]></keys>" + Const.CR;
          retval += "		<payload eclIsDef=\"true\" eclType=\"payload\"><![CDATA[" + this.savePayload() + "]]></payload>" + Const.CR;
          retval += getXMLElement("indexfile", this.getIndexfile());
@@ -381,7 +360,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
          retval += getXMLElement("isDuplicate", this.getIsDuplicate());
          retval += getXMLElement("overwrite", this.getOverwrite());
          
-  
         return retval;
 
     }
@@ -404,8 +382,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
             throws KettleException {
         try {
             this.setBaserecset(getRepElement(rep, id_jobentry, "baserecset"));
-            //this.setKeys(getRepElement(rep, id_jobentry, "keys"));
-            //this.setPayload(getRepElement(rep, id_jobentry, "payload"));
              if(rep.getStepAttributeString(id_jobentry, "keys") != null)
                 this.openKeys(rep.getStepAttributeString(id_jobentry, "keys")); //$NON-NLS-1$
              if(rep.getStepAttributeString(id_jobentry, "payload") != null)
@@ -419,7 +395,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
             this.setIndex(getRepElement(rep, id_jobentry, "index"));
             this.setNewindexfile(getRepElement(rep, id_jobentry, "newindexfile"));
             this.setIsDuplicate(getRepElement(rep, id_jobentry, "isDuplicate"));
-             this.setOverwrite(getRepElement(rep, id_jobentry, "overwrite"));
+            this.setOverwrite(getRepElement(rep, id_jobentry, "overwrite"));
                 
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -436,23 +412,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
     }
     public void saveRep(Repository rep, ObjectId id_job) throws KettleException {
         try {
-                            /*
-             *     private String baserecset;
-    private String keys;
-    private String payload;
-    private String indexfile;
-    private String sorted;
-    private String preload;
-    private String opt;
-    private String compressed;
-    private String distributed;
-    private String index;
-    private String newindexfile;
-             * 
-             */
            saveRepElement(rep,id_job,"baserecset",this.getBaserecset());
-           //saveRepElement(rep,id_job,"keys",this.getKeys());
-           //saveRepElement(rep,id_job,"payload",this.getPayload());
            rep.saveStepAttribute(id_job, getObjectId(), "keys", this.saveKeys()); //$NON-NLS-1$
            rep.saveStepAttribute(id_job, getObjectId(), "payload", this.savePayload()); //$NON-NLS-1$
            saveRepElement(rep,id_job,"indexfile",this.getIndexfile());
