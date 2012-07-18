@@ -29,7 +29,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
-import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.CreateTable;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.hpccsystems.eclguifeatures.RecordBO;
@@ -97,78 +96,68 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         this.validator = new Validator();
     }
     
-    public final void toggleEnable(){
-        Color white = new Color(null,255,255,255);
-        Color grey = new Color(null,245,245,245);
-         if(isDuplicate.getText().equals(COMBO_ITEM_YES)){
-                            
-                            baserecset.setEnabled(false);
-                            baserecset.setBackground(grey);
-                            indexfile.setEnabled(false);
-                            indexfile.setBackground(grey);
-                            sorted.setEnabled(false);
-                            sorted.setBackground(grey);
-                            preload.setEnabled(false);
-                            preload.setBackground(grey);
-                            opt.setEnabled(false);
-                            opt.setBackground(grey);
-                            compressed.setEnabled(false);
-                            compressed.setBackground(grey);
-                            distributed.setEnabled(false);
-                            distributed.setBackground(grey);
-                            
-                            index.setBackground(white);
-                            index.setEnabled(true);
-                            newindexfile.setBackground(white);
-                            newindexfile.setEnabled(true);
-                            
-                            tabFolder.getTabList()[1].setEnabled(false);
-                            tabFolder.getTabList()[2].setEnabled(false);
-  
-                            tabFolder.redraw();
-                        }else{
-                            index.setBackground(grey);
-                            index.setEnabled(false);
-                            newindexfile.setBackground(grey);
-                            newindexfile.setEnabled(false);
-                            
-                            
-                            baserecset.setEnabled(true);
-                            baserecset.setBackground(white);
-                            indexfile.setEnabled(true);
-                            indexfile.setBackground(white);
-                            sorted.setEnabled(true);
-                            sorted.setBackground(white);
-                            preload.setEnabled(true);
-                            preload.setBackground(white);
-                            opt.setEnabled(true);
-                            opt.setBackground(white);
-                            compressed.setEnabled(true);
-                            compressed.setBackground(white);
-                            distributed.setEnabled(true);
-                            distributed.setBackground(white);
-                            
-                            tabFolder.getTabList()[1].setEnabled(true);
-                            tabFolder.getTabList()[2].setEnabled(true);
+    public final void toggleEnable() {
+        Color white = new Color(null, 255, 255, 255);
+        Color grey = new Color(null, 245, 245, 245);
 
-                            tabFolder.redraw();
-                            
-                        }
+        if (isDuplicate.getText().equals(COMBO_ITEM_YES)) {
+
+            baserecset.setEnabled(false);
+            baserecset.setBackground(grey);
+            indexfile.setEnabled(false);
+            indexfile.setBackground(grey);
+            sorted.setEnabled(false);
+            sorted.setBackground(grey);
+            preload.setEnabled(false);
+            preload.setBackground(grey);
+            opt.setEnabled(false);
+            opt.setBackground(grey);
+            compressed.setEnabled(false);
+            compressed.setBackground(grey);
+            distributed.setEnabled(false);
+            distributed.setBackground(grey);
+
+            index.setBackground(white);
+            index.setEnabled(true);
+            newindexfile.setBackground(white);
+            newindexfile.setEnabled(true);
+
+            tabFolder.getTabList()[1].setEnabled(false);
+            tabFolder.getTabList()[2].setEnabled(false);
+
+            tabFolder.redraw();
+        } else {
+            index.setBackground(grey);
+            index.setEnabled(false);
+            newindexfile.setBackground(grey);
+            newindexfile.setEnabled(false);
+
+            baserecset.setEnabled(true);
+            baserecset.setBackground(white);
+            indexfile.setEnabled(true);
+            indexfile.setBackground(white);
+            sorted.setEnabled(true);
+            sorted.setBackground(white);
+            preload.setEnabled(true);
+            preload.setBackground(white);
+            opt.setEnabled(true);
+            opt.setBackground(white);
+            compressed.setEnabled(true);
+            compressed.setBackground(white);
+            distributed.setEnabled(true);
+            distributed.setBackground(white);
+
+            tabFolder.getTabList()[1].setEnabled(true);
+            tabFolder.getTabList()[2].setEnabled(true);
+
+            tabFolder.redraw();
+
+        }
     }
+
     public JobEntryInterface open() {
         Shell parentShell = getParent();
         Display display = parentShell.getDisplay();
-        String datasets[] = null;
-        AutoPopulate ap = new AutoPopulate();
-        try{
-            //Object[] jec = this.jobMeta.getJobCopies().toArray();
-            
-            datasets = ap.parseDatasetsRecordsets(this.jobMeta.getJobCopies());
-        }catch (Exception e){
-            System.out.println("Error Parsing existing Datasets");
-            System.out.println(e.toString());
-            datasets = new String[]{""};
-        }
         
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
         String[] columnNames = new String[] {"column_name"};
@@ -180,12 +169,12 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         tabFolder = new TabFolder (shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
         FormData data = new FormData();
         
-        data.height = 400;
-        data.width = 640;
+        data.height = 500;
+        data.width = 690;
         tabFolder.setLayoutData(data);
         
         Composite compForGrp = new Composite(tabFolder, SWT.NONE);
-	//compForGrp.setLayout(new FillLayout(SWT.VERTICAL));
+
         compForGrp.setBackground(new Color(tabFolder.getDisplay(),255,255,255));
         compForGrp.setLayout(new FormLayout());
                 
@@ -232,7 +221,7 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         FormData generalGroupFormat = new FormData();
         generalGroupFormat.top = new FormAttachment(0, margin);
         generalGroupFormat.width = 400;
-        generalGroupFormat.height = 85;
+        generalGroupFormat.height = 95;
         generalGroupFormat.left = new FormAttachment(middle, 0);
         generalGroup.setLayoutData(generalGroupFormat);
         
@@ -254,8 +243,6 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         indexGroup.setLayoutData(joinGroupFormat);
 
         
-        //this.leftRecordSet = buildCombo("Left Recordset Name", null, lsMod, middle, margin, indexGroup,datasets);
-        //this.joinRecordSet = buildText("Resulting Recordset", this.joinType, lsMod, middle, margin, indexGroup);
         this.baserecset = buildText("Baserecset", null, lsMod, middle, margin, indexGroup);
         this.indexfile = buildText("Index File", baserecset, lsMod, middle, margin, indexGroup);
         this.sorted = buildCombo("Is Sorted", indexfile, lsMod, middle, margin, indexGroup, new String[]{COMBO_ITEM_NO, COMBO_ITEM_YES});
@@ -267,10 +254,6 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         this.index = buildText("Index", distributed, lsMod, middle, margin, indexGroup);
         this.newindexfile = buildText("New Indexfile", index, lsMod, middle, margin, indexGroup);
         
-        //this.index.setBackground(null);
-        
-        
-        
         generalTab.setControl(compForGrp);
          
         if(jobEntry.getKeys() != null){
@@ -278,9 +261,8 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
             keysCT.setRecordList(jobEntry.getKeys());
             
             if(keysRecordList.getRecords() != null && keysRecordList.getRecords().size() > 0) {
-                    System.out.println("Size: "+keysRecordList.getRecords().size());
                     for (Iterator<RecordBO> iterator = keysRecordList.getRecords().iterator(); iterator.hasNext();) {
-                            RecordBO obj = (RecordBO) iterator.next();
+                            iterator.next();
                     }
             }
         }
@@ -292,8 +274,7 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
             });
        
         
-       // keysCT.redrawTable(true);
-        TabItem keysTab = keysCT.buildDefTab("Keys", tabFolder);
+        keysCT.buildDefTab("Keys", tabFolder);
        
         
         
@@ -302,13 +283,13 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
             payloadCT.setRecordList(jobEntry.getPayload());
             
             if(payloadRecordList.getRecords() != null && payloadRecordList.getRecords().size() > 0) {
-                    System.out.println("Size: "+payloadRecordList.getRecords().size());
                     for (Iterator<RecordBO> iterator = payloadRecordList.getRecords().iterator(); iterator.hasNext();) {
-                            RecordBO obj = (RecordBO) iterator.next();
+                            iterator.next();
                     }
             }
         }
-        TabItem payloadTab = payloadCT.buildDefTab("Payload", tabFolder);
+        
+        payloadCT.buildDefTab("Payload", tabFolder);
         keysCT.redrawTable(true);
        
         wOK = new Button(shell, SWT.PUSH);
@@ -431,32 +412,6 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         return text;
     }
 
-    private Text buildMultiText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.V_SCROLL);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 100;
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
     private Combo buildCombo(String strLabel, Control prevControl,
             ModifyListener lsMod, int middle, int margin, Composite groupBox, String[] items) {
         // label
@@ -491,22 +446,7 @@ public class ECLIndexDialog extends JobEntryDialog implements JobEntryDialogInte
         }
 
         jobEntry.setName(jobEntryName.getText());
-               /*
-             *     private String baserecset;
-    private String keys;
-    private String payload;
-    private String indexfile;
-    private String sorted;
-    private String preload;
-    private String opt;
-    private String compressed;
-    private String distributed;
-    private String index;
-    private String newindexfile;
-             * 
-             */
         jobEntry.setBaserecset(baserecset.getText());
-        //jobEntry.setKeys(keys.getText());
         jobEntry.setIndexfile(indexfile.getText());
         jobEntry.setSorted(sorted.getText());
         jobEntry.setPreload(preload.getText());

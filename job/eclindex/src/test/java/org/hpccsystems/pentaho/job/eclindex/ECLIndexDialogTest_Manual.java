@@ -5,6 +5,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.hpccsystems.eclguifeatures.RecordBO;
 import org.hpccsystems.eclguifeatures.RecordList;
 import org.junit.Test;
+import org.pentaho.di.core.Result;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.ui.core.PropsUI;
@@ -21,7 +23,7 @@ import org.pentaho.di.ui.core.PropsUI;
 public class ECLIndexDialogTest_Manual {
 
     @Test
-    public void must_display_and_validate() {
+    public void must_display_and_validate() throws KettleException {
         PropsUI.init(new Display(), 0);
         
         final ECLIndex eclIndex = new ECLIndex();
@@ -36,7 +38,7 @@ public class ECLIndexDialogTest_Manual {
         testInstance.open();
         
         // Visually compare trace output to selected values in dialog
-        System.out.println(eclIndex.getXML());
+        eclIndex.execute(new Result(), 1);
     }
 
     private RecordList newRecordListWith(String... values) {

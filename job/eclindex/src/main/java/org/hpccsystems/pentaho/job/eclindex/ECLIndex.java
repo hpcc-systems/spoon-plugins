@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.hpccsystems.pentaho.job.eclindex;
 
 import java.util.ArrayList;
@@ -158,7 +154,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
             if(recordList.getRecords() != null && recordList.getRecords().size() > 0) {
                     System.out.println("Size: "+recordList.getRecords().size());
                     for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
-                            RecordBO record = (RecordBO) iterator.next();
+                            RecordBO record = iterator.next();
                             if(!out.equals("")){
                                 out += ",";
                             }
@@ -206,27 +202,23 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
             data.addValue("ecl", Value.VALUE_TYPE_STRING, index.ecl());
            
 
-            List list = result.getRows();
+            List<RowMetaAndData> list = result.getRows();
             list.add(data);
             String eclCode = "";
-            if (list == null) {
-                list = new ArrayList();
-            } else {
-                try{
+            try{
                 for (int i = 0; i < list.size(); i++) {
-                    RowMetaAndData rowData = (RowMetaAndData) list.get(i);
+                    RowMetaAndData rowData = list.get(i);
                     
                     String code = rowData.getString("ecl", null);
                     if (code != null) {
                         eclCode += code;
                     }
                     
-                     }
-                }catch (Exception e){
+                 }
+            }catch (Exception e){
 
-                }
-                logBasic("{Join Job} ECL Code =" + eclCode);
             }
+            logBasic("{Join Job} ECL Code =" + eclCode);
 
             result.setRows(list);
         }
@@ -237,7 +229,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
     
     public String saveKeys(){
         String out = "";
-        ArrayList list = keys.getRecords();
+        List<RecordBO> list = keys.getRecords();
         Iterator<RecordBO> itr = list.iterator();
         boolean isFirst = true;
         while(itr.hasNext()){
@@ -268,7 +260,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
     
     public String savePayload(){
         String out = "";
-        ArrayList list = payload.getRecords();
+        ArrayList<RecordBO> list = payload.getRecords();
         Iterator<RecordBO> itr = list.iterator();
         boolean isFirst = true;
         while(itr.hasNext()){
