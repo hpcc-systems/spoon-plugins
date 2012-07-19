@@ -152,7 +152,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         
         if(recordList != null){
             if(recordList.getRecords() != null && recordList.getRecords().size() > 0) {
-                    System.out.println("Size: "+recordList.getRecords().size());
                     for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
                             RecordBO record = iterator.next();
                             if(!out.equals("")){
@@ -194,8 +193,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
                 index.setDistributed(distributed);
             }
             
-            //logBasic("{Join Job} Previous =" + result.getLogText());
-
             result.setResult(true);
 
             RowMetaAndData data = new RowMetaAndData();
@@ -218,7 +215,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
             }catch (Exception e){
 
             }
-            logBasic("{Join Job} ECL Code =" + eclCode);
+            logBasic("{Index Job} ECL Code (below):\r\n" + eclCode);
 
             result.setRows(list);
         }
@@ -247,12 +244,8 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         int len = strLine.length;
         if(len>0){
             keys = new RecordList();
-            //System.out.println("Open Record List");
             for(int i =0; i<len; i++){
-                System.out.println("++++++++++++" + strLine[i]);
-                //this.recordDef.addRecord(new RecordBO(strLine[i]));
                 RecordBO rb = new RecordBO(strLine[i]);
-                System.out.println(rb.getColumnName());
                 keys.addRecordBO(rb);
             }
         }
@@ -278,12 +271,8 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         int len = strLine.length;
         if(len>0){
             payload = new RecordList();
-           // System.out.println("Open Record List");
             for(int i =0; i<len; i++){
-                System.out.println("++++++++++++" + strLine[i]);
-                //this.recordDef.addRecord(new RecordBO(strLine[i]));
                 RecordBO rb = new RecordBO(strLine[i]);
-                System.out.println(rb.getColumnName());
                 payload.addRecordBO(rb);
             }
         }
@@ -294,7 +283,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         String rStr = "";
         if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, key)) != null){
                 rStr = XMLHandler.getNodeValue(XMLHandler.getSubNode(node, key));
-                //System.out.println("load XML Element " + key + " = " + XMLHandler.getNodeValue(XMLHandler.getSubNode(node, key)) + "|");
         }
         return rStr;
     }
