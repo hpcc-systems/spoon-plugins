@@ -5,6 +5,8 @@
 package org.hpccsystems.ecldirect;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,14 +16,18 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 //import org.apache.commons.io.IOUtils;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import org.hpccsystems.ecldirect.ECLSoap;
+
 
 /**
  *
@@ -37,18 +43,29 @@ public class EclDirect {
     private String jobName;
     private String eclccInstallDir;
     private String includeML;
-    
     private String mlPath;
-    
     private String wuid;
-    
-     private String outputName = "";
-     
+    private String outputName = "";
     private boolean isValid = true;
+    
+    private String error = "";
+    
 
     
     
-    public boolean isValid() {
+    public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
+	}
+
+	public String getClusterName() {
+		return clusterName;
+	}
+
+	public boolean isValid() {
 		return isValid;
 	}
 
@@ -145,23 +162,7 @@ public class EclDirect {
     
     
     public ArrayList execute(String eclCode){
-        /*
-        ECLSoap es = new ECLSoap();
-        es.setCluster(clusterName);
-        es.setEclccInstallDir(eclccInstallDir);
-        es.setHostname(serverHost);
-        es.setOutputName(outputName);
-        //System.out.println("includeML++++++++++++++++++: " + this.includeML);
-        if(this.includeML.equals("true")){
-            es.setIncludeML(true);
-        }else{
-            es.setIncludeML(false);
-        }
-        es.setJobName(jobName);
-        es.setMlPath(mlPath);
-        
-        es.setPort(Integer.parseInt(this.serverPort));
-        */
+
         ECLSoap es = getECLSoap();
         
         Boolean proceed = es.executeECL(eclCode);
@@ -186,25 +187,9 @@ public class EclDirect {
     
     
     public Boolean execute_noResults(String eclCode){
-        /*ECLSoap es = new ECLSoap();
-        es.setCluster(clusterName);
-        es.setEclccInstallDir(eclccInstallDir);
-        es.setHostname(serverHost);
-        //System.out.println("includeML++++++++++++++++++: " + this.includeML);
-        if(this.includeML.equals("true")){
-            es.setIncludeML(true);
-        }else{
-            es.setIncludeML(false);
-        }
-        es.setJobName(jobName);
-        es.setMlPath(mlPath); 
-        es.setOutputName(outputName);
-        es.setPort(Integer.parseInt(this.serverPort));
-         * 
-         */
+
         ECLSoap es = getECLSoap();
-        
-        
+
         Boolean proceed = es.executeECL(eclCode);
         this.wuid = es.getWuid();
         return proceed;
@@ -213,22 +198,7 @@ public class EclDirect {
     
     public ArrayList resultList(){
         ArrayList al = null;
-        /*ECLSoap es = new ECLSoap();
-        es.setCluster(clusterName);
-        es.setEclccInstallDir(eclccInstallDir);
-        es.setHostname(serverHost);
-        es.setJobName(jobName);
-        es.setMlPath(mlPath); 
-        es.setOutputName(outputName);
-        es.setPort(Integer.parseInt(this.serverPort));
-        
-         if(this.includeML.equals("true")){
-            es.setIncludeML(true);
-        }else{
-            es.setIncludeML(false);
-        }
-         * 
-         */
+
         ECLSoap es = getECLSoap();
         InputStream is = es.InfoDetailsCall(this.wuid);
         try{
@@ -321,6 +291,14 @@ public class EclDirect {
         es.setMlPath(mlPath); 
         es.setOutputName(outputName);
         es.setPort(Integer.parseInt(this.serverPort));
+        if(this.includeML.equals("true")){
+            es.setIncludeML(true);
+        }else{
+            es.setIncludeML(false);
+        }
+  
+           
+           
         return es;
     }
      public String convertInputStreamToString(InputStream ists) throws IOException {
@@ -341,5 +319,165 @@ public class EclDirect {
         } else {       
             return "";
         }
+    }
+     
+     
+     
+     
+     public boolean execute(String eclCode, String debugLevel){
+ 		
+
+ 	      //decide if we need to do a pre compile check before we send it off to the server
+ 	      boolean validate = false;
+ 	      if(!debugLevel.equalsIgnoreCase("None")){
+ 	        validate = true;
+ 	      }
+           
+ 	       ECLSoap es = getECLSoap();
+           ArrayList dsList = null;
+           String outStr = "";
+           try{
+               if(validate){
+
+                    this.error = (es.syntaxCheck(eclCode)).trim();
+                    System.out.println(this.error);
+                    boolean isError = false;
+                    boolean isWarning = false;
+                    if(es.getErrorCount() > 0 &&  debugLevel.equalsIgnoreCase("Stop on Errors")){
+                    	isError = true;
+                    }
+                    if(es.getWarningCount() > 0 && debugLevel.equalsIgnoreCase("Stop on Errors or Warnings")){
+                     	isWarning = true;
+                    }
+                     
+                    if((isError || isWarning) && !error.equals("")){;
+                    	this.isValid = false;
+                    	
+                    }else{
+                       //System.out.println("if -- executeECL");
+                       this.isValid = es.executeECL(eclCode);
+                       this.setWuid(es.getWuid());
+                         
+                       //if not isValid add error
+                       if(!this.isValid){
+                    	   this.error += "\r\nServer Failed to compile code please refer to ECLWatch and verify your settings\r\n";
+                    	   //System.out.println(this.error);
+                       }
+                         
+                    }
+                 }else{
+                	 //System.out.println("else -- executeECL");
+                	 this.isValid = es.executeECL(eclCode);
+                     this.setWuid(es.getWuid());
+                     if(!this.isValid){
+                    	 this.error += "\r\nFailed to execute code on the cluster, please verify your settings\r\n";
+                    	 //System.out.println(this.error);
+                     }
+                 }
+       
+              }catch (Exception e){
+            	  this.error += "Exception occured please verify all settings.";
+                  e.printStackTrace();
+                  this.isValid = false;
+                  System.out.println(this.error);
+             }
+             
+             
+         return this.isValid;
+     }
+     
+     public boolean writeResultsToFile(String outputDir) throws Exception{
+    	 boolean isSuccess = true;
+    	 System.out.println("writing files");
+    	 ECLSoap es = getECLSoap();
+    	 if(isValid){// && dsList != null){
+             ArrayList al = this.resultList();
+             int alSize = al.size();
+             for(int i = 0; i < alSize ; i++){
+                 //System.out.println("-");
+                 ArrayList al2 = (ArrayList)al.get(i);
+                 int al2Size = al2.size();
+                 //columns
+                 int counter = 0;
+                 for(int j = 0; j < al2Size ; j++){
+                    // System.out.println("--");
+
+                     ArrayList al3 = (ArrayList)al2.get(j);
+                     int al3Size = al3.size();
+                     
+                     for(int r = 0; r < al3Size ; r++){
+
+                         if(((Column)al3.get(r)).getName().equals("Name")){
+                             String resName = ((Column)al3.get(r)).getValue();
+                             InputStream is = es.ResultsSoapCall(this.getWuid(), resName);
+                             ArrayList results = es.parseResults(is);
+                             resName = resName.replace(" ", "_");
+                             createOutputFile(results,outputDir + "\\" + resName + ".csv",counter);
+                             counter++;
+                         }
+                     }
+                     
+                 }
+                     System.setProperty("fileCount", counter+"" );
+             }
+
+         }else{
+        	 isSuccess = false;
+         }
+    	 return isSuccess;
+     }
+     
+     public void createOutputFile(ArrayList dsList,String fileName, int count){
+         String outStr = "";
+         String header = "";
+         String error = "";
+         if(dsList != null){
+         String newline = System.getProperty("line.separator");
+         
+                        for (int iList = 0; iList < dsList.size(); iList++) {
+                            //"----------Outer-------------"
+                            ArrayList rowList = (ArrayList) dsList.get(iList);
+
+                            for (int jRow = 0; jRow < rowList.size(); jRow++) {
+                                //"----------Row-------------"
+                                ArrayList columnList = (ArrayList) rowList.get(jRow);
+
+                                for (int lCol = 0; lCol < columnList.size(); lCol++) {
+                                 //"----------Column-------------"
+                                    Column column = (Column) columnList.get(lCol);
+                                  
+                                    outStr += column.getValue();
+                                    if(lCol< (columnList.size()-1)){
+                                        outStr += ",";
+                                    }
+                                    if(jRow == 0){
+                                        header += column.getName();
+                                        if(lCol< (columnList.size()-1)){
+                                            header += ",";
+                                        }else{
+                                            header += newline;
+                                        }
+                                    }
+                                }
+                               
+                                outStr += newline;
+                            }
+                        }
+             try {
+                
+                BufferedWriter out = new BufferedWriter(new FileWriter(fileName));
+                System.getProperties().getProperty("fileName");
+                System.setProperty("fileName"+count, fileName);
+                
+                out.write(header+outStr);
+                out.close();
+           
+            } catch (IOException e) {
+               //logError("Failed to write file: " + fileName);
+               error += "Failed to write ecl code file: " + fileName;
+               //result.setResult(false);
+                e.printStackTrace();
+            }  
+         }
     }
 }

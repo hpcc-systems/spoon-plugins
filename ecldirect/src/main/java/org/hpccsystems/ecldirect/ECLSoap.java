@@ -793,7 +793,7 @@ public class ECLSoap {
      * Parses out the data from the results soap call, the string is the xml 
      * that is the same as returned from the eclDirect
      */
-    public static ArrayList parseResults(InputStream xml) throws Exception {
+    public ArrayList parseResults(InputStream xml) throws Exception {
         ArrayList results = null;
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
