@@ -12,23 +12,37 @@ public class Rollup implements EclCommand {
 
     private String name;
     private String recordset;
+    private String recordFormat;
     private String condition;
     private String transformName;
     private String transform;
-    private String transformCall;
     private String fieldlist;
     private String group;
+    //private String outputFormat;
     private Boolean runLocal;//optional
+    
+    
+   // public String getOutputFormat() {
+	//	return outputFormat;
+	//}
 
-    public String getTransformCall() {
-        return transformCall;
-    }
+	//public void setOutputFormat(String outputFormat) {
+	//	this.outputFormat = outputFormat;
+	//}
 
-    public void setTransformCall(String transformCall) {
-        this.transformCall = transformCall;
-    }
+	
 
-    public String getTransformName() {
+
+
+    public String getRecordFormat() {
+		return recordFormat;
+	}
+
+	public void setRecordFormat(String recordFormat) {
+		this.recordFormat = recordFormat;
+	}
+
+	public String getTransformName() {
         return transformName;
     }
 
@@ -101,31 +115,34 @@ public class Rollup implements EclCommand {
     @Override
     public String ecl() {
         
-        String ecl = transformName + " := TRANSFORM \r\n" + transform + "\r\n" + "END; \r\n";
+        String ecl = "";
+
+        
+       // ecl += transformName + "RECNAME := record \r\n"; 
+       // ecl += this.getOutputFormat() + "\r\n end;\r\n\r\n";
+        
+        ecl += recordFormat + " " + transformName + "(" + recordFormat + " L," + recordFormat + " R) := TRANSFORM \r\n" + transform + "\r\n" + "END; \r\n";
         
         ecl += name + ":=ROLLUP(" + recordset;
         //add local if its set if not its optional
         //ROLLUP(recordset, condition, transform [, LOCAL] )
         
-        
+        String transformCall = transformName + "(LEFT,RIGHT)";
         if(condition != null && !condition.equals("")){
             ecl+= "," +condition;
-            if(transformCall != null && !transformCall.equals("")){
-                ecl += "," + transformCall;
-                if (runLocal != null && runLocal) {
-                        ecl += ", local";
-                    }
-            }
+
+            ecl += "," + transformCall;
+            if (runLocal != null && runLocal) {
+                    ecl += ", local";
+                }
+        
         }else{
             if (group != null && !group.equals("")) {
                 //ROLLUP(recordset, GROUP, transform )
                 ecl += "," + group;
-                if (transformCall != null && !transformCall.equals("")){
                     ecl += "," + transformCall;
-                }
             }else{
                 //ROLLUP(recordset, transform, fieldlist [, LOCAL] )
-                if(transformCall != null && !transformCall.equals("")){
                     ecl += "," + transformCall;
                     if (fieldlist != null && !fieldlist.equals("")) {
                        ecl += "," + fieldlist;
@@ -134,7 +151,6 @@ public class Rollup implements EclCommand {
                             ecl += ", local";
                         }
                     }
-                }
             }
         }
         //close out the ecl call

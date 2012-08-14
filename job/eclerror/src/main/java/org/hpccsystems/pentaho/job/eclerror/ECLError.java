@@ -106,6 +106,7 @@ public class ECLError extends JobEntryBase implements Cloneable, JobEntryInterfa
 			if (isGuiMode()) {
 			    ErrorNotices en = new ErrorNotices();
 			    //String error = result.getLogText();
+			    error = "Please see eclwatch for more detailed information!\n\n\n" + error;
 			    en.openDialog("Syntax Check Failed:", error,eclCode);
 			}
 		    

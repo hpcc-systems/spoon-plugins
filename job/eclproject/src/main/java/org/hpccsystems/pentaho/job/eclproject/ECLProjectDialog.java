@@ -545,7 +545,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
     		errors += "You must provide a \"Output Format\"!\r\n";
     	}
     	
-    	
+    	//TODO: update this doesn't seem to work.
     	//require transform format to atleast not be ""
     	if(tblMapper.getMapperRecList().equals("")){
     		isValid = false;

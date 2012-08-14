@@ -240,6 +240,56 @@ public class Utils {
 		tree.setRedraw(true);
 	}
 	
+public static void fillTree(String side, String type, Tree tree, Map<String, String[]> mapDataSets) {
+		
+		for (Map.Entry<String, String[]> entry : mapDataSets.entrySet()) {
+		    String key = entry.getKey();
+		    TreeItem item = new TreeItem(tree, SWT.NONE);
+			item.setText(side + "." + key);
+			String[] value = entry.getValue();
+			TreeItem childfirst = new TreeItem(item, SWT.NONE);
+			childfirst.setText(type);
+			for (int i = 0; i < value.length; i++) {
+				TreeItem child = new TreeItem(item, SWT.NONE);
+				child.setText(type+"." + value[i]);
+			}
+		}
+		// Turn drawing back on!
+		tree.setRedraw(true);
+	}
+
+
+public static void fillTreeVariableName(MainMapper tblMapper, Tree tree, Map<String, String[]> mapDataSets) {
+	/*
+	 * String[] cmbValues = new String[tblOutput.getRecordList().getRecords().size()];
+		cmbValues[count] = "self." + obj.getColumnName();
+	 */
+	tblMapper.getCmbVariableName().removeAll();
+	String type = "SELF";
+	//String[] cmbValuesAll = {"SELF"};
+	List<String> cmbValuesAll = new ArrayList<String>(1);
+	cmbValuesAll.add("SELF");
+	
+	for (Map.Entry<String, String[]> entry : mapDataSets.entrySet()) {
+	    String key = entry.getKey();
+		String[] value = entry.getValue();
+		//String[] cmbValues = new String[value.length];
+		for (int i = 0; i < value.length; i++) {
+			//cmbValues[i] = type + "." + value[i];
+			cmbValuesAll.add(type + "." + value[i]);
+		}
+		
+		//String[] cmbValuesTmp = ArrayUtils.addAll(cmbValuesAll, cmbValues);
+
+		
+	}
+	String[] cmbValues = cmbValuesAll.toArray(new String[cmbValuesAll.size()]);
+	tblMapper.getCmbVariableName().setItems(cmbValues);
+	
+	// Turn drawing back on!
+	tree.setRedraw(true);
+}
+	
 	public static void fillTreeForOperators(Tree tree) {
 		// Turn off drawing to avoid flicker
 		tree.setRedraw(false);

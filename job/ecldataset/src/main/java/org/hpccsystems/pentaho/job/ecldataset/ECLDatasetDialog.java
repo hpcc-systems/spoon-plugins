@@ -91,8 +91,8 @@ public class ECLDatasetDialog extends JobEntryDialog implements JobEntryDialogIn
         TabFolder tabFolder = new TabFolder (shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
         FormData data = new FormData();
         
-        data.height = 400;
-        data.width = 640;
+        data.height = 500;
+        data.width = 650;
         tabFolder.setLayoutData(data);
         
         Composite compForGrp = new Composite(tabFolder, SWT.NONE);

@@ -215,8 +215,18 @@ public class MainMapper {
 		                table.selectAll();
 		            }
 		        } //end of else
+		        
+		        tableViewer.refresh();
+		        table.redraw();
 		    } //end of handleEvent function
 		});
+		
+		table.addListener (SWT.Selection, new Listener () {
+            public void handleEvent (Event event) {
+                    tableViewer.refresh();
+                    table.redraw();
+            }
+        });
 	}
 	
 	/**
@@ -524,6 +534,7 @@ public class MainMapper {
 						txtExpression.setText("");
 						uncheckAll();
 						tableViewer.refresh();
+						tableViewer.getTable().redraw();
 					}
 				}
 			}

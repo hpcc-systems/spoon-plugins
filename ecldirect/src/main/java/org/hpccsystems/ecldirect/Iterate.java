@@ -11,57 +11,36 @@ package org.hpccsystems.ecldirect;
 public class Iterate implements EclCommand {
 
     private String name;
-    private String record;
-    private String recordName;
-    private String transform;
-    private String transformCall;
     private String transformName;
     private String recordsetName;
-    private String recordset;
+    private String dataset;
     private Boolean runLocal;
-    private String returnType;
-
-    public String getReturnType() {
-        return returnType;
-    }
-
-    public void setReturnType(String returnType) {
-        this.returnType = returnType;
-    }
-    
+    private String transform;
+   
     
 
-    public String getTransformCall() {
-        return transformCall;
-    }
+    public String getTransform() {
+		return transform;
+	}
 
-    public void setTransformCall(String transformCall) {
-        this.transformCall = transformCall;
-    }
+	public void setTransform(String transform) {
+		this.transform = transform;
+	}
 
-    
-    public String getRecordName() {
-        return recordName;
-    }
+	public String getDataset() {
+		return dataset;
+	}
 
-    public void setRecordName(String recordName) {
-        this.recordName = recordName;
-    }
+	public void setDataset(String dataset) {
+		this.dataset = dataset;
+	}
 
-    public String getRecordsetName() {
+	public String getRecordsetName() {
         return recordsetName;
     }
 
     public void setRecordsetName(String recordsetName) {
         this.recordsetName = recordsetName;
-    }
-
-    public String getRecord() {
-        return record;
-    }
-
-    public void setRecord(String record) {
-        this.record = record;
     }
 
     public Boolean getRunLocal() {
@@ -90,21 +69,7 @@ public class Iterate implements EclCommand {
         this.name = name;
     }
 
-    public String getRecordset() {
-        return recordset;
-    }
-
-    public void setRecordset(String recordset) {
-        this.recordset = recordset;
-    }
-
-    public String getTransform() {
-        return transform;
-    }
-
-    public void setTransform(String transform) {
-        this.transform = transform;
-    }
+   
 
     
 
@@ -114,18 +79,15 @@ public class Iterate implements EclCommand {
         
          
         String ecl = "";
-        if(record != null && !record.equals("") && !record.equals("null")){
-            ecl += recordName + " := RECORD\r\n" + record + "\r\nEND; \r\n\r\n";
-        }
-        if(recordset != null && !recordset.equals("") && !recordset.equals("null")){
-            
-            ecl += recordsetName + " := DATASET(["+recordset+"],"+recordName+");\r\n";
-        }
+
+
         //ecl += returnType + " " + transformName + "(" + returnType + " L, " + returnType + " R) := TRANSFORM \r\n" + transform + "\r\nEND;\r\n\r\n";
         if(transformName != null && !transformName.equals("")){
-            ecl += transformName + " := TRANSFORM \r\n" + transform + "\r\nEND;\r\n\r\n";
+            ecl += dataset + " " + transformName + "(" + dataset + " L," + dataset + " R) := TRANSFORM \r\n";
+            ecl += transform;
+            ecl += "\r\nEND;\r\n\r\n";
         }
-        ecl += name + " := ITERATE(" + recordsetName + "," + transformCall;
+        ecl += recordsetName + " := ITERATE(" + dataset + "," + transformName + "(LEFT,RIGHT)";
         //add local if its set if not its optional
         if (runLocal != null && runLocal) {
            ecl += ", local";
