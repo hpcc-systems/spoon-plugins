@@ -7,7 +7,7 @@
 	classname="org.hpccsystems.pentaho.job.eclrollup.ECLRollup">
             
     <libraries>
-	  <library name="../../hpcc-common/ecldirect.jar"/>
+	  	<library name="../../hpcc-common/ecldirect.jar"/>
         <library name="../../hpcc-common/eclgui.jar"/>
         <library name="eclrollup.jar"/>
     </libraries>            

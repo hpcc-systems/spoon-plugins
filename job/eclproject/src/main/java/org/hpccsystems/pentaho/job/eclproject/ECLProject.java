@@ -23,17 +23,17 @@ import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
 import org.hpccsystems.ecldirect.Dataset;
-import org.hpccsystems.eclguifeatures.RecordBO;
-import org.hpccsystems.eclguifeatures.RecordList;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 import org.hpccsystems.mapper.*;
-import org.hpccsystems.mapper.MapperRecordList;
+import org.hpccsystems.ecljobentrybase.*;
 
 
 /**
  *
- * @author ChalaAX
+ * @author ShetyeD
  */
-public class ECLProject extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLProject extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
     
     private String recordsetName = "";
     private boolean declareCounter = false;

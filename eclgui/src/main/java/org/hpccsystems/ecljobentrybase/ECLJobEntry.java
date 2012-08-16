@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.hpccsystems.pentaho.job.ecljobentry;
+package org.hpccsystems.ecljobentrybase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,18 +35,20 @@ import org.pentaho.di.job.JobMeta;
 
 /**
  *
- * @author ChalaAX
+ * @author Chambers,Joseph
  */
-public class ECLJobEntry extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLJobEntry extends JobEntryBase implements Cloneable, JobEntryInterface  {
     
+	
+	
 	@Override
     public Result execute(Result prevResult, int k) throws KettleException {
-		return null;
-	}
+return null;
+}
 
-	
 
-	@Override
+
+@Override
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
             super.loadXML(node, list, list1);
     }

@@ -1,4 +1,4 @@
-package org.hpccsystems.eclguifeatures;
+package org.hpccsystems.recordlayout;
 
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.swt.widgets.TableItem;

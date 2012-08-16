@@ -18,8 +18,9 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
+import org.hpccsystems.ecljobentrybase.*;
 
-public class ECLMerge extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLMerge extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
 
 	private String result; // Output Recordset
 	private String recordsetName; // Output Recordset Name

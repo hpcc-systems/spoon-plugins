@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.hpccsystems.ecldirect.Rollup;
-import org.hpccsystems.eclguifeatures.RecordBO;
-import org.hpccsystems.eclguifeatures.RecordList;
+//import org.hpccsystems.recordlayout.RecordBO;
+//import org.hpccsystems.recordlayout.RecordList;
 import org.hpccsystems.mapper.MapperBO;
 import org.hpccsystems.mapper.MapperRecordList;
 import org.pentaho.di.cluster.SlaveServer;
@@ -26,12 +26,15 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
+import org.hpccsystems.ecljobentrybase.*;
+
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterface {
+//public class ECLRollup extends ECLJobEntry implements Cloneable, JobEntryInterface  {
+public class ECLRollup extends ECLJobEntry{
     
     //private String jobName;
 
@@ -46,27 +49,8 @@ public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterf
     private String group = "";
     private Boolean runLocal = false;//optional
     
-    //private RecordList recordList = new RecordList();
     private MapperRecordList mapperRecList = new MapperRecordList();
-    
-    
-    
-    //public String getRecordFormat() {
-	//	return recordFormat;
-	//}
 
-	//public void setRecordFormat(String recordFormat) {
-	//	this.recordFormat = recordFormat;
-	//}
-
-	//public RecordList getRecordList() {
-   //     return recordList;
-   // }
-
-    //public void setRecordList(RecordList recordList) {
-    //    this.recordList = recordList;
-    //}
-    
     public MapperRecordList getMapperRecList() {
 		return mapperRecList;
 	}
@@ -177,17 +161,7 @@ public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterf
         rollup.setTransformName(this.getTransformName());
         
         rollup.setTransform(generateEclForMapperGrid());
-        //rollup.setOutputFormat(resultListToString());
         
-        
-        /*
-         *     private String recordset;
-    private String condition;
-    private String transform;
-    private String fieldlist;
-    private String group;
-    private Boolean runLocal;
-         */
 
         logBasic("{rollup Job} Execute = " + rollup.ecl());
         

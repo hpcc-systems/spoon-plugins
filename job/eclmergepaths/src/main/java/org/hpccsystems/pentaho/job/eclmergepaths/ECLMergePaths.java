@@ -24,13 +24,14 @@ import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
 import org.hpccsystems.ecldirect.Column;
 import java.io.*;
+import org.hpccsystems.ecljobentrybase.*;
 
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLMergePaths extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLMergePaths extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
     
 
     private String numberOfPaths = "1";

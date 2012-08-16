@@ -20,12 +20,13 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
+import org.hpccsystems.ecljobentrybase.*;
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
     
     //private String jobName;
     //private String name = "";

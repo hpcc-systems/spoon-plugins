@@ -2,8 +2,8 @@ package org.hpccsystems.pentaho.job.eclindex;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.hpccsystems.eclguifeatures.RecordBO;
-import org.hpccsystems.eclguifeatures.RecordList;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 import org.junit.Test;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;

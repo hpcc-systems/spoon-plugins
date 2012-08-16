@@ -1,4 +1,4 @@
-package org.hpccsystems.eclguifeatures;
+package org.hpccsystems.recordlayout;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;

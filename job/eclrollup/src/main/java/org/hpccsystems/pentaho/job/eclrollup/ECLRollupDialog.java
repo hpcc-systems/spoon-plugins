@@ -6,6 +6,7 @@ package org.hpccsystems.pentaho.job.eclrollup;
 
 
 
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -50,12 +52,16 @@ import org.hpccsystems.mapper.*;
 
 
 import org.hpccsystems.eclguifeatures.*;
+import org.hpccsystems.recordlayout.*;
+import org.hpccsystems.ecljobentrybase.*;
+
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLRollupDialog extends JobEntryDialog implements JobEntryDialogInterface {
+public class ECLRollupDialog extends ECLJobEntryDialog{
+//public class ECLRollupDialog extends ECLJobEntryDialog {
 
     private ECLRollup jobEntry;
     
@@ -563,85 +569,126 @@ public class ECLRollupDialog extends JobEntryDialog implements JobEntryDialogInt
 		//System.out.println("Updated Input Recordsets");
         tblMapper.reDrawTable();
     }
+    
+
+    
+    public Button buildButton(String strLabel, Control prevControl, 
+             ModifyListener isMod, int middle, int margin, Composite groupBox){
+        
+            Button nButton = new Button(groupBox, SWT.PUSH | SWT.SINGLE | SWT.CENTER);
+            nButton.setText(strLabel);
+            props.setLook(nButton);
+            //nButton.addModifyListener(lsMod)
+            FormData fieldFormat = new FormData();
+            
+            fieldFormat.left = new FormAttachment(middle, 0);
+            fieldFormat.top = new FormAttachment(prevControl, margin);
+            fieldFormat.right = new FormAttachment(75, 0);
+            fieldFormat.height = 25;
+
+            nButton.setLayoutData(fieldFormat);
+        
+            return nButton;
+            
+           
+    }
+    public String buildFileDialog() {
+        
+            //file field
+            FileDialog fd = new FileDialog(shell, SWT.SAVE);
+
+            fd.setText("Save");
+            fd.setFilterPath("C:/");
+            String[] filterExt = { "*.csv", ".xml", "*.txt", "*.*" };
+            fd.setFilterExtensions(filterExt);
+            String selected = fd.open();
+            if(fd.getFileName() != ""){
+                return fd.getFilterPath() + System.getProperty("file.separator") + fd.getFileName();
+            }else{
+                return "";
+            }
+            
+        }
+
+    public Text buildText(String strLabel, Control prevControl,
+                ModifyListener lsMod, int middle, int margin, Composite groupBox) {
+            // label
+            Label fmt = new Label(groupBox, SWT.RIGHT);
+            fmt.setText(strLabel);
+            props.setLook(fmt);
+            FormData labelFormat = new FormData();
+            labelFormat.left = new FormAttachment(0, 0);
+            labelFormat.top = new FormAttachment(prevControl, margin);
+            labelFormat.right = new FormAttachment(middle, -margin);
+            fmt.setLayoutData(labelFormat);
+
+            // text field
+            Text text = new Text(groupBox, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+            props.setLook(text);
+            text.addModifyListener(lsMod);
+            FormData fieldFormat = new FormData();
+            fieldFormat.left = new FormAttachment(middle, 0);
+            fieldFormat.top = new FormAttachment(prevControl, margin);
+            fieldFormat.right = new FormAttachment(100, 0);
+            text.setLayoutData(fieldFormat);
+
+            return text;
+        }
+
+    public Text buildMultiText(String strLabel, Control prevControl,
+                ModifyListener lsMod, int middle, int margin, Composite groupBox) {
+            // label
+            Label fmt = new Label(groupBox, SWT.RIGHT);
+            fmt.setText(strLabel);
+            props.setLook(fmt);
+            FormData labelFormat = new FormData();
+            labelFormat.left = new FormAttachment(0, 0);
+            labelFormat.top = new FormAttachment(prevControl, margin);
+            labelFormat.right = new FormAttachment(middle, -margin);
+            fmt.setLayoutData(labelFormat);
+
+            // text field
+            Text text = new Text(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.V_SCROLL);
+            props.setLook(text);
+            text.addModifyListener(lsMod);
+            FormData fieldFormat = new FormData();
+            fieldFormat.left = new FormAttachment(middle, 0);
+            fieldFormat.top = new FormAttachment(prevControl, margin);
+            fieldFormat.right = new FormAttachment(100, 0);
+            fieldFormat.height = 100;
+            text.setLayoutData(fieldFormat);
+
+            return text;
+        }
+
+    public Combo buildCombo(String strLabel, Control prevControl,
+                ModifyListener lsMod, int middle, int margin, Composite groupBox, String[] items) {
+            // label
+            Label fmt = new Label(groupBox, SWT.RIGHT);
+            fmt.setText(strLabel);
+            props.setLook(fmt);
+            FormData labelFormat = new FormData();
+            labelFormat.left = new FormAttachment(0, 0);
+            labelFormat.top = new FormAttachment(prevControl, margin);
+            labelFormat.right = new FormAttachment(middle, -margin);
+            fmt.setLayoutData(labelFormat);
+
+            // combo field
+            Combo combo = new Combo(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
+            props.setLook(combo);
+            combo.setItems(items);
+            combo.addModifyListener(lsMod);
+            FormData fieldFormat = new FormData();
+            fieldFormat.left = new FormAttachment(middle, 0);
+            fieldFormat.top = new FormAttachment(prevControl, margin);
+            fieldFormat.right = new FormAttachment(100, 0);
+            fieldFormat.height = 50;
+            combo.setLayoutData(fieldFormat);
+
+            return combo;
+        }
+    
    
-
-    private Text buildText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Text buildMultiText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.V_SCROLL);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 100;
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Combo buildCombo(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox, String[] items) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // combo field
-        Combo combo = new Combo(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-        props.setLook(combo);
-        combo.setItems(items);
-        combo.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 50;
-        combo.setLayoutData(fieldFormat);
-
-        return combo;
-    }
 
     private boolean validate(){
     	boolean isValid = true;
@@ -736,11 +783,5 @@ public class ECLRollupDialog extends JobEntryDialog implements JobEntryDialogInt
         jobEntry.setChanged(backupChanged);
         jobEntry = null;
         dispose();
-    }
-
-    public void dispose() {
-        WindowProperty winprop = new WindowProperty(shell);
-        props.setScreen(winprop);
-        shell.dispose();
     }
 }

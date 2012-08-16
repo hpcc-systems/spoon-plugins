@@ -18,8 +18,9 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
+import org.hpccsystems.ecljobentrybase.*;
 
-public class ECLLoop extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLLoop extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
 
 	private String result;
 	private String recordsetName;

@@ -39,13 +39,14 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 import java.io.*;
 
 import org.hpccsystems.eclguifeatures.*;
+import org.hpccsystems.ecljobentrybase.*;
 
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntryDialogInterface {
+public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
 
     private ECLGlobalVariables jobEntry;
     
@@ -373,83 +374,6 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
     	return isReady;
     }
 
-    private Text buildText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Text buildMultiText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 50;
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Combo buildCombo(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox, String[] items) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // combo field
-        Combo combo = new Combo(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-        props.setLook(combo);
-        combo.setItems(items);
-        combo.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 50;
-        combo.setLayoutData(fieldFormat);
-
-        return combo;
-    }
 
     private boolean validate(){
     	boolean isValid = true;
@@ -547,9 +471,4 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
         dispose();
     }
 
-    public void dispose() {
-        WindowProperty winprop = new WindowProperty(shell);
-        props.setScreen(winprop);
-        shell.dispose();
-    }
 }

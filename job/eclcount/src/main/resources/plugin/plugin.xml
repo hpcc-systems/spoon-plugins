@@ -9,7 +9,6 @@
     <libraries>
 		<library name="../../hpcc-common/ecldirect.jar"/>
         <library name="../../hpcc-common/eclgui.jar"/>
-        <library name="../../hpcc-common/ecljobentry.jar"/>
         <library name="eclcount.jar"/>
         
     </libraries>            

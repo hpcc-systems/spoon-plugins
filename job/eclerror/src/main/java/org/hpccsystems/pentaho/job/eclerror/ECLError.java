@@ -33,12 +33,13 @@ import org.pentaho.di.plugins.perspectives.eclresults.*;
 
 import org.hpccsystems.eclguifeatures.*;
 import org.pentaho.di.job.JobMeta;
+import org.hpccsystems.ecljobentrybase.*;
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLError extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLError extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
     
 
 

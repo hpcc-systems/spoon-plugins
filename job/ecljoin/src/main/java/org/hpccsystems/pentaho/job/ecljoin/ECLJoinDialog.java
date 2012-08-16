@@ -37,12 +37,13 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
 import org.hpccsystems.eclguifeatures.*;
 import org.eclipse.swt.events.*;
+import org.hpccsystems.ecljobentrybase.*;
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLJoinDialog extends JobEntryDialog implements JobEntryDialogInterface {
+public class ECLJoinDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
 
     private ECLJoin jobEntry;    
     private Text jobEntryName;
@@ -282,84 +283,6 @@ public class ECLJoinDialog extends JobEntryDialog implements JobEntryDialogInter
 
     }
 
-    private Text buildText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Text buildMultiText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.V_SCROLL);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 100;
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Combo buildCombo(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox, String[] items) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // combo field
-        Combo combo = new Combo(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-        props.setLook(combo);
-        combo.setItems(items);
-        combo.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 50;
-        combo.setLayoutData(fieldFormat);
-
-        return combo;
-    }
-
     private boolean validate(){
     	boolean isValid = true;
     	String errors = "";
@@ -444,11 +367,5 @@ public class ECLJoinDialog extends JobEntryDialog implements JobEntryDialogInter
         jobEntry.setChanged(backupChanged);
         jobEntry = null;
         dispose();
-    }
-
-    public void dispose() {
-        WindowProperty winprop = new WindowProperty(shell);
-        props.setScreen(winprop);
-        shell.dispose();
     }
 }

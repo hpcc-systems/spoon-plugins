@@ -17,6 +17,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import java.util.regex.*;
 
+import org.hpccsystems.recordlayout.*;
+
 /**
  *
  * @author ChambeJX

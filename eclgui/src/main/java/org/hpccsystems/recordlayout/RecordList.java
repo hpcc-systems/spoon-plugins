@@ -1,4 +1,4 @@
-package org.hpccsystems.eclguifeatures;
+package org.hpccsystems.recordlayout;
 
 import java.util.ArrayList;
 import java.util.HashSet;

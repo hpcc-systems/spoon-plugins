@@ -91,7 +91,6 @@
 				<module>perspectives</module>
 				<module>eclgui</module>
 				<module>ecldirect</module>
-				<module>ecljobentry</module>
 				<module>job</module>
 			</modules>
 			<build>

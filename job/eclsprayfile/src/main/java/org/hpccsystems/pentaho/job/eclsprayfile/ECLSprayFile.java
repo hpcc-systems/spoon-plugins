@@ -28,12 +28,13 @@ import org.w3c.dom.Node;
 
 import org.pentaho.di.job.JobMeta;
 import org.hpccsystems.eclguifeatures.*;
+import org.hpccsystems.ecljobentrybase.*;
 
 /**
  *
  * @author ChalaAX
  */
-public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
     
     private String outputField = "";
     //private String ipAddress = "";

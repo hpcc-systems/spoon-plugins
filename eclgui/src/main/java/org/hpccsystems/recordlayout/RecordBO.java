@@ -1,4 +1,4 @@
-package org.hpccsystems.eclguifeatures;
+package org.hpccsystems.recordlayout;
 
 public class RecordBO {
 	

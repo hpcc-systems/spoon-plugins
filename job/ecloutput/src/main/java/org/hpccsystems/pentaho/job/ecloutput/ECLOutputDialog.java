@@ -49,6 +49,7 @@ import org.pentaho.di.job.JobHopMeta;
 
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.hpccsystems.eclguifeatures.*;
+import org.hpccsystems.ecljobentrybase.*;
 //JobEntry
 
 
@@ -63,14 +64,14 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
-import org.hpccsystems.pentaho.job.ecljobentry.*;
-//import org.eclipse.swt.layout.FillLayout;
+import org.hpccsystems.ecljobentrybase.*;
+
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLOutputDialog extends ECLJobEntryDialog {
+public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialogInterface {
 	
 	
     private ECLOutput jobEntry;
@@ -925,9 +926,5 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
         dispose();
     }
 
-    public void dispose() {
-        WindowProperty winprop = new WindowProperty(shell);
-        props.setScreen(winprop);
-        shell.dispose();
-    }
+
 }
