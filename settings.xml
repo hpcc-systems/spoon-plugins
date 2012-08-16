@@ -34,13 +34,13 @@
 	<servers>
 		<server>
 			<id>sonatype-nexus-snapshots</id>
-			<username>XXXXXXXX</username>
-			<password>****</password>
+			<username>${env.SONATYPE_USERNAME}</username>
+			<password>${env.SONATYPE_PASSWORD}</password>
 		</server>
 		<server>
 			<id>sonatype-nexus-staging</id>
-			<username>XXXXXXXX</username>
-			<password>****</password>
+			<username>${env.SONATYPE_USERNAME}</username>
+			<password>${env.SONATYPE_PASSWORD}</password>
 		</server>
 	</servers>
 </settings>
