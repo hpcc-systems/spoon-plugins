@@ -63,13 +63,6 @@ public class RecordList {
 		changeListeners.add(viewer);
 	}
         
-        
-        
-        
-        
-        
-        
-        
      public void addRecordBO(RecordBO r){
         arlRecords.add(arlRecords.size(), r);
         Iterator<IRecordListViewer> iterator = changeListeners.iterator();

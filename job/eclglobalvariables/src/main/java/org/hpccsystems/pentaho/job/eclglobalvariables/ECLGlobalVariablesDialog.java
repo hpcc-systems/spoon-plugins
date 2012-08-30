@@ -72,7 +72,7 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
     
     
     
-    private Button wOK, wCancel;
+    private Button wOK, wCancel, mlFileOpenButton, eclFileOpenButton;
     private boolean backupChanged;
     private SelectionAdapter lsDef;
 
@@ -155,7 +155,7 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         FormData datasetGroupFormat = new FormData();
         datasetGroupFormat.top = new FormAttachment(generalGroup, margin);
         datasetGroupFormat.width = 400;
-        datasetGroupFormat.height = 220;
+        datasetGroupFormat.height = 320;
         datasetGroupFormat.left = new FormAttachment(middle, 0);
         varGroup.setLayoutData(datasetGroupFormat);
 
@@ -173,8 +173,35 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         //move these to Library(s)
         
         eclccInstallDir = buildText("eclcc Install Dir", jobName, lsMod, middle, margin, varGroup);
-        mlPath = buildText("Path to ML Library", eclccInstallDir, lsMod, middle, margin, varGroup);
-        includeML = buildCombo("Include ML Library?", mlPath, lsMod, middle, margin, varGroup, new String[]{"true", "false"});
+        this.eclFileOpenButton = buildButton("Choose Location", eclccInstallDir, lsMod, middle, margin, varGroup);
+        controls.put("fOpen", eclccInstallDir);
+        
+        Listener eclFileOpenListener = new Listener() {
+
+            public void handleEvent(Event e) {
+                String newFile = buildDirectoryDialog();
+                if(newFile != ""){
+                	eclccInstallDir.setText(newFile);
+                }
+            }
+        };
+        this.eclFileOpenButton.addListener(SWT.Selection, eclFileOpenListener);
+        
+        includeML = buildCombo("Include ML Library?", eclFileOpenButton, lsMod, middle, margin, varGroup, new String[]{"true", "false"});
+        mlPath = buildText("Path to ML Library", includeML, lsMod, middle, margin, varGroup);
+        this.mlFileOpenButton = buildButton("Choose Location", mlPath, lsMod, middle, margin, varGroup);
+        controls.put("fOpen", mlFileOpenButton);
+        
+        Listener mlFileOpenListener = new Listener() {
+
+            public void handleEvent(Event e) {
+                String newFile = buildDirectoryDialog();
+                if(newFile != ""){
+                	mlPath.setText(newFile);
+                }
+            }
+        };
+        this.mlFileOpenButton.addListener(SWT.Selection, mlFileOpenListener);
         
         
 

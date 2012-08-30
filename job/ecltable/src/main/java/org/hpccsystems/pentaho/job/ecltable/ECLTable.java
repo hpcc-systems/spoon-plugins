@@ -5,6 +5,7 @@
 package org.hpccsystems.pentaho.job.ecltable;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.hpccsystems.ecldirect.Table;
 import org.pentaho.di.cluster.SlaveServer;
@@ -16,12 +17,16 @@ import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.xml.XMLHandler;
-import org.pentaho.di.job.entry.JobEntryBase;
-import org.pentaho.di.job.entry.JobEntryInterface;
+//import org.pentaho.di.job.entry.JobEntryBase;
+//import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
+
+import org.hpccsystems.eclguifeatures.*;
 import org.hpccsystems.ecljobentrybase.*;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 
 /**
  *
@@ -42,6 +47,16 @@ public class ECLTable extends ECLJobEntry{//extends JobEntryBase implements Clon
     private Boolean runLocal = false;
     private Boolean isKeyed = false;
     private Boolean isMerge = false;
+
+    private RecordList recordList = new RecordList();
+
+    public RecordList getRecordList() {
+        return recordList;
+    }
+
+    public void setRecordList(RecordList recordList) {
+        this.recordList = recordList;
+    }
 
     public String getRecordsetName() {
         return recordsetName;
@@ -187,7 +202,75 @@ public class ECLTable extends ECLJobEntry{//extends JobEntryBase implements Clon
         }
     }
 
-
+    public String resultListToString(RecordList recordList){
+        String out = "";
+        
+        if(recordList != null){
+            if(recordList.getRecords() != null && recordList.getRecords().size() > 0) {
+                    System.out.println("Size: "+recordList.getRecords().size());
+                    for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
+                            RecordBO record = (RecordBO) iterator.next();
+                        	String rLen = record.getColumnWidth();
+        					if (rLen != null && rLen.trim().length() >0) {
+                                if(record.getColumnName() != null && !record.getColumnName().equals("")){
+                                    out += record.getColumnType()+rLen + " " + record.getColumnName();
+                                    if(record.getDefaultValue() != ""){
+                                        out += " := " + record.getDefaultValue();
+                                    }
+                                    out += ";\r\n";
+                                 }
+                            }else{
+                                if(record.getColumnName() != null && !record.getColumnName().equals("")){
+                                    out += record.getColumnType() + " " + record.getColumnName();
+                                    if(record.getDefaultValue() != ""){
+                                        out += " := " + record.getDefaultValue();
+                                    }
+                                    out += ";\r\n";
+                                }
+                            }
+                            
+                            
+                    }
+            }
+        }
+        
+        return out;
+    }
+    
+    public String saveRecordList(){
+        String out = "";
+        ArrayList list = recordList.getRecords();
+        Iterator<RecordBO> itr = list.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
+    }
+    
+    public void openRecordList(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            recordList = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList.addRecordBO(rb);
+            }
+        }
+    }
+    public String resultListToString(){
+    	return resultListToString(this.recordList);
+    }
+    
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
@@ -198,7 +281,7 @@ public class ECLTable extends ECLJobEntry{//extends JobEntryBase implements Clon
         Table table = new Table();
         table.setName(this.getRecordsetName());
         table.setRecordset(this.getRecordset());
-        table.setFormat(this.getFormat());
+        //table.setFormat(this.getFormat());
         table.setExpression(this.getExpression());
         table.setSize(this.getSize());
         
@@ -206,6 +289,7 @@ public class ECLTable extends ECLJobEntry{//extends JobEntryBase implements Clon
         table.setRunLocal(this.getRunLocal());
         table.setIsKeyed(this.getIsKeyed());
         table.setIsMerge(this.getIsMerge());
+        table.setFormat(resultListToString());
 
         logBasic("{Table Job} Execute = " + table.ecl());
         
@@ -249,8 +333,8 @@ public class ECLTable extends ECLJobEntry{//extends JobEntryBase implements Clon
             
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"recordset")) != null)
                 this.setRecordset(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"recordset")));
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"format")) != null)
-                this.setFormat(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"format")));
+            //if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"format")) != null)
+            //    this.setFormat(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"format")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"expression")) != null)
                 this.setExpression(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"expression")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"size")) != null)
@@ -263,7 +347,8 @@ public class ECLTable extends ECLJobEntry{//extends JobEntryBase implements Clon
                 this.setIsKeyedString(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"isKeyed")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"isMerge")) != null)
                 this.setIsMergeString(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"isMerge")));
-            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
+                openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
             
         } catch (Exception e) {
             throw new KettleXMLException("ECL Distribute Job Plugin Unable to read step info from XML node", e);
@@ -279,7 +364,7 @@ public class ECLTable extends ECLJobEntry{//extends JobEntryBase implements Clon
         retval += "             <recordset_name eclIsDef=\"true\" eclType=\"recordset\"><![CDATA["+this.recordsetName+"]]></recordset_name>"+Const.CR;
         
         retval += "             <recordset><![CDATA["+this.recordset+"]]></recordset>"+Const.CR;
-        retval += "             <format><![CDATA["+this.format+"]]></format>"+Const.CR;
+        //retval += "             <format><![CDATA["+this.format+"]]></format>"+Const.CR;
         retval += "             <expression><![CDATA[" + this.expression + "]]></expression>"+Const.CR;
         retval += "             <size><![CDATA["+this.size+"]]></size>"+Const.CR;
         retval += "             <isUnsorted><![CDATA["+this.getIsUnsortedString()+"]]></isUnsorted>"+Const.CR;
@@ -287,7 +372,7 @@ public class ECLTable extends ECLJobEntry{//extends JobEntryBase implements Clon
         retval += "             <isKeyed><![CDATA["+this.getIsKeyedString()+"]]></isKeyed>"+Const.CR;
         retval += "             <isMerge><![CDATA["+this.getIsMergeString()+"]]></isMerge>"+Const.CR;
         
-        
+        retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
        
        
        
@@ -305,13 +390,16 @@ public class ECLTable extends ECLJobEntry{//extends JobEntryBase implements Clon
             recordsetName = rep.getStepAttributeString(id_jobentry, "recordset_name");
             
             recordset = rep.getStepAttributeString(id_jobentry, "recordset");
-            format = rep.getStepAttributeString(id_jobentry, "format");
+            //format = rep.getStepAttributeString(id_jobentry, "format");
             expression = rep.getStepAttributeString(id_jobentry, "expression");
             size = rep.getStepAttributeString(id_jobentry, "size");
             this.setIsUnsortedString(rep.getStepAttributeString(id_jobentry, "isUnsorted"));
             this.setRunLocalString(rep.getStepAttributeString(id_jobentry, "runLocal"));
             this.setIsKeyedString(rep.getStepAttributeString(id_jobentry, "isKeyed"));
             this.setIsMergeString(rep.getStepAttributeString(id_jobentry, "isMerge"));
+            
+            if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
+                this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
             
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -324,13 +412,14 @@ public class ECLTable extends ECLJobEntry{//extends JobEntryBase implements Clon
             
             rep.saveStepAttribute(id_job, getObjectId(), "recordset_name", recordsetName);
             rep.saveStepAttribute(id_job, getObjectId(), "recordset", recordset);
-            rep.saveStepAttribute(id_job, getObjectId(), "format", format);
+            //rep.saveStepAttribute(id_job, getObjectId(), "format", format);
             rep.saveStepAttribute(id_job, getObjectId(), "expression", expression);
             rep.saveStepAttribute(id_job, getObjectId(), "size", size);
             rep.saveStepAttribute(id_job, getObjectId(), "isUnsorted", this.getIsUnsortedString());
             rep.saveStepAttribute(id_job, getObjectId(), "runLocal", this.getRunLocalString());
             rep.saveStepAttribute(id_job, getObjectId(), "isKeyed", this.getIsKeyedString());
             rep.saveStepAttribute(id_job, getObjectId(), "isMerge", this.getIsMergeString());
+            rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);
         }
