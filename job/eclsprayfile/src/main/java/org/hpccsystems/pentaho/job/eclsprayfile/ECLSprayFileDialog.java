@@ -76,6 +76,7 @@ public class ECLSprayFileDialog extends ECLJobEntryDialog{//extends JobEntryDial
     private Text csvQuote;
     private Text csvTerminator;
     private Text fixedRecordSize;
+    private Text groupName;
     private Button wOK, wCancel;
     private boolean backupChanged;
     private SelectionAdapter lsDef;
@@ -190,12 +191,13 @@ public class ECLSprayFileDialog extends ECLJobEntryDialog{//extends JobEntryDial
         FormData sourceGroupFormat = new FormData();
         sourceGroupFormat.top = new FormAttachment(generalGroup, margin);
         sourceGroupFormat.width = 400;
-        sourceGroupFormat.height = 120;
+        sourceGroupFormat.height = 140;
         sourceGroupFormat.left = new FormAttachment(middle, 0);
         sourceGroup.setLayoutData(sourceGroupFormat);
        
         //ipAddress = buildText("IP Address", jobEntryName, lsMod, middle, margin, sourceGroup);
-        filePath = buildText("File Name", jobEntryName, lsMod, middle, margin, sourceGroup);
+        groupName = buildText("Destination Group", null, lsMod, middle, margin, sourceGroup);
+        filePath = buildText("File Name", groupName, lsMod, middle, margin, sourceGroup);
         logicalFileName = buildText("Logical File Name", filePath, lsMod, middle, margin, sourceGroup);
         fileType = buildCombo("File Type", logicalFileName, lsMod, middle, margin, sourceGroup, new String[]{"Fixed", "Variable"});
         allowOverwrite = buildCombo("Allow Overwrite", fileType, lsMod, middle, margin, sourceGroup, new String[]{"True", "False"});
@@ -350,6 +352,10 @@ public class ECLSprayFileDialog extends ECLJobEntryDialog{//extends JobEntryDial
         	allowOverwrite.setText(jobEntry.getAllowOverwrite());
         }
         
+        if (jobEntry.getGroupName() != null) {
+        	groupName.setText(jobEntry.getGroupName());
+        }
+        
         fileType.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				System.out.println("Item selected: "+fileType.getText());
@@ -433,6 +439,12 @@ public class ECLSprayFileDialog extends ECLJobEntryDialog{//extends JobEntryDial
     		errors += "You must provide a \"Allow Overwrite\"!\r\n";
     	}
     	
+    	if(this.groupName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Destination Group\"!\r\n";
+    	}
+    	
     	if(this.fileType.getText().equals("Variable")){
     		// csvSeparator
     	    // csvQuote
@@ -492,6 +504,7 @@ public class ECLSprayFileDialog extends ECLJobEntryDialog{//extends JobEntryDial
         jobEntry.setCsvTerminator(csvTerminator.getText());
         jobEntry.setFixedRecordSize(fixedRecordSize.getText());
         jobEntry.setAllowOverwrite(allowOverwrite.getText());
+        jobEntry.setGroupName(groupName.getText());
         //jobEntry.setRecordList(ct.getRecordList());
         dispose();
     }

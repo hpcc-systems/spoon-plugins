@@ -46,6 +46,7 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
     private String csvQuote = "";
     private String fixedRecordSize = "";
     private String allowOverwrite = "True";
+    private String groupName = "";
     
     private boolean isValid = true;
     
@@ -67,7 +68,15 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
         return outputField;
     }
 
-    public String getAllowOverwrite() {
+    public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+
+	public String getAllowOverwrite() {
 		return allowOverwrite;
 	}
 
@@ -187,7 +196,7 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
         spray.setCsvTerminator(getCsvTerminator());
         spray.setRecordSize(getFixedRecordSize());
         spray.setAllowOverWrite(getAllowOverwrite());
-
+        spray.setGroupName(getGroupName());
          
         //logBasic(spray.ecl());
         logBasic("{Spray Job} Execute = " + spray.ecl());
@@ -287,6 +296,10 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
                 setFixedRecordSize(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fixed_record_size")));   
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "allowOverwrite")) != null)
             	setAllowOverwrite(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "allowOverwrite")));
+            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "groupName")) != null)
+            	setGroupName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "groupName")));
+            
           //  if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
            //     openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
 
@@ -312,6 +325,7 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
         retval += "		<fixed_record_size><![CDATA[" + fixedRecordSize + "]]></fixed_record_size>" + Const.CR;
         retval += "		<logical_file_name><![CDATA[" + logicalFileName + "]]></logical_file_name>" + Const.CR;
         retval += "		<allowOverwrite><![CDATA[" + allowOverwrite + "]]></allowOverwrite>" + Const.CR;
+        retval += "		<groupName><![CDATA[" + groupName + "]]></groupName>" + Const.CR;
         
        // retval += "		<recordList>" + this.saveRecordList() + "</recordList>" + Const.CR;
         return retval;
@@ -342,6 +356,8 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
             
             if(rep.getStepAttributeString(id_jobentry, "allowOverwrite") != null)
             	allowOverwrite = rep.getStepAttributeString(id_jobentry, "allowOverwrite"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "groupName") != null)
+            	groupName = rep.getStepAttributeString(id_jobentry, "groupName"); //$NON-NLS-1$
             
           //  if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
           //      this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
@@ -363,6 +379,7 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
             rep.saveStepAttribute(id_job, getObjectId(), "fixedRecordSize", fixedRecordSize); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "logicalFileName", logicalFileName); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "allowOverwrite", allowOverwrite); //$NON-NLS-1$
+            rep.saveStepAttribute(id_job, getObjectId(), "groupName", groupName); //$NON-NLS-1$
             
           //  rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
         } catch (Exception e) {
