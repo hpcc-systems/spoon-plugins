@@ -5,7 +5,9 @@
 package org.hpccsystems.ecljobentrybase;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 //import org.hpccsystems.ecldirect.Output;
 import org.hpccsystems.ecldirect.EclDirect;
 import org.pentaho.di.cluster.SlaveServer;
@@ -31,6 +33,8 @@ import org.pentaho.di.core.gui.SpoonFactory;
 
 
 import org.hpccsystems.eclguifeatures.*;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.job.JobMeta;
 
 /**
@@ -70,6 +74,64 @@ return null;
 
     public void saveRep(Repository rep, ObjectId id_job) throws KettleException {
 
+    }
+    
+    public String resultListToString(RecordList recordList){
+        String out = "";
+        
+        if(recordList != null){
+            if(recordList.getRecords() != null && recordList.getRecords().size() > 0) {
+                    System.out.println("Size: "+recordList.getRecords().size());
+                    for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
+                            RecordBO record = (RecordBO) iterator.next();
+                        	String rLen = record.getColumnWidth();
+        					if (rLen != null && rLen.trim().length() >0) {
+                                if(record.getColumnName() != null && !record.getColumnName().equals("")){
+                                    out += record.getColumnType()+rLen + " " + record.getColumnName();
+                                    if(record.getDefaultValue().equalsIgnoreCase("null")){
+                                    	//added so we can set null values
+                                        out += ":= ''";
+                                    }else if(record.getDefaultValue() != ""){
+                                    	//added check to make non numeric be quoted ''
+                                    	String regex = "((-|\\+)?[0-9]+(\\.[0-9]+)?)+";
+                                    	if(record.getDefaultValue().matches(regex)){
+                                    		out += ":= " + record.getDefaultValue();
+                                    	}else{
+                                    		out += ":= '" + record.getDefaultValue() + "'";
+                                        }
+                                    }
+                                    out += ";\r\n";
+                                 }
+                            }else{
+                                if(record.getColumnName() != null && !record.getColumnName().equals("")){
+                                    out += record.getColumnType() + " " + record.getColumnName();
+                                    //if(record.getDefaultValue() != ""){
+                                    //    out += ":= " + record.getDefaultValue();
+                                    //}
+                                    
+                                    if(record.getDefaultValue().equalsIgnoreCase("null")){
+                                    	//added so we can set null values
+                                        out += ":= ''";
+                                    }else if(record.getDefaultValue() != ""){
+                                    	//added check to make non numeric be quoted ''
+                                    	String regex = "((-|\\+)?[0-9]+(\\.[0-9]+)?)+";
+                                    	if(record.getDefaultValue().matches(regex)){
+                                    		out += ":= " + record.getDefaultValue();
+                                    	}else{
+                                    		out += ":= '" + record.getDefaultValue() + "'";
+                                        }
+                                    }
+                                    
+                                    out += ";\r\n";
+                                }
+                            }
+                            
+                            
+                    }
+            }
+        }
+        
+        return out;
     }
     
     

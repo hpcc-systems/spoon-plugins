@@ -165,6 +165,7 @@ public class Spray implements EclCommand {
         } else {
             throw new RuntimeException("Uninitialized File Type");
         }
+        //System.out.println(outputField.toString());
         return outputField.toString();
 
     }

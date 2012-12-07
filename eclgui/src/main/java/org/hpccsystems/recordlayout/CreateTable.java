@@ -1,5 +1,6 @@
 package org.hpccsystems.recordlayout;
 
+import java.awt.Robot;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +30,10 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
@@ -54,7 +59,9 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.KeyListener;
 
 public class CreateTable {
     private Shell shell;
@@ -384,6 +391,7 @@ public class CreateTable {
 		
 	}// End of createTable method
 	
+	int currIndex = 0;
 	/**
 	 * Create a TableViewer
 	 */
@@ -413,7 +421,58 @@ public class CreateTable {
                 
                 if(columnNames.length >= 3){
                     // Column 3 : Column Type (Combo Box) 
-                    editors[2] = new ComboBoxCellEditor(table, recordList.getColTypes(), SWT.DROP_DOWN|SWT.READ_ONLY);
+                    final ComboBoxCellEditor c = new ComboBoxCellEditor(table, recordList.getColTypes(), SWT.DROP_DOWN|SWT.READ_ONLY);
+                    
+                    
+                    currIndex = ((CCombo)c.getControl()).getSelectionIndex();
+                    c.getControl().addKeyListener(new KeyListener() {
+              	      String selectedItem = "";
+
+            	      public void keyPressed(KeyEvent e) {
+            	    	 // System.out.println("test: " + ((CCombo)c.getControl()).getText());
+            	        if (((CCombo)c.getControl()).getText().length() > 0) {
+            	        	System.out.println("cant getText");
+            	          //return;
+            	        }
+            	        int currentSel = ((CCombo)c.getControl()).getSelectionIndex();
+
+            	        String key = Character.toString(e.character);
+            	        String[] items = ((CCombo)c.getControl()).getItems();
+            	       
+            	        for (int i = currentSel; i < items.length; i++) {
+            	          if (items[i].toLowerCase().startsWith(key.toLowerCase())) {
+            	        	  if(i != currentSel){
+            	        		  currIndex = i;
+            	        		  return;
+            	        	  }
+            	          }
+            	        }
+            	        
+            	        for (int i = 1; i < items.length; i++) {
+              	          if (items[i].toLowerCase().startsWith(key.toLowerCase())) {
+              	        	  	  currIndex = i;
+              	        		  return;
+              	          }
+              	        }
+              	        
+            	      }
+
+					@Override
+					public void keyReleased(KeyEvent arg0) {
+						 int oldIndex = currIndex;
+						 currIndex = ((CCombo)c.getControl()).getSelectionIndex();
+						 
+						 //hack to fix double jump when box is open
+						 //if pentaho ever upgrades to new version of swing 
+						 //there is a cleaner way to do this
+						 if(Math.abs(currIndex-oldIndex) == 2){
+							 oldIndex--;
+						 }
+						 ((CCombo)c.getControl()).select(oldIndex);
+					}
+
+            	    });
+                    editors[2] = c;
                 }
                 if(columnNames.length >= 4){
                     // Column 4 : Column Width (Text with digits only)

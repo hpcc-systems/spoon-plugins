@@ -149,6 +149,9 @@ public class ECLProject extends ECLJobEntry{//extends JobEntryBase implements Cl
 		this.mapperRecList = mapperRecList;
 	}
     
+	/*
+	 //moved to base class
+	
 	public String resultListToString() {
 		String out = "";
 		if (recordList != null) {
@@ -183,6 +186,7 @@ public class ECLProject extends ECLJobEntry{//extends JobEntryBase implements Cl
 		
 		return out;
 	}
+	 */
 	
 	public String saveRecordList() {
 		String out = "";
@@ -299,12 +303,12 @@ public class ECLProject extends ECLJobEntry{//extends JobEntryBase implements Cl
         project.setDeclareCounter(this.getDeclareCounter());
         project.setInRecordName(this.getInRecordName());
         project.setOutRecordName(this.getOutRecordName());
-        project.setOutRecordFormat(resultListToString());
+        project.setOutRecordFormat(resultListToString(recordList));
         project.setTransformName(this.getTransformName());
         //project.setTransformFormat(this.getTransformFormat());
         project.setTransformFormat(generateEclForMapperGrid());
         project.setParameterName(this.getParameterName());
-        //project.setRecordFormatString(resultListToString());
+        //project.setRecordFormatString(resultListToString(recordList));
         
         
 

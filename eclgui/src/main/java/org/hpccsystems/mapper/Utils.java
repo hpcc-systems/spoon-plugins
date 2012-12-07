@@ -13,6 +13,18 @@ import org.eclipse.swt.widgets.TreeItem;
 
 public class Utils {
 
+	public static Map<String,String> getHelpMap(){
+		Map<String,String> arlListDateHelp = new HashMap<String,String>();
+		arlListDateHelp.put("STD.Date.Date_rec", "Date Data Type: A RECORD structure containing three fields, and INTEGER2 year, an UNSIGNED1 month, and an UNSIGNED1 day.\r\n" +
+				"EXPORT Date_rec := RECORD\r\n" + 
+				"  INTEGER2 year;" + "\r\n" +
+				"  UNSIGNED1 month;" + "\r\n" +
+				"  UNSIGNED1 day;" + "\r\n" +
+				"END;");
+		arlListDateHelp.put("STD.Date.Date_t", "Date Data Type: An UNSIGNED4 containing a date value in YYYYMMDD format.\r\n\r\nEXPORT Date_t := UNSIGNED4;\r\n");
+		
+		return arlListDateHelp;
+	}
 	public static Map<String, List<String>> getFunctionValueMap(){
 		
 		Map<String, List<String>> mapFunctions = new TreeMap<String, List<String>>();
@@ -64,6 +76,7 @@ public class Utils {
 		mapFunctions.put("ECL Language", arlListLogical);
 		
 		
+		
 		//STD.Date functions
 		List<String> arlListDate = new ArrayList<String>();
 		arlListDate.add("STD.Date.Date_rec");
@@ -75,7 +88,8 @@ public class Utils {
 		arlListDate.add("STD.Date.DateFromParts");
 		arlListDate.add("STD.Date.IsLeapYear");
 		arlListDate.add("STD.Date.FromGregorianYMD");
-		arlListDate.add("STD.Date.ToGregorianYMD");
+		//will not work since it has to be ToGregorianYMD(x).Year etc
+		//arlListDate.add("STD.Date.ToGregorianYMD");
 		mapFunctions.put("Date", arlListDate);
 				
 		// HASH Operations

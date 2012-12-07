@@ -49,6 +49,7 @@
 
 	<dependencyManagement>
 		<dependencies>
+
 			<dependency>
 				<groupId>pentaho-kettle</groupId>
 				<artifactId>kettle-core</artifactId>

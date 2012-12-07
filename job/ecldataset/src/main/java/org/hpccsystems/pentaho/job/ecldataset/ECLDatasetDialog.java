@@ -42,6 +42,8 @@ import org.pentaho.di.ui.job.dialog.JobDialog;
 import org.pentaho.di.ui.job.entry.JobEntryDialog;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
+import org.hpccsystems.ecldirect.HPCCServerInfo;
+import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.hpccsystems.recordlayout.CreateTable;
 import org.hpccsystems.recordlayout.RecordBO;
@@ -58,7 +60,7 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
     private Text recordName;
    // private Text recordDef;
     private Text recordSet;
-    private Text fileName;
+    private Combo fileName;
     private Text datasetName;
     private Button wOK, wCancel;
     private boolean backupChanged;
@@ -156,8 +158,26 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
         datasetGroupFormat.left = new FormAttachment(middle, 0);
         datasetGroup.setLayoutData(datasetGroupFormat);
 
+        AutoPopulate ap = new AutoPopulate();
+        String[] fileList = new String[0];
+        
+        String serverHost = "";
+        int serverPort = 8010;
+        try{
+            //Object[] jec = this.jobMeta.getJobCopies().toArray();
+                
+                serverHost = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_ip");
+                serverPort = Integer.parseInt(ap.getGlobalVariable(jobMeta.getJobCopies(),"server_port"));
+               
+            }catch (Exception e){
+                System.out.println("Error Parsing existing Global Variables ");
+                System.out.println(e.toString());
+                
+            }
+        HPCCServerInfo hsi = new HPCCServerInfo(serverHost,serverPort);
+        fileList = hsi.fetchFileList();
         datasetName = buildText("Dataset Name", null, lsMod, middle, margin, datasetGroup);
-        fileName = buildText("Logical File Name", datasetName, lsMod, middle, margin, datasetGroup);
+        fileName = buildCombo("Logical File Name", datasetName, lsMod, middle, margin, datasetGroup, fileList);
         fileType = buildCombo("File Type", fileName, lsMod, middle, margin, datasetGroup,new String[]{"", "CSV", "THOR"});
 
         recordSet = buildMultiText("Manual Record Entry", fileType, lsMod, middle, margin, datasetGroup);

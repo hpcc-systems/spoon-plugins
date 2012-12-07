@@ -97,9 +97,9 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         this.fileType = fileType;
     }
     
-    public String resultListToString(){
-    	return resultListToString(this.recordList);
-    }
+    //public String resultListToString(){
+    //	return resultListToString(this.recordList);
+    //}
     
     public String fieldsValid(RecordList recordList){
         String errors = "";
@@ -124,41 +124,8 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         
         return errors;
     }
-    public String resultListToString(RecordList recordList){
-        String out = "";
-        
-        if(recordList != null){
-            if(recordList.getRecords() != null && recordList.getRecords().size() > 0) {
-                    System.out.println("Size: "+recordList.getRecords().size());
-                    for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
-                            RecordBO record = (RecordBO) iterator.next();
-                        	String rLen = record.getColumnWidth();
-        					if (rLen != null && rLen.trim().length() >0) {
-                                if(record.getColumnName() != null && !record.getColumnName().equals("")){
-                                    out += record.getColumnType()+rLen + " " + record.getColumnName();
-                                    if(record.getDefaultValue() != ""){
-                                        out += " := " + record.getDefaultValue();
-                                    }
-                                    out += ";\r\n";
-                                 }
-                            }else{
-                                if(record.getColumnName() != null && !record.getColumnName().equals("")){
-                                    out += record.getColumnType() + " " + record.getColumnName();
-                                    if(record.getDefaultValue() != ""){
-                                        out += " := " + record.getDefaultValue();
-                                    }
-                                    out += ";\r\n";
-                                }
-                            }
                             
                             
-                    }
-            }
-        }
-        
-        return out;
-    }
-
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
@@ -168,7 +135,7 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         dataset.setLogicalFileName(getLogicalFileName());
         dataset.setName(getDatasetName());
        // dataset.setRecordFormatString(getRecordDef());
-        dataset.setRecordFormatString(resultListToString());
+        dataset.setRecordFormatString(resultListToString(this.recordList));
         dataset.setRecordName(getRecordName());
         dataset.setFileType(getFileType());
         dataset.setRecordSet(getRecordSet());
@@ -255,7 +222,7 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
                 openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
             
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fileTYpe")) != null)
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fileType")) != null)
                 setFileType(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fileType")));
 
         } catch (Exception e) {

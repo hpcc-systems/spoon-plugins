@@ -142,7 +142,7 @@ INTEGER4 PersonCount := 1;
         int margin = Const.MARGIN;
 
         shell.setLayout(formLayout);
-        shell.setText("Define an ECL Dataset");
+        shell.setText("Define an ECL Table");
 
         FormLayout groupLayout = new FormLayout();
         groupLayout.marginWidth = 10;

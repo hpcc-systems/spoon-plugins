@@ -11,7 +11,31 @@ public class RecordList {
 	private Set<IRecordListViewer> changeListeners = new HashSet<IRecordListViewer>();
 	
 	// Combo box choices
-	static final String[] COLUMN_TYPE_ARRAY = {"Select", "Integer", "Real", "Decimal", "String", "QString", "Unicode", "Data", "VarString", "VarUnicode", "Set Of", "TypeOf", "RecordOf", "Enum"};
+	static final String[] COLUMN_TYPE_ARRAY = {"Select", 
+		"BOOLEAN",
+		"DATA",
+		"DECIMAL",
+		"INTEGER", 
+		"QSTRING",
+		"REAL", 
+		"STRING",
+		"SET OF BOOLEAN",
+		"SET OF DATA",
+		"SET OF INTEGER",
+		"SET OF REAL",
+		"SET OF STRING",
+		"SET OF UNICODE",
+		"UNICODE", 
+		"VARSTRING", 
+		"VARUNICODE"
+		};
+	
+	//following will need more hlep
+	/*
+	 TYPEOF
+	 RECORDOF
+	 ENUM
+	 */
 		
 	
 	public RecordList(){

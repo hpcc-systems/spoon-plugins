@@ -266,7 +266,25 @@ public class ECLExecuteDialog extends ECLJobEntryDialog{//extends JobEntryDialog
 
     }
     
-
+    private void updatePaths(){
+    	String path = this.fileName.getText();
+    	boolean lastIsSlash = false;
+    	if(path.lastIndexOf("\\") == (path.length()-1)){
+    		//has last \
+    		lastIsSlash = true;
+    	}
+    	if(!lastIsSlash && path.lastIndexOf("/") == (path.length()-1)){
+    		lastIsSlash = true;
+    	}
+    	if(lastIsSlash){
+    		//remove the slash
+    		String noSlashPath = path.substring(0,path.length()-1);
+    		this.fileName.setText(noSlashPath);
+    	}
+    	
+    	
+    }
+    
     private boolean validate(){
     	boolean isValid = true;
     	String errors = "";
@@ -295,6 +313,7 @@ public class ECLExecuteDialog extends ECLJobEntryDialog{//extends JobEntryDialog
 		
 	}
     private void ok() {
+    	updatePaths();
     	if(!validate()){
     		return;
     	}

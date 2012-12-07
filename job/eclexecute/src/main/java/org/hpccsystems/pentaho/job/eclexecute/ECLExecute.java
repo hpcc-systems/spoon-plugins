@@ -121,6 +121,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	        String serverPort = "";
 	        String cluster = "";
 	        String jobName = "";
+	        String jobNameNoSpace ="";
 	        String eclccInstallDir = "";
 	        String mlPath = "";
 	        String includeML = "";
@@ -134,7 +135,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	
 	            cluster = ap.getGlobalVariable(jobMeta.getJobCopies(),"cluster");
 	            jobName = ap.getGlobalVariable(jobMeta.getJobCopies(),"jobName");
-	
+	            jobNameNoSpace = jobName.replace(" ", "_"); 
 	            eclccInstallDir = ap.getGlobalVariable(jobMeta.getJobCopies(),"eclccInstallDir");
 	            mlPath = ap.getGlobalVariable(jobMeta.getJobCopies(),"mlPath");
 	            includeML = ap.getGlobalVariable(jobMeta.getJobCopies(),"includeML");
@@ -153,7 +154,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
         
         
             ECLExecute.isReady=true;
-            logBasic("not waiting: " + ECLExecute.isReady);
+            //logBasic("not waiting: " + ECLExecute.isReady);
             result.setResult(true);
 
 
@@ -188,7 +189,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
             try{
                 String includes = "";
                 includes += "IMPORT Std;\n";
-                if(includeML.equals("true")){
+                if(includeML.equalsIgnoreCase("true")){
                     includes += "IMPORT * FROM ML;\r\n\r\n";
                     includes += "IMPORT * FROM ML.Cluster;\r\n\r\n";
                     includes += "IMPORT * FROM ML.Types;\r\n\r\n";
@@ -277,7 +278,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
                                         }
                                     }
                                 }
-                                logBasic("newline");
+                               // logBasic("newline");
                                 outStr += newline;
                             }
                         }

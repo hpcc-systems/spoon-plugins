@@ -88,9 +88,9 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
-				<module>perspectives</module>
 				<module>eclgui</module>
 				<module>ecldirect</module>
+				<module>perspectives</module>
 				<module>job</module>
 			</modules>
 			<build>

@@ -442,16 +442,26 @@ public class EclDirect {
                                 //"----------Row-------------"
                                 ArrayList columnList = (ArrayList) rowList.get(jRow);
 
+                           
                                 for (int lCol = 0; lCol < columnList.size(); lCol++) {
                                  //"----------Column-------------"
                                     Column column = (Column) columnList.get(lCol);
-                                  
-                                    outStr += column.getValue();
+                                    if(column.getValue().contains(",")){
+                                    	outStr += "\"" + column.getValue() + "\"";
+                                    }else{
+                                    	outStr += column.getValue();
+                                    }
+                                    //outStr += column.getValue();
                                     if(lCol< (columnList.size()-1)){
                                         outStr += ",";
                                     }
                                     if(jRow == 0){
-                                        header += column.getName();
+                                    	if(column.getName().contains(",")){
+                                    		header += "\"" + column.getName() + "\"";
+                                    	}else{
+                                    		header += column.getName();
+                                    	}
+                                        //header += column.getName();
                                         if(lCol< (columnList.size()-1)){
                                             header += ",";
                                         }else{
@@ -459,7 +469,7 @@ public class EclDirect {
                                         }
                                     }
                                 }
-                               
+                              
                                 outStr += newline;
                             }
                         }

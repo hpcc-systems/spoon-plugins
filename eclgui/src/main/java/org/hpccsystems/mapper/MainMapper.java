@@ -8,10 +8,13 @@ import java.util.Map;
 
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -27,7 +30,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolTip;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 public class MainMapper {
 	
@@ -304,7 +309,7 @@ public class MainMapper {
 		
 		return result;
 	}
-	
+	private ToolTip inputTip ;
 	public void buildExpressionPanel(Composite parentComp, Map<String, String[]> mapDataSets){
 		
 		Composite comp2 = new Composite(parentComp, SWT.NONE);
@@ -372,7 +377,44 @@ public class MainMapper {
 		gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
 		lblOperators.setLayoutData(gridData);
 		
+		
+		
+		
 		treeInputDataSet = new Tree(compTreePanel, SWT.SINGLE | SWT.BORDER);
+		
+		
+		/*inputTip = new ToolTip(compTreePanel.getShell(), SWT.BALLOON | SWT.ICON_INFORMATION);		
+	    Listener inputList = new Listener(){
+
+			@Override
+			public void handleEvent(Event event) {
+				// TODO Auto-generated method stub
+				switch (event.type) {
+				case SWT.MouseMove: {
+					inputTip.setVisible(false);
+				}
+					case SWT.MouseHover: {
+						Point coords = new Point(event.x, event.y);
+						TreeItem item = treeInputDataSet.getItem(coords);
+						
+						
+						if(item != null){
+							//System.out.println("Show tool tip " + coords + " " + item.getText());
+							inputTip.setText("Info");
+							inputTip.setMessage(item.getText());
+							inputTip.setVisible(true);
+						}else{
+							//System.out.println("hide tool tip");
+							inputTip.setVisible(false);
+						}
+					}
+				}
+			}};
+			
+			treeInputDataSet.addListener(SWT.MouseHover, inputList);
+			treeInputDataSet.addListener(SWT.MouseMove, inputList);
+		*/
+		//treeInputDataSet.setToolTipText("Select the column from the input dataset");
 		gridData = new GridData(GridData.FILL_HORIZONTAL);
 	    gridData.heightHint = 100;
 	    treeInputDataSet.setLayoutData(gridData);
@@ -407,7 +449,7 @@ public class MainMapper {
 			}
 		});
 		
-	    Tree treeFunctions = new Tree(compTreePanel, SWT.SINGLE | SWT.BORDER);
+	    final Tree treeFunctions = new Tree(compTreePanel, SWT.SINGLE | SWT.BORDER);
 	    gridData = new GridData(GridData.FILL_HORIZONTAL);
 	    gridData.heightHint = 100;
 	    treeFunctions.setLayoutData(gridData);
@@ -448,6 +490,51 @@ public class MainMapper {
 				}
 			}
 		});
+	    
+	    final ToolTip functionsTip = new ToolTip(compTreePanel.getShell(), SWT.BALLOON | SWT.ICON_INFORMATION);
+	    
+	    Listener functionsList = new Listener(){
+
+			@Override
+			public void handleEvent(Event event) {
+				// TODO Auto-generated method stub
+				
+				switch (event.type) {
+				case SWT.MouseExit:
+				case SWT.MouseMove: {
+					functionsTip.setVisible(false);
+					break;
+				}
+				
+					case SWT.MouseHover: {
+						Point coords = new Point(event.x, event.y);
+						TreeItem item = treeFunctions.getItem(coords);
+						Point tipLocation = treeFunctions.getLocation();
+						
+						if(item != null){
+							String help = "";
+							
+							if(Utils.getHelpMap().containsKey(item.getText())){
+								help += Utils.getHelpMap().get(item.getText());
+							}
+							//System.out.println("Show tool tip " + coords + " " + item.getText());
+							functionsTip.setText(item.getText());
+							
+							functionsTip.setMessage(help);
+							//functionsTip.setLocation(tipLocation.x,tipLocation.y);
+							functionsTip.setVisible(true);
+						}else{
+							//System.out.println("hide tool tip");
+							functionsTip.setVisible(false);
+						}
+						break;
+					}
+				}
+			}};
+			
+			treeFunctions.addListener(SWT.MouseHover, functionsList);
+			treeFunctions.addListener(SWT.MouseMove, functionsList);
+			treeFunctions.addListener(SWT.MouseExit, functionsList);
 	    
 	    int style = SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL;
 	    final Table tblOperators = new Table(compTreePanel, style);
