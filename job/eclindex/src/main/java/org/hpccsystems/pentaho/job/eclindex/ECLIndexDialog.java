@@ -50,7 +50,7 @@ import org.hpccsystems.ecljobentrybase.*;
  */
 public class ECLIndexDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
     
-    // TODO these belong in org.hpccsystems.ecldirect.Index (?)
+    // TODO these belong in org.hpccsystems.javaecl.Index (?)
     private static final String COMPRESSION_TYPE_FIRST = "FIRST";
     private static final String COMPRESSION_TYPE_ROW   = "ROW";
     private static final String COMPRESSION_TYPE_LZW   = "LZW";

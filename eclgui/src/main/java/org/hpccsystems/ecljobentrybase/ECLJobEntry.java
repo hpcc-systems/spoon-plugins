@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
-//import org.hpccsystems.ecldirect.Output;
+//import org.hpccsystems.javaecl.Output;
 import org.hpccsystems.javaecl.EclDirect;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;

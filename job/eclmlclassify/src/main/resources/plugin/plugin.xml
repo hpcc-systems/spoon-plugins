@@ -7,7 +7,7 @@
 	classname="org.hpccsystems.pentaho.job.eclmlclassify.ECLML_Classify">
             
     <libraries>
-  	  <library name="../../hpcc-common/ecldirect.jar"/>
+  	  <library name="../../hpcc-common/javaecl-0.1.0.jar"/>
         <library name="../../hpcc-common/eclgui.jar"/>
         <library name="eclmlclassify.jar"/>
     </libraries>            

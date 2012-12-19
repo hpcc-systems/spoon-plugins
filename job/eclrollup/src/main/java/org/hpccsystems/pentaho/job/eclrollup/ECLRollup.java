@@ -7,7 +7,7 @@ package org.hpccsystems.pentaho.job.eclrollup;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.hpccsystems.ecldirect.Rollup;
+import org.hpccsystems.javaecl.Rollup;
 //import org.hpccsystems.recordlayout.RecordBO;
 //import org.hpccsystems.recordlayout.RecordList;
 import org.hpccsystems.mapper.MapperBO;

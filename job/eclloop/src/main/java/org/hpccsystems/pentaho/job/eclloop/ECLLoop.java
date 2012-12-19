@@ -3,7 +3,7 @@ package org.hpccsystems.pentaho.job.eclloop;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hpccsystems.ecldirect.Loop;
+import org.hpccsystems.javaecl.Loop;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;

@@ -6,7 +6,7 @@ package org.hpccsystems.pentaho.job.ecldedup;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hpccsystems.ecldirect.Dedup;
+import org.hpccsystems.javaecl.Dedup;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;

@@ -7,7 +7,7 @@ package org.hpccsystems.pentaho.job.ecldataset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.hpccsystems.ecldirect.Dataset;
+import org.hpccsystems.javaecl.Dataset;
 import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.cluster.SlaveServer;

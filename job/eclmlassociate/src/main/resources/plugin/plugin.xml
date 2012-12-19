@@ -7,7 +7,7 @@
 	classname="org.hpccsystems.pentaho.job.eclmlassociate.ECLML_Associate">
             
     <libraries>
-	  <library name="../../hpcc-common/ecldirect.jar"/>
+	  <library name="../../hpcc-common/javaecl-0.1.0.jar"/>
         <library name="../../hpcc-common/eclgui.jar"/>
         <library name="eclmlassociate.jar"/>
     </libraries>            

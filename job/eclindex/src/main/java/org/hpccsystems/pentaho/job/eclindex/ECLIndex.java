@@ -3,7 +3,7 @@ package org.hpccsystems.pentaho.job.eclindex;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.hpccsystems.ecldirect.Index;
+import org.hpccsystems.javaecl.Index;
 import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.cluster.SlaveServer;

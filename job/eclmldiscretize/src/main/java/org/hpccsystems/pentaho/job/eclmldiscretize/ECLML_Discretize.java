@@ -6,7 +6,7 @@ package org.hpccsystems.pentaho.job.eclmldiscretize;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hpccsystems.ecldirect.ML_Discretize;
+import org.hpccsystems.javaecl.ML_Discretize;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;

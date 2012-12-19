@@ -7,7 +7,7 @@ package org.hpccsystems.pentaho.job.ecldespray;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hpccsystems.ecldirect.DeSpray;
+import org.hpccsystems.javaecl.DeSpray;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;

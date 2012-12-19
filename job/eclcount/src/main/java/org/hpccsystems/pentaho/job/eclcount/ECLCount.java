@@ -7,7 +7,7 @@ package org.hpccsystems.pentaho.job.eclcount;
 import java.util.ArrayList;
 
 import java.util.List;
-import org.hpccsystems.ecldirect.Count;
+import org.hpccsystems.javaecl.Count;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;

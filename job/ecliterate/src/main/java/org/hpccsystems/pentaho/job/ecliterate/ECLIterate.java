@@ -7,7 +7,7 @@ package org.hpccsystems.pentaho.job.ecliterate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.hpccsystems.ecldirect.Iterate;
+import org.hpccsystems.javaecl.Iterate;
 import org.hpccsystems.mapper.MapperBO;
 import org.hpccsystems.mapper.MapperRecordList;
 import org.pentaho.di.cluster.SlaveServer;
