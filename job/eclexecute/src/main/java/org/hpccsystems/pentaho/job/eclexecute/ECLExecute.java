@@ -125,6 +125,8 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	        String eclccInstallDir = "";
 	        String mlPath = "";
 	        String includeML = "";
+	        String user = "";
+	        String pass = "";
 	        
 	        AutoPopulate ap = new AutoPopulate();
 	        try{
@@ -139,6 +141,8 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	            eclccInstallDir = ap.getGlobalVariable(jobMeta.getJobCopies(),"eclccInstallDir");
 	            mlPath = ap.getGlobalVariable(jobMeta.getJobCopies(),"mlPath");
 	            includeML = ap.getGlobalVariable(jobMeta.getJobCopies(),"includeML");
+	            user = ap.getGlobalVariable(jobMeta.getJobCopies(),"user_name");
+                pass = ap.getGlobalVariableEncrypted(jobMeta.getJobCopies(),"password");
 	
 	        }catch (Exception e){
 	            System.out.println("Error Parsing existing Global Variables ");
@@ -182,6 +186,8 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
             eclDirect.setJobName(jobName);
             eclDirect.setMlPath(mlPath);
             eclDirect.setOutputName(this.getName());
+            eclDirect.setUserName(user);
+            eclDirect.setPassword(pass);
             //ArrayList dsList = null;
           
             //String outStr = "";

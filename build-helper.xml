@@ -24,7 +24,6 @@
          ================================================================================= -->
 	<target name="create-distribution" description="Build installable distribution">
 		<zip destfile="./target/spoon-plugins-distribution.zip">
-			<zipfileset dir="./ecldirect/target" includes="ecldirect.jar" prefix="hpcc-common" />
 			<zipfileset dir="./eclgui/target" includes="eclgui.jar" prefix="hpcc-common" />
 			<zipfileset dir="./perspectives/eclresults/target" includes="eclresults.jar" prefix="spoon/eclresults" />
 			<zipfileset dir="./perspectives/eclresults/src/main/resources/plugin" includes="plugin.xml" prefix="spoon/eclresults" />

@@ -387,7 +387,7 @@ public class ECLProject extends ECLJobEntry{//extends JobEntryBase implements Cl
         retval += "		<declareCounter><![CDATA[" + this.getDeclareCounterString() + "]]></declareCounter>" + Const.CR;
         retval += "		<recordset_name><![CDATA[" + recordsetName + "]]></recordset_name>" + Const.CR;
         retval += "		<inRecordName><![CDATA[" + inRecordName + "]]></inRecordName>" + Const.CR;
-        retval += "		<outRecordName><![CDATA[" + outRecordName + "]]></outRecordName>" + Const.CR;
+        retval += "		<outRecordName eclIsDef=\"true\" eclType=\"recordset\"><![CDATA[" + outRecordName + "]]></outRecordName>" + Const.CR;
         retval += "		<outRecordFormat><![CDATA[" + outRecordFormat + "]]></outRecordFormat>" + Const.CR;
         retval += "		<transformName><![CDATA[" + transformName + "]]></transformName>" + Const.CR;
         retval += "		<transformFormat><![CDATA[" + transformFormat + "]]></transformFormat>" + Const.CR;

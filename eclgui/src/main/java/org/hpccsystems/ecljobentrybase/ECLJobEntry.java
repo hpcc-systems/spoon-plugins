@@ -33,6 +33,9 @@ import org.pentaho.di.core.gui.SpoonFactory;
 
 
 import org.hpccsystems.eclguifeatures.*;
+import org.hpccsystems.javaecl.Column;
+import org.hpccsystems.javaecl.ECLSoap;
+import org.hpccsystems.javaecl.EclDirect;
 import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.job.JobMeta;

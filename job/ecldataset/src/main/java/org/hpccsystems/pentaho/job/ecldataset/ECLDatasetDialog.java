@@ -4,6 +4,8 @@
  */
 package org.hpccsystems.pentaho.job.ecldataset;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -11,6 +13,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Color;
@@ -174,8 +177,25 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
                 System.out.println(e.toString());
                 
             }
-        HPCCServerInfo hsi = new HPCCServerInfo(serverHost,serverPort);
+        final HPCCServerInfo hsi = new HPCCServerInfo(serverHost,serverPort);
         fileList = hsi.fetchFileList();
+        try{
+        	ArrayList<String> files = ap.getLogicalFileName(this.jobMeta.getJobCopies());
+        	if(files != null){
+        		fileList = ap.merge(fileList, files.toArray(new String[files.size()]));
+        	}
+        }catch(Exception ex){
+        	System.out.println("Unable to fetch file names from sprays: " + ex.toString());
+        }
+        ArrayList<String> tempFiles = new ArrayList<String>();
+        for (int i = 0; i<fileList.length; i++){
+        	if(!tempFiles.contains(fileList[i])){
+        		tempFiles.add(fileList[i]);
+        	}
+        }
+        Collections.sort(tempFiles);
+        fileList = tempFiles.toArray(new String[tempFiles.size()]);
+       
         datasetName = buildText("Dataset Name", null, lsMod, middle, margin, datasetGroup);
         fileName = buildCombo("Logical File Name", datasetName, lsMod, middle, margin, datasetGroup, fileList);
         fileType = buildCombo("File Type", fileName, lsMod, middle, margin, datasetGroup,new String[]{"", "CSV", "THOR"});
@@ -199,6 +219,30 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
        // recordDef = buildMultiText("Record Definition", recordName, lsMod, middle, margin, recordGroup);
         
         
+        fileName.addSelectionListener(new SelectionListener(){
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				String file = fileName.getText();
+				
+				ArrayList<String[]> details = hsi.fetchFileDetails(file);
+				
+				if(details.size()>0){
+					ErrorNotices en = new ErrorNotices();
+					if(en.openComfirmDialog(getParent(), "Do you want to eplace your current Record Structure on the\r\nFields tab with the one stored on the server?")){
+						ct.setRecordList(jobEntry.ArrayListToRecordList(details));
+						ct.redrawTable(true);
+					}
+				}
+				
+			}}); 
            item1.setControl(compForGrp);
         
         

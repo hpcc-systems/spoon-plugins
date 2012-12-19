@@ -158,6 +158,8 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
         String eclccInstallDir = "";
         String mlPath = "";
         String includeML = "";
+        String user = "";
+        String pass = "";
         
         AutoPopulate ap = new AutoPopulate();
             try{
@@ -173,6 +175,9 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
                 eclccInstallDir = ap.getGlobalVariable(jobMeta.getJobCopies(),"eclccInstallDir");
                 mlPath = ap.getGlobalVariable(jobMeta.getJobCopies(),"mlPath");
                 includeML = ap.getGlobalVariable(jobMeta.getJobCopies(),"includeML");
+                
+                user = ap.getGlobalVariable(jobMeta.getJobCopies(),"user_name");
+                pass = ap.getGlobalVariableEncrypted(jobMeta.getJobCopies(),"password");
                 
             }catch (Exception e){
                 System.out.println("Error Parsing existing Global Variables ");
@@ -197,6 +202,7 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
         spray.setRecordSize(getFixedRecordSize());
         spray.setAllowOverWrite(getAllowOverwrite());
         spray.setGroupName(getGroupName());
+        
          
         //logBasic(spray.ecl());
         logBasic("{Spray Job} Execute = " + spray.ecl());
@@ -213,6 +219,8 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
         eclDirect.setJobName(jobName);
         eclDirect.setMlPath(mlPath);
         eclDirect.setOutputName(this.getName());
+        eclDirect.setUserName(user);
+        eclDirect.setPassword(pass);
         ArrayList dsList = eclDirect.execute(spray.ecl());
        
         isValid = eclDirect.isValid();

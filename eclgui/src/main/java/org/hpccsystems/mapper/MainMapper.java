@@ -1,13 +1,20 @@
 package org.hpccsystems.mapper;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.MouseEvent;
@@ -15,6 +22,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -25,6 +33,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -52,16 +61,45 @@ public class MainMapper {
 	private String[] cmbListValues = null;
 	private Tree treeInputDataSet = null;
 	
+	//Fields to check for EDIT status
+	private String oldexpression = "";
+	private String newExpression = "";
+	private int previousSelectedIndex;
+	
+	//private boolean hasChanged = false;
+	MapperBO objRecord;
 	
 	public Tree getTreeInputDataSet() {
 		return treeInputDataSet;
 	}
 
-
 	public void setTreeInputDataSet(Tree treeInputDataSet) {
 		this.treeInputDataSet = treeInputDataSet;
 	}
+	
+	public String getOldexpression() {
+		return oldexpression;
+	}
 
+	public void setOldexpression(String oldexpression) {
+		this.oldexpression = oldexpression;
+	}
+
+	public String getNewExpression() {
+		return newExpression;
+	}
+
+	public void setNewExpression(String newExpression) {
+		this.newExpression = newExpression;
+	}
+	
+	public int getPreviousSelectedIndex() {
+		return previousSelectedIndex;
+	}
+
+	public void setPreviousSelectedIndex(int previousSelectedIndex) {
+		this.previousSelectedIndex = previousSelectedIndex;
+	}
 
 	/**
 	 * This method redraws the table.
@@ -232,15 +270,78 @@ public class MainMapper {
                     table.redraw();
             }
         });
+		
+		//This has been added to act upon double mouse-click on a specific row.
+		table.addListener(SWT.DefaultSelection, new Listener() {
+			public void handleEvent(Event e) {
+				
+				//if(!getOldexpression().equalsIgnoreCase(getNewExpression())) {
+				if(hasChanged()){
+					int style = 452; //Message Box Style code for SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL 
+					MessageBox mb = new MessageBox(table.getShell(), style);
+					mb.setText("Alert");
+					mb.setMessage("You will loose your current changes? Do you wish to continue?");
+					int val = mb.open();
+					switch (val)  {   // val contains the constant of the selected button
+						case SWT.CANCEL:
+							break;
+						case SWT.YES:
+							int selectionIndex = table.getSelectionIndex();
+							objRecord = mapperRecList.getRecord(selectionIndex);
+							cmbVariableName.setText(objRecord.getOpVariable());
+							txtExpression.setText(objRecord.getExpression());
+							txtExpression.setFocus();
+							btnSaveExpression.setEnabled(true);
+							setOldexpression(txtExpression.getText());
+							
+							break;
+						case SWT.NO:
+							table.setSelection(getPreviousSelectedIndex());
+							break;
+					 }
+				} else {
+					int selectionIndex = table.getSelectionIndex();
+					if(!tableViewer.getTable().getItem(selectionIndex).getChecked()){
+						objRecord = mapperRecList.getRecord(selectionIndex);
+						cmbVariableName.setText(objRecord.getOpVariable());
+						txtExpression.setText(objRecord.getExpression());
+						txtExpression.setFocus();
+						btnSaveExpression.setEnabled(true);
+						
+						setOldexpression(txtExpression.getText());
+						setPreviousSelectedIndex(selectionIndex);
+					}
+				}
+			}
+		});
 	}
 	
+	private boolean hasChanged(){
+		
+		boolean changed = false;
+		try{
+		if(objRecord != null){
+			if(!objRecord.getOpVariable().equals(cmbVariableName.getText())){
+				changed = true;
+			}
+			
+			if(!objRecord.getExpression().equals(txtExpression.getText())){
+				changed = true;
+			}
+		}
+		}catch (Exception e){
+			
+		}
+		return changed;
+		
+	}
 	/**
 	 * Add the Buttons
 	 * @param parent
 	 */
 	private void createButtons(Composite tblComposite) {
-		 // Create and configure the "Add" button
-		Button edit = new Button(tblComposite, SWT.PUSH | SWT.CENTER);
+		 // Create and configure the "Edit" button
+		/*Button edit = new Button(tblComposite, SWT.PUSH | SWT.CENTER);
 		edit.setText("Edit");
 		GridData gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gridData.widthHint = 80;
@@ -265,11 +366,11 @@ public class MainMapper {
 					}
 				}
 			}
-		});
+		});*/
 		
 		Button delete = new Button(tblComposite, SWT.PUSH | SWT.CENTER);
 		delete.setText("Delete");
-		gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
+		GridData gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gridData.widthHint = 80;
 		delete.setLayoutData(gridData);
 		delete.addSelectionListener(new SelectionAdapter() {
@@ -353,6 +454,7 @@ public class MainMapper {
 		cmbVariableName.setLayoutData(gridData);
 		
 		cmbVariableName.setItems(getCmbListValues()); //Set the Combo Values
+		
 		
 		Composite compTreePanel = new Composite(group1, SWT.NONE);
 		layout = new GridLayout();
@@ -492,7 +594,28 @@ public class MainMapper {
 		});
 	    
 	    final ToolTip functionsTip = new ToolTip(compTreePanel.getShell(), SWT.BALLOON | SWT.ICON_INFORMATION);
+	    BuildHelpIndex bhi = new BuildHelpIndex();
 	    
+	    String indexFile = "plugins/hpcc-common/helpfiles/index.xml";
+	    
+	    URL url = null;
+	 	try{
+		 	URL baseURL = this.getClass().getResource("../../../");
+		 	
+		 	System.out.println("BaseURL: " + baseURL.getPath());
+		 	if(baseURL != null){
+		 		url = new URL(baseURL, indexFile);
+		 	}else {
+		 		url = this.getClass().getResource(indexFile);
+		 	}
+	 	}catch (MalformedURLException e){
+	 		System.out.println("can't find helf files" + e.toString());
+	 	}
+	 	System.out.println("URL: " + url.toString());
+	    
+	    bhi.setUrl(url.toString().replace("%20", " ").replace("file:", ""));
+	    final HashMap<String,String> helpIndex = bhi.getMap();
+	   
 	    Listener functionsList = new Listener(){
 
 			@Override
@@ -502,39 +625,78 @@ public class MainMapper {
 				switch (event.type) {
 				case SWT.MouseExit:
 				case SWT.MouseMove: {
-					functionsTip.setVisible(false);
+					functionsTip.setAutoHide(true);
+					//functionsTip.setVisible(false);
 					break;
 				}
 				
 					case SWT.MouseHover: {
-						Point coords = new Point(event.x, event.y);
-						TreeItem item = treeFunctions.getItem(coords);
-						Point tipLocation = treeFunctions.getLocation();
 						
-						if(item != null){
+						break;
+					}
+					case SWT.KeyDown: {
+						
+						if(event.keyCode == SWT.F1){
+							Point coords = new Point(event.x, event.y);
+							//TreeItem item = treeFunctions.getItem(coords);
+							TreeItem item = treeFunctions.getSelection()[0];
+							Shell tip = new Shell(treeFunctions.getDisplay());
+							System.out.println(event.keyCode);
 							String help = "";
-							
-							if(Utils.getHelpMap().containsKey(item.getText())){
-								help += Utils.getHelpMap().get(item.getText());
+							String htmlFile = "plugins/hpcc-common/helpfiles/";
+							System.out.println("Item: " + item.getText().replace("STD.", ""));
+							if(helpIndex.containsKey(item.getText().replace("STD.", ""))){
+								htmlFile += helpIndex.get(item.getText().replace("STD.", ""));
+								//if(Utils.getHelpMap().containsKey(item.getText())){
+								//	help += Utils.getHelpMap().get(item.getText());
+								//}
+							}else{
+								htmlFile += "html/index.html";
 							}
-							//System.out.println("Show tool tip " + coords + " " + item.getText());
-							functionsTip.setText(item.getText());
+							Browser browser;
+							try {
+								 	browser = new Browser(tip, SWT.BALLOON);
+								 	browser.setBounds(0, 0, 800, 800);
+								 	//browser.setText(help);
+								 	//ClassLoader classLoader = getClass().getClassLoader();
+								 	//System.out.println("PATHbase: " + classLoader.getResource(".").getFile());
+								 	
+								 	
+								 	URL url = null;
+								 	try{
+									 	URL baseURL = this.getClass().getResource("../../../");
+									 	
+									 	System.out.println("BaseURL: " + baseURL.getPath());
+									 	if(baseURL != null){
+									 		url = new URL(baseURL, htmlFile);
+									 	}else {
+									 		url = this.getClass().getResource(htmlFile);
+									 	}
+								 	}catch (MalformedURLException e){
+								 		System.out.println("can't find helf files" + e.toString());
+								 	}
+								 	System.out.println("URL: " + url.toString());
+								 	browser.setUrl(url.toString());
+								 	
+								 	//file:/C:/Program Files/data-integration/plugins/jobentries/eclproject/../../hpcc-common/eclgui.jar!/org/hpccsystems/mapper/html/bk01apa.html
+							} catch (SWTError e) {
+							 	System.out.println("Could not instantiate Browser: " + e.getMessage());
+							 	
+						 	}
 							
-							functionsTip.setMessage(help);
-							//functionsTip.setLocation(tipLocation.x,tipLocation.y);
-							functionsTip.setVisible(true);
-						}else{
-							//System.out.println("hide tool tip");
-							functionsTip.setVisible(false);
+							
+							tip.pack ();
+							tip.open();
+							
 						}
 						break;
 					}
 				}
 			}};
-			
-			treeFunctions.addListener(SWT.MouseHover, functionsList);
-			treeFunctions.addListener(SWT.MouseMove, functionsList);
-			treeFunctions.addListener(SWT.MouseExit, functionsList);
+			treeFunctions.addListener(SWT.KeyDown, functionsList);
+			//treeFunctions.addListener(SWT.MouseHover, functionsList);
+			//treeFunctions.addListener(SWT.MouseMove, functionsList);
+			//treeFunctions.addListener(SWT.MouseExit, functionsList);
 	    
 	    int style = SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL;
 	    final Table tblOperators = new Table(compTreePanel, style);
@@ -588,7 +750,7 @@ public class MainMapper {
 		
 		Composite compButton = new Composite(group1, SWT.NONE);
 		layout = new GridLayout();
-		layout.numColumns = 2;
+		layout.numColumns = 3;
 		data = new GridData();
 		compButton.setLayout(layout);
 		compButton.setLayoutData(data);
@@ -608,7 +770,8 @@ public class MainMapper {
 							selectionIndex = i;
 						}
 					}
-					if(tableViewer.getTable().getItem(selectionIndex).getChecked()){
+					
+					/*if(tableViewer.getTable().getItem(selectionIndex).getChecked()){
 						MapperBO objRecord = mapperRecList.getRecord(selectionIndex);
 						//objRecord.setOpVariable(txtVariableName.getText());
 						objRecord.setOpVariable(cmbVariableName.getText());
@@ -622,7 +785,23 @@ public class MainMapper {
 						uncheckAll();
 						tableViewer.refresh();
 						tableViewer.getTable().redraw();
-					}
+					}*/
+					
+					selectionIndex = tableViewer.getTable().getSelectionIndex();
+					objRecord = mapperRecList.getRecord(selectionIndex);
+					objRecord.setOpVariable(cmbVariableName.getText());
+					objRecord.setExpression(txtExpression.getText());
+					mapperRecList.removeRecord(selectionIndex);
+					mapperRecList.addRecordAtIndex(selectionIndex, objRecord);
+					cmbVariableName.setText("");
+					txtExpression.setText("");
+					uncheckAll();
+					setOldexpression("");
+					setNewExpression("");
+					tableViewer.refresh();
+					tableViewer.getTable().redraw();
+					
+					
 				}
 			}
 		});
@@ -658,9 +837,59 @@ public class MainMapper {
 					txtExpression.setText("");
 					mapperRecList.addRecord(record);
 					uncheckAll();
+					setOldexpression("");
+					setNewExpression("");
 					tableViewer.refresh();
+					
 				}
 			}
+		});
+		
+		//Code to Add Cancel Button
+		Button btnCancelExpression = new Button(compButton, SWT.PUSH | SWT.CENTER);
+		btnCancelExpression.setText("Cancel");
+		gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gridData.widthHint = 80;
+		btnCancelExpression.setLayoutData(gridData);
+		btnCancelExpression.addSelectionListener(new SelectionAdapter() {
+			
+			public void widgetSelected(SelectionEvent e) {
+				
+				//To check if the expression is modified
+				setNewExpression(txtExpression.getText());
+				if(hasChanged()){
+				//if(!getOldexpression().equalsIgnoreCase(getNewExpression())) {
+					//System.out.println("Old Expression: "+getOldexpression());
+					//System.out.println("New Expression: "+getNewExpression());
+					int style = 452; //Message Box Style code for SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL 
+					MessageBox mb = new MessageBox(tableViewer.getTable().getShell(), style);
+					mb.setText("Alert");
+					mb.setMessage("You will loose your current changes? Do you wish to continue?");
+					int val = mb.open();
+					switch (val)  {   // val contains the constant of the selected button
+						case SWT.CANCEL:
+							break;
+						case SWT.YES:
+							objRecord = null;
+							cmbVariableName.setText("");
+							txtExpression.setText("");
+							setOldexpression("");
+							setNewExpression("");
+							btnSaveExpression.setEnabled(false);
+							break;
+						case SWT.NO:
+							break;
+					 }
+				} else {
+					objRecord = null;
+					cmbVariableName.setText("");
+					txtExpression.setText("");
+					btnSaveExpression.setEnabled(false);
+					setOldexpression("");
+					setNewExpression("");
+				}
+			}
+			
 		});
 		
 		/*Composite comp3 = new Composite(parentComp, SWT.NONE);
@@ -691,8 +920,8 @@ public class MainMapper {
 		btnClose.setLayoutData(gridData);*/
 		
 	}
-	
 }
+
 
 
 

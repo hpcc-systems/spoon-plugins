@@ -203,6 +203,32 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
             }
         }
     }
+    
+    public RecordList ArrayListToRecordList(ArrayList<String[]> in){
+    	
+    	RecordList recordList = null;
+    	/*
+    	 					column[0] = "";//label
+                        	column[1] = "";//type
+                        	column[2] = "";//value
+                        	column[3] = "";//size
+                        	column[4] = "";//maxsize
+    	 */
+        
+        if(in.size()>0){
+            recordList = new RecordList();
+            for(int i =0; i<in.size(); i++){
+                RecordBO rb = new RecordBO();
+                rb.setColumnName(in.get(i)[0]);
+                rb.setColumnType(in.get(i)[1].replaceAll("\\d+",""));//replaces digit with "" so we get STRING/INTEGER etc
+                rb.setColumnWidth(in.get(i)[1].replaceAll("\\D+",""));//replace non digit with "" so we get just number 
+                rb.setDefaultValue(in.get(i)[2]);
+                recordList.addRecordBO(rb);
+            }
+        }
+        return recordList;
+    }
+    
     @Override
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
         try {

@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.TreeItem;
 
 public class Utils {
 
+	/*
 	public static Map<String,String> getHelpMap(){
 		Map<String,String> arlListDateHelp = new HashMap<String,String>();
 		arlListDateHelp.put("STD.Date.Date_rec", "Date Data Type: A RECORD structure containing three fields, and INTEGER2 year, an UNSIGNED1 month, and an UNSIGNED1 day.\r\n" +
@@ -21,10 +22,22 @@ public class Utils {
 				"  UNSIGNED1 month;" + "\r\n" +
 				"  UNSIGNED1 day;" + "\r\n" +
 				"END;");
-		arlListDateHelp.put("STD.Date.Date_t", "Date Data Type: An UNSIGNED4 containing a date value in YYYYMMDD format.\r\n\r\nEXPORT Date_t := UNSIGNED4;\r\n");
-		
+		arlListDateHelp.put("STD.Date.Days_t", "<html><head>" +
+				"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">" +
+      		"<title>Date Data Types</title><link rel=\"stylesheet\" href=\"eclipsehelp.css\" type=\"text/css\"><meta name=\"generator\" content=\"DocBook XSL Stylesheets V1.75.1\"><link rel=\"home\" href=\"index.html\" title=\"ECL Reference\"><link rel=\"up\" href=\"bk02ch08.html\" title=\"Date Handling\"><link rel=\"prev\" href=\"bk02ch08.html\" title=\"Date Handling\"><link rel=\"next\" href=\"bk02ch08s02.html\" title=\"Year\"></head><body bgcolor=\"white\" text=\"black\" link=\"#0000FF\" vlink=\"#840084\" alink=\"#0000FF\"><div class=\"navheader\"><table width=\"100%\" summary=\"Navigation header\"><tr><th colspan=\"3\" align=\"center\"><span class=\"bold\"><strong>Date Data Types</strong></span></th></tr><tr><td width=\"20%\" align=\"left\"><a accesskey=\"p\" href=\"bk02ch08.html\">Prev</a>&nbsp;</td><th width=\"60%\" align=\"center\"><span class=\"emphasis\"><em>Date Handling</em></span></th><td width=\"20%\" align=\"right\">&nbsp;<a accesskey=\"n\" href=\"bk02ch08s02.html\">Next</a></td></tr></table><hr></div><div class=\"sect1\" title=\"Date Data Types\"><div class=\"titlepage\"><div><div><h2 class=\"title\" style=\"clear: both\"><a name=\"Date_Data_Types\"></a><span class=\"bold\"><strong>Date Data Types</strong></span></h2></div></div></div><p><span class=\"bold\"><strong>STD.Date.Date_rec<a class=\"indexterm\" name=\"d4e20160\"></a><a class=\"indexterm\" name=\"d4e20162\"></a></strong></span></p><p><span class=\"bold\"><strong>STD.Date.Date_t<a class=\"indexterm\" name=\"d4e20166\"></a><a class=\"indexterm\" name=\"d4e20168\"></a></strong></span></p><p><span class=\"bold\"><strong>STD.Date.Days_t<a class=\"indexterm\" name=\"d4e20172\"></a><a class=\"indexterm\" name=\"d4e20174\"></a></strong></span></p><div class=\"informaltable\"><table border=\"0\"><colgroup><col width=\"13%\"><col width=\"87%\"></colgroup><tbody><tr><td><span class=\"bold\"><strong>Date_rec</strong></span></td><td>A RECORD structure containing three fields, and INTEGER2 year, an UNSIGNED1 month, and an UNSIGNED1 day.</td></tr><tr><td><span class=\"bold\"><strong>Date_t</strong></span></td><td>An UNSIGNED4 containing a date value in YYYYMMDD format.</td></tr><tr><td><span class=\"bold\"><strong>Days_t</strong></span></td><td>An UNSIGNED4 containing a date value representing the number of elapsed days since a particular base date. This number can be the number of days in the common era (January 1, 1AD = 1) based on either the Julian or Gregorian calendars, or the number of elapsed days since the Gregorian calendar's January 1, 1900 (January 1, 1900 = 1).</td></tr></tbody></table></div><p>The three Date data types defined in the Date Standard Library are:</p><pre class=\"programlisting\">    // A record stucture with the different elements separated out." +
+      		"EXPORT Date_rec := RECORD" +
+      		"INTEGER2   year;" +
+      		"UNSIGNED1  month;" +
+      		"UNSIGNED1  day;" +
+      		"END;" +
+      		"EXPORT Date_t := UNSIGNED4;" +
+      		"//A number of elapsed days.  Value depends on the function called." +
+      		"EXPORT Days_t := UNSIGNED4;" +
+      		"</pre></div><div class=\"navfooter\"><hr><table width=\"100%\" summary=\"Navigation footer\"><tr><td width=\"40%\" align=\"left\"><a accesskey=\"p\" href=\"bk02ch08.html\">Prev</a>&nbsp;</td><td width=\"20%\" align=\"center\"><a accesskey=\"u\" href=\"bk02ch08.html\">Up</a></td><td width=\"40%\" align=\"right\">&nbsp;<a accesskey=\"n\" href=\"bk02ch08s02.html\">Next</a></td></tr><tr><td width=\"40%\" align=\"left\" valign=\"top\"><span class=\"emphasis\"><em>Date Handling</em></span>&nbsp;</td><td width=\"20%\" align=\"center\"><a accesskey=\"h\" href=\"index.html\">Home</a></td><td width=\"40%\" align=\"right\" valign=\"top\">&nbsp;<span class=\"bold\"><strong>Year</strong></span></td></tr></table></div></body></html>");
 		return arlListDateHelp;
 	}
+	
+	*/
 	public static Map<String, List<String>> getFunctionValueMap(){
 		
 		Map<String, List<String>> mapFunctions = new TreeMap<String, List<String>>();
