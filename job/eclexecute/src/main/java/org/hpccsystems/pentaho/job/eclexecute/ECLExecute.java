@@ -143,6 +143,8 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	            includeML = ap.getGlobalVariable(jobMeta.getJobCopies(),"includeML");
 	            user = ap.getGlobalVariable(jobMeta.getJobCopies(),"user_name");
                 pass = ap.getGlobalVariableEncrypted(jobMeta.getJobCopies(),"password");
+                
+                //System.out.println("autopop:: User:" + user + " Pass: " + pass);
 	
 	        }catch (Exception e){
 	            System.out.println("Error Parsing existing Global Variables ");
@@ -204,9 +206,9 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
                 eclCode = includes + eclCode;
                 
                 boolean isValid = false;
-               // System.out.println("---------------- submitToCluster");
+                System.out.println("---------------- submitToCluster");
                 isValid = eclDirect.execute(eclCode, this.debugLevel);
-               // System.out.println("---------------- finished submitToCluster");
+                System.out.println("---------------- finished submitToCluster");
                 if(isValid){
                 	//System.out.println("---------------- writing file");
                 	isValid = eclDirect.writeResultsToFile(this.fileName);

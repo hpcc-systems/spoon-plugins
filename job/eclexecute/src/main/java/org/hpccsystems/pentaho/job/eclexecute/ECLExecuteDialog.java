@@ -4,6 +4,7 @@
  */
 package org.hpccsystems.pentaho.job.eclexecute;
 
+import java.io.File;
 import java.util.ArrayList;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -299,6 +300,12 @@ public class ECLExecuteDialog extends ECLJobEntryDialog{//extends JobEntryDialog
     		//one is required.
     		isValid = false;
     		errors += "You must provide a \"Output File(s) Directory\"!\r\n";
+    	}else{
+	    	boolean pathExists = (new File(this.fileName.getText())).exists();
+	    	if(!pathExists){
+	    		isValid = false;
+	    		errors += "The \"Output File(s) Directory\" can't be found!\r\n";
+	    	}
     	}
     	
     	// if skey require minskew ------ since its just a blank not needed yet will be needed in future version TODO:

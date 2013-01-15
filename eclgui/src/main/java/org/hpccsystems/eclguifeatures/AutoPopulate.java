@@ -749,7 +749,13 @@ public class AutoPopulate {
 
     
     public String getGlobalVariableEncrypted(List<JobEntryCopy> jobs, String ofType) throws Exception{
-    	return Encr.decryptPassword(getGlobalVariable(jobs,ofType));
+    	String pass = getGlobalVariable(jobs,ofType);
+    	if(pass.equalsIgnoreCase("")){
+			return "";
+		}else{
+			return Encr.decryptPassword(pass);
+		}
+    	
     }
     public String getGlobalVariable(List<JobEntryCopy> jobs, String ofType) throws Exception{
        // System.out.println(" ------------ getGlobalVariable ------------- ");
@@ -828,9 +834,17 @@ public class AutoPopulate {
                                     XMLHandler.getSubNode(nNode, "includeML")
                                 );
                           }
+                          if(ofType.equalsIgnoreCase("user_name")){
+                              out = XMLHandler.getNodeValue(
+                                  XMLHandler.getSubNode(nNode, "user_name")
+                              );
+                        }
                           
-                          
-                                  
+                          if(ofType.equalsIgnoreCase("password")){
+                              out = XMLHandler.getNodeValue(
+                                  XMLHandler.getSubNode(nNode, "password")
+                              );
+                        }      
 
                        }
                       
