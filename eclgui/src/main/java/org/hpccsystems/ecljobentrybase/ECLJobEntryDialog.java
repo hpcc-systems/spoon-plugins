@@ -152,6 +152,30 @@ public class ECLJobEntryDialog extends JobEntryDialog implements JobEntryDialogI
 
             return text;
         }
+    public Text buildPassword(String strLabel, Control prevControl,
+            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
+        // label
+        Label fmt = new Label(groupBox, SWT.RIGHT);
+        fmt.setText(strLabel);
+        props.setLook(fmt);
+        FormData labelFormat = new FormData();
+        labelFormat.left = new FormAttachment(0, 0);
+        labelFormat.top = new FormAttachment(prevControl, margin);
+        labelFormat.right = new FormAttachment(middle, -margin);
+        fmt.setLayoutData(labelFormat);
+
+        // text field
+        Text text = new Text(groupBox, SWT.SINGLE | SWT.LEFT | SWT.BORDER | SWT.PASSWORD);
+        props.setLook(text);
+        text.addModifyListener(lsMod);
+        FormData fieldFormat = new FormData();
+        fieldFormat.left = new FormAttachment(middle, 0);
+        fieldFormat.top = new FormAttachment(prevControl, margin);
+        fieldFormat.right = new FormAttachment(100, 0);
+        text.setLayoutData(fieldFormat);
+
+        return text;
+    }
 
     public Text buildMultiText(String strLabel, Control prevControl,
                 ModifyListener lsMod, int middle, int margin, Composite groupBox) {

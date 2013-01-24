@@ -60,6 +60,7 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
     
     private Text cluster;
     private Text jobName;
+    private Text maxReturn;
     private Text eclccInstallDir;
     private Text mlPath;
     private Combo includeML;
@@ -157,14 +158,14 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         FormData datasetGroupFormat = new FormData();
         datasetGroupFormat.top = new FormAttachment(generalGroup, margin);
         datasetGroupFormat.width = 400;
-        datasetGroupFormat.height = 335;
+        datasetGroupFormat.height = 355;
         datasetGroupFormat.left = new FormAttachment(middle, 0);
         varGroup.setLayoutData(datasetGroupFormat);
 
         //name = buildText("Distribute Name", null, lsMod, middle, margin, distributeGroup);
 
         userName = buildText("Server Username", null, lsMod, middle, margin, varGroup);
-        password = buildText("Server Password", userName, lsMod, middle, margin, varGroup);
+        password = buildPassword("Server Password", userName, lsMod, middle, margin, varGroup);
         serverIP = buildText("Server Host", password, lsMod, middle, margin, varGroup);
         serverPort = buildText("Server Port", serverIP, lsMod, middle, margin, varGroup);
         landingZone = buildText("Landing Zone Dir", serverPort, lsMod, middle, margin, varGroup);
@@ -172,10 +173,10 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         //move thes to Job Information
         cluster = buildText("Cluster", landingZone, lsMod, middle, margin, varGroup);
         jobName = buildText("Job Name", cluster, lsMod, middle, margin, varGroup);
-        
+        maxReturn = buildText("Preview Rows", jobName, lsMod, middle, margin, varGroup);
         //move these to Library(s)
         
-        eclccInstallDir = buildText("eclcc Install Dir", jobName, lsMod, middle, margin, varGroup);
+        eclccInstallDir = buildText("eclcc Install Dir", maxReturn, lsMod, middle, margin, varGroup);
         this.eclFileOpenButton = buildButton("Choose Location", eclccInstallDir, lsMod, middle, margin, varGroup);
         controls.put("fOpen", eclccInstallDir);
         
@@ -290,6 +291,9 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         if (jobEntry.getJobName() != null) {
             jobName.setText(jobEntry.getJobName());
         }
+        if (jobEntry.getMaxReturn() != null) {
+            maxReturn.setText(jobEntry.getMaxReturn());
+        }
         if (jobEntry.getEclccInstallDir() != null) {
             eclccInstallDir.setText(jobEntry.getEclccInstallDir());
         }
@@ -352,9 +356,9 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
     }
     private boolean verifySettings(){
     	boolean isReady = false;
-    	
     	boolean eclccExists = true;
     	boolean mlExists = true;
+    	boolean saltExists = true;
     	
     	String errorTxt = "Some Fields Were Not Correct:\r\n";
     	
@@ -373,43 +377,48 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
     		}
     	}
     	if(eclccExists && mlExists){
-    		isReady = true;
-    		System.out.println("paths validated");
-    	}else{
-    		Shell parentShell = getParent();
-            //Display display = parentShell.getDisplay();
-    		//final Shell dialog = new Shell (display, SWT.DIALOG_TRIM);
-    		final Shell dialog = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
+    	
 
-    		Label label = new Label (dialog, SWT.NONE);
-    		label.setText (errorTxt);
-    		Button okButton = new Button (dialog, SWT.PUSH);
-    		okButton.setText ("&OK");
-   
-	        Listener cancelListener = new Listener() {
-
-	            public void handleEvent(Event e) {
-	                dialog.close();
-	            }
-	        };
-	        
-	        okButton.addListener(SWT.Selection, cancelListener);
-	        
-	        FormLayout form = new FormLayout ();
-	    	form.marginWidth = form.marginHeight = 8;
-	    	dialog.setLayout (form);
-	    	FormData okData = new FormData ();
-	    	okData.top = new FormAttachment (label, 8);
-	    	okButton.setLayoutData (okData);
+	    	if(eclccExists && mlExists){
+	    		isReady = true;
+	    		System.out.println("paths validated");
+	    	}else{
+	    		Shell parentShell = getParent();
+	            //Display display = parentShell.getDisplay();
+	    		//final Shell dialog = new Shell (display, SWT.DIALOG_TRIM);
+	    		final Shell dialog = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
+	
+	    		Label label = new Label (dialog, SWT.NONE);
+	    		label.setText (errorTxt);
+	    		Button okButton = new Button (dialog, SWT.PUSH);
+	    		okButton.setText ("&OK");
+	   
+		        Listener cancelListener = new Listener() {
+	
+		            public void handleEvent(Event e) {
+		                dialog.close();
+		            }
+		        };
+		        
+		        okButton.addListener(SWT.Selection, cancelListener);
+		        
+		        FormLayout form = new FormLayout ();
+		    	form.marginWidth = form.marginHeight = 8;
+		    	dialog.setLayout (form);
+		    	FormData okData = new FormData ();
+		    	okData.top = new FormAttachment (label, 8);
+		    	okButton.setLayoutData (okData);
+		    	
+		        
+		        dialog.setDefaultButton (okButton);
+		    	dialog.pack ();
+		    	dialog.open ();
 	    	
-	        
-	        dialog.setDefaultButton (okButton);
-	    	dialog.pack ();
-	    	dialog.open ();
+	    	
+	    	}
     	}
     	return isReady;
     }
-
 
     private boolean validate(){
     	boolean isValid = true;
@@ -491,6 +500,7 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         
         jobEntry.setCluster(cluster.getText());
         jobEntry.setJobName(jobName.getText());
+        jobEntry.setMaxReturn(maxReturn.getText());
         
         jobEntry.setEclccInstallDir(eclccInstallDir.getText());
         jobEntry.setMlPath(mlPath.getText());

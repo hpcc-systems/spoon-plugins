@@ -34,7 +34,7 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
     
     //private String jobName;
     //private String name = "";
-    
+	private String maxReturn = "";
     private String serverIP = "";
     private String serverPort = "";
     
@@ -51,7 +51,17 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
 
     private String keyStr = "saqwvdf023rkjas7ku,df9e4kt`q234rtuqrtadfads.faufrae";
     
-    public String getUser() {
+    
+    
+    public String getMaxReturn() {
+		return maxReturn;
+	}
+
+	public void setMaxReturn(String maxReturn) {
+		this.maxReturn = maxReturn;
+	}
+
+	public String getUser() {
 		return user;
 	}
 
@@ -167,6 +177,9 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
         try {
             super.loadXML(node, list, list1);
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"maxReturn")) != null)
+                this.setMaxReturn(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"maxReturn")));
+            
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"server_ip")) != null)
                 this.setServerIP(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"server_ip")));
             
@@ -209,7 +222,7 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
         String retval = "";
         
         retval += super.getXML();
-      
+        retval += "             <maxReturn><![CDATA["+this.maxReturn+"]]></maxReturn>"+Const.CR;
         retval += "             <server_ip><![CDATA["+this.serverIP+"]]></server_ip>"+Const.CR;
         
         retval += "             <server_port><![CDATA["+this.serverPort+"]]></server_port>"+Const.CR;
@@ -241,6 +254,7 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
             //jobName = rep.getStepAttributeString(id_jobentry, "jobName"); //$NON-NLS-1$
 
             //name = rep.getStepAttributeString(id_jobentry, "name"); //$NON-NLS-1$
+        	maxReturn = rep.getStepAttributeString(id_jobentry, "maxReturn");
             serverIP = rep.getStepAttributeString(id_jobentry, "server_ip");
             
             serverPort = rep.getStepAttributeString(id_jobentry, "server_port");
@@ -264,7 +278,7 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
     public void saveRep(Repository rep, ObjectId id_job) throws KettleException {
         try {
 
-            
+        	rep.saveStepAttribute(id_job, getObjectId(), "maxReturn", maxReturn);
             rep.saveStepAttribute(id_job, getObjectId(), "server_ip", serverIP);
             rep.saveStepAttribute(id_job, getObjectId(), "server_port", serverPort);
             rep.saveStepAttribute(id_job, getObjectId(), "landing_zone", landingZone);

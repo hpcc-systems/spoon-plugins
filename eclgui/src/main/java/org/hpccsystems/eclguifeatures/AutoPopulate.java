@@ -817,6 +817,12 @@ public class AutoPopulate {
                                 );
                           }
                           
+                          if(ofType.equalsIgnoreCase("maxReturn")){
+                              out = XMLHandler.getNodeValue(
+                                  XMLHandler.getSubNode(nNode, "maxReturn")
+                              );
+                        }
+                          
                           if(ofType.equalsIgnoreCase("eclccInstallDir")){
                                 out = XMLHandler.getNodeValue(
                                     XMLHandler.getSubNode(nNode, "eclccInstallDir")
