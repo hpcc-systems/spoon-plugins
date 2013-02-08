@@ -6,11 +6,10 @@
 	<packaging>jar</packaging>
 	<name>HPCC Systems Pentaho Data Integration ECL Join Job Plugin</name>
 	<description></description>
-	<version>0.1-SNAPSHOT</version>
     <parent>
         <groupId>org.hpccsystems.pentaho</groupId>
         <artifactId>job</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
 
     <properties>
