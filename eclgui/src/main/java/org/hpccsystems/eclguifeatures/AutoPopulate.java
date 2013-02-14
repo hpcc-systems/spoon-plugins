@@ -852,6 +852,20 @@ public class AutoPopulate {
                               );
                         }      
 
+                          if(ofType.equalsIgnoreCase("SALTPath")){
+                              out = XMLHandler.getNodeValue(
+                                  XMLHandler.getSubNode(nNode, "SALTPath")
+                              );
+                        }
+                        
+                        if(ofType.equalsIgnoreCase("includeSALT")){
+                              out = XMLHandler.getNodeValue(
+                                  XMLHandler.getSubNode(nNode, "includeSALT")
+                              );
+                        }
+                          
+                                  
+
                        }
                       
                        
@@ -974,6 +988,34 @@ public class AutoPopulate {
 
          }
          return logicalFileNames;
+
+     }
+    
+    
+    public boolean hasNodeofType(List<JobEntryCopy> jobs, String ofType) throws Exception{
+        // System.out.println(" ------------ " + ofTYpe + " ------------- ");
+    	 boolean isType = false;
+         Object[] jec = jobs.toArray();
+         if(jec != null){
+            
+             for(int j = 0; j<jec.length; j++){
+                    String xml = ((JobEntryCopy)jec[j]).getXML();
+                    NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
+                    for (int temp = 0; temp < nl.getLength(); temp++){
+                        Node nNode = nl.item(temp);
+                        
+                        String type = XMLHandler.getNodeValue(
+                            XMLHandler.getSubNode(nNode, "type")
+                            );
+                        //System.out.println("Type: " + type);
+                        if(type.equalsIgnoreCase(ofType)){
+                        	isType = true;
+                            return isType;//no need to keep looping;
+                        }
+                    }
+             }
+         }
+         return isType;
 
      }
     

@@ -54,5 +54,7 @@
         <zipfileset dir=".././job/eclsprayfile/target" includes="eclsprayfile.jar" prefix="jobentries/eclsprayfile" />
         <zipfileset dir=".././job/ecltable/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecltable" />
         <zipfileset dir=".././job/ecltable/target" includes="ecltable.jar" prefix="jobentries/ecltable" />
+		<zipfileset dir=".././job/saltdataprofiling/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/saltdataprofiling" />
+		<zipfileset dir=".././job/saltdataprofiling/target" includes="saltdataprofiling.jar" prefix="jobentries/saltdataprofiling" />
 	</zip>
 </project>

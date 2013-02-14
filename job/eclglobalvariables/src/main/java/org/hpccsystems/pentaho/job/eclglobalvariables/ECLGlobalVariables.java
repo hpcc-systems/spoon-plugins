@@ -48,6 +48,9 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
     
     private String user = "";
     private String pass = "";
+    
+    private String SALTPath = "";
+    private boolean includeSALT = false;
 
     private String keyStr = "saqwvdf023rkjas7ku,df9e4kt`q234rtuqrtadfads.faufrae";
     
@@ -145,6 +148,38 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
         }
     }
 
+    
+    public String getSALTPath() {
+		return SALTPath;
+	}
+
+	public void setSALTPath(String sALTPath) {
+		SALTPath = sALTPath;
+	}
+
+	public boolean isIncludeSALT() {
+		return includeSALT;
+	}
+
+	public void setIncludeSALT(boolean includeSALT) {
+		this.includeSALT = includeSALT;
+	}
+	public void setIncludeSALT(String includeSALT) {
+        if(includeSALT.equals("true")){
+            this.includeSALT = true;
+        }else{
+            this.includeSALT = false;
+        }
+    }
+	
+	 public String getIncludeSALT() {
+	        if(includeSALT){
+	            return "true";
+	        }else{
+	            return "false";
+	        }
+	    }
+
 
     public String getJobName() {
         return jobName;
@@ -204,6 +239,13 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"includeML")) != null)
                 this.setIncludeML(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"includeML")));
             
+            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"includeSALT")) != null)
+                this.setIncludeSALT(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"includeSALT")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"SALTPath")) != null)
+                this.setSALTPath(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"SALTPath")));
+           
+            
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"user_name")) != null)
                 this.setUser(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"user_name")));
             
@@ -242,6 +284,9 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
         retval += "             <user_name><![CDATA["+this.getUser() + "]]></user_name>"+Const.CR;
         
         retval += "             <password><![CDATA["+ pass + "]]></password>"+Const.CR;
+        
+        retval += "             <includeSALT><![CDATA["+this.getIncludeSALT() + "]]></includeSALT>"+Const.CR;
+        retval += "             <SALTPath><![CDATA["+this.getSALTPath()+"]]></SALTPath>"+Const.CR;
       
        
         return retval;
@@ -269,6 +314,9 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
             this.setUser( rep.getStepAttributeString(id_jobentry, "user_name"));
             pass = ( rep.getStepAttributeString(id_jobentry, "password"));
             
+            this.setIncludeSALT( rep.getStepAttributeString(id_jobentry, "includeSALT"));
+            this.setSALTPath( rep.getStepAttributeString(id_jobentry, "SALTPath"));
+            
                     
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -291,6 +339,8 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
             
             rep.saveStepAttribute(id_job, getObjectId(), "user_name", this.getUser());
             rep.saveStepAttribute(id_job, getObjectId(), "password", pass);
+            rep.saveStepAttribute(id_job, getObjectId(), "includeSALT", this.getIncludeSALT());
+            rep.saveStepAttribute(id_job, getObjectId(), "SALTPath", this.getSALTPath());
             
         
         } catch (Exception e) {

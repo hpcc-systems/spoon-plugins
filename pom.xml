@@ -82,6 +82,7 @@
                 </plugins>
             </build>
         </profile>
+		
 		<profile>
 			<id>build-all</id>
 			<activation>
@@ -89,12 +90,14 @@
 			</activation>
 			<modules>
 				<module>eclgui</module>
+				<module>eclsalt</module>
 				<module>perspectives</module>
 				<module>job</module>
 			</modules>
 			<build>
 				<finalName>${project.artifactId}</finalName>
 				<plugins>
+
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-compiler-plugin</artifactId>
@@ -110,6 +113,7 @@
 									<goal>compile</goal>
 								</goals>
 							</execution>
+							
 						</executions>
 					</plugin>
 					<plugin>
@@ -138,6 +142,7 @@
 							</execution>
 						</executions>
 					</plugin>
+					
 				</plugins>
 			</build>
 
@@ -154,6 +159,7 @@
 						<version>4.10</version>
 						<scope>test</scope>
 					</dependency>
+            
 				</dependencies>
 			</dependencyManagement>
 
@@ -193,6 +199,7 @@
 									<goal>run</goal>
 								</goals>
 							</execution>
+							 							
 						</executions>
 					</plugin>
 				</plugins>

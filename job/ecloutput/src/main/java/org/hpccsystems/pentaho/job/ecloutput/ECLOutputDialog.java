@@ -816,7 +816,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
 	        String serverPort = "";
 	            try{
 	            //Object[] jec = this.jobMeta.getJobCopies().toArray();
-	                
+	                 
 	                serverHost = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_ip");
 	                serverPort = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_port");
 	            }catch (Exception e){

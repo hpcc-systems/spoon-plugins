@@ -19,11 +19,14 @@ import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.xml.XMLHandler;
+import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryBase;
+import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
+import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.ecljobentrybase.*;
 
 /**
@@ -128,13 +131,30 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
                             
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
-        
+    	JobMeta jobMeta = super.parentJob.getJobMeta();
+        List<JobEntryCopy> jobs = jobMeta.getJobCopies();
+        AutoPopulate ap = new AutoPopulate();
         Result result = prevResult;
         
         Dataset dataset = new Dataset();
         dataset.setLogicalFileName(getLogicalFileName());
         dataset.setName(getDatasetName());
        // dataset.setRecordFormatString(getRecordDef());
+        //use(hasNodeofType(type); from global variables here
+        boolean isSaltHygiene = false;
+        try{
+        	isSaltHygiene = ap.hasNodeofType(jobs, "SALTHygiene");
+        }catch(Exception e){
+        	
+        }
+        if(isSaltHygiene){//need to check to see if saltHygine is enabled if so trigger this.
+        	 logBasic("{Dataset Job} ADD HYGINE SETTINGS");
+        	RecordBO saltID = new RecordBO();
+        	saltID.setColumnName("spoonGeneratedID");
+        	saltID.setColumnType("INTEGER");
+        
+        	this.recordList.addRecordBO(saltID);
+        }
         dataset.setRecordFormatString(resultListToString(this.recordList));
         dataset.setRecordName(getRecordName());
         dataset.setFileType(getFileType());

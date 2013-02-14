@@ -161,6 +161,7 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
         datasetGroupFormat.left = new FormAttachment(middle, 0);
         datasetGroup.setLayoutData(datasetGroupFormat);
 
+        
         AutoPopulate ap = new AutoPopulate();
         String[] fileList = new String[0];
         
@@ -177,6 +178,7 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
                 System.out.println(e.toString());
                 
             }
+
         final HPCCServerInfo hsi = new HPCCServerInfo(serverHost,serverPort);
         fileList = hsi.fetchFileList();
         try{
