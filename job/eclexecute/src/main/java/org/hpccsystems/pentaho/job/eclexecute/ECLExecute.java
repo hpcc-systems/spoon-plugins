@@ -42,7 +42,7 @@ import org.hpccsystems.pentaho.job.eclexecute.RenderWebDisplay;
 import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.recordlayout.RecordList;
 import org.hpccsystems.salt.hygiene.Generate;
-import org.hpccsystems.saltui.*;
+import org.hpccsystems.saltui.hygiene.*;
 
 
 /**
@@ -259,11 +259,13 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 		        		
 		        	}
 		        	String file_name = "";
+		        	
 		        	for(int i = 0; i < datasets.length; i++){
 		        		 //iterate through all the xml files and build a specification file.
 		        		//System.out.println("dataset: " + datasets[i]);
 		        		RecordList fields = ap.rawFieldsByDataset(datasets[i],jobMeta.getJobCopies());
 		        		//have field declaration now we need to build the xml
+		        		String fieldCSV = "";
 		        		for (Iterator<RecordBO> iterator = fields.getRecords().iterator(); iterator.hasNext();) {
 		        			RecordBO obj = (RecordBO) iterator.next();
 		        			//System.out.println("----------------" + obj.getColumnName());
@@ -277,7 +279,11 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 		                    				"</fielddef>\r\n";
 		        			*/
 		        			if(!obj.getColumnName().equals("spoonGeneratedID")){
-		        				
+		        				if(fieldCSV.equals("")){
+		        					fieldCSV += obj.getColumnName();
+		        				}else{
+		        					fieldCSV += ","+obj.getColumnName();
+		        				}
 		        				xmlHygieneBuilder += buildHygieneRule(datasets[i], obj.getColumnName(),obj.getColumnType());
 		        			}
 		        			if(obj.getColumnName().equals("spoonGeneratedID")){
@@ -289,7 +295,8 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 		        		
 		        		//todo: write layout_<file_name> to file needed for soap
 		        		layoutECL = "EXPORT layout_" + file_name + " := RECORD\r\n" + resultListToString(fields) + "\r\nEND;\r\n\r\n";
-		        		
+		        		//xmlHygieneBuilder += buildHygieneRule(datasets[i], "SRC","");
+		        		xmlHygieneBuilder += "<hyg:sourcefield>" + fieldCSV + "</hyg:sourcefield>";
 		        	}
 		        	
 		        	

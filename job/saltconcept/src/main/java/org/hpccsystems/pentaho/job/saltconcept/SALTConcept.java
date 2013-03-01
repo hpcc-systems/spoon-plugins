@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.hpccsystems.pentaho.job.salthygiene;
+package org.hpccsystems.pentaho.job.saltconcept;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,11 +10,7 @@ import java.util.List;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.recordlayout.RecordList;
-import org.hpccsystems.saltui.hygiene.*;
-//import org.hpccsystems.saltui.EntryBO;
-//import org.hpccsystems.saltui.EntryList;
-//import org.hpccsystems.saltui.HygieneRuleBO;
-//import org.hpccsystems.saltui.HygieneRuleList;
+import org.hpccsystems.saltui.concept.*;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;
@@ -36,7 +32,7 @@ import org.hpccsystems.javaecl.SaltHygieneReport;
  *
  * @author ChambersJ
  */
-public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class SALTConcept extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
     
 	
     private String datasetName;
@@ -44,14 +40,7 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
     private String cleanData;
 	//private String rules;
 	private EntryList entryList = new EntryList();
-	private String srcField;
-	
-	private String includeSrcOutliers;
-    private String includeClusterSrc;
-    private String includeClusterCounts;
-    private String includeSrcProfiles;
-	
-	private HygieneRuleList fieldTypeList = new HygieneRuleList();
+	private ConceptRuleList fieldTypeList = new ConceptRuleList();
    
 	public String getDatasetName() {
 		return datasetName;
@@ -65,10 +54,10 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
 	public void setLayout(String layout) {
 		this.layout = layout;
 	}
-    public HygieneRuleList getFieldTypeList() {
+    public ConceptRuleList getFieldTypeList() {
 		return fieldTypeList;
 	}
-	public void setFieldTypeList(HygieneRuleList fieldTypeList) {
+	public void setFieldTypeList(ConceptRuleList fieldTypeList) {
 		this.fieldTypeList = fieldTypeList;
 	}
 	public EntryList getEntryList() {
@@ -80,38 +69,6 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
 	
 	
 	
-	public String getSrcField() {
-		return srcField;
-	}
-	public void setSrcField(String srcField) {
-		this.srcField = srcField;
-	}
-	
-	
-	public String getIncludeSrcOutliers() {
-		return includeSrcOutliers;
-	}
-	public void setIncludeSrcOutliers(String includeSrcOutliers) {
-		this.includeSrcOutliers = includeSrcOutliers;
-	}
-	public String getIncludeClusterSrc() {
-		return includeClusterSrc;
-	}
-	public void setIncludeClusterSrc(String includeClusterSrc) {
-		this.includeClusterSrc = includeClusterSrc;
-	}
-	public String getIncludeClusterCounts() {
-		return includeClusterCounts;
-	}
-	public void setIncludeClusterCounts(String includeClusterCounts) {
-		this.includeClusterCounts = includeClusterCounts;
-	}
-	public String getIncludeSrcProfiles() {
-		return includeSrcProfiles;
-	}
-	public void setIncludeSrcProfiles(String includeSrcProfiles) {
-		this.includeSrcProfiles = includeSrcProfiles;
-	}
 	public String getCleanData() {
 		return cleanData;
 	}
@@ -150,8 +107,8 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
     
     public String saveFieldTypeList(){
         String out = "";
-        ArrayList<HygieneRuleBO> list = fieldTypeList.getFields();
-        Iterator<HygieneRuleBO> itr = list.iterator();
+        ArrayList<ConceptRuleBO> list = fieldTypeList.getFields();
+        Iterator<ConceptRuleBO> itr = list.iterator();
         boolean isFirst = true;
         while(itr.hasNext()){
             if(!isFirst){out+="|";}
@@ -169,9 +126,9 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
         int len = strLine.length;
         
         if(len>0){
-            fieldTypeList = new HygieneRuleList();
+            fieldTypeList = new ConceptRuleList();
             for(int i =0; i<len; i++){
-                HygieneRuleBO ft = new HygieneRuleBO(strLine[i]);
+                ConceptRuleBO ft = new ConceptRuleBO(strLine[i]);
                 ft.fromCSV(strLine[i]);
                 fieldTypeList.add(ft);
             }
@@ -314,20 +271,6 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "cleanedData")) != null)
                 setCleanData(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "cleanedData")));
             
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "srcField")) != null)
-                setSrcField(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "srcField")));
-            
-
-            
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "includeSrcOutliers")) != null)
-                setIncludeSrcOutliers(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "includeSrcOutliers")));
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "includeClusterSrc")) != null)
-                setIncludeClusterSrc(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "includeClusterSrc")));
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "includeClusterCounts")) != null)
-                setIncludeClusterCounts(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "includeClusterCounts")));
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "includeSrcProfiles")) != null)
-                setIncludeSrcProfiles(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "includeSrcProfiles")));
-            
         } catch (Exception e) {
             throw new KettleXMLException("ECL Dataset Job Plugin Unable to read step info from XML node", e);
         }
@@ -344,15 +287,6 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
         retval += "		<entryList><![CDATA[" + this.saveEntryList() + "]]></entryList>" + Const.CR;
         retval += "		<fieldTypeList><![CDATA[" + this.saveFieldTypeList() + "]]></fieldTypeList>" + Const.CR;
         retval += "		<cleanedData><![CDATA[" + this.cleanData + "]]></cleanedData>" + Const.CR;
-        retval += "		<srcField><![CDATA[" + this.srcField + "]]></srcField>" + Const.CR;
-        
-
-        retval += "		<includeSrcOutliers><![CDATA[" + this.includeSrcOutliers + "]]></includeSrcOutliers>" + Const.CR;
-        retval += "		<includeClusterSrc><![CDATA[" + this.includeClusterSrc + "]]></includeClusterSrc>" + Const.CR;
-        retval += "		<includeClusterCounts><![CDATA[" + this.includeClusterCounts + "]]></includeClusterCounts>" + Const.CR;
-        retval += "		<includeSrcProfiles><![CDATA[" + this.includeSrcProfiles + "]]></includeSrcProfiles>" + Const.CR;
-        
-        
         return retval;
 
     }
@@ -373,22 +307,7 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
             
             if(rep.getStepAttributeString(id_jobentry, "cleanedData") != null)
                 this.setCleanData(rep.getStepAttributeString(id_jobentry, "cleanedData")); //$NON-NLS-1$
-            
-            if(rep.getStepAttributeString(id_jobentry, "srcField") != null)
-                this.setSrcField(rep.getStepAttributeString(id_jobentry, "srcField")); //$NON-NLS-1$
         
-        	
-            
-            if(rep.getStepAttributeString(id_jobentry, "includeSrcOutliers") != null)
-                this.setIncludeSrcOutliers(rep.getStepAttributeString(id_jobentry, "includeSrcOutliers")); //$NON-NLS-1$
-            if(rep.getStepAttributeString(id_jobentry, "includeClusterSrc") != null)
-                this.setIncludeClusterSrc(rep.getStepAttributeString(id_jobentry, "includeClusterSrc")); //$NON-NLS-1$
-            if(rep.getStepAttributeString(id_jobentry, "includeClusterCounts") != null)
-                this.setIncludeClusterCounts(rep.getStepAttributeString(id_jobentry, "includeClusterCounts")); //$NON-NLS-1$
-            if(rep.getStepAttributeString(id_jobentry, "includeSrcProfiles") != null)
-                this.setIncludeSrcProfiles(rep.getStepAttributeString(id_jobentry, "includeSrcProfiles")); //$NON-NLS-1$
-            
-            
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
         }
@@ -402,14 +321,6 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
             rep.saveStepAttribute(id_job, getObjectId(), "entryList", this.saveEntryList()); //$NON-NLS-1$.
             rep.saveStepAttribute(id_job, getObjectId(), "fieldTypeList", this.saveFieldTypeList()); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "cleanedData", this.getCleanData()); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "srcField", this.getSrcField()); //$NON-NLS-1$
-            
-
-            rep.saveStepAttribute(id_job, getObjectId(), "includeSrcOutliers", this.getIncludeSrcOutliers()); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "includeClusterSrc", this.getIncludeClusterSrc()); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "includeClusterCounts", this.getIncludeClusterCounts()); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "includeSrcProfiles", this.getIncludeSrcProfiles()); //$NON-NLS-1$
-            
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);
         }

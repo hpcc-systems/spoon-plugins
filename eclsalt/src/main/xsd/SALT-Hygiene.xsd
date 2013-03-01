@@ -9,6 +9,7 @@
                 <element name="file-name" type="string" maxOccurs="1" minOccurs="1"/>
 				<element name="idfield" type="string" maxOccurs="1" minOccurs="1"/>
 				<element name="idname" type="string" maxOccurs="1" minOccurs="1"/>
+				<element name="sourcefield" type="string" maxOccurs="1" minOccurs="0"/>
                 <element name="field-rule" type="tns:field-hygiene-rule" maxOccurs="unbounded" minOccurs="0"/>
             </sequence>
         </complexType>

@@ -1,4 +1,4 @@
-package org.hpccsystems.saltui;
+package org.hpccsystems.saltui.hygiene;
 
 import java.util.ArrayList;
 import java.util.HashSet;

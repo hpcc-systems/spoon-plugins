@@ -119,6 +119,7 @@ import javax.xml.bind.annotation.XmlType;
     "moduleName",
     "fileName",
     "idname",
+    "sourcefield",
     "fields",
     "matchingRules",
     "hygieneRules",
@@ -138,6 +139,9 @@ public class SaltSpecification {
     
     @XmlElement(name = "idname", required = false)
     protected String idname;
+    
+    @XmlElement(name = "sourcefield", required = false)
+    protected String sourcefield;
     
     
     @XmlElement(required = true)
@@ -175,7 +179,9 @@ public class SaltSpecification {
         this.moduleName = value;
     }
 
-    /**
+   
+
+	/**
      * Gets the value of the fileName property.
      * 
      * @return
@@ -337,7 +343,13 @@ public class SaltSpecification {
 		this.idname = idname;
 	}
 
+	public String getSourcefield() {
+		return sourcefield;
+	}
 
+	public void setSourcefield(String sourcefield) {
+		this.sourcefield = sourcefield;
+	}
 
 	/**
      * <p>Java class for anonymous complex type.

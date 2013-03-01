@@ -152,8 +152,12 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         	RecordBO saltID = new RecordBO();
         	saltID.setColumnName("spoonGeneratedID");
         	saltID.setColumnType("INTEGER");
-        
+        	RecordBO saltSRC = new RecordBO();
+        	//saltSRC.setColumnName("SRC");
+        	//saltSRC.setColumnType("STRING");
+        	//saltSRC.setDefaultValue("SPOON_");
         	this.recordList.addRecordBO(saltID);
+        	//this.recordList.addRecordBO(saltSRC);
         }
         dataset.setRecordFormatString(resultListToString(this.recordList));
         dataset.setRecordName(getRecordName());

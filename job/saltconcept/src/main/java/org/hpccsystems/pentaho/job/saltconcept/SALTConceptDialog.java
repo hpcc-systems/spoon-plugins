@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.hpccsystems.pentaho.job.salthygiene;
+package org.hpccsystems.pentaho.job.saltconcept;
 
 import java.util.Iterator;
 import org.eclipse.jface.viewers.TableViewer;
@@ -49,20 +49,18 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.hpccsystems.recordlayout.RecordBO;
-//import org.hpccsystems.saltui.
-import org.hpccsystems.saltui.hygiene.*;
+import org.hpccsystems.saltui.concept.*;
 import org.hpccsystems.ecljobentrybase.*;
 /**
  *
  * @author ChambersJ
  */
-public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
+public class SALTConceptDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
 
-    private SALTHygiene jobEntry;
+    private SALTConcept jobEntry;
     private Text jobEntryName;
     private Combo datasetName;
     private Combo layout;
-    private Combo cleanedOutput;
     private Label outLabel;
     
     private Button wOK, wCancel;
@@ -71,19 +69,16 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
     
     CreateTable createTable = null;
     private EntryList entryList;
-    private HygieneRuleList fieldTypeList;
+    private ConceptRuleList fieldTypeList;
     
-	private Combo includeSrcOutliers;
-    private Combo includeClusterSrc;
-    private Combo includeClusterCounts;
-    private Combo includeSrcProfiles;
 
 
-    public SALTHygieneDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
+
+    public SALTConceptDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
         super(parent, jobEntryInt, rep, jobMeta);
-        jobEntry = (SALTHygiene) jobEntryInt;
+        jobEntry = (SALTConcept) jobEntryInt;
         if (this.jobEntry.getName() == null) {
-            this.jobEntry.setName("Salt Hygiene");
+            this.jobEntry.setName("Salt Concept");
         }
     }
 
@@ -138,13 +133,13 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
 
 
         shell.setLayout(formLayout);
-        shell.setText("Salt Hygiene");
+        shell.setText("Salt Concept");
 
         int middle = props.getMiddlePct();
         int margin = Const.MARGIN;
 
         shell.setLayout(formLayout);
-        shell.setText("Define Salt Hygiene Rules");
+        shell.setText("Define Salt Concept Fields");
 
         FormLayout groupLayout = new FormLayout();
         groupLayout.marginWidth = 10;
@@ -176,35 +171,12 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
         joinGroupFormat.height = 150;
         joinGroupFormat.left = new FormAttachment(middle, 0);
         joinGroup.setLayoutData(joinGroupFormat);
-        
-        
 
         item1.setControl(compForGrp);
         this.datasetName = buildCombo("Dataset Name", null, lsMod, middle, margin, joinGroup,datasets);
-        this.cleanedOutput = buildCombo("Output Cleaned Dataset?", this.datasetName, lsMod,middle,margin,joinGroup,new String[]{"yes","no"});
-        //this.layout = buildCombo("Layout", this.datasetName, lsMod, middle, margin, joinGroup,datasets);
         outLabel = buildLabel("The Output will be stored as a file on the cluster as \r\n" +
-        		"~SPOONFILES::[Dataset Name]_CleanedData.\r\n\r\n", this.cleanedOutput, lsMod, 0, margin, joinGroup);
+        		"~SPOONFILES::[Dataset Name]_CleanedData.\r\n\r\n", this.datasetName, lsMod, 0, margin, joinGroup);
 
-        
-
-        Group optionalGroup = new Group(compForGrp, SWT.SHADOW_NONE);
-        props.setLook(optionalGroup);
-        optionalGroup.setText("Data Source Cluster Diagnostic Reports");
-        optionalGroup.setLayout(groupLayout);
-        FormData optionalGroupFormat = new FormData();
-        optionalGroupFormat.top = new FormAttachment(joinGroup, margin);
-        optionalGroupFormat.width = 400;
-        optionalGroupFormat.height = 150;
-        optionalGroupFormat.left = new FormAttachment(middle, 0);
-        optionalGroup.setLayoutData(optionalGroupFormat);
-        
-        this.includeSrcOutliers = buildCombo("Include SrcOutliers", null, lsMod,middle,margin,optionalGroup,new String[]{"yes","no"});
-        this.includeClusterSrc = buildCombo("Include ClusterSrc?", this.includeSrcOutliers, lsMod,middle,margin,optionalGroup,new String[]{"yes","no"});
-        this.includeClusterCounts = buildCombo("Include Cluster Counts?", this.includeClusterSrc, lsMod,middle,margin,optionalGroup,new String[]{"yes","no"});
-        this.includeSrcProfiles = buildCombo("Include SrcProfiles?", this.includeClusterCounts, lsMod,middle,margin,optionalGroup,new String[]{"yes","no"});
-
-        
         createTable = new CreateTable(shell);
         try{
 	        String[] items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
@@ -308,23 +280,6 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
         if (jobEntry.getCleanData() != null) {
             this.cleanedOutput.setText(jobEntry.getCleanData());
         }
-        
-        
-        if (jobEntry.getIncludeClusterCounts() != null) {
-            this.includeClusterCounts.setText(jobEntry.getIncludeClusterCounts());
-        }
-        
-        if (jobEntry.getIncludeClusterSrc() != null) {
-            this.includeClusterSrc.setText(jobEntry.getIncludeClusterSrc());
-        }
-        
-        if (jobEntry.getIncludeSrcOutliers() != null) {
-            this.includeSrcOutliers.setText(jobEntry.getIncludeSrcOutliers());
-        }
-        if (jobEntry.getIncludeSrcProfiles() != null) {
-            this.includeSrcProfiles.setText(jobEntry.getIncludeSrcProfiles());
-        }
-
 
         shell.pack();
         shell.open();
@@ -483,11 +438,6 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
         jobEntry.setEntryList(createTable.getEntryList());
         jobEntry.setFieldTypeList(createTable.getRuleList());
         jobEntry.setCleanData((this.cleanedOutput.getText()));
-        
-        jobEntry.setIncludeClusterCounts((this.includeClusterCounts.getText()));
-        jobEntry.setIncludeClusterSrc((this.includeClusterSrc.getText()));
-        jobEntry.setIncludeSrcOutliers((this.includeSrcOutliers.getText()));
-        jobEntry.setIncludeSrcProfiles((this.includeSrcProfiles.getText()));
         dispose();
     }
 

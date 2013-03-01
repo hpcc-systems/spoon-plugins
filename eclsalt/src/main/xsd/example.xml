@@ -3,8 +3,9 @@
   <file-name>HelloWorld_File</file-name>
   <idfield>HelloWorld_File_ID</idfield>
   <idname>HellowWOrldIDName</idname>
+  <sourcefield>test</sourcefield>
   <field-rule>
     <field-name>First</field-name>
     <left-trim>true</left-trim>
   </field-rule>
-</hygiene-spec>
+</hygiene-spec>"src/main/xsd/example.xml"

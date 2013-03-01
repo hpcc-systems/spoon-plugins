@@ -3,6 +3,7 @@
     <hyg:file-name>Customers_File</hyg:file-name>
 	
 	<hyg:idfield>Customers_File</hyg:idfield>
+	 <hyg:sourcefield>test</hyg:sourcefield>
     <hyg:field-rule>
         <hyg:field-name>first_name</hyg:field-name>
         <hyg:field-type>STRING50</hyg:field-type>

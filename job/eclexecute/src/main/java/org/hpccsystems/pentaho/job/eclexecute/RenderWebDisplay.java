@@ -21,9 +21,9 @@ public class RenderWebDisplay {
 
 	public static void main(String[] args){
 		RenderWebDisplay rwd = new RenderWebDisplay();
-		String file = "C:\\Spoon Demos\\new\\salt_dataprofiling_quickstart\\out\\Dataprofiling_AllProfiles.csv";
-		file = "C:\\Documents and Settings\\ChambeJX.RISK\\Desktop\\toyota\\out_clean2\\NEW\\Dataprofiling_AllProfiles.csv";
-		String outFolder = "C:\\Documents and Settings\\ChambeJX.RISK\\Desktop\\toyota\\out_clean\\NEW";
+		String file = "C:\\spoon-profiles\\toyota\\out\\Dataprofiling_AllProfiles2.csv";
+		//file = "C:\\Documents and Settings\\ChambeJX.RISK\\Desktop\\toyota\\out_clean2\\NEW\\Dataprofiling_AllProfiles.csv";
+		String outFolder = "C:\\spoon-profiles\\toyota\\out\\";
 		rwd.processFile(file, outFolder);
 		}
 	
@@ -111,30 +111,9 @@ public class RenderWebDisplay {
 	          boolean newTable = false;
 	          
 	          while ((nextLine = reader.readNext()) != null) {
-	        	  //System.out.println("LINE: " + line++ + " LEN: " + nextLine.length);
-	        	  //if(nextLine[1].equals("customer_key_1") || nextLine[1].equals("name")){
-	        		//  System.out.println(nextLine[1] + " " + nextLine.length);
-	        	  //}
+
 	        	  String[] lineArr = nextLine;
-	          //while ((strLine = br.readLine()) != null)   {
-	          // Print the content on the console
-	        	  //String regex = "\"(\\([^)]*\\)|[^\"])*\"";
-
-	        	 // String[] lineArr = strLine.split(regex);
-	        	  //String[] lineArr = strLine.split(",(?![^()]*+\\))");
-/*
-	              String[] lineArr = strLine.split("\\,");
-	        	  String[] lineArr2 = new String[6];
-	        	  String regex = "\"(\\([^)]*\\)|[^\"])*\"";
-	        	  Pattern p = Pattern.compile(regex);
-	        	  Matcher m = p.matcher(strLine);
-	        	  int cnt = 0;
-	        	  while(m.find()) {
-	        		  System.out.println(strLine.substring(m.start(),m.end()));
-	        		  lineArr2[cnt++] = strLine.substring(m.start(),m.end());
-	        	  }
-
-	*/        	  
+	             	  
 	        	  
 	              if(first){
 	            	  firstRowLen = lineArr.length;
@@ -142,22 +121,32 @@ public class RenderWebDisplay {
 	            	  second = true;
 	              }else{
 		           //  html += renderRows(strLineArr,length);
-		              	if(lineArr.length >= firstRowLen){
+	            	  	
+		              	if(lineArr.length > 2){
 		              	//if(lineArr[2] != ""){
-			      			System.out.println("NAME: " + lineArr[1]);
+			      			//System.out.println("NAME: " + lineArr[1]);
 			            	html += "\n\r<tr>" +
 			                      "<td>" + lineArr[0] + "</td>" + //fldno
 			                      "<td>" + lineArr[1] + "</td>" + //fieldname
 			                      "<td>" + lineArr[2] + "</td>"; //cardinality
 			                      ;
 			                newTable = true;
-			                fldno = lineArr[0];
-			      			len = lineArr[3];
+			                
+			                fldno = "";
+			                len = "";
+			                words = "";
+			                characters = "";
+			                patterns = "";
+			                freqTerms = "";
+			                
+			                if(lineArr.length > 0) fldno = lineArr[0];
+			                if(lineArr.length > 3) len = lineArr[3];
 			      			//System.out.println("DEFINE LEN: |" + len + "|");
-			      			words = lineArr[4];
-			      			characters = lineArr[5];
-			      			patterns = lineArr[6];
-			      			freqTerms = lineArr[7];
+			      			//System.out.println(lineArr.length);
+			      			if(lineArr.length > 4) words = lineArr[4];
+			      			if(lineArr.length > 5) characters = lineArr[5];
+			      			if(lineArr.length > 6) patterns = lineArr[6];
+			      			if(lineArr.length > 7) freqTerms = lineArr[7];
 			      			/*
 			                      "<td>" + lineArr[3] + "</td>" + //len
 			                      "<td>" + lineArr[4] + "</td>" + //words
@@ -182,22 +171,26 @@ public class RenderWebDisplay {
 				      			int thisLen = lineArr.length;
 				      			String subStr = "";
 				      			html += "<tr>";
-				      			 for(int i =0; i<thisLen; i++){
+				      			 for(int i =0; i<2; i++){
+				      				if(i < thisLen){
 				      				 subStr += lineArr[i];
-				      				
-				      				html += "<td>" + lineArr[i] + "</td>";
+				      				 html += "<td>" + lineArr[i] + "</td>";
+				      				}else{
+				      					 html += "<td></td>";
+				      				}
 				      			 }
 				      			 html += "</tr>";
 				      			 //System.out.println(subStr.length());
 				      			 //System.out.println(len.length());
-				      			 //if(subStr.length()<=len.length()){
+				      			 if(subStr.length()<=len.length()){
 				      			
 				      			   len = len.substring(subStr.length(),len.length());
 				      			   //System.out.println("|"+len+"|");
-			      				 //}else{
+			      				 }else{
+			      					 len = "";
 			      				//	html += "</tbody></table></td>";
 				      			//	 newTable = true;
-			      				// }
+			      				 }
 				      			
 				      			 if(len.equals("")){
 				      				// System.out.println("new table");
@@ -214,14 +207,21 @@ public class RenderWebDisplay {
 				      			int thisLen = lineArr.length;
 				      			String subStr = "";
 				      			html += "<tr>";
-				      			for(int i =0; i<thisLen; i++){
+				      			for(int i =0; i<2; i++){
+				      				if(i < thisLen){
 				      				 subStr += lineArr[i];
 				      				
-				      				html += "<td>" + lineArr[i] + "</td>";
+				      				 html += "<td>" + lineArr[i] + "</td>";
+				      				}else{
+				      					html += "<td></td>";
+				      				}
 				      			 }
 				      			html += "</tr>";
-				      			words = words.substring(subStr.length(),words.length());
-				      			
+				      			if(subStr.length() <= words.length()){
+				      				words = words.substring(subStr.length(),words.length());
+				      			}else{
+				      				words = "";
+				      			}
 				      			if(words.equals("")){
 				      				 html += "</table></td>";
 				      				 newTable = true;
@@ -236,16 +236,23 @@ public class RenderWebDisplay {
 				      			int thisLen = lineArr.length;
 				      			String subStr = "";
 				      			html += "<tr>";
-				      			for(int i =0; i<thisLen; i++){
+				      			for(int i =0; i<2; i++){
+				      				if(i < thisLen){
 				      				 subStr += lineArr[i];
 				      				 
-				      				html += "<td>" + lineArr[i] + "</td>";
+				      				 html += "<td>" + lineArr[i] + "</td>";
+				      				}else{
+				      					html += "<td></td>";
+				      				}
 				      			 }
 				      			html += "</tr>";
 				      			//if(characters.length()>=subStr.length()){
 				      				
-				      			
-				      			characters = characters.substring(subStr.length(),characters.length());
+				      			if(subStr.length() <= characters.length()){
+				      				characters = characters.substring(subStr.length(),characters.length());
+				      			}else{
+				      				characters = "";
+				      			}
 				      			//}else{
 				      			//	System.out.println("subStr: " + subStr);
 				      			//	characters = characters.substring(subStr.length(),characters.length());
@@ -264,13 +271,21 @@ public class RenderWebDisplay {
 				      			int thisLen = lineArr.length;
 				      			String subStr = "";
 				      			html += "<tr>";
-				      			for(int i =0; i<thisLen; i++){
+				      			for(int i =0; i<2; i++){
+				      				if(i < thisLen){
 				      				 subStr += lineArr[i];
 				      				
-				      				html += "<td>" + lineArr[i] + "</td>";
+				      				 html += "<td>" + lineArr[i] + "</td>";
+				      				}else{
+				      					html += "<td></td>";
+				      				}
 				      			 }
 				      			html += "</tr>";
-				      			patterns = patterns.substring(subStr.length(),patterns.length());
+				      			if(subStr.length() <= patterns.length()){
+				      				patterns = patterns.substring(subStr.length(),patterns.length());
+				      			}else{
+				      				patterns = "";
+				      			}
 				      			
 				      			if(patterns.equals("")){
 				      				 html += "</table></td>";
@@ -286,13 +301,21 @@ public class RenderWebDisplay {
 				      			int thisLen = lineArr.length;
 				      			String subStr = "";
 				      			html += "<tr>";
-				      			for(int i =0; i<thisLen; i++){
+				      			for(int i =0; i<2; i++){
+				      				if(i < thisLen){
 				      				 subStr += lineArr[i];
 				      				 
-				      				html += "<td>" + lineArr[i] + "</td>";
+				      				 html += "<td>" + lineArr[i] + "</td>";
+				      				}else{
+				      					html += "<td></td>";
+				      				}
 				      			 }
 				      			html += "</tr>";
-				      			freqTerms = freqTerms.substring(subStr.length(),freqTerms.length());
+				      			if(subStr.length() <= freqTerms.length()){
+				      				freqTerms = freqTerms.substring(subStr.length(),freqTerms.length());
+				      			}else{
+				      				freqTerms = "";
+				      			}
 				      			if(freqTerms.equals("")){
 				      				 html += "</table></td>";
 				      				 newTable = true;
@@ -300,7 +323,7 @@ public class RenderWebDisplay {
 			      			}
 		      		}
 		              second = false;
-		              
+		            //  System.out.println( lineArr[1] + " : " + lineArr.length );
 	              }      
 	          }
 	         
@@ -309,7 +332,7 @@ public class RenderWebDisplay {
 	    }catch (Exception e){//Catch exception if any
 	        System.err.println("Error: " + e.getMessage());
 	        e.printStackTrace();
-	        System.out.println("LINE: " + line++ + " ");
+	        //System.out.println("LINE: " + line++ + " ");
 	     }
 	      return html;
 

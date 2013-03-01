@@ -1,4 +1,4 @@
-package org.hpccsystems.saltui;
+package org.hpccsystems.saltui.hygiene;
 
 public class HygieneRuleBO {
 	

@@ -1,4 +1,4 @@
-package org.hpccsystems.saltui;
+package org.hpccsystems.saltui.concept;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,7 +55,7 @@ public class CreateTable {
 	private Table table;
 	private TableViewer tableViewer;
 	private EntryList entryList;
-	private HygieneRuleBO activeRule = new HygieneRuleBO();
+	private ConceptRuleBO activeRule = new ConceptRuleBO();
 	private Composite compForGrp2;
 	private ArrayList<TableEditor> tableEditEditor = new ArrayList<TableEditor>();
 	private ArrayList<TableEditor> tableDelEditor = new ArrayList<TableEditor>();
@@ -63,7 +63,7 @@ public class CreateTable {
 	
 	
 	private Shell editRuleDialog;
-	private HygieneRuleList ruleList;
+	private ConceptRuleList ruleList;
 	private String rules[];
 	private Combo ruleName;
 	//private Text fieldName;
@@ -91,10 +91,10 @@ public class CreateTable {
 	public void setEntryList(EntryList entryList) {
 		this.entryList = entryList;
 	}
-	public HygieneRuleList getRuleList() {
+	public ConceptRuleList getRuleList() {
 		return ruleList;
 	}
-	public void setRuleList(HygieneRuleList ruleList) {
+	public void setRuleList(ConceptRuleList ruleList) {
 		this.ruleList = ruleList;
 	}
 	public EntryList getEntryList() {
@@ -306,7 +306,7 @@ public class CreateTable {
 		//refreshTable();
 	}
 	public CreateTable(){
-		ruleList = new HygieneRuleList();
+		ruleList = new ConceptRuleList();
 		ruleList.createDefault();
 	}
 	public static void main(String[] args) {
@@ -396,7 +396,7 @@ public class CreateTable {
 			if(entry.getHygieneRuleListIndex() != -1 && ruleList.getFields().size() > 0){
 				activeRule = ruleList.get(entry.getHygieneRuleListIndex());
 			}else{
-				activeRule = new HygieneRuleBO();
+				activeRule = new ConceptRuleBO();
 			}
 			
 			Group detailsGroup = new Group(editRuleDialog, SWT.SHADOW_NONE);
@@ -684,7 +684,7 @@ public class CreateTable {
 			if(ruleName.getText().equals("New Rule")){
 				 //new rule
 				System.out.println("new rule " + activeRule.getDisplayTitle());
-				 activeRule = new HygieneRuleBO();
+				 activeRule = new ConceptRuleBO();
 				 updateHygieneRuleBO();
 				 System.out.println("new rule " + activeRule.getDisplayTitle());
 				 
@@ -705,7 +705,7 @@ public class CreateTable {
 					}
 				 
 				 updateHygieneRuleBO();
-				 System.out.println("update rule index: " + ruleIndex + " (" + entry.getRuleName() + ") Selected (newRuleIndex): " + newRuleIndex + "(" + ((HygieneRuleBO)ruleList.get(newRuleIndex)).getDisplayTitle() + ")");
+				 System.out.println("update rule index: " + ruleIndex + " (" + entry.getRuleName() + ") Selected (newRuleIndex): " + newRuleIndex + "(" + ((ConceptRuleBO)ruleList.get(newRuleIndex)).getDisplayTitle() + ")");
 				 //if(entry.getFieldTypeListIndex() != -1){
 				//	 fieldTypes.update(entry.getFieldTypeListIndex(), activeFieldType);
 				 //}else 
@@ -798,7 +798,7 @@ private void loadRuleEditData(int selected){
 	 if(selected > rules.length-1 || selected == -1 || ruleList.getTitles().length == 0 || ruleName.getText().equalsIgnoreCase("New Rule")){
 		 //new rule
 		 System.out.println("new rule");
-		 activeRule = new HygieneRuleBO("");
+		 activeRule = new ConceptRuleBO("");
 		 setDetailFieldsState(true);
 		 ruleName.setText("New Rule");
 		 
@@ -1008,7 +1008,7 @@ private void createButtons(Composite parent) {
 	
 	
 	public CreateTable(Shell shell) {
-		ruleList = new HygieneRuleList();
+		ruleList = new ConceptRuleList();
 		ruleList.createDefault();
 		this.shell = shell;
 	}

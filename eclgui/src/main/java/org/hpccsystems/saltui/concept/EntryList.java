@@ -1,11 +1,9 @@
-package org.hpccsystems.saltui;
+package org.hpccsystems.saltui.concept;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import org.hpccsystems.saltui.IEntryListViewer;
 
 public class EntryList {
 	private ArrayList<EntryBO> entries = new ArrayList<EntryBO>();

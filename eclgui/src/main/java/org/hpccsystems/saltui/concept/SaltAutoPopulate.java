@@ -1,4 +1,4 @@
-package org.hpccsystems.saltui;
+package org.hpccsystems.saltui.concept;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.w3c.dom.NodeList;
 public class SaltAutoPopulate {
 
 	public EntryList entryList = new EntryList();
-	public HygieneRuleList fieldTypeList = new HygieneRuleList();
+	public ConceptRuleList fieldTypeList = new ConceptRuleList();
 	
 	
 	  public  String[] getRule(List<JobEntryCopy> jobs, String datasetName, String columnName) throws Exception{
@@ -122,9 +122,9 @@ public class SaltAutoPopulate {
 	        int len = strLine.length;
 	        
 	        if(len>0){
-	            fieldTypeList = new HygieneRuleList();
+	            fieldTypeList = new ConceptRuleList();
 	            for(int i =0; i<len; i++){
-	                HygieneRuleBO ft = new HygieneRuleBO(strLine[i]);
+	                ConceptRuleBO ft = new ConceptRuleBO(strLine[i]);
 	                ft.fromCSV(strLine[i]);
 	                fieldTypeList.add(ft);
 	            }

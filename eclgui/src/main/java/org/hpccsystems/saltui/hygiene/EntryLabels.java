@@ -1,4 +1,4 @@
-package org.hpccsystems.saltui;
+package org.hpccsystems.saltui.hygiene;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;

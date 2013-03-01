@@ -31,7 +31,9 @@ public class Generate {
            // specStr.appendLine("IDFIELD:" + spec.getIdfield());
             if(spec.getIdname() != null){
             	specStr.appendLine("IDNAME:" + spec.getIdname());
+            	specStr.appendLine("IDFIELD:" + spec.getIdname());
             }
+            
             
 
             FieldHygieneRule rules[] = spec.getFieldRuleArray();
@@ -63,16 +65,24 @@ public class Generate {
                 if (likesLine.length() > 0) {
                     fields.appendLine("FIELD:" + hrule.getFieldName() + ":LIKE(LIKE_"
                             + hrule.getFieldName() + "):0,0");
-                } else {
+                } else if (!hrule.getFieldType().equals("")){
                     fields.appendLine("FIELD:" + hrule.getFieldName() + ":TYPE("
                             + hrule.getFieldType() + "):0,0");
+                }else{
+                	fields.appendLine("FIELD:" + hrule.getFieldName() + ":0,0");
                 }
 
 
             }
+            
+           
 
             specStr.appendLine(likes.toString());
             specStr.appendLine(fields.toString());
+            
+            if(spec.getSourcefield()!= null){
+            	specStr.appendLine("SOURCEFIELD:SRC:CONSISTENT(" + spec.getSourcefield() + ")");
+            }
 
             return specStr.toString();
         } else {
@@ -104,6 +114,7 @@ public class Generate {
         spec.setFileName("HelloWorld_File");
        // spec.setIdfield("HelloWorld_File_ID");
        spec.setIdname("HellowWorldIDName");
+       spec.setSourcefield("test");
         FieldHygieneRule rule = spec.addNewFieldRule();
         rule.setFieldName("First");
         rule.setLeftTrim(true);

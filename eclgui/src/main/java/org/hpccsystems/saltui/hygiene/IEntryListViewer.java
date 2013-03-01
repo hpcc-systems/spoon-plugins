@@ -1,9 +1,9 @@
-package org.hpccsystems.saltui;
+package org.hpccsystems.saltui.hygiene;
 
 public interface IEntryListViewer {
 	
 	//Update the view after the record has been added to record list
-	public void addEntry(EntryBO entry);
+	public void addEntry(org.hpccsystems.saltui.concept.EntryBO entry);
 	
 	//Update the view after the record has been removed from record list
 	public void removeEntry(int index);

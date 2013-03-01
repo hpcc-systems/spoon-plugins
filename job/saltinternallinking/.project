@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>eclproject</name>
+	<name>saltinternallinking</name>
 	<comment></comment>
 	<projects>
-		<project>eclgui</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
