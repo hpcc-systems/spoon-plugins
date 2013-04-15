@@ -6,7 +6,7 @@ package org.hpccsystems.pentaho.job.eclsort;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hpccsystems.ecldirect.Sort;
+import org.hpccsystems.javaecl.Sort;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;
@@ -21,12 +21,13 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
+import org.hpccsystems.ecljobentrybase.*;
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLSort extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLSort extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
     
     //private String logicalFileName;
     private String datasetName = "";

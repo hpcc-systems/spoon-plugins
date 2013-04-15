@@ -1,4 +1,4 @@
-package org.hpccsystems.pentaho.job.eclproject;
+package org.hpccsystems.mapper;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -15,7 +15,7 @@ public class MapperLabelsProvider extends LabelProvider implements ITableLabelPr
 
 	//ImageRegistry owns all of the image objects registered, and automatically disposes them when SWT Display is disposed.
 	static {
-		String iconPath = "../icons/";
+		String iconPath = "icons/";
 		imageRegistry.put( CHECKED_IMAGE, ImageDescriptor.createFromFile(MainMapper.class, iconPath + CHECKED_IMAGE + ".gif"));
 		imageRegistry.put( UNCHECKED_IMAGE, ImageDescriptor.createFromFile(MainMapper.class, iconPath + UNCHECKED_IMAGE + ".gif"));
 	}

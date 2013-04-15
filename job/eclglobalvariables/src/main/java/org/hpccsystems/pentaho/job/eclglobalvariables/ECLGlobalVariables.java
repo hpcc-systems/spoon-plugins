@@ -4,32 +4,37 @@
  */
 package org.hpccsystems.pentaho.job.eclglobalvariables;
 
-import java.util.ArrayList;
+
 import java.util.List;
+
+
+
 import org.pentaho.di.cluster.SlaveServer;
-import org.pentaho.di.compatibility.Value;
+
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.Result;
-import org.pentaho.di.core.RowMetaAndData;
+
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.xml.XMLHandler;
-import org.pentaho.di.job.entry.JobEntryBase;
-import org.pentaho.di.job.entry.JobEntryInterface;
+
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
+import org.hpccsystems.ecljobentrybase.*;
+
+import org.pentaho.di.core.encryption.*;
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
     
     //private String jobName;
     //private String name = "";
-    
+	private String maxReturn = "";
     private String serverIP = "";
     private String serverPort = "";
     
@@ -40,8 +45,48 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
     private String jobName = "Spoon-job";
     private String cluster = "hthor";
     private boolean includeML = false;
+    
+    private String user = "";
+    private String pass = "";
+    
+    private String SALTPath = "";
+    private boolean includeSALT = false;
 
-    public String getServerIP() {
+    private String keyStr = "saqwvdf023rkjas7ku,df9e4kt`q234rtuqrtadfads.faufrae";
+    
+    
+    
+    public String getMaxReturn() {
+		return maxReturn;
+	}
+
+	public void setMaxReturn(String maxReturn) {
+		this.maxReturn = maxReturn;
+	}
+
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	public String getPass() {
+		if(pass.equalsIgnoreCase("")){
+			return "";
+		}else{
+			return Encr.decryptPassword(pass);
+		}
+	}
+
+	public void setPass(String pass) {
+		if(!pass.equalsIgnoreCase("")){
+			this.pass = Encr.encryptPassword(pass);
+		}
+	}
+
+	public String getServerIP() {
         return serverIP;
     }
 
@@ -103,6 +148,38 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
         }
     }
 
+    
+    public String getSALTPath() {
+		return SALTPath;
+	}
+
+	public void setSALTPath(String sALTPath) {
+		SALTPath = sALTPath;
+	}
+
+	public boolean isIncludeSALT() {
+		return includeSALT;
+	}
+
+	public void setIncludeSALT(boolean includeSALT) {
+		this.includeSALT = includeSALT;
+	}
+	public void setIncludeSALT(String includeSALT) {
+        if(includeSALT.equals("true")){
+            this.includeSALT = true;
+        }else{
+            this.includeSALT = false;
+        }
+    }
+	
+	 public String getIncludeSALT() {
+	        if(includeSALT){
+	            return "true";
+	        }else{
+	            return "false";
+	        }
+	    }
+
 
     public String getJobName() {
         return jobName;
@@ -135,6 +212,9 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
         try {
             super.loadXML(node, list, list1);
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"maxReturn")) != null)
+                this.setMaxReturn(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"maxReturn")));
+            
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"server_ip")) != null)
                 this.setServerIP(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"server_ip")));
             
@@ -158,7 +238,19 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
             
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"includeML")) != null)
                 this.setIncludeML(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"includeML")));
+            
+            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"includeSALT")) != null)
+                this.setIncludeSALT(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"includeSALT")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"SALTPath")) != null)
+                this.setSALTPath(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"SALTPath")));
            
+            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"user_name")) != null)
+                this.setUser(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"user_name")));
+            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"password")) != null)
+            	pass = (XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"password")));
             
         } catch (Exception e) {
             throw new KettleXMLException("ECL Distribute Job Plugin Unable to read step info from XML node", e);
@@ -172,7 +264,7 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
         String retval = "";
         
         retval += super.getXML();
-      
+        retval += "             <maxReturn><![CDATA["+this.maxReturn+"]]></maxReturn>"+Const.CR;
         retval += "             <server_ip><![CDATA["+this.serverIP+"]]></server_ip>"+Const.CR;
         
         retval += "             <server_port><![CDATA["+this.serverPort+"]]></server_port>"+Const.CR;
@@ -188,6 +280,13 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
         retval += "             <cluster><![CDATA["+this.getCluster()+"]]></cluster>"+Const.CR;
         
         retval += "             <includeML><![CDATA["+this.getIncludeML() + "]]></includeML>"+Const.CR;
+        
+        retval += "             <user_name><![CDATA["+this.getUser() + "]]></user_name>"+Const.CR;
+        
+        retval += "             <password><![CDATA["+ pass + "]]></password>"+Const.CR;
+        
+        retval += "             <includeSALT><![CDATA["+this.getIncludeSALT() + "]]></includeSALT>"+Const.CR;
+        retval += "             <SALTPath><![CDATA["+this.getSALTPath()+"]]></SALTPath>"+Const.CR;
       
        
         return retval;
@@ -200,6 +299,7 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
             //jobName = rep.getStepAttributeString(id_jobentry, "jobName"); //$NON-NLS-1$
 
             //name = rep.getStepAttributeString(id_jobentry, "name"); //$NON-NLS-1$
+        	maxReturn = rep.getStepAttributeString(id_jobentry, "maxReturn");
             serverIP = rep.getStepAttributeString(id_jobentry, "server_ip");
             
             serverPort = rep.getStepAttributeString(id_jobentry, "server_port");
@@ -211,6 +311,12 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
             this.setCluster( rep.getStepAttributeString(id_jobentry, "cluster"));
             this.setIncludeML( rep.getStepAttributeString(id_jobentry, "includeML"));
             
+            this.setUser( rep.getStepAttributeString(id_jobentry, "user_name"));
+            pass = ( rep.getStepAttributeString(id_jobentry, "password"));
+            
+            this.setIncludeSALT( rep.getStepAttributeString(id_jobentry, "includeSALT"));
+            this.setSALTPath( rep.getStepAttributeString(id_jobentry, "SALTPath"));
+            
                     
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -220,7 +326,7 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
     public void saveRep(Repository rep, ObjectId id_job) throws KettleException {
         try {
 
-            
+        	rep.saveStepAttribute(id_job, getObjectId(), "maxReturn", maxReturn);
             rep.saveStepAttribute(id_job, getObjectId(), "server_ip", serverIP);
             rep.saveStepAttribute(id_job, getObjectId(), "server_port", serverPort);
             rep.saveStepAttribute(id_job, getObjectId(), "landing_zone", landingZone);
@@ -231,6 +337,10 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
             rep.saveStepAttribute(id_job, getObjectId(), "cluster", this.getCluster());
             rep.saveStepAttribute(id_job, getObjectId(), "includeML", this.getIncludeML());
             
+            rep.saveStepAttribute(id_job, getObjectId(), "user_name", this.getUser());
+            rep.saveStepAttribute(id_job, getObjectId(), "password", pass);
+            rep.saveStepAttribute(id_job, getObjectId(), "includeSALT", this.getIncludeSALT());
+            rep.saveStepAttribute(id_job, getObjectId(), "SALTPath", this.getSALTPath());
             
         
         } catch (Exception e) {
@@ -245,4 +355,7 @@ public class ECLGlobalVariables extends JobEntryBase implements Cloneable, JobEn
     public boolean isUnconditional() {
         return true;
     }
+    
+    
+   
 }

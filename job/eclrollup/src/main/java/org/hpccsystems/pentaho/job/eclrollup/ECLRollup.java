@@ -5,8 +5,13 @@
 package org.hpccsystems.pentaho.job.eclrollup;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import org.hpccsystems.ecldirect.Rollup;
+import org.hpccsystems.javaecl.Rollup;
+//import org.hpccsystems.recordlayout.RecordBO;
+//import org.hpccsystems.recordlayout.RecordList;
+import org.hpccsystems.mapper.MapperBO;
+import org.hpccsystems.mapper.MapperRecordList;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;
@@ -21,26 +26,38 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
+import org.hpccsystems.ecljobentrybase.*;
+
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterface {
+//public class ECLRollup extends ECLJobEntry implements Cloneable, JobEntryInterface  {
+public class ECLRollup extends ECLJobEntry{
     
     //private String jobName;
 
 
     private String recordsetName = "";
     private String recordset = "";
+    //private String recordFormat = "";
     private String condition = "";
     private String transformName = "";
-    private String transform = "";
-    private String transformCall = "";
-
+   // private String transform = "";
     private String fieldlist = "";
     private String group = "";
     private Boolean runLocal = false;//optional
+    
+    private MapperRecordList mapperRecList = new MapperRecordList();
+
+    public MapperRecordList getMapperRecList() {
+		return mapperRecList;
+	}
+
+	public void setMapperRecList(MapperRecordList mapperRecList) {
+		this.mapperRecList = mapperRecList;
+	}
 
     public String getRecordsetName() {
         return recordsetName;
@@ -48,14 +65,6 @@ public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterf
 
     public void setRecordsetName(String recordsetName) {
         this.recordsetName = recordsetName;
-    }
-
-    public String getTransformCall() {
-        return transformCall;
-    }
-
-    public void setTransformCall(String transformCall) {
-        this.transformCall = transformCall;
     }
 
     public String getTransformName() {
@@ -106,13 +115,6 @@ public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterf
         this.runLocal = runLocal;
     }
 
-    public String getTransform() {
-        return transform;
-    }
-
-    public void setTransform(String transform) {
-        this.transform = transform;
-    }
     
 
     
@@ -140,35 +142,26 @@ public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterf
     public Result execute(Result prevResult, int k) throws KettleException {
         
         Result result = prevResult;
-        
 
- 
-
- 
-    
-    
         Rollup rollup = new Rollup();
         rollup.setName(this.getRecordsetName());
         rollup.setRecordset(this.getRecordset());
+        rollup.setRecordFormat(this.getRecordset());
         rollup.setRunLocal(this.getRunLocal());
         
         rollup.setCondition(this.getCondition());
         rollup.setFieldlist(this.getFieldlist());
-        rollup.setGroup(this.getGroup());
+        
+        if(this.group.equalsIgnoreCase("yes")){
+        	rollup.setGroup("GROUP");
+        }else{
+        	rollup.setGroup("");
+        }
         
         rollup.setTransformName(this.getTransformName());
-        rollup.setTransform(this.getTransform());
-        rollup.setTransformCall(this.getTransformCall());
         
+        rollup.setTransform(generateEclForMapperGrid());
         
-        /*
-         *     private String recordset;
-    private String condition;
-    private String transform;
-    private String fieldlist;
-    private String group;
-    private Boolean runLocal;
-         */
 
         logBasic("{rollup Job} Execute = " + rollup.ecl());
         
@@ -202,6 +195,69 @@ public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterf
         
         return result;
     }
+    
+    
+	
+	/**
+	 * This method is used to generate ECl for the Mapper Grid values
+	 * @param arlRecords
+	 * @return String containing ECL Code 
+	 */
+	public String generateEclForMapperGrid() {
+		String out = "";
+		if (mapperRecList != null) {
+			if (mapperRecList.getRecords() != null && mapperRecList.getRecords().size() > 0) {
+				//System.out.println("Size: " + mapperRecList.getRecords().size());
+				for (Iterator<MapperBO> iterator = mapperRecList.getRecords().iterator(); iterator.hasNext();) {
+					MapperBO record = (MapperBO) iterator.next();
+					out += record.getOpVariable() + " := " + record.getExpression();
+					out += ";\r\n";
+				}
+			}
+		}
+		//System.out.println("RESULT of generateEclForMapperGrid() ........... "+out);
+		
+		return out;
+	}
+	
+    
+	public String saveRecordListForMapper() {
+		String out = "";
+		ArrayList list = mapperRecList.getRecords();
+		Iterator<MapperBO> itr = list.iterator();
+		boolean isFirst = true;
+		while (itr.hasNext()) {
+			//System.out.println("loop");
+			if (!isFirst) {
+				out += "|";
+			}
+
+			out += itr.next().toCSV();
+			isFirst = false;
+		}
+		
+		//System.out.println("RESULT of saveRecordListForMapper() ........... "+out);
+		
+		return out;
+	}
+
+	public void openRecordListForMapper(String in) {
+		//System.out.println("Inside Method openRecordListForMapper .........."+in);
+		String[] strLine = in.split("[|]");
+
+		int len = strLine.length;
+		if (len > 0) {
+			mapperRecList = new MapperRecordList();
+			//System.out.println("Open Record List");
+			for (int i = 0; i < len; i++) {
+				//System.out.println("++++++++++++" + strLine[i]);
+				// this.recordDef.addRecord(new RecordBO(strLine[i]));
+				MapperBO rb = new MapperBO(strLine[i]);
+				mapperRecList.addRecord(rb);
+			}
+		}
+	}
+	
 
     @Override
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
@@ -218,16 +274,22 @@ public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterf
                 this.setCondition(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"condition")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"transformName")) != null)
                 this.setTransformName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"transformName")));
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"transform")) != null)
-                this.setTransform(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"transform")));
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"transformCall")) != null)
-                this.setTransformCall(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"transformCall")));
+            //if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"transform")) != null)
+            //    this.setTransform(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"transform")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"fieldlist")) != null)
                 this.setFieldlist(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"fieldlist")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"group")) != null)
                 this.setGroup(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"group")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"runLocal")) != null)
                 this.setRunLocalString(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"runLocal")));
+            
+            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "mapperRecList")) != null)
+            	openRecordListForMapper(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "mapperRecList")));
+            
+            //recordFormat
+            //if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"recordFormat")) != null)
+            //    this.setRecordFormat(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"recordFormat")));
 
         } catch (Exception e) {
             throw new KettleXMLException("ECL Distribute Job Plugin Unable to read step info from XML node", e);
@@ -244,15 +306,13 @@ public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterf
         retval += "             <recordset><![CDATA["+this.recordset+"]]></recordset>"+Const.CR;
         retval += "             <condition><![CDATA["+this.condition+"]]></condition>"+Const.CR;
         retval += "             <transformName eclIsDef=\"true\" eclType=\"recordset\"><![CDATA["+this.transformName+"]]></transformName>"+Const.CR;
-        retval += "             <transform><![CDATA["+this.transform+"]]></transform>"+Const.CR;
-        retval += "             <transformCall><![CDATA["+this.transformCall+"]]></transformCall>"+Const.CR;
+        //retval += "             <transform><![CDATA["+this.transform+"]]></transform>"+Const.CR;
         retval += "             <fieldlist><![CDATA["+this.fieldlist+"]]></fieldlist>"+Const.CR;
         retval += "             <group><![CDATA["+this.group+"]]></group>"+Const.CR;
         retval += "             <runLocal><![CDATA["+this.getRunLocalString()+"]]></runLocal>"+Const.CR;
-       
-
-       
-       
+        retval += "		<mapperRecList><![CDATA[" + this.saveRecordListForMapper() + "]]></mapperRecList>" + Const.CR;
+       //recordFormat
+       // retval += "             <recordFormat><![CDATA["+this.getRecordFormat()+"]]></recordFormat>"+Const.CR;
        
         return retval;
 
@@ -274,17 +334,21 @@ public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterf
                 condition = rep.getStepAttributeString(id_jobentry, "condition");
             if(rep.getStepAttributeString(id_jobentry, "transformName") != null)
                 transformName = rep.getStepAttributeString(id_jobentry, "transformName");
-            if(rep.getStepAttributeString(id_jobentry, "transform") != null)
-                transform = rep.getStepAttributeString(id_jobentry, "transform");
-            if(rep.getStepAttributeString(id_jobentry, "transformCall") != null)
-                transformCall = rep.getStepAttributeString(id_jobentry, "transformCall");
+            //if(rep.getStepAttributeString(id_jobentry, "transform") != null)
+            //    transform = rep.getStepAttributeString(id_jobentry, "transform");
             if(rep.getStepAttributeString(id_jobentry, "fieldlist") != null)
                 fieldlist = rep.getStepAttributeString(id_jobentry, "fieldlist");
             if(rep.getStepAttributeString(id_jobentry, "group") != null)
                 group = rep.getStepAttributeString(id_jobentry, "group");            
             if(rep.getStepAttributeString(id_jobentry, "runLocal") != null)
                 this.setRunLocalString(rep.getStepAttributeString(id_jobentry, "runLocal"));
-
+            if(rep.getStepAttributeString(id_jobentry, "mapperRecList") != null)
+                this.openRecordListForMapper(rep.getStepAttributeString(id_jobentry, "mapperRecList")); //$NON-NLS-1$
+            
+            //recordFormat
+           // if(rep.getStepAttributeString(id_jobentry, "recordFormat") != null)
+           //     this.setRecordFormat(rep.getStepAttributeString(id_jobentry, "recordFormat"));
+            
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
         }
@@ -300,11 +364,14 @@ public class ECLRollup extends JobEntryBase implements Cloneable, JobEntryInterf
             rep.saveStepAttribute(id_job, getObjectId(), "recordset", recordset);
             rep.saveStepAttribute(id_job, getObjectId(), "condition", condition);
             rep.saveStepAttribute(id_job, getObjectId(), "transformName", transformName);
-            rep.saveStepAttribute(id_job, getObjectId(), "transform", transform);
-            rep.saveStepAttribute(id_job, getObjectId(), "transformCall", transformCall);
+            //rep.saveStepAttribute(id_job, getObjectId(), "transform", transform);
             rep.saveStepAttribute(id_job, getObjectId(), "fieldlist", fieldlist);
             rep.saveStepAttribute(id_job, getObjectId(), "group", group);
             rep.saveStepAttribute(id_job, getObjectId(), "runLocal", this.getRunLocalString());
+            rep.saveStepAttribute(id_job, getObjectId(), "mapperRecList", this.saveRecordListForMapper()); //$NON-NLS-1$
+            //recordFormat
+            //rep.saveStepAttribute(id_job, getObjectId(), "recordFormat", recordFormat);
+            
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);
         }

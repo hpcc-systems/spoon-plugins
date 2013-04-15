@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.hpccsystems.pentaho</groupId>
 		<artifactId>spoon-plugins</artifactId>
-		<version>0.1-SNAPSHOT</version>
+		<version>0.1.0</version>
 	</parent>
 
 	<dependencyManagement>
@@ -24,15 +24,26 @@
 				<version>4.2.1-GA</version>
 			</dependency>
 			<dependency>
-				<groupId>org.mod4j.org.eclipse</groupId>
-				<artifactId>jface</artifactId>
-				<version>3.5.0</version>
+				<groupId>pentaho-kettle</groupId>
+				<artifactId>kettle-ui-swt</artifactId>
+				<version>4.2.1-GA</version>
 			</dependency>
-            <dependency>
-                <groupId>org.eclipse</groupId>
-                <artifactId>swt</artifactId>
-                <version>3.3.0-v3346</version>
-            </dependency>
+			<dependency>
+				<groupId>pentaho-kettle</groupId>
+				<artifactId>kettle-db</artifactId>
+				<version>4.2.1-GA</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse</groupId>
+				<artifactId>jface</artifactId>
+				<version>3.3.0-I20070606-0010</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hpccsystems</groupId>
+				<artifactId>javaecl</artifactId>
+				<version>[0.1.0,)</version>
+			</dependency>
+            
 		</dependencies>
 	</dependencyManagement>
 
@@ -46,12 +57,21 @@
 			<artifactId>kettle-engine</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.mod4j.org.eclipse</groupId>
+			<groupId>pentaho-kettle</groupId>
+			<artifactId>kettle-ui-swt</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>pentaho-kettle</groupId>
+			<artifactId>kettle-db</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse</groupId>
 			<artifactId>jface</artifactId>
 		</dependency>
-            <dependency>
-                <groupId>org.eclipse</groupId>
-                <artifactId>swt</artifactId>
-            </dependency>
+		<dependency>
+			<groupId>org.hpccsystems</groupId>
+			<artifactId>javaecl</artifactId>
+		</dependency>
+        
 	</dependencies>
 </project>

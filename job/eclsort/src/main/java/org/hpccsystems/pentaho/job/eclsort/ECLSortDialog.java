@@ -36,12 +36,13 @@ import org.pentaho.di.ui.job.entry.JobEntryDialog;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
 import org.hpccsystems.eclguifeatures.*;
+import org.hpccsystems.ecljobentrybase.*;
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLSortDialog extends JobEntryDialog implements JobEntryDialogInterface {
+public class ECLSortDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
 
     private ECLSort jobEntry;
     private Text jobEntryName;
@@ -216,102 +217,51 @@ public class ECLSortDialog extends JobEntryDialog implements JobEntryDialogInter
 
     }
     
-    private Label buildLabel(String strLabel, Control prevControl,
-        ModifyListener lsMod, int middle, int margin, Composite groupBox){
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        //labelFormat.left = new FormAttachment(0, 0);
-        //labelFormat.top = new FormAttachment(prevControl, margin);
-       // labelFormat.right = new FormAttachment(middle, -margin);
-        
-        labelFormat.left = new FormAttachment(middle, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(100, 0);
-        fmt.setLayoutData(labelFormat);
-        return fmt;
-    }
+    
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	//only need to require a entry name
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	
+    	if(this.recordsetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Resulting Recordset Name\"!\r\n";
+    	}
+    	
+    	if(this.datasetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Dataset to be Sorted\"!\r\n";
+    	}
+    	
+    	if(this.fields.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Fields\"!\r\n";
+    	}
 
-    private Text buildText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
 
-        // text field
-        Text text = new Text(groupBox, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Text buildMultiText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.V_SCROLL);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 100;
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Combo buildCombo(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox, String[] items) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // combo field
-        Combo combo = new Combo(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-        props.setLook(combo);
-        combo.setItems(items);
-        combo.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 50;
-        combo.setLayoutData(fieldFormat);
-
-        return combo;
-    }
-
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
+    
     private void ok() {
+    	if(!validate()){
+    		return;
+    	}
         jobEntry.setName(jobEntryName.getText());
         jobEntry.setFields(fields.getText());
         jobEntry.setDatasetName(datasetName.getText());
@@ -326,9 +276,5 @@ public class ECLSortDialog extends JobEntryDialog implements JobEntryDialogInter
         dispose();
     }
 
-    public void dispose() {
-        WindowProperty winprop = new WindowProperty(shell);
-        props.setScreen(winprop);
-        shell.dispose();
-    }
+   
 }

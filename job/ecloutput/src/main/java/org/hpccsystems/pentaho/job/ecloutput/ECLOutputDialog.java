@@ -48,7 +48,9 @@ import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.job.JobHopMeta;
 
 import org.pentaho.di.job.entry.JobEntryCopy;
+import org.hpccsystems.javaecl.HPCCServerInfo;
 import org.hpccsystems.eclguifeatures.*;
+import org.hpccsystems.ecljobentrybase.*;
 //JobEntry
 
 
@@ -63,14 +65,14 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
-import org.hpccsystems.pentaho.job.ecljobentry.*;
-//import org.eclipse.swt.layout.FillLayout;
+import org.hpccsystems.ecljobentrybase.*;
+
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLOutputDialog extends ECLJobEntryDialog {
+public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialogInterface {
 	
 	
     private ECLOutput jobEntry;
@@ -106,7 +108,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
     private Combo thor; // used in 
     
     //used in different file types
-    private Text cluster;
+    private Combo cluster;
     private Text encrypt;
     private Combo compressed;
     private Combo overwrite;
@@ -150,7 +152,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
 
         shell.setLayout(new FillLayout(SWT.VERTICAL));
-    
+        shell.setText("Define an ECL Output");
         props.setLook(shell);
         JobDialog.setShellImage(shell, jobEntry);
 
@@ -630,13 +632,33 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
         
         groupFormat.widthHint = 530;
         
+        AutoPopulate ap = new AutoPopulate();
+        String[] clusters = new String[0];
+        
+        String serverHost = "";
+        int serverPort = 8010;
+        try{
+            //Object[] jec = this.jobMeta.getJobCopies().toArray();
+                
+                serverHost = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_ip");
+                serverPort = Integer.parseInt(ap.getGlobalVariable(jobMeta.getJobCopies(),"server_port"));
+               
+            }catch (Exception e){
+                System.out.println("Error Parsing existing Global Variables ");
+                System.out.println(e.toString());
+                
+            }
+        HPCCServerInfo hsi = new HPCCServerInfo(serverHost,serverPort);
+        
+        clusters = hsi.fetchTargetClusters();
+        
         int height = 320;
        // {"", "File", "File - CSV", "File - XML", "Piped", "Named"}
         if(type.equals("File")){
             //height = 105;
             this.file = buildText("File", null, lsMod, middle, margin, fileTypeGroup);
             //this.fileOptions = buildText("Thor File Options", this.file, lsMod, middle, margin, fileTypeGroup);
-            this.cluster = buildText("Target Cluster", this.file, lsMod, middle, margin, fileTypeGroup);
+            this.cluster = buildCombo("Target Cluster", this.file, lsMod, middle, margin, fileTypeGroup, clusters);
             this.encrypt = buildText("Encryption Key", this.cluster, lsMod, middle, margin, fileTypeGroup);
             this.compressed = buildCombo("Compress", this.encrypt, lsMod, middle, margin, fileTypeGroup,new String[]{"", "Yes", "No"});
             this.overwrite = buildCombo("Overwrite", this.compressed, lsMod, middle, margin, fileTypeGroup,new String[]{"", "Yes", "No"});
@@ -647,7 +669,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
             this.file = buildText("File", null, lsMod, middle, margin, fileTypeGroup);
             //this.fileOptions = buildText("CSV File Options", this.file, lsMod, middle, margin, fileTypeGroup);
             this.typeOptions = buildText("CSV Options", this.file, lsMod, middle, margin, fileTypeGroup);
-            this.cluster = buildText("Target Cluster", this.typeOptions, lsMod, middle, margin, fileTypeGroup);
+            this.cluster = buildCombo("Target Cluster", this.typeOptions, lsMod, middle, margin, fileTypeGroup, clusters);
             this.encrypt = buildText("Encryption Key", this.cluster, lsMod, middle, margin, fileTypeGroup);
             this.overwrite = buildCombo("Overwrite", this.encrypt, lsMod, middle, margin, fileTypeGroup,new String[]{"", "Yes", "No"});
             this.expire = buildText("Days till expire", this.overwrite, lsMod, middle, margin, fileTypeGroup);
@@ -657,7 +679,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
             this.file = buildText("File", null, lsMod, middle, margin, fileTypeGroup);
             //this.fileOptions = buildText("XML File Options", this.file, lsMod, middle, margin, fileTypeGroup);
             this.typeOptions = buildText("XML Options", this.file, lsMod, middle, margin, fileTypeGroup);
-            this.cluster = buildText("Target Cluster", this.typeOptions, lsMod, middle, margin, fileTypeGroup);
+            this.cluster = buildCombo("Target Cluster", this.typeOptions, lsMod, middle, margin, fileTypeGroup,clusters);
             this.encrypt = buildText("Encryption Key", this.cluster, lsMod, middle, margin, fileTypeGroup);
             this.overwrite = buildCombo("Overwrite", this.encrypt, lsMod, middle, margin, fileTypeGroup,new String[]{"", "Yes", "No"});
             this.expire = buildText("Days till expire", this.overwrite, lsMod, middle, margin, fileTypeGroup);
@@ -794,7 +816,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
 	        String serverPort = "";
 	            try{
 	            //Object[] jec = this.jobMeta.getJobCopies().toArray();
-	                
+	                 
 	                serverHost = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_ip");
 	                serverPort = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_port");
 	            }catch (Exception e){
@@ -925,9 +947,5 @@ public class ECLOutputDialog extends ECLJobEntryDialog {
         dispose();
     }
 
-    public void dispose() {
-        WindowProperty winprop = new WindowProperty(shell);
-        props.setScreen(winprop);
-        shell.dispose();
-    }
+
 }

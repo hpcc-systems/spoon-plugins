@@ -39,24 +39,28 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 import java.io.*;
 
 import org.hpccsystems.eclguifeatures.*;
+import org.hpccsystems.ecljobentrybase.*;
 
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntryDialogInterface {
+public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
 
     private ECLGlobalVariables jobEntry;
     
     private Text jobEntryName;
 
+    private Text userName;
+    private Text password;
     private Text serverIP;
     private Text serverPort;
     private Text landingZone;
     
     private Text cluster;
     private Text jobName;
+    private Text maxReturn;
     private Text eclccInstallDir;
     private Text mlPath;
     private Combo includeML;
@@ -71,7 +75,10 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
     
     
     
-    private Button wOK, wCancel;
+    private Text SALTPath;
+    private Combo includeSALT;
+
+    private Button wOK, wCancel, mlFileOpenButton, eclFileOpenButton,saltFileOpenButton;
     private boolean backupChanged;
     private SelectionAdapter lsDef;
 
@@ -154,28 +161,72 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
         FormData datasetGroupFormat = new FormData();
         datasetGroupFormat.top = new FormAttachment(generalGroup, margin);
         datasetGroupFormat.width = 400;
-        datasetGroupFormat.height = 220;
+        datasetGroupFormat.height = 355;
+        datasetGroupFormat.height = 425;
         datasetGroupFormat.left = new FormAttachment(middle, 0);
         varGroup.setLayoutData(datasetGroupFormat);
 
         //name = buildText("Distribute Name", null, lsMod, middle, margin, distributeGroup);
 
-        
-        serverIP = buildText("Server Host", null, lsMod, middle, margin, varGroup);
+        userName = buildText("Server Username", null, lsMod, middle, margin, varGroup);
+        password = buildPassword("Server Password", userName, lsMod, middle, margin, varGroup);
+        serverIP = buildText("Server Host", password, lsMod, middle, margin, varGroup);
         serverPort = buildText("Server Port", serverIP, lsMod, middle, margin, varGroup);
         landingZone = buildText("Landing Zone Dir", serverPort, lsMod, middle, margin, varGroup);
         
         //move thes to Job Information
         cluster = buildText("Cluster", landingZone, lsMod, middle, margin, varGroup);
         jobName = buildText("Job Name", cluster, lsMod, middle, margin, varGroup);
-        
+        maxReturn = buildText("Preview Rows", jobName, lsMod, middle, margin, varGroup);
         //move these to Library(s)
         
-        eclccInstallDir = buildText("eclcc Install Dir", jobName, lsMod, middle, margin, varGroup);
-        mlPath = buildText("Path to ML Library", eclccInstallDir, lsMod, middle, margin, varGroup);
-        includeML = buildCombo("Include ML Library?", mlPath, lsMod, middle, margin, varGroup, new String[]{"true", "false"});
+        eclccInstallDir = buildText("eclcc Install Dir", maxReturn, lsMod, middle, margin, varGroup);
+        this.eclFileOpenButton = buildButton("Choose Location", eclccInstallDir, lsMod, middle, margin, varGroup);
+        controls.put("fOpen", eclccInstallDir);
         
+        Listener eclFileOpenListener = new Listener() {
+
+            public void handleEvent(Event e) {
+                String newFile = buildDirectoryDialog();
+                if(newFile != ""){
+                	eclccInstallDir.setText(newFile);
+                }
+            }
+        };
+        this.eclFileOpenButton.addListener(SWT.Selection, eclFileOpenListener);
         
+        includeML = buildCombo("Include ML Library?", eclFileOpenButton, lsMod, middle, margin, varGroup, new String[]{"true", "false"});
+        mlPath = buildText("Path to ML Library", includeML, lsMod, middle, margin, varGroup);
+        this.mlFileOpenButton = buildButton("Choose Location", mlPath, lsMod, middle, margin, varGroup);
+        controls.put("fOpen", mlFileOpenButton);
+        
+        Listener mlFileOpenListener = new Listener() {
+
+            public void handleEvent(Event e) {
+                String newFile = buildDirectoryDialog();
+                if(newFile != ""){
+                	mlPath.setText(newFile);
+                }
+            }
+        };
+        this.mlFileOpenButton.addListener(SWT.Selection, mlFileOpenListener);
+        
+        includeSALT = buildCombo("Include SALT Library?", mlFileOpenButton, lsMod, middle, margin, varGroup, new String[]{"true", "false"});
+        SALTPath = buildText("Path to SALT Library", includeSALT, lsMod, middle, margin, varGroup);
+        
+        this.saltFileOpenButton = buildButton("Choose Location", SALTPath, lsMod, middle, margin, varGroup);
+        controls.put("fOpen", saltFileOpenButton);
+        
+        Listener saltFileOpenListener = new Listener() {
+
+            public void handleEvent(Event e) {
+                String newFile = buildDirectoryDialog();
+                if(newFile != ""){
+                	SALTPath.setText(newFile);
+                }
+            }
+        };
+        this.saltFileOpenButton.addListener(SWT.Selection, saltFileOpenListener);
 
         wOK = new Button(shell, SWT.PUSH);
         wOK.setText("OK");
@@ -259,6 +310,9 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
         if (jobEntry.getJobName() != null) {
             jobName.setText(jobEntry.getJobName());
         }
+        if (jobEntry.getMaxReturn() != null) {
+            maxReturn.setText(jobEntry.getMaxReturn());
+        }
         if (jobEntry.getEclccInstallDir() != null) {
             eclccInstallDir.setText(jobEntry.getEclccInstallDir());
         }
@@ -268,7 +322,20 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
         if (jobEntry.getIncludeML() != null) {
             includeML.setText(jobEntry.getIncludeML());
         }
+        
+        if (jobEntry.getSALTPath() != null) {
+            SALTPath.setText(jobEntry.getSALTPath());
+        }
+        if (jobEntry.getIncludeSALT() != null) {
+            includeSALT.setText(jobEntry.getIncludeSALT());
+        }
 
+        if (jobEntry.getUser() != null) {
+            userName.setText(jobEntry.getUser());
+        }
+        if (jobEntry.getPass() != null) {
+            password.setText(jobEntry.getPass());
+        }
       
 
 
@@ -315,9 +382,9 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
     }
     private boolean verifySettings(){
     	boolean isReady = false;
-    	
     	boolean eclccExists = true;
     	boolean mlExists = true;
+    	boolean saltExists = true;
     	
     	String errorTxt = "Some Fields Were Not Correct:\r\n";
     	
@@ -370,89 +437,127 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
 	    	dialog.pack ();
 	    	dialog.open ();
     	}
+		if(includeSALT.getText().equals("true")){
+			saltExists = (new File(SALTPath.getText())).exists();
+			if(!saltExists){
+				//warn
+				errorTxt += "The \"Path to SALT Library\" could not be located\r\n";
+				System.out.println("No SALT Library found");
+			}
+		}
+    	if(saltExists && eclccExists && mlExists){
+	    		isReady = true;
+	    		System.out.println("paths validated");
+		}else{
+			Shell parentShell = getParent();
+			//Display display = parentShell.getDisplay();
+			//final Shell dialog = new Shell (display, SWT.DIALOG_TRIM);
+			final Shell dialog = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
+System.out.println("No SALT Library found - dialog open");
+			Label label = new Label (dialog, SWT.NONE);
+			label.setText (errorTxt);
+			Button okButton = new Button (dialog, SWT.PUSH);
+			okButton.setText ("&OK");
+   
+			Listener cancelListener = new Listener() {
+
+				public void handleEvent(Event e) {
+					dialog.close();
+				}
+			};
+			
+			okButton.addListener(SWT.Selection, cancelListener);
+			
+			FormLayout form = new FormLayout ();
+			form.marginWidth = form.marginHeight = 8;
+			dialog.setLayout (form);
+			FormData okData = new FormData ();
+			okData.top = new FormAttachment (label, 8);
+			okButton.setLayoutData (okData);
+			
+			
+			dialog.setDefaultButton (okButton);
+			dialog.pack ();
+			dialog.open ();
+		
+		
+		}
+    	
     	return isReady;
     }
 
-    private Text buildText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
 
-        // text field
-        Text text = new Text(groupBox, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        text.setLayoutData(fieldFormat);
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	//only need to require a entry name
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	
+    	if(this.serverIP.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Server Host\"!\r\n";
+    	}
+    	
+    	if(this.serverPort.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Server Port\"!\r\n";
+    	}
+    	
+    	if(this.landingZone.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Landing Zone Dir\"!\r\n";
+    	}
+    	
+    	if(this.cluster.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Cluster\"!\r\n";
+    	}
+    	
+    	if(this.jobName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Name\"!\r\n";
+    	}
+    	if(this.eclccInstallDir.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"eclcc Install Dir\"!\r\n";
+    	}
+    	
+    	if(this.includeML.getText().equals("true")){
+    		if(this.mlPath.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"Path to ML Library\" when Include ML Library is set to ture!\r\n";
+        	}
+    	}
+    	
+    	
 
-        return text;
-    }
-
-    private Text buildMultiText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 50;
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Combo buildCombo(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox, String[] items) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // combo field
-        Combo combo = new Combo(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-        props.setLook(combo);
-        combo.setItems(items);
-        combo.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 50;
-        combo.setLayoutData(fieldFormat);
-
-        return combo;
-    }
-
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
+    
     private void ok() {
-
+    	if(!validate()){
+    		return;
+    	}
+    	
         //jobEntry.setJobName(jobEntryName.getText());
         jobEntry.setName(jobEntryName.getText());
         
@@ -462,10 +567,17 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
         
         jobEntry.setCluster(cluster.getText());
         jobEntry.setJobName(jobName.getText());
+        jobEntry.setMaxReturn(maxReturn.getText());
         
         jobEntry.setEclccInstallDir(eclccInstallDir.getText());
         jobEntry.setMlPath(mlPath.getText());
         jobEntry.setIncludeML(includeML.getText());
+        
+        jobEntry.setUser(userName.getText());
+        jobEntry.setPass(password.getText());
+        
+        jobEntry.setSALTPath(SALTPath.getText());
+        jobEntry.setIncludeSALT(includeSALT.getText());
 
 
 
@@ -478,9 +590,4 @@ public class ECLGlobalVariablesDialog extends JobEntryDialog implements JobEntry
         dispose();
     }
 
-    public void dispose() {
-        WindowProperty winprop = new WindowProperty(shell);
-        props.setScreen(winprop);
-        shell.dispose();
-    }
 }

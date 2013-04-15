@@ -43,3 +43,6 @@ To build a "drop-in" installable zip file to use in Pentaho Data Integration (Ke
 NOTE: If so desired you may incorporate the Maven settings into your
 .m2/settings.xml file, eliminating the need to specify this project's
 settings.xml file on the command line.
+
+NOTE: In order to use the SALT features you must obtain a commercial license of SALT and install 
+it on your system please visit hpccsystems.com for more details.

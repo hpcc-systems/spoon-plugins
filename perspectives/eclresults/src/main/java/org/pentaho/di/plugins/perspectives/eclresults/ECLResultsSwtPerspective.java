@@ -35,6 +35,10 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 
 
+import au.com.bytecode.opencsv.CSVReader;
+
+
+
 public class ECLResultsSwtPerspective implements SpoonPerspective {
   private Composite comp;
   private static ECLResultsSwtPerspective instance = new ECLResultsSwtPerspective();
@@ -210,10 +214,10 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
             //int len = folder.getChildren().length;
             int len = folder.getItemCount();
             //System.out.println("Number of items: " + folder.getItemCount());
-            System.out.println("Number of tabs: " + len);
+           // System.out.println("Number of tabs: " + len);
             folder.setSelection(len-1);
-            System.out.println("fileName" + fileName);
-            System.out.println("setActive -- isactive = true");
+            //System.out.println("fileName" + fileName);
+            //System.out.println("setActive -- isactive = true");
             this.isActive = true;
          }else{
              this.isActive = false;
@@ -239,19 +243,19 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
   }
 
   public String getId() {
-    System.out.println("getId");
+    //System.out.println("getId");
     return "eclresults";
   }
 
   
   // Whatever you pass out will be reparented. Don't construct the UI in this method as it may be called more than once.
   public Composite getUI() {
-       System.out.println("getUI");
+       //System.out.println("getUI");
     return comp;
   }
 
   public String getDisplayName(Locale locale) {
-       System.out.println("getDisplayName");
+       //System.out.println("getDisplayName");
     return "ECL Results";
   }
 
@@ -272,6 +276,10 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
   private void openFile(String fileName, Table table){
       String outStr;
       try{
+    	  
+    	  CSVReader reader = new CSVReader(new FileReader(fileName),',','"');
+          String [] strLineArr;
+          
           // Open the file that is the first 
           // command line parameter
           FileInputStream fstream = new FileInputStream(fileName);
@@ -288,9 +296,10 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
           int length = 0;
           boolean first = true;
           //Read File Line By Line
-          while ((strLine = br.readLine()) != null)   {
+          while ((strLineArr = reader.readNext()) != null) {
+          //while ((strLine = br.readLine()) != null)   {
           // Print the content on the console
-              outStr = strLine;
+              //outStr = strLine;
               TableItem item = null;
               
               
@@ -298,7 +307,7 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
               
               //StringTokenizer st = new StringTokenizer(strLine,",");
               //length = st.countTokens();
-              String[] strLineArr = strLine.split("\\,");
+              //String[] strLineArr = strLine.split("\\,");
               if(first){
                   length = strLineArr.length;
               }else{
@@ -331,7 +340,7 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
                                    // System.out.println(strLineArr[i]);
                       }else{
                          
-                          System.out.println("-- "+i+" -- " + strLineArr[i]);
+                          //System.out.println("-- "+i+" -- " + strLineArr[i]);
                           item.setText(i,strLineArr[i]);
                       }
                   }
@@ -340,12 +349,12 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
               
           }
           
-          System.out.println("Finisehd file");
+          //System.out.println("Finisehd file");
          
           for (int i=0; i<length; i++) {
 		table.getColumn (i).pack ();
 	  }
-          System.out.println("finished packing");
+          //System.out.println("finished packing");
           //Close the input stream
           in.close();
     }catch (Exception e){//Catch exception if any

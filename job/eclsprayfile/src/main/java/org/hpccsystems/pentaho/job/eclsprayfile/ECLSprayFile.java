@@ -9,8 +9,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.hpccsystems.ecldirect.Spray;
-import org.hpccsystems.ecldirect.EclDirect;
+import org.hpccsystems.javaecl.Spray;
+import org.hpccsystems.javaecl.EclDirect;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;
@@ -28,12 +28,13 @@ import org.w3c.dom.Node;
 
 import org.pentaho.di.job.JobMeta;
 import org.hpccsystems.eclguifeatures.*;
+import org.hpccsystems.ecljobentrybase.*;
 
 /**
  *
  * @author ChalaAX
  */
-public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
     
     private String outputField = "";
     //private String ipAddress = "";
@@ -45,6 +46,7 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
     private String csvQuote = "";
     private String fixedRecordSize = "";
     private String allowOverwrite = "True";
+    private String groupName = "";
     
     private boolean isValid = true;
     
@@ -66,7 +68,15 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         return outputField;
     }
 
-    public String getAllowOverwrite() {
+    public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+
+	public String getAllowOverwrite() {
 		return allowOverwrite;
 	}
 
@@ -148,6 +158,8 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         String eclccInstallDir = "";
         String mlPath = "";
         String includeML = "";
+        String user = "";
+        String pass = "";
         
         AutoPopulate ap = new AutoPopulate();
             try{
@@ -163,6 +175,9 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
                 eclccInstallDir = ap.getGlobalVariable(jobMeta.getJobCopies(),"eclccInstallDir");
                 mlPath = ap.getGlobalVariable(jobMeta.getJobCopies(),"mlPath");
                 includeML = ap.getGlobalVariable(jobMeta.getJobCopies(),"includeML");
+                
+                user = ap.getGlobalVariable(jobMeta.getJobCopies(),"user_name");
+                pass = ap.getGlobalVariableEncrypted(jobMeta.getJobCopies(),"password");
                 
             }catch (Exception e){
                 System.out.println("Error Parsing existing Global Variables ");
@@ -186,7 +201,8 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         spray.setCsvTerminator(getCsvTerminator());
         spray.setRecordSize(getFixedRecordSize());
         spray.setAllowOverWrite(getAllowOverwrite());
-
+        spray.setGroupName(getGroupName());
+        
          
         //logBasic(spray.ecl());
         logBasic("{Spray Job} Execute = " + spray.ecl());
@@ -203,6 +219,8 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         eclDirect.setJobName(jobName);
         eclDirect.setMlPath(mlPath);
         eclDirect.setOutputName(this.getName());
+        eclDirect.setUserName(user);
+        eclDirect.setPassword(pass);
         ArrayList dsList = eclDirect.execute(spray.ecl());
        
         isValid = eclDirect.isValid();
@@ -286,6 +304,10 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
                 setFixedRecordSize(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fixed_record_size")));   
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "allowOverwrite")) != null)
             	setAllowOverwrite(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "allowOverwrite")));
+            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "groupName")) != null)
+            	setGroupName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "groupName")));
+            
           //  if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
            //     openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
 
@@ -311,6 +333,7 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
         retval += "		<fixed_record_size><![CDATA[" + fixedRecordSize + "]]></fixed_record_size>" + Const.CR;
         retval += "		<logical_file_name><![CDATA[" + logicalFileName + "]]></logical_file_name>" + Const.CR;
         retval += "		<allowOverwrite><![CDATA[" + allowOverwrite + "]]></allowOverwrite>" + Const.CR;
+        retval += "		<groupName><![CDATA[" + groupName + "]]></groupName>" + Const.CR;
         
        // retval += "		<recordList>" + this.saveRecordList() + "</recordList>" + Const.CR;
         return retval;
@@ -341,6 +364,8 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
             
             if(rep.getStepAttributeString(id_jobentry, "allowOverwrite") != null)
             	allowOverwrite = rep.getStepAttributeString(id_jobentry, "allowOverwrite"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "groupName") != null)
+            	groupName = rep.getStepAttributeString(id_jobentry, "groupName"); //$NON-NLS-1$
             
           //  if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
           //      this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
@@ -362,6 +387,7 @@ public class ECLSprayFile extends JobEntryBase implements Cloneable, JobEntryInt
             rep.saveStepAttribute(id_job, getObjectId(), "fixedRecordSize", fixedRecordSize); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "logicalFileName", logicalFileName); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "allowOverwrite", allowOverwrite); //$NON-NLS-1$
+            rep.saveStepAttribute(id_job, getObjectId(), "groupName", groupName); //$NON-NLS-1$
             
           //  rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
         } catch (Exception e) {

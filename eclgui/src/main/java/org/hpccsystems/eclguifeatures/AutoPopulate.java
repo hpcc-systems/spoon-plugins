@@ -10,12 +10,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import java.util.regex.*;
+
+import org.hpccsystems.recordlayout.*;
+
 
 /**
  *
@@ -24,6 +28,7 @@ import java.util.regex.*;
 public class AutoPopulate {
     
     private String[] dataSets;
+    private int nodeIndex;
     private String[] recordSets;
     private Node datasetNode = null;//used internally to store the node in the load record list functions
     
@@ -38,11 +43,11 @@ public class AutoPopulate {
     		Iterator it = ds.entrySet().iterator();
     		while(it.hasNext()){
     			Map.Entry m = (Map.Entry)it.next();
-    			System.out.println("DataSet: " + m.getKey());
+    			//System.out.println("DataSet: " + m.getKey());
     			String[] fields = (String[])m.getValue();
     			
     			for(int i=0; i<fields.length; i++ ){
-    				System.out.println("---- " + fields[i]);
+    				//System.out.println("---- " + fields[i]);
     			}
     		}
     		
@@ -53,8 +58,10 @@ public class AutoPopulate {
     	}
     }
     
-    
     public HashMap parseDefExpressionBuilder(List<JobEntryCopy> jobs) throws Exception{
+    	return parseDefExpressionBuilder(jobs,"");
+    }
+    public HashMap parseDefExpressionBuilder(List<JobEntryCopy> jobs, String datasetName) throws Exception{
 
         HashMap ds = new HashMap();
         String attributeName = "eclIsDef";
@@ -64,49 +71,56 @@ public class AutoPopulate {
         int k = 0;
         for(int j = 0; j<jec.length; j++){
             if(!((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("START") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("OUTPUT") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("SUCCESS")){
-               String xml = ((JobEntryCopy)jec[j]).getXML();
-               NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
-               for (int temp = 0; temp < nl.getLength(); temp++){
-                   Node nNode = nl.item(temp);
-                   
-                   
-                   NodeList children;
-                   Node childnode;
-                   String defValue = null;
-                   String type = null;
-                  
-                   children=nNode.getChildNodes();
-                   
-                   for (int i=0;i<children.getLength();i++)
-                   {
-                	   try{
-	                	  
-	                	   childnode=children.item(i);
-	                	   if(childnode != null){
-	                		   if(childnode.getAttributes() != null){
-				                   Node attribute = childnode.getAttributes().getNamedItem(attributeName);
-				                   if (attribute!=null && attributeValue.equals(attribute.getTextContent())){
-				                	   
-				                	   defValue = XMLHandler.getNodeValue(childnode);
-				                	  
-				                	   if(defValue != null && !defValue.equalsIgnoreCase("null")){
-				                		   //System.out.println("NODE_VALUE: " + defValue);
-				                		   ds.put(defValue, fieldsByDataset(defValue, jobs));
-				                		   k++;
-				                	   }else{
-				                		   //System.out.println("NODE_VALUE: IS NULL");
-				                	   }
-				                   }
-	                		   }
+            	
+            	
+	               //System.out.println("----Loading Dataset: " + ((JobEntryCopy)jec[j]).getName());
+            	   String xml = ((JobEntryCopy)jec[j]).getXML();
+	               NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
+	               for (int temp = 0; temp < nl.getLength(); temp++){
+	                   Node nNode = nl.item(temp);
+	                   
+	                   
+	                   NodeList children;
+	                   Node childnode;
+	                   String defValue = null;
+	                   String type = null;
+	                  
+	                   children=nNode.getChildNodes();
+	                   
+	                   for (int i=0;i<children.getLength();i++)
+	                   {
+	                	   try{
+		                	  
+		                	   childnode=children.item(i);
+		                	   if(childnode != null){
+		                		   if(childnode.getAttributes() != null){
+					                   Node attribute = childnode.getAttributes().getNamedItem(attributeName);
+					                   if (attribute!=null && attributeValue.equals(attribute.getTextContent())){
+					                	   
+					                	   defValue = XMLHandler.getNodeValue(childnode);
+					                	  
+					                	   if(defValue != null && !defValue.equalsIgnoreCase("null")){
+					                		  
+					                		   if(datasetName.equals("") || defValue.equalsIgnoreCase(datasetName)){
+					                			   //System.out.println("NODE_VALUE: " + defValue);
+					                			   ds.put(defValue, fieldsByDataset(defValue, jobs));
+					                		   }
+					                		   k++;
+					                	   }else{
+					                		   //System.out.println("NODE_VALUE: IS NULL");
+					                	   }
+					                   }
+		                		   }
+		                	   }
+	                	   }catch (Exception exc){
+	                		   System.out.println("Failed to Read XML");
+	                		   //System.out.println(exc);
+	                		   //exc.printStackTrace();
 	                	   }
-                	   }catch (Exception exc){
-                		   System.out.println("Failed to Read XML");
-                		   //System.out.println(exc);
-                		   //exc.printStackTrace();
-                	   }
-
-                   }
-               }
+	
+	                   }
+	               }
+            	
             }
         }
         return ds;
@@ -234,7 +248,7 @@ public class AutoPopulate {
      * 
      */
     public String[] fieldsByDataset(String datasetName,List<JobEntryCopy> jobs)throws Exception{
-        System.out.println("***fieldsByDataset***");
+        //System.out.println("***fieldsByDataset***");
         String datasets[] = new String[1];
         ArrayList<String> adDS = new ArrayList<String>();
         this.fieldsByDatasetList(adDS, datasetName,jobs);
@@ -311,6 +325,7 @@ public class AutoPopulate {
 				                			  // System.out.println("-------------Yes----------" + tType);
 				                    		   type = tType;
 				                    		   datasetNode = nNode;
+				                    		   nodeIndex = i;
 				                    		   k++;
 				                    		   //to save execution time lets exit on the first find as it is most likely to be the one we want
 				                    		   
@@ -347,7 +362,7 @@ public class AutoPopulate {
         int len = strLine.length;
         if(len>0){
             datasetFields = new RecordList();
-            System.out.println("Open Record List");
+            //System.out.println("Open Record List");
             for(int i =0; i<len; i++){
                 RecordBO rb = new RecordBO(strLine[i]);
                 datasetFields.addRecordBO(rb);
@@ -363,12 +378,12 @@ public class AutoPopulate {
     	 int len = colArr.length;
     	 if(len>0){
     		 buildRecordList(columns);
-    		 System.out.println("Len: " + len);
+    		 //System.out.println("Len: " + len);
              for(int i =0; i<len; i++){
             	 //get just the name
             	 String[] fieldArr = colArr[i].split("[,]");
             	 if(fieldArr.length>1){
-            		 System.out.println(fieldArr[0]);
+            		 //System.out.println(fieldArr[0]);
             		 adDS.add(fieldArr[0]);
             	 }
             	 
@@ -401,7 +416,7 @@ public class AutoPopulate {
         String type = getType(jobs, datasetName);
         //datasetNode is set in getType
         node = datasetNode;
-        System.out.println("Type for "+ datasetName +": " + type);
+        //System.out.println("Type for "+ datasetName +": " + type);
         //place any outliers above the else will catch all that has a single parent with filed name recordset
         if(type != null && type.equalsIgnoreCase("ECLCount")){ 
         	fieldsByParent("ECLCount","recordset", adDS,datasetName,jobs);
@@ -430,7 +445,7 @@ public class AutoPopulate {
         }else if(type != null && type.equalsIgnoreCase("ECLML_FromField")){
         	
         	if(node != null){
-        		System.out.println("We have fromField");
+        		//System.out.println("We have fromField");
         		String parentNodeName = getRecordListFromField(node, adDS, datasetName,jobs);
         		fieldsByDatasetList(adDS,parentNodeName,jobs);
         	}
@@ -440,7 +455,7 @@ public class AutoPopulate {
         	//System.out.println("-------------GETTING RECORD LIST---------------");
         	//System.out.println("Type: " + type);
         	if(node != null){
-        		System.out.println("We have Node");
+        		//System.out.println("We have Node");
         		getRecordListFromECLDataset(node, adDS, datasetName,jobs);
         	}
         }else if(type != null && !type.equals("")){
@@ -582,7 +597,7 @@ public class AutoPopulate {
      * def of the datasets
      */
     public void fieldsByDatasetList2(ArrayList<String> adDS, String datasetName,List<JobEntryCopy> jobs)throws Exception{
-        System.out.println(" ------------ fieldsByDatasetList ------------ ");
+       // System.out.println(" ------------ fieldsByDatasetList ------------ ");
         Object[] jec = jobs.toArray();
 
         int k = 0;
@@ -721,7 +736,7 @@ public class AutoPopulate {
     }
     
     private String[] mergeArray(String[] a1, String[] a2){
-        System.out.println(" ------------ mergeArray ------------- ");
+        //System.out.println(" ------------ mergeArray ------------- ");
         
         String[] out = new String[a1.length+a2.length];
       
@@ -731,9 +746,19 @@ public class AutoPopulate {
         return out;
     }
 
+
     
+    public String getGlobalVariableEncrypted(List<JobEntryCopy> jobs, String ofType) throws Exception{
+    	String pass = getGlobalVariable(jobs,ofType);
+    	if(pass.equalsIgnoreCase("")){
+			return "";
+		}else{
+			return Encr.decryptPassword(pass);
+		}
+    	
+    }
     public String getGlobalVariable(List<JobEntryCopy> jobs, String ofType) throws Exception{
-        System.out.println(" ------------ getGlobalVariable ------------- ");
+       // System.out.println(" ------------ getGlobalVariable ------------- ");
         String datasets[] = null;
         ArrayList<String> adDS = new ArrayList<String>();
         String out = "";
@@ -792,6 +817,12 @@ public class AutoPopulate {
                                 );
                           }
                           
+                          if(ofType.equalsIgnoreCase("maxReturn")){
+                              out = XMLHandler.getNodeValue(
+                                  XMLHandler.getSubNode(nNode, "maxReturn")
+                              );
+                        }
+                          
                           if(ofType.equalsIgnoreCase("eclccInstallDir")){
                                 out = XMLHandler.getNodeValue(
                                     XMLHandler.getSubNode(nNode, "eclccInstallDir")
@@ -809,10 +840,38 @@ public class AutoPopulate {
                                     XMLHandler.getSubNode(nNode, "includeML")
                                 );
                           }
+                          if(ofType.equalsIgnoreCase("user_name")){
+                              out = XMLHandler.getNodeValue(
+                                  XMLHandler.getSubNode(nNode, "user_name")
+                              );
+                        }
                           
+                          if(ofType.equalsIgnoreCase("password")){
+                              out = XMLHandler.getNodeValue(
+                                  XMLHandler.getSubNode(nNode, "password")
+                              );
+                        }      
+
+                          if(ofType.equalsIgnoreCase("SALTPath")){
+                              out = XMLHandler.getNodeValue(
+                                  XMLHandler.getSubNode(nNode, "SALTPath")
+                              );
+                        }
+                        
+                        if(ofType.equalsIgnoreCase("includeSALT")){
+                              out = XMLHandler.getNodeValue(
+                                  XMLHandler.getSubNode(nNode, "includeSALT")
+                              );
+                        }
                           
                                   
 
+                       }else if(type.equalsIgnoreCase("ECLExecute")){
+                    	   if(ofType.equalsIgnoreCase("file_name")){
+                               out = XMLHandler.getNodeValue(
+                                   XMLHandler.getSubNode(nNode, "file_name")
+                               );
+                          }
                        }
                       
                        
@@ -829,4 +888,143 @@ public class AutoPopulate {
         return out;
 
     }
+    
+    
+    /*
+     * Gets the Dataset fields from all existing nodes
+     * This uses recursion to travel up from joins etc to the 
+     * def of the datasets
+     */
+    public String getDatasetsField(String fieldName, String datasetName,List<JobEntryCopy> jobs)throws Exception{
+        //System.out.println(" ------------ fieldsByDatasetList ------------ ");
+        Object[] jec = jobs.toArray();
+        Node node = null;
+        RecordList recordList = null;
+        String type = getType(jobs, datasetName);
+        //datasetNode is set in getType
+        //return datasetNode;
+        
+        String recordName = XMLHandler.getNodeValue(
+                XMLHandler.getSubNode(datasetNode, fieldName));
+       
+        return recordName;
+    }
+    
+    /*
+     * Gets the Dataset fields from all existing nodes
+     * This uses recursion to travel up from joins etc to the 
+     * def of the datasets
+     */
+    public RecordList rawFieldsByDataset(String datasetName,List<JobEntryCopy> jobs)throws Exception{
+        //System.out.println(" ------------ fieldsByDatasetList ------------ ");
+        Object[] jec = jobs.toArray();
+        Node node = null;
+        RecordList recordList = null;
+        String type = getType(jobs, datasetName);
+        //datasetNode is set in getType
+        node = datasetNode;
+        if(type != null && type.equalsIgnoreCase("ECLDataset")){
+        	System.out.println("-------------GETTING RECORD LIST---------------");
+        	System.out.println("Type: " + type);
+        	if(node != null){
+        		
+        		recordList = fetchFieldsRecordListByDataset(node);
+        	}
+        }
+        return recordList;
+       
+    }
+    
+    public RecordList fetchFieldsRecordListByDataset(Node node){
+    	String columns = XMLHandler.getNodeValue(
+                XMLHandler.getSubNode(node, "recordList"));
+    	String[] strLine = columns.split("[|]");
+    	RecordList recordList = null;
+        int len = strLine.length;
+        if(len>0){
+        	recordList = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList.addRecordBO(rb);
+            }
+        }
+        
+        return recordList;
+    }
+    
+    
+    
+    public ArrayList<String> getLogicalFileName(List<JobEntryCopy> jobs) throws Exception{
+    	
+    	ArrayList<String> logicalFileNames = new ArrayList<String>();
+         System.out.println(" ------------ getLogicalFileName ------------- ");
+         String datasets[] = null;
+         String fieldName = "logical_file_name";//spray
+         
+         Object[] jec = jobs.toArray();
+
+         int k = 0;
+         
+         if(jec != null){
+             
+
+             for(int j = 0; j<jec.length; j++){
+                    String xml = ((JobEntryCopy)jec[j]).getXML();
+                    NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
+                    for (int temp = 0; temp < nl.getLength(); temp++){
+                        Node nNode = nl.item(temp);
+                        
+                        String type = XMLHandler.getNodeValue(
+                            XMLHandler.getSubNode(nNode, "type")
+                            );
+                        System.out.println("Type: " + type);
+                        if(type.equalsIgnoreCase("ECLSprayFile")){
+                            	System.out.println("Logical Lookup: ");
+                                 logicalFileNames.add(XMLHandler.getNodeValue(
+                                     XMLHandler.getSubNode(nNode, fieldName)
+                                 ));
+                            
+                        }
+                    }
+             }
+
+         }
+         return logicalFileNames;
+
+     }
+    
+    
+    public boolean hasNodeofType(List<JobEntryCopy> jobs, String ofType) throws Exception{
+        // System.out.println(" ------------ " + ofTYpe + " ------------- ");
+    	 boolean isType = false;
+         Object[] jec = jobs.toArray();
+         if(jec != null){
+            
+             for(int j = 0; j<jec.length; j++){
+                    String xml = ((JobEntryCopy)jec[j]).getXML();
+                    NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
+                    for (int temp = 0; temp < nl.getLength(); temp++){
+                        Node nNode = nl.item(temp);
+                        
+                        String type = XMLHandler.getNodeValue(
+                            XMLHandler.getSubNode(nNode, "type")
+                            );
+                        //System.out.println("Type: " + type);
+                        if(type.equalsIgnoreCase(ofType)){
+                        	isType = true;
+                            return isType;//no need to keep looping;
+                        }
+                    }
+             }
+         }
+         return isType;
+
+     }
+    
+    
+    
 }

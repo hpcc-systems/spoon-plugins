@@ -4,10 +4,13 @@
  */
 package org.hpccsystems.pentaho.job.eclexecute;
 
+import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-//import org.hpccsystems.ecldirect.Output;
-import org.hpccsystems.ecldirect.EclDirect;
+//import org.hpccsystems.javaecl.Output;
+import org.hpccsystems.javaecl.EclDirect;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;
@@ -18,13 +21,15 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.job.entry.JobEntryBase;
+import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
-import org.hpccsystems.ecldirect.Column;
+import org.hpccsystems.javaecl.Column;
 import java.io.*;
-import org.hpccsystems.ecldirect.ECLSoap;
+
+import org.hpccsystems.javaecl.ECLSoap;
 import org.pentaho.di.ui.spoon.Spoon;
 import org.pentaho.di.core.*;
 import org.pentaho.di.core.gui.SpoonFactory;
@@ -33,18 +38,26 @@ import org.pentaho.di.plugins.perspectives.eclresults.*;
 
 import org.hpccsystems.eclguifeatures.*;
 import org.pentaho.di.job.JobMeta;
+import org.hpccsystems.ecljobentrybase.*;
+import org.hpccsystems.pentaho.job.eclexecute.RenderWebDisplay;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
+import org.hpccsystems.salt.hygiene.Generate;
+import org.hpccsystems.saltui.hygiene.*;
+
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
     
     private String attributeName = "";
     private String fileName = "";
     private String serverAddress = "";
     private String serverPort = "";
     private String debugLevel = "";
+    private String error = "";
     
     public static boolean isReady = false;
     boolean isValid = true;
@@ -97,12 +110,41 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
 	public void setDebugLevel(String debugLevel) {
 		this.debugLevel = debugLevel;
 	}
+	 
+	
+	
+	 
+	public void fixEclFiles(String dir){
+		File folder = new File(dir);
+		if(folder.exists()){
+	        File[] listOfFiles = folder.listFiles();
+	
+	        for (int i = 0; i < listOfFiles.length; i++) {
+	
+	            if (listOfFiles[i].isFile()) {
+	            	String name = listOfFiles[i].getName();
+	            	System.out.println("file_rename==========: " + listOfFiles[i].getName());
+	            	System.out.println(name.substring((name.length())-3, (name.length())));
+					if(!name.substring((name.length())-3, (name.length())).equalsIgnoreCase("ecl")){
+		                File f = new File(dir+"\\"+listOfFiles[i].getName()); 
+		                System.out.println("file_rename==========: " + listOfFiles[i].getName());
+		                String newName = listOfFiles[i].getName() + ".ecl";
+		                f.renameTo(new File(dir + "\\"+ newName));
+					}
+	            }
+	        }
+		}
 
+	}
 	@Override
     public Result execute(Result prevResult, int k) throws KettleException {
-		String error = "";
+		
         
+		String resName = "";
       //Result result = null;
+		//String xmlBuilder = "";
+		String xmlHygieneBuilder = "";
+		String layoutECL = "";
         
         Result result = prevResult;
         if(result.isStopped()){
@@ -113,17 +155,6 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
            } 
         }else{
         
-	        ErrorNotices en = new ErrorNotices();
-	        
-	        //decide if we need to do a pre compile check before we send it off to the server
-	        boolean validate = false;
-	        if(!this.debugLevel.equalsIgnoreCase("None")){
-	        	validate = true;
-	        }
-	        
-	        //generates popup -- removed in lue of the error level
-	        //en.openValidateCodeDialog();
-	        //boolean validate = en.isValidateCode();
 	
 	        JobMeta jobMeta = super.parentJob.getJobMeta();
 	                
@@ -131,9 +162,27 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
 	        String serverPort = "";
 	        String cluster = "";
 	        String jobName = "";
+	        String jobNameNoSpace ="";
+	        String maxReturn = "";
 	        String eclccInstallDir = "";
 	        String mlPath = "";
 	        String includeML = "";
+	        String user = "";
+	        String pass = "";
+	        String dsECL = "";
+	        
+
+            String rsDef = "";
+	        String dsDef = "";
+	        String recordName = "";
+	        String dsName = "";
+	        String logicalFile = "";
+	        String fileType = "";
+	        
+	        String SALTPath = "";
+	        String includeSALT = "";
+	        String saltIncludePath = "";
+	        Boolean isInternalLinking = false;
 	        
 	        AutoPopulate ap = new AutoPopulate();
 	        try{
@@ -144,10 +193,18 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
 	
 	            cluster = ap.getGlobalVariable(jobMeta.getJobCopies(),"cluster");
 	            jobName = ap.getGlobalVariable(jobMeta.getJobCopies(),"jobName");
-	
+	            jobNameNoSpace = jobName.replaceAll("[^A-Za-z0-9]", "");//jobName.replace(" ", "_"); 
+	            maxReturn = ap.getGlobalVariable(jobMeta.getJobCopies(),"maxReturn");
 	            eclccInstallDir = ap.getGlobalVariable(jobMeta.getJobCopies(),"eclccInstallDir");
 	            mlPath = ap.getGlobalVariable(jobMeta.getJobCopies(),"mlPath");
 	            includeML = ap.getGlobalVariable(jobMeta.getJobCopies(),"includeML");
+	            user = ap.getGlobalVariable(jobMeta.getJobCopies(),"user_name");
+                pass = ap.getGlobalVariableEncrypted(jobMeta.getJobCopies(),"password");
+
+                isInternalLinking = ap.hasNodeofType(jobMeta.getJobCopies(), "SaltInternalLinking");
+	            
+	            SALTPath = ap.getGlobalVariable(jobMeta.getJobCopies(),"SALTPath");
+	            includeSALT = ap.getGlobalVariable(jobMeta.getJobCopies(),"includeSALT");
 	            
 	            //System.out.println("@@@@@@@@@@@@@@@@@@@" + includeML + "@@@@@@");
 	
@@ -157,7 +214,158 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
 	            e.printStackTrace();
 	
 	        }
+	        saltIncludePath = ECLExecuteSalt.buildDatasetSalt(result, jobMeta, fileName, error);
+	        if(!error.equals("")){
+	        	logBasic(error);
+	        }
+	      //insert code here to build spec file on compile
 	        
+	        /*
+	        if(includeSALT.equalsIgnoreCase("true")){
+	        	saltIncludePath = this.fileName+ "";
+	        }
+	        if(includeSALT.equalsIgnoreCase("true") && !isInternalLinking){
+	        System.out.println("----------- insert code here to build spec file on compile");
+		        try{
+		        	//find all the datasets and build xml files
+		        	String[] datasets = ap.parseDatasets(jobMeta.getJobCopies());
+		        	
+		        	if(datasets.length != 1){
+		        		//set error state WE ONLY ALLOW ONE DATASET
+		        		
+		        	}
+		        	String file_name = "";
+		        	
+		        	for(int i = 0; i < datasets.length; i++){
+		        		 //iterate through all the xml files and build a specification file.
+		        		//System.out.println("dataset: " + datasets[i]);
+		        		RecordList fields = ap.rawFieldsByDataset(datasets[i],jobMeta.getJobCopies());
+		        		//have field declaration now we need to build the xml
+		        		String fieldCSV = "";
+		        		for (Iterator<RecordBO> iterator = fields.getRecords().iterator(); iterator.hasNext();) {
+		        			RecordBO obj = (RecordBO) iterator.next();
+		 
+		        			//TODO: fix this so it uses the ID passed in Hygine
+		        			if(!obj.getColumnName().equalsIgnoreCase("spoonClusterID")){
+		        				if(fieldCSV.equals("")){
+		        					fieldCSV += obj.getColumnName();
+		        				}else{
+		        					fieldCSV += ","+obj.getColumnName();
+		        				}
+		        				xmlHygieneBuilder += buildHygieneRule(datasets[i], obj.getColumnName(),obj.getColumnType());
+		        			}
+		        			if(obj.getColumnName().equalsIgnoreCase("spoonClusterID")){
+		        				//xmlHygieneBuilder +="<hyg:idname>" + "spoonClusterID" + "</hyg:idname>" +"\r\n";
+		        			}
+		        			//xmlHygieneBuilder +="<hyg:ridfield>" + "spoonRecordID" + "</hyg:hyg:ridfield>" +"\r\n";
+		        			
+		        		}
+		        		xmlHygieneBuilder +="<hyg:idname>" + "spoonClusterID" + "</hyg:idname>" +"\r\n";
+		        		//jobMeta.getJob
+		        		file_name = ap.getDatasetsField("record_name", datasets[i],jobMeta.getJobCopies());
+		        		
+		        		//todo: write layout_<file_name> to file needed for soap
+		        		layoutECL = "EXPORT layout_" + file_name + " := RECORD\r\n" + resultListToString(fields);
+		        		layoutECL += "UNSIGNED6 spoonClusterID := 0;\r\n";
+		        		layoutECL += "UNSIGNED6 spoonRecordID := 0;\r\n";
+		        		layoutECL += "\r\nEND;\r\n\r\n";
+		        		//xmlHygieneBuilder += buildHygieneRule(datasets[i], "SRC","");
+		        		//xmlHygieneBuilder += "<hyg:sourcefield>" + fieldCSV + "</hyg:sourcefield>";
+		        		xmlHygieneBuilder += buildOptReports(datasets[i]);
+		        		//dsECL += System.getProperties().getProperty("Dataset-" + datasets[i]);
+	
+		    	        
+		    	        rsDef = System.getProperties().getProperty("Dataset-" + datasets[i]+"-rsDef");
+		    	        dsDef = System.getProperties().getProperty("Dataset-" + datasets[i]+"-dsDef");
+		    	        recordName = System.getProperties().getProperty("Dataset-" + datasets[i]+"-rs");
+		    	        logicalFile = System.getProperties().getProperty("Dataset-" + datasets[i]+"-logical");
+		    	        fileType = System.getProperties().getProperty("Dataset-" + datasets[i]+"-type");
+		    	        dsName = System.getProperties().getProperty("Dataset-" + datasets[i]+"-ds");
+		        	}
+		        	
+		        	
+		        	
+		        				
+		
+					
+		        	xmlHygieneBuilder = "<hyg:hygiene-spec xmlns:hyg=\"http://hpccsystems.org/salt/hygiene/bean\">" +"\r\n"+
+										    "<hyg:module-name>" + jobNameNoSpace + "module</hyg:module-name>" +"\r\n"+
+										    "<hyg:file-name>" + file_name + "</hyg:file-name>" +"\r\n"+
+										    "<hyg:dataset-rsdef><![CDATA[" + rsDef + "]]></hyg:dataset-rsdef>" +"\r\n"+
+										    "<hyg:dataset-dsdef><![CDATA[" + dsDef + "]]></hyg:dataset-dsdef>" +"\r\n"+
+										    "<hyg:dataset-record-name><![CDATA[" + recordName + "]]></hyg:dataset-record-name>" +"\r\n"+
+										    "<hyg:dataset-name><![CDATA[" + dsName + "]]></hyg:dataset-name>" +"\r\n"+
+										    "<hyg:dataset-logical-file><![CDATA[" + logicalFile + "]]></hyg:dataset-logical-file>" +"\r\n"+
+										    "<hyg:dataset-file-type><![CDATA[" + fileType + "]]></hyg:dataset-file-type>" +"\r\n"+
+										    xmlHygieneBuilder +
+										    "</hyg:hygiene-spec>";
+		        	//System.out.println("-------------------------------------SALT COMPILE--------------------------------");
+		        	try {              
+		             
+		                
+		                BufferedWriter out = new BufferedWriter(new FileWriter(this.fileName + "\\salt.xml"));
+		                out.write(xmlHygieneBuilder);
+		                out.close();
+		                
+		                //FileInputStream fis = new FileInputStream(
+		               // 		this.fileName + "\\salt.xml");
+		                //need to compare xml bevore writting it to see if need to re-compile salt
+		        		Generate gen = new Generate();
+		        		String spec = gen.generateHygieneSpecFromXMLFile(this.fileName + "\\salt.xml");
+		        		BufferedWriter out2 = new BufferedWriter(new FileWriter(this.fileName + "\\salt.spc"));
+		                out2.write(spec);
+		                out2.close();
+		                
+		                String modFile = "";
+		                //System.out.println("-------------------------------------SALT COMPILE2--------------------------------");
+		                boolean compileSuccess = ECLExecuteSalt.compileSalt(SALTPath, this.fileName + "\\salt.spc", this.fileName+ "",jobNameNoSpace,error,this.fileName);
+		                
+		                if(!compileSuccess){
+		                	 String SaltError = "Unable to create the SALT files! Please check your salt path in Global Variables, and your output path in Execute.";
+		                	 result.setResult(false);
+		                	 result.setStopped(true);
+		                	 result.setLogText(SaltError);
+		                 	 logError(SaltError);
+		                 	 System.out.println(SaltError);
+		                 	 error += SaltError;
+		                 	 return result;
+		                }else{
+		                	logBasic("Salt Compiled");
+		                	//System.out.println("Salt Compiled moving on");
+		                }
+		                
+		                //fixEclFiles(this.fileName + "\\" + jobNameNoSpace + "module");
+		                
+		        		
+		            } catch (IOException e) {
+		                 e.printStackTrace();
+		                 String SaltError = "Unable to create the SALT files! Please check your salt path in Global Variables, and your output path in Execute.";
+	                	 result.setResult(false);
+	                	 result.setStopped(true);
+	                	 result.setLogText(SaltError);
+	                 	 logError(SaltError);
+	                 	 System.out.println(SaltError);
+	                 	 error += SaltError;
+	                 	 return result;
+		            }   
+		        	
+		        	
+		        	try {              
+
+		                BufferedWriter out = new BufferedWriter(new FileWriter(this.fileName + "\\" + jobNameNoSpace + "module\\layout_" + file_name + ".ecl"));
+		                out.write(layoutECL);
+		                out.close();
+		            } catch (IOException e) {
+		                 e.printStackTrace();
+		            }   
+		        	
+		        }catch (Exception e){
+		        	System.out.println("--------------FAILED---------------");
+		        	System.out.println(e.toString());
+		            e.printStackTrace();
+		        }
+	        }
+	        */
 	        //System.out.println("Output -- Finished setting up Global Variables");
 	        this.setServerAddress(serverHost);
 	        this.setServerPort(serverPort);
@@ -165,14 +373,14 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
         
         
             ECLExecute.isReady=true;
-            logBasic("not waiting: " + ECLExecute.isReady);
+            //logBasic("not waiting: " + ECLExecute.isReady);
             result.setResult(true);
 
 
-            List list = result.getRows();
+            List<RowMetaAndData> list = result.getRows();
             String eclCode = "";
             if (list == null) {
-                list = new ArrayList();
+                list = new ArrayList<RowMetaAndData>();
             } else {
 
                 for (int i = 0; i < list.size(); i++) {
@@ -191,202 +399,65 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
             eclDirect.setEclccInstallDir(eclccInstallDir);
             eclDirect.setIncludeML(includeML);
             eclDirect.setJobName(jobName);
+            eclDirect.setMaxReturn(maxReturn);
             eclDirect.setMlPath(mlPath);
             eclDirect.setOutputName(this.getName());
+            eclDirect.setUserName(user);
+            eclDirect.setPassword(pass);
+            //ArrayList dsList = null;
+          
+            //String outStr = "";
+            
+            eclDirect.setIncludeSALT(includeSALT);
+            eclDirect.setSALTPath(SALTPath);
+            eclDirect.setSaltLib(saltIncludePath);
             ArrayList dsList = null;
             String outStr = "";
             //System.out.println("Output -- Finished setting up ECLDirect");
             try{
                 String includes = "";
                 includes += "IMPORT Std;\n";
-                if(includeML.equals("true")){
+                if(includeML.equalsIgnoreCase("true")){
                     includes += "IMPORT * FROM ML;\r\n\r\n";
                     includes += "IMPORT * FROM ML.Cluster;\r\n\r\n";
                     includes += "IMPORT * FROM ML.Types;\r\n\r\n";
                 }
+               // System.out.println("Execute -- Finished Imports");
+                
+                if(includeSALT.equalsIgnoreCase("true")){
+                    includes += "IMPORT SALT25;\r\n\r\n";
+                    includes += "IMPORT ut;\r\n\r\n";
+                    includes += "IMPORT " +jobNameNoSpace + "module;\r\n\r\n";
+                }
+                
                 System.out.println("Execute -- Finished Imports");
                 eclCode = includes + eclCode;
                 
-                
-                
-                
-                
-                if(validate){
-                	//System.out.println("Execute -- Validate");
-                   // System.out.println("Output -- Start Validate");
-                    ECLSoap es = new ECLSoap();
-                    es.setEclccInstallDir(eclccInstallDir);
-                    es.setCluster(cluster);
-                   // System.out.println("Execute -- Validate 10");
-                    es.setHostname(serverAddress);
-                    es.setJobName(jobName);
-                    es.setOutputName(this.getName());
-                   // System.out.println("Execute -- Validate 20");
-                    if(includeML.equals("true")){
-                        es.setIncludeML(true);
-                       // System.out.println("includML");
-                    }else{
-                        es.setIncludeML(false);
-                        //System.out.println("Dont includML");
-                    }
-                    es.setMlPath(mlPath);
-                    es.setPort(Integer.parseInt(serverPort));
-                    //System.out.println("Execute -- Validate 30");
-                    error = (es.syntaxCheck(eclCode)).trim();
-                    //System.out.println("Execute -- Validate 31");
-                    boolean isError = false;
-                    boolean isWarning = false;
-                    
-                   
-                    
-                    if(es.getErrorCount() > 0 &&  this.debugLevel.equalsIgnoreCase("Stop on Errors")){
-                    	isError = true;
-                    	//System.out.println("Execute -- Validate isError");
-                    }
-                    if(es.getWarningCount() > 0 && this.debugLevel.equalsIgnoreCase("Stop on Errors or Warnings")){
-                    	isWarning = true;
-                    	//System.out.println("Execute -- Validate isWarning");
-                    }
-                    
-                    if((isError || isWarning) && !error.equals("")){
-                    	
-                    	
-                    	//need to detect level here
-                    	//int errorLevel = detectErrorLevel(error);
-                        logError("Syntax Check Failed:\n\r"+error);
-                        this.logRowlevel("Syntax Check Failed:\n\r"+error);
-                        //en.openDialog("Syntax Check Failed:", error,eclCode);
-                        isValid = false;
-                        result.setResult(false);
-                        result.setLogText(error);
-                        
-                        /*
-                        RowMetaAndData data = new RowMetaAndData();
-                        data.addValue("eclErrorCode", Value.VALUE_TYPE_STRING,eclCode+"\r\n");
-                        list.add(data);
-                        
-                        data = new RowMetaAndData();
-                        data.addValue("eclError", Value.VALUE_TYPE_STRING, error + "\r\n");
-                        list.add(data);
-                        */
-                        //throw new KettleException("ECL failed Validation, please correct and re-run." + error);
-                    }else{
-                    	System.out.println("Execute -- No Validate");
-                    	System.out.println("!!!!!!!!!!1 USE execute_noResults");
-                        //isValid = eclDirect.execute_noResults(eclCode);
-                    	
-                    	
-                        
-                        isValid = es.executeECL(eclCode);
-                        eclDirect.setWuid(es.getWuid());
-                        
-                        //if not isValid add error
-                        if(!isValid){
-                        	error += "\r\nServer Failed to compile code please refer to ECLWatch and verify your settings\r\n";
-                        	logError("Server Failed to compile code please refer to ECLWatch and verify your settings");
-                        }
-                        
-                    }
-                   // System.out.println("Output -- Finished Validating");
-                }else{
-                	//System.out.println("!!!!!!!!!!2 USE execute_noResults");
-                    //isValid = eclDirect.execute_noResults(eclCode);
-                	ECLSoap es = new ECLSoap();
-                    es.setEclccInstallDir(eclccInstallDir);
-                    es.setCluster(cluster);
-                    es.setHostname(serverAddress);
-                    es.setJobName(jobName);
-                    es.setOutputName(this.getName());
-                    //System.out.println("@@@@@@@@@@@@@@@@@@@2" + includeML + "@@@@@@");
-                    if(includeML.equals("true")){
-                        es.setIncludeML(true);
-                        System.out.println("includML");
-                    }else{
-                        es.setIncludeML(false);
-                        System.out.println("Dont includML");
-                    }
-                    es.setMlPath(mlPath);
-                    es.setPort(Integer.parseInt(serverPort));
-                    isValid = es.executeECL(eclCode);
-                    eclDirect.setWuid(es.getWuid());
-                    
-                    if(!isValid){
-                    	error += "\r\nFailed to execute code on the cluster, please verify your settings\r\n";
-                    	logError("Failed to execute code on the cluster, please verify your settings");
-                    }
+                boolean isValid = false;
+               // System.out.println("---------------- submitToCluster");
+
+                isValid = eclDirect.execute(eclCode, this.debugLevel);
+               // System.out.println("---------------- finished submitToCluster");
+
+                //System.out.println("---------------- finished submitToCluster");
+                if(isValid){
+                	//System.out.println("---------------- writing file");
+                //	System.out.println("---------------- writing file");
+                	isValid = eclDirect.writeResultsToFile(this.fileName);
                 }
-                //logBasic("Start Log Results");
-               
-                    if(isValid){// && dsList != null){
-                        ArrayList al = eclDirect.resultList();
-                        
-                        int alSize = al.size();
-                        // System.out.println(al.toString());
-                         //rows
-                        for(int i = 0; i < alSize ; i++){
-                            //System.out.println("-");
-                            ArrayList al2 = (ArrayList)al.get(i);
-                            int al2Size = al2.size();
-                            //columns
-                            int counter = 0;
-                            for(int j = 0; j < al2Size ; j++){
-                               // System.out.println("--");
-
-                                ArrayList al3 = (ArrayList)al2.get(j);
-                                int al3Size = al3.size();
-                                
-                                for(int r = 0; r < al3Size ; r++){
-
-                                    if(((Column)al3.get(r)).getName().equals("Name")){
-                                        //System.out.println("---");
-                                        String resName = ((Column)al3.get(r)).getValue();
-                                        //System.out.println( v2);
-                                        ECLSoap es = new ECLSoap();
-                                        es.setEclccInstallDir(eclccInstallDir);
-                                        es.setCluster(cluster);
-                                        es.setHostname(serverAddress);
-                                        es.setJobName(jobName);
-                                        es.setOutputName(this.getName());
-                                        //System.out.println("@@@@@@@@@@@@@@@@@@@3" + includeML + "@@@@@@");
-                                        if(includeML.equals("true")){
-                                            es.setIncludeML(true);
-                                            //System.out.println("includML");
-                                        }else{
-                                            es.setIncludeML(false);
-                                            //System.out.println("Dont includML");
-                                        }
-                                        
-                                        InputStream is = es.ResultsSoapCall(eclDirect.getWuid(), resName);
-                                        ArrayList results = es.parseResults(is);
-                                        //System.out.println(this.fileName + "\\" + resName + ".csv");
-                                        resName = resName.replace(" ", "_");
-                                        createOutputFile(results,this.fileName + "\\" + resName + ".csv",counter);
-                                        counter++;
-                                    }
-                                }
-                                
-                            }
-                            //set counter to memory
-                                
-                                //System.out.println(counter);
-                                System.setProperty("fileCount", counter+"" );
-                        }
-                      //  this.createOutputFile(dsList,fileName);
-                      //  result.setRows(list);
-                    }else{
-                    	logError("Tasked Failed");
-                    	result.setResult(false);
-                    	//error += "\r\nFailed to compile code please verify your settings\r\n";
-                    
-                    }
-                    
-                    
+                if(!isValid){
+                	result.setResult(false);
+                    result.setLogText(eclDirect.getError());
+                	logError(eclDirect.getError());
+                	System.out.println(eclDirect.getError());
+                	error += eclDirect.getError();
+                }
                     
              }catch (Exception e){
                 logError("Failed to execute code on Cluster." + e);
                 result.setResult(false);
                 error += "Exception occured please verify all settings.";
-                 e.printStackTrace();
+                e.printStackTrace();
             }
             
             result.clear();
@@ -409,6 +480,65 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
                  e.printStackTrace();
             }   
              
+            
+            ArrayList<String> resultNames = eclDirect.getResultNames();
+            for (int n = 0; n<resultNames.size(); n++){
+            	System.out.println("+++Results --------------------" + resultNames.get(n));
+            	resName = resultNames.get(n);
+            
+	            //resName = eclDirect.getResName();
+	            System.out.println("++Spring HTML -------------------------" + resName);
+	            if(resName.equalsIgnoreCase("dataProfilingResults") || resName.equalsIgnoreCase("Dataprofiling_AllProfiles")){ 
+	                RenderWebDisplay rwd = new RenderWebDisplay();
+	         		rwd.processFile(this.fileName + "\\" + resName + ".csv", this.fileName);
+	         		
+	         		String saltData = System.getProperty("saltData");
+	         		if(saltData!= null && !saltData.equals("")){
+	         			System.setProperty("saltData",  saltData + "," + this.fileName + "\\" + resName + ".csv");
+	         		}else{
+	         			System.setProperty("saltData",  this.fileName + "\\" + resName + ".csv");
+	         		}
+	            }
+	            
+	            cacheOutputInfo("Dataprofiling_SummaryReport","saltSummaryData", resName);
+	            
+	            /*if(resName.equalsIgnoreCase("Dataprofiling_SummaryReport")){
+	            
+	            	String saltSummaryData = System.getProperty("saltSummaryData");
+	         		if(saltSummaryData != null && !saltSummaryData.equals("")){
+	         			System.setProperty("saltSummaryData",  saltSummaryData + "," + this.fileName + "\\" + resName + ".csv");
+	         		}else{
+	         			System.setProperty("saltSummaryData",  this.fileName + "\\" + resName + ".csv");
+	         		}
+	            }*/
+	            //Dataprofiling_OptimizedLayout
+	            //saltOptimizedLayouts
+	            cacheOutputInfo("Dataprofiling_OptimizedLayout","saltOptimizedLayouts", resName);
+	            /*
+	            if(resName.equalsIgnoreCase("Dataprofiling_OptimizedLayout")){
+		            
+	            	String saltSummaryData = System.getProperty("saltOptimizedLayouts");
+	         		if(saltSummaryData != null && !saltSummaryData.equals("")){
+	         			System.setProperty("saltOptimizedLayouts",  saltSummaryData + "," + this.fileName + "\\" + resName + ".csv");
+	         		}else{
+	         			System.setProperty("saltOptimizedLayouts",  this.fileName + "\\" + resName + ".csv");
+	         		}
+	            }
+	            */
+	         
+	            //SrcOutliers
+	            cacheOutputInfo("SrcOutliers","saltSrcOutliers", resName);
+	            //ClusterSrc
+	            cacheOutputInfo("ClusterSrc","saltClusterSrc", resName);
+	            //ClusterCounts
+	            cacheOutputInfo("ClusterCounts","saltClusterCounts", resName);
+	            //SrcProfiles
+	            cacheOutputInfo("SrcProfiles","saltSrcProfiles", resName);
+	            //Hygiene_ValidityErrors
+	            cacheOutputInfo("Hygiene_ValidityErrors","saltHygiene_ValidityErrors", resName);
+	            //CleanedData
+	            cacheOutputInfo("CleanedData","saltCleanedData", resName);
+            }
         
        }
         
@@ -416,80 +546,32 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
        return result;
     }
 	
-	/*
-	public int detectErrorLevel(String error){
-		int errorLevel = 0;
-		
-		//does it contain error
-		
-		//does it contain warning
-		
-		return errorLevel;
-	}*/
+	public void cacheOutputInfo(String thisResName,String propertyName, String resName){
+		try{
+		if(resName.equalsIgnoreCase(thisResName)){
+            
+        	String resultData = System.getProperty(propertyName);
+     		if(resultData != null && !resultData.equals("")){
+     			System.setProperty(propertyName,  resultData + "," + this.fileName + "\\" + resName + ".csv");
+     		}else{
+     			System.setProperty(propertyName,  this.fileName + "\\" + resName + ".csv");
+     		}
+        }
+		}catch (Exception e){
+			System.out.println("Error Setting result data");
+		}
+	}
+	
+	
+	
     
-    public void createOutputFile(ArrayList dsList,String fileName, int count){
-         String outStr = "";
-         String header = "";
-         if(dsList != null){
-         String newline = System.getProperty("line.separator");
-         
-                        for (int iList = 0; iList < dsList.size(); iList++) {
-                            //logBasic("----------Outer-------------");
-                            ArrayList rowList = (ArrayList) dsList.get(iList);
-
-                            for (int jRow = 0; jRow < rowList.size(); jRow++) {
-                                //logBasic("----------Row-------------");
-                                ArrayList columnList = (ArrayList) rowList.get(jRow);
-
-                                for (int lCol = 0; lCol < columnList.size(); lCol++) {
-                                 //   logBasic("----------Column-------------");
-                                    Column column = (Column) columnList.get(lCol);
-                                    logBasic(column.getName() + "=" + column.getValue() + "|");
-                                    outStr += column.getValue();
-                                    if(lCol< (columnList.size()-1)){
-                                        outStr += ",";
-                                    }
-                                    if(jRow == 0){
-                                        header += column.getName();
-                                        if(lCol< (columnList.size()-1)){
-                                            header += ",";
-                                        }else{
-                                            header += newline;
-                                        }
-                                    }
-                                }
-                                logBasic("newline");
-                                outStr += newline;
-                            }
-                        }
-             try {
-                
-                BufferedWriter out = new BufferedWriter(new FileWriter(fileName));
-                System.getProperties().getProperty("fileName");
-                System.setProperty("fileName"+count, fileName);
-                
-                out.write(header+outStr);
-                out.close();
-           
-            } catch (IOException e) {
-               logError("Failed to write file: " + fileName);
-               //error += "Failed to write ecl code file";
-               //result.setResult(false);
-                e.printStackTrace();
-            }  
-         }
-    }
-
+	
+     
     @Override
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
         try {
              //System.out.println(" ------------ loadXML ------------- ");
             super.loadXML(node, list, list1);
-
-            //if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "attribute_name")) != null)
-            //    setAttributeName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "attribute_name")));
-            //if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "server_address")) != null)
-                //setServerAddress(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "server_address")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "file_name")) != null)
                 setFileName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "file_name")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "debugLevel")) != null)
@@ -506,14 +588,8 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
         String retval = "";
         // System.out.println(" ------------ getXML ------------- ");
         retval += super.getXML();
-
-        //retval += "		<attribute_name>" + attributeName + "</attribute_name>" + Const.CR;
-       // retval += "		<server_address>" + serverAddress + "</server_address>" + Const.CR;
-        
-      
         retval += "		<file_name><![CDATA[" + fileName + "]]></file_name>" + Const.CR;
         retval += "		<debugLevel><![CDATA[" + this.debugLevel + "]]></debugLevel>" + Const.CR;
-        //System.out.println(" end getXML ");
         return retval;
 
     }
@@ -522,12 +598,7 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
             throws KettleException {
         //System.out.println(" ------------ loadRep " + id_jobentry + "------------- ");
         try {
-          
-            //if(rep.getStepAttributeString(id_jobentry, "attributeName") != null)
-            //    attributeName = rep.getStepAttributeString(id_jobentry, "attributeName"); //$NON-NLS-1$
-            //if(rep.getStepAttributeString(id_jobentry, "serverAddress") != null)
-            //    serverAddress = rep.getStepAttributeString(id_jobentry, "serverAddress"); //$NON-NLS-1$
-            if(rep.getStepAttributeString(id_jobentry, "fileName") != null)
+           if(rep.getStepAttributeString(id_jobentry, "fileName") != null)
                 fileName = rep.getStepAttributeString(id_jobentry, "fileName"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "debugLevel") != null)
                 debugLevel = rep.getStepAttributeString(id_jobentry, "debugLevel"); //$NON-NLS-1$
@@ -545,10 +616,7 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
             ObjectId[] allIDs = rep.getPartitionSchemaIDs(true);
             for(int i = 0; i<allIDs.length; i++){
                 logBasic("ObjectID["+i+"] = " + allIDs[i]);
-              //  System.out.println("ObjectID["+i+"] = " + allIDs[i]);
             }
-            //rep.saveStepAttribute(id_job, getObjectId(), "attributeName", attributeName); //$NON-NLS-1$
-            //rep.saveStepAttribute(id_job, getObjectId(), "serverAddress", serverAddress); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "fileName", fileName); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "debugLevel", this.debugLevel); //$NON-NLS-1$
            
@@ -559,7 +627,6 @@ public class ECLExecute extends JobEntryBase implements Cloneable, JobEntryInter
 
     public boolean evaluates() {
     	return isValid;
-        //return true;
     }
 
     public boolean isUnconditional() {

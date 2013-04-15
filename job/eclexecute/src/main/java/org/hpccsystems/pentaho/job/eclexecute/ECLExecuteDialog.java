@@ -4,6 +4,7 @@
  */
 package org.hpccsystems.pentaho.job.eclexecute;
 
+import java.io.File;
 import java.util.ArrayList;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -57,12 +58,12 @@ import org.hpccsystems.eclguifeatures.*;
 
 import java.util.HashMap;
 import org.eclipse.swt.widgets.DirectoryDialog;
-
+import org.hpccsystems.ecljobentrybase.*;
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLExecuteDialog extends JobEntryDialog implements JobEntryDialogInterface {
+public class ECLExecuteDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
 
     private ECLExecute jobEntry;
     private Text jobEntryName;
@@ -186,7 +187,7 @@ public class ECLExecuteDialog extends JobEntryDialog implements JobEntryDialogIn
         Listener fileOpenListener = new Listener() {
 
             public void handleEvent(Event e) {
-                String newFile = buildFileDialog();
+                String newFile = buildDirectoryDialog();
                 if(newFile != ""){
                     fileName.setText(newFile);
                 }
@@ -266,150 +267,63 @@ public class ECLExecuteDialog extends JobEntryDialog implements JobEntryDialogIn
 
     }
     
-    
-private Button buildButton(String strLabel, Control prevControl, 
-         ModifyListener isMod, int middle, int margin, Composite groupBox){
-    
-        Button nButton = new Button(groupBox, SWT.PUSH | SWT.SINGLE | SWT.CENTER);
-        nButton.setText(strLabel);
-        props.setLook(nButton);
-        //nButton.addModifyListener(lsMod)
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(75, 0);
-        fieldFormat.height = 25;
-        nButton.setLayoutData(fieldFormat);
-    
-        return nButton;
-        
-       
-}
-private String buildFileDialog() {
-    
-    DirectoryDialog dialog = new DirectoryDialog(shell);
-    dialog.setFilterPath("c:\\"); // Windows specific
-    //System.out.println("RESULT=" + dialog.open());
-    String selected = dialog.open();
-    if(selected == null){
-        selected = "";
-    }
-    return selected;
-    /*
-    //file field
-        FileDialog fd = new FileDialog(shell, SWT.SAVE);
-
-        fd.setText("Save");
-        fd.setFilterPath("C:/");
-        String[] filterExt = { "*.csv", ".xml", "*.txt", "*.*" };
-        //fd.setFilterExtensions(filterExt);
-        String selected = fd.open();
-        if(fd.getFileName() != ""){
-            return fd.getFilterPath() + System.getProperty("file.separator") + fd.getFileName();
-        }else{
-            return "";
-        }
-     * */
-
-        
-    }
-
-    private Text buildText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Text buildMultiText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.V_SCROLL);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 100;
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Combo buildCombo(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox, String[] items) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // combo field
-        Combo combo = new Combo(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-        props.setLook(combo);
-        combo.setItems(items);
-        combo.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 50;
-        combo.setLayoutData(fieldFormat);
-
-        return combo;
+    private void updatePaths(){
+    	String path = this.fileName.getText();
+    	boolean lastIsSlash = false;
+    	if(path.lastIndexOf("\\") == (path.length()-1)){
+    		//has last \
+    		lastIsSlash = true;
+    	}
+    	if(!lastIsSlash && path.lastIndexOf("/") == (path.length()-1)){
+    		lastIsSlash = true;
+    	}
+    	if(lastIsSlash){
+    		//remove the slash
+    		String noSlashPath = path.substring(0,path.length()-1);
+    		this.fileName.setText(noSlashPath);
+    	}
+    	
+    	
     }
     
-    private Label buildLabel(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox){
-            Label fmt = new Label(groupBox, SWT.RIGHT);
-            fmt.setText(strLabel);
-            props.setLook(fmt);
-            FormData labelFormat = new FormData();
-            //labelFormat.left = new FormAttachment(0, 0);
-            //labelFormat.top = new FormAttachment(prevControl, margin);
-           // labelFormat.right = new FormAttachment(middle, -margin);
-            
-            labelFormat.left = new FormAttachment(middle, 0);
-            labelFormat.top = new FormAttachment(prevControl, margin);
-            labelFormat.right = new FormAttachment(100, 0);
-            fmt.setLayoutData(labelFormat);
-            return fmt;
-        }
-
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	//recordset
+    	if(this.fileName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Output File(s) Directory\"!\r\n";
+    	}else{
+	    	boolean pathExists = (new File(this.fileName.getText())).exists();
+	    	if(!pathExists){
+	    		isValid = false;
+	    		errors += "The \"Output File(s) Directory\" can't be found!\r\n";
+	    	}
+    	}
+    	
+    	// if skey require minskew ------ since its just a blank not needed yet will be needed in future version TODO:
+    	
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
     private void ok() {
+    	updatePaths();
+    	if(!validate()){
+    		return;
+    	}
         jobEntry.setName(jobEntryName.getText());
         
         AutoPopulate ap = new AutoPopulate();

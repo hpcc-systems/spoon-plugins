@@ -41,7 +41,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
-import org.hpccsystems.eclguifeatures.RecordList;
+import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryDialogInterface;
@@ -53,15 +53,17 @@ import org.pentaho.di.ui.job.entry.JobEntryDialog;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
 
-import org.hpccsystems.eclguifeatures.CreateTable;
-import org.hpccsystems.eclguifeatures.RecordBO;
+import org.hpccsystems.recordlayout.CreateTable;
+import org.hpccsystems.eclguifeatures.ErrorNotices;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.ecljobentrybase.*;
 
 
 /**
  *
  * @author ChalaAX
  */
-public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialogInterface {
+public class ECLSprayFileDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
 
     private ECLSprayFile jobEntry;
     private Text jobEntryName;
@@ -74,6 +76,7 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
     private Text csvQuote;
     private Text csvTerminator;
     private Text fixedRecordSize;
+    private Text groupName;
     private Button wOK, wCancel;
     private boolean backupChanged;
     private SelectionAdapter lsDef;
@@ -157,7 +160,7 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         int margin = Const.MARGIN;
 
         shell.setLayout(formLayout);
-        shell.setText("Define an ECL Dataset");
+        shell.setText("Define an ECL Spray");
 
         FormLayout groupLayout = new FormLayout();
         groupLayout.marginWidth = 10;
@@ -188,12 +191,13 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         FormData sourceGroupFormat = new FormData();
         sourceGroupFormat.top = new FormAttachment(generalGroup, margin);
         sourceGroupFormat.width = 400;
-        sourceGroupFormat.height = 120;
+        sourceGroupFormat.height = 140;
         sourceGroupFormat.left = new FormAttachment(middle, 0);
         sourceGroup.setLayoutData(sourceGroupFormat);
        
         //ipAddress = buildText("IP Address", jobEntryName, lsMod, middle, margin, sourceGroup);
-        filePath = buildText("File Name", jobEntryName, lsMod, middle, margin, sourceGroup);
+        groupName = buildText("Destination Group", null, lsMod, middle, margin, sourceGroup);
+        filePath = buildText("File Name", groupName, lsMod, middle, margin, sourceGroup);
         logicalFileName = buildText("Logical File Name", filePath, lsMod, middle, margin, sourceGroup);
         fileType = buildCombo("File Type", logicalFileName, lsMod, middle, margin, sourceGroup, new String[]{"Fixed", "Variable"});
         allowOverwrite = buildCombo("Allow Overwrite", fileType, lsMod, middle, margin, sourceGroup, new String[]{"True", "False"});
@@ -348,6 +352,10 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         	allowOverwrite.setText(jobEntry.getAllowOverwrite());
         }
         
+        if (jobEntry.getGroupName() != null) {
+        	groupName.setText(jobEntry.getGroupName());
+        }
+        
         fileType.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				System.out.println("Item selected: "+fileType.getText());
@@ -395,85 +403,97 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
 
     }
 
-    private Text buildText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
+    
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	//only need to require a entry name
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	
+    	if(this.filePath.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"File Name\"!\r\n";
+    	}
+    	
+    	if(this.logicalFileName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Logical File Name\"!\r\n";
+    	}
+    	
+    	if(this.fileType.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"File Type\"!\r\n";
+    	}
+    	
+    	if(this.allowOverwrite.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Allow Overwrite\"!\r\n";
+    	}
+    	
+    	if(this.groupName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Destination Group\"!\r\n";
+    	}
+    	
+    	if(this.fileType.getText().equals("Variable")){
+    		// csvSeparator
+    	    // csvQuote
+    	    // csvTerminator
+    		if(this.csvSeparator.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"CSV Separator\" for Variable File Type!\r\n";
+        	}
+    		if(this.csvTerminator.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"CSV Terminator\" for Variable File Type!\r\n";
+        	}
+    		if(this.csvQuote.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"CSV Quote\" for Variable File Type!\r\n";
+        	}
+    		
+    	}
+    	
+    	if(this.fileType.getText().equals("Fixed")){
+    		//fixedRecordSize
+    		if(this.fixedRecordSize.getText().equals("")){
+        		//one is required.
+        		isValid = false;
+        		errors += "You must provide a \"Fixed Record Size\" for Fixed File Type!\r\n";
+        	}
+    	}
+    	
+    	
+    	//File TYpe Variable,FIxed
 
-        // text field
-        Text text = new Text(groupBox, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Text buildMultiText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.V_SCROLL);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 100;
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Combo buildCombo(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox, String[] items) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // combo field
-        Combo combo = new Combo(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-        props.setLook(combo);
-        combo.setItems(items);
-        combo.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 50;
-        combo.setLayoutData(fieldFormat);
-
-        return combo;
-    }
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
 
     private void ok() {
+    	if(!validate()){
+    		return;
+    	}
+    	
         jobEntry.setName(jobEntryName.getText());
        // jobEntry.setIpAddress(ipAddress.getText());
         jobEntry.setFilePath(filePath.getText());
@@ -484,6 +504,7 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         jobEntry.setCsvTerminator(csvTerminator.getText());
         jobEntry.setFixedRecordSize(fixedRecordSize.getText());
         jobEntry.setAllowOverwrite(allowOverwrite.getText());
+        jobEntry.setGroupName(groupName.getText());
         //jobEntry.setRecordList(ct.getRecordList());
         dispose();
     }
@@ -492,11 +513,5 @@ public class ECLSprayFileDialog extends JobEntryDialog implements JobEntryDialog
         jobEntry.setChanged(backupChanged);
         jobEntry = null;
         dispose();
-    }
-
-    public void dispose() {
-        WindowProperty winprop = new WindowProperty(shell);
-        props.setScreen(winprop);
-        shell.dispose();
     }
 }

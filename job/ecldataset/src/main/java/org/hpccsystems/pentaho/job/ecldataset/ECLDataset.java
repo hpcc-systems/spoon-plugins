@@ -7,9 +7,9 @@ package org.hpccsystems.pentaho.job.ecldataset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.hpccsystems.ecldirect.Dataset;
-import org.hpccsystems.eclguifeatures.RecordBO;
-import org.hpccsystems.eclguifeatures.RecordList;
+import org.hpccsystems.javaecl.Dataset;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;
@@ -19,17 +19,21 @@ import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.xml.XMLHandler;
+import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryBase;
+import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
+import org.hpccsystems.eclguifeatures.AutoPopulate;
+import org.hpccsystems.ecljobentrybase.*;
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
     
     private String logicalFileName = "";
     private String datasetName = "";
@@ -96,58 +100,96 @@ public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInter
         this.fileType = fileType;
     }
     
+    //public String resultListToString(){
+    //	return resultListToString(this.recordList);
+    //}
     
-    public String resultListToString(){
-        String out = "";
+    public String fieldsValid(RecordList recordList){
+        String errors = "";
         
         if(recordList != null){
             if(recordList.getRecords() != null && recordList.getRecords().size() > 0) {
-                    System.out.println("Size: "+recordList.getRecords().size());
+            	int i = 1;
                     for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
                             RecordBO record = (RecordBO) iterator.next();
-                        	String rLen = record.getColumnWidth();
-        					if (rLen != null && rLen.trim().length() >0) {
-                                if(record.getColumnName() != null && !record.getColumnName().equals("")){
-                                    out += record.getColumnType()+rLen + " " + record.getColumnName();
-                                    if(record.getDefaultValue() != ""){
-                                        out += " := " + record.getDefaultValue();
-                                    }
-                                    out += ";\r\n";
-                                 }
-                            }else{
-                                if(record.getColumnName() != null && !record.getColumnName().equals("")){
-                                    out += record.getColumnType() + " " + record.getColumnName();
-                                    if(record.getDefaultValue() != ""){
-                                        out += " := " + record.getDefaultValue();
-                                    }
-                                    out += ";\r\n";
-                                }
+                            
+                            //name type required
+                            if(!(record.getColumnName() != null && !record.getColumnName().equals(""))){
+                            	errors += "On the Fields Tab Row " + i + " is missing \"Column Name \"!\r\n";
                             }
-                            
-                            
+                            if(!(record.getColumnType() != null && !record.getColumnType().equals("")&& !record.getColumnType().equals("Select"))){
+                            	errors += "On the Fields Tab Row " + i + " is missing \"Column Type\"!\r\n";
+                            } 
+                            i++;
                     }
             }
         }
         
-        return out;
+        return errors;
     }
-
+                            
+                            
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
-        
+    	JobMeta jobMeta = super.parentJob.getJobMeta();
+        List<JobEntryCopy> jobs = jobMeta.getJobCopies();
+        AutoPopulate ap = new AutoPopulate();
         Result result = prevResult;
         
         Dataset dataset = new Dataset();
         dataset.setLogicalFileName(getLogicalFileName());
         dataset.setName(getDatasetName());
        // dataset.setRecordFormatString(getRecordDef());
-        dataset.setRecordFormatString(resultListToString());
+        //use(hasNodeofType(type); from global variables here
+        boolean isSaltHygiene = false;
+        boolean isSaltSpecificity = false;
+        try{
+        	isSaltHygiene = ap.hasNodeofType(jobs, "SALTHygiene");
+        	isSaltSpecificity = ap.hasNodeofType(jobs, "SALTSpecificity");
+        }catch(Exception e){
+        	
+        }
+        /*TODO: you need to detect is salt and project spoonClusterID
+         * moved the spoonClusterID and spoonRecordID to be added in a project in the related plugin ecl code generation
+         * 
+        if(isSaltHygiene){//need to check to see if saltHygine is enabled if so trigger this.
+        	 logBasic("{Dataset Job} ADD HYGINE SETTINGS");
+        	RecordBO saltID = new RecordBO();
+        	saltID.setColumnName("spoonClusterID");
+        	saltID.setColumnType("UNSIGNED6");
+        	RecordBO saltSRC = new RecordBO();
+        	//saltSRC.setColumnName("SRC");
+        	//saltSRC.setColumnType("STRING");
+        	//saltSRC.setDefaultValue("SPOON_");
+        	this.recordList.addRecordBO(saltID);
+        	//this.recordList.addRecordBO(saltSRC);
+        }
+        
+        if(isSaltSpecificity){//need to check to see if saltHygine is enabled if so trigger this.
+       	 	logBasic("{Dataset Job} ADD Specificity SETTINGS");
+	       	RecordBO saltID = new RecordBO();
+	       	saltID.setColumnName("spoonClusterID");
+	       	saltID.setColumnType("INTEGER");
+	       	RecordBO saltSRC = new RecordBO();
+	       	this.recordList.addRecordBO(saltID);
+
+       }
+       */
+        dataset.setRecordFormatString(resultListToString(this.recordList));
         dataset.setRecordName(getRecordName());
         dataset.setFileType(getFileType());
         dataset.setRecordSet(getRecordSet());
         
-
-        logBasic("{Dataset Job} Execute = " + dataset.ecl());
+        logBasic("{Dataset Job} Execute = " + dataset.ecl());//must be first so that it builds the below vars
+        
+        System.setProperty("Dataset-" + getDatasetName()+"-rsDef",  dataset.getRecordDef());
+        System.setProperty("Dataset-" + getDatasetName()+"-dsDef",  dataset.getDatasetDef());
+        System.setProperty("Dataset-" + getDatasetName()+"-rs", dataset.getRecordName());
+        System.setProperty("Dataset-" + getDatasetName()+"-ds", dataset.getName());
+        System.setProperty("Dataset-" + getDatasetName()+"-logical",this.getLogicalFileName());
+        System.setProperty("Dataset-" + getDatasetName()+"-type",this.getFileType());
+        
+        
         
         logBasic("{Dataset Job} Previous =" + result.getLogText());
         
@@ -199,7 +241,7 @@ public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInter
         int len = strLine.length;
         if(len>0){
             recordList = new RecordList();
-            System.out.println("Open Record List");
+            //System.out.println("Open Record List");
             for(int i =0; i<len; i++){
                 //System.out.println("++++++++++++" + strLine[i]);
                 //this.recordDef.addRecord(new RecordBO(strLine[i]));
@@ -209,6 +251,38 @@ public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInter
             }
         }
     }
+    
+    public RecordList ArrayListToRecordList(ArrayList<String[]> in){
+    	
+    	RecordList recordList = null;
+    	/*
+    	 					column[0] = "";//label
+                        	column[1] = "";//type
+                        	column[2] = "";//value
+                        	column[3] = "";//size
+                        	column[4] = "";//maxsize
+    	 */
+        
+        if(in.size()>0){
+            recordList = new RecordList();
+            for(int i =0; i<in.size(); i++){
+                RecordBO rb = new RecordBO();
+                rb.setColumnName(in.get(i)[0]);
+                //rb.setColumnType(in.get(i)[1].replaceAll("\\d+",""));//replaces digit with "" so we get STRING/INTEGER etc
+                //System.out.println("Letters: " + x.replaceAll("\\d+[_]*",""));
+                rb.setColumnType(in.get(i)[1].replaceAll("\\d+[_]*",""));//replaces digit with "" so we get STRING/INTEGER etc
+                
+                //rb.setColumnWidth(in.get(i)[1].replaceAll("\\D+",""));//replace non digit with "" so we get just number 
+                //System.out.println("Numbers: " + x.replaceAll("[^0-9_]+",""));
+                rb.setColumnWidth(in.get(i)[1].replaceAll("[^0-9_]+",""));//replace non digit with "" so we get just number 
+                
+                rb.setDefaultValue(in.get(i)[2]);
+                recordList.addRecordBO(rb);
+            }
+        }
+        return recordList;
+    }
+    
     @Override
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
         try {
@@ -228,7 +302,7 @@ public class ECLDataset extends JobEntryBase implements Cloneable, JobEntryInter
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
                 openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
             
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fileTYpe")) != null)
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fileType")) != null)
                 setFileType(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fileType")));
 
         } catch (Exception e) {

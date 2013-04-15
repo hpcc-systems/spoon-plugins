@@ -1,4 +1,4 @@
-package org.hpccsystems.pentaho.job.eclproject;
+package org.hpccsystems.mapper;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;

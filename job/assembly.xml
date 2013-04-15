@@ -20,5 +20,14 @@
        <fileMode>0644</fileMode>
      </file>
    </files>
+   <dependencySets>
+       <dependencySet>
+           <outputDirectory>plugin</outputDirectory>
+           <includes>
+               <include>org.hpccsystems:javaecl:0.1.0</include>
+           </includes>
+           <fileMode>0644</fileMode>
+       </dependencySet>
+   </dependencySets>
 </assembly>
 

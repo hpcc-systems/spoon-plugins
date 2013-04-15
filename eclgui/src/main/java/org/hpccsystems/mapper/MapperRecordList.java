@@ -1,4 +1,4 @@
-package org.hpccsystems.pentaho.job.eclproject;
+package org.hpccsystems.mapper;
 
 import java.util.ArrayList;
 

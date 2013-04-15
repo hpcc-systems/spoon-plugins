@@ -24,17 +24,20 @@
          ================================================================================= -->
 	<target name="create-distribution" description="Build installable distribution">
 		<zip destfile="./target/spoon-plugins-distribution.zip">
-			<zipfileset dir="./ecldirect/target" includes="ecldirect.jar" prefix="hpcc-common" />
 			<zipfileset dir="./eclgui/target" includes="eclgui.jar" prefix="hpcc-common" />
-			<zipfileset dir="./ecljobentry/target" includes="ecljobentry.jar" prefix="hpcc-common" />
+			<zipfileset dir="./eclsalt/target" includes="eclsalt.jar" prefix="hpcc-common" />
 			<zipfileset dir="./perspectives/eclresults/target" includes="eclresults.jar" prefix="spoon/eclresults" />
 			<zipfileset dir="./perspectives/eclresults/src/main/resources/plugin" includes="plugin.xml" prefix="spoon/eclresults" />
+			<zipfileset dir="./perspectives/saltresults/target" includes="saltresults.jar" prefix="spoon/saltresults" />
+			<zipfileset dir="./perspectives/saltresults/src/main/resources/plugin" includes="plugin.xml" prefix="spoon/saltresults" />
 			<zipfileset dir="./job/ecldataset/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecldataset" />
 			<zipfileset dir="./job/ecldataset/target" includes="ecldataset.jar" prefix="jobentries/ecldataset" />
 			<zipfileset dir="./job/ecldedup/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecldedup" />
 			<zipfileset dir="./job/ecldedup/target" includes="ecldedup.jar" prefix="jobentries/ecldedup" />
 			<zipfileset dir="./job/ecldistribute/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecldistribute" />
 			<zipfileset dir="./job/ecldistribute/target" includes="ecldistribute.jar" prefix="jobentries/ecldistribute" />
+			<zipfileset dir="./job/eclerror/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclerror" />
+			<zipfileset dir="./job/eclerror/target" includes="eclerror.jar" prefix="jobentries/eclerror" />
 			<zipfileset dir="./job/eclexecute/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclexecute" />
 			<zipfileset dir="./job/eclexecute/target" includes="eclexecute.jar" prefix="jobentries/eclexecute" />
 			<zipfileset dir="./job/eclgeneric/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclgeneric" />
@@ -71,6 +74,9 @@
 			<zipfileset dir="./job/eclproject/target" includes="eclproject.jar" prefix="jobentries/eclproject" />
 			<zipfileset dir="./job/eclrollup/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclrollup" />
 			<zipfileset dir="./job/eclrollup/target" includes="eclrollup.jar" prefix="jobentries/eclrollup" />
+			
+			
+			
 			<zipfileset dir="./job/eclsort/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclsort" />
 			<zipfileset dir="./job/eclsort/target" includes="eclsort.jar" prefix="jobentries/eclsort" />
 			<zipfileset dir="./job/eclsprayfile/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclsprayfile" />
@@ -88,6 +94,13 @@
 			<zipfileset dir="./job/eclloop/target" includes="eclloop.jar" prefix="jobentries/eclloop" />
 			<zipfileset dir="./job/eclmerge/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmerge" />
 			<zipfileset dir="./job/eclmerge/target" includes="eclmerge.jar" prefix="jobentries/eclmerge" />
+			<zipfileset dir="./job/saltdataprofiling/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/saltdataprofiling" />
+			<zipfileset dir="./job/saltdataprofiling/target" includes="saltdataprofiling.jar" prefix="jobentries/saltdataprofiling" />
+			<zipfileset dir="./job/salthygiene/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/salthygiene" />
+			<zipfileset dir="./job/salthygiene/target" includes="salthygiene.jar" prefix="jobentries/salthygiene" />
+			<zipfileset dir="./job/saltinternallinking/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/saltinternallinking" />
+			<zipfileset dir="./job/saltinternallinking/target" includes="saltinternallinking.jar" prefix="jobentries/saltinternallinking" />
+			
 		</zip>
 	</target>
 

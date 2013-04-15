@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="SALTSpecification"
+	iconfile="icon.png"
+	description="Salt Specification"
+	tooltip="Salt Specification File builder" 
+	category="HPCC Systems SALT"
+	classname="org.hpccsystems.pentaho.job.saltspecification.SALTSpecification">
+            
+    <libraries>
+        <library name="../../hpcc-common/eclsalt.jar"/>
+	    <library name="../../hpcc-common/javaecl-0.1.0.jar"/>
+        <library name="../../hpcc-common/eclgui.jar"/>
+        <library name="saltspecification.jar"/>
+    </libraries>            
+</plugin>

@@ -6,7 +6,7 @@
 	<packaging>pom</packaging>
 	<name>HPCC Systems Pentaho Data Integration Plugin Modules</name>
 	<description></description>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
@@ -82,21 +82,22 @@
                 </plugins>
             </build>
         </profile>
+		
 		<profile>
 			<id>build-all</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
-				<module>perspectives</module>
-				<module>ecldirect</module>
 				<module>eclgui</module>
-				<module>ecljobentry</module>
+				<module>eclsalt</module>
+				<module>perspectives</module>
 				<module>job</module>
 			</modules>
 			<build>
 				<finalName>${project.artifactId}</finalName>
 				<plugins>
+
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-compiler-plugin</artifactId>
@@ -112,6 +113,7 @@
 									<goal>compile</goal>
 								</goals>
 							</execution>
+							
 						</executions>
 					</plugin>
 					<plugin>
@@ -140,6 +142,7 @@
 							</execution>
 						</executions>
 					</plugin>
+					
 				</plugins>
 			</build>
 
@@ -156,6 +159,7 @@
 						<version>4.10</version>
 						<scope>test</scope>
 					</dependency>
+            
 				</dependencies>
 			</dependencyManagement>
 
@@ -195,6 +199,7 @@
 									<goal>run</goal>
 								</goals>
 							</execution>
+							 							
 						</executions>
 					</plugin>
 				</plugins>

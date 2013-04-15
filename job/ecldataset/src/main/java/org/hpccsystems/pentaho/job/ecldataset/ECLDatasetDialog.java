@@ -4,6 +4,8 @@
  */
 package org.hpccsystems.pentaho.job.ecldataset;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -11,6 +13,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Color;
@@ -42,23 +45,25 @@ import org.pentaho.di.ui.job.dialog.JobDialog;
 import org.pentaho.di.ui.job.entry.JobEntryDialog;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
-import org.hpccsystems.eclguifeatures.CreateTable;
+import org.hpccsystems.javaecl.HPCCServerInfo;
+import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
-import org.hpccsystems.eclguifeatures.RecordBO;
-import org.hpccsystems.eclguifeatures.RecordList;
-
+import org.hpccsystems.recordlayout.CreateTable;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
+import org.hpccsystems.ecljobentrybase.*;
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLDatasetDialog extends JobEntryDialog implements JobEntryDialogInterface {
+public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
 
     private ECLDataset jobEntry;
     private Text jobEntryName;
     private Text recordName;
    // private Text recordDef;
     private Text recordSet;
-    private Text fileName;
+    private Combo fileName;
     private Text datasetName;
     private Button wOK, wCancel;
     private boolean backupChanged;
@@ -91,8 +96,8 @@ public class ECLDatasetDialog extends JobEntryDialog implements JobEntryDialogIn
         TabFolder tabFolder = new TabFolder (shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
         FormData data = new FormData();
         
-        data.height = 400;
-        data.width = 640;
+        data.height = 500;
+        data.width = 650;
         tabFolder.setLayoutData(data);
         
         Composite compForGrp = new Composite(tabFolder, SWT.NONE);
@@ -152,14 +157,52 @@ public class ECLDatasetDialog extends JobEntryDialog implements JobEntryDialogIn
         FormData datasetGroupFormat = new FormData();
         datasetGroupFormat.top = new FormAttachment(generalGroup, margin);
         datasetGroupFormat.width = 400;
-        datasetGroupFormat.height = 200;
+        datasetGroupFormat.height = 220;
         datasetGroupFormat.left = new FormAttachment(middle, 0);
         datasetGroup.setLayoutData(datasetGroupFormat);
 
-        datasetName = buildText("Dataset Name", null, lsMod, middle, margin, datasetGroup);
-        fileName = buildText("Logical File Name", datasetName, lsMod, middle, margin, datasetGroup);
         
-        recordSet = buildMultiText("Manual Record Entry", fileName, lsMod, middle, margin, datasetGroup);
+        AutoPopulate ap = new AutoPopulate();
+        String[] fileList = new String[0];
+        
+        String serverHost = "";
+        int serverPort = 8010;
+        try{
+            //Object[] jec = this.jobMeta.getJobCopies().toArray();
+                
+                serverHost = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_ip");
+                serverPort = Integer.parseInt(ap.getGlobalVariable(jobMeta.getJobCopies(),"server_port"));
+               
+            }catch (Exception e){
+                System.out.println("Error Parsing existing Global Variables ");
+                System.out.println(e.toString());
+                
+            }
+
+        final HPCCServerInfo hsi = new HPCCServerInfo(serverHost,serverPort);
+        fileList = hsi.fetchFileList();
+        try{
+        	ArrayList<String> files = ap.getLogicalFileName(this.jobMeta.getJobCopies());
+        	if(files != null){
+        		fileList = ap.merge(fileList, files.toArray(new String[files.size()]));
+        	}
+        }catch(Exception ex){
+        	System.out.println("Unable to fetch file names from sprays: " + ex.toString());
+        }
+        ArrayList<String> tempFiles = new ArrayList<String>();
+        for (int i = 0; i<fileList.length; i++){
+        	if(!tempFiles.contains(fileList[i])){
+        		tempFiles.add(fileList[i]);
+        	}
+        }
+        Collections.sort(tempFiles);
+        fileList = tempFiles.toArray(new String[tempFiles.size()]);
+       
+        datasetName = buildText("Dataset Name", null, lsMod, middle, margin, datasetGroup);
+        fileName = buildCombo("Logical File Name", datasetName, lsMod, middle, margin, datasetGroup, fileList);
+        fileType = buildCombo("File Type", fileName, lsMod, middle, margin, datasetGroup,new String[]{"", "CSV", "THOR"});
+
+        recordSet = buildMultiText("Manual Record Entry", fileType, lsMod, middle, margin, datasetGroup);
 
         //Record Declaration
         Group recordGroup = new Group(compForGrp, SWT.SHADOW_NONE);
@@ -168,17 +211,40 @@ public class ECLDatasetDialog extends JobEntryDialog implements JobEntryDialogIn
         recordGroup.setLayout(groupLayout);
         FormData recordGroupFormat = new FormData();
         recordGroupFormat.top = new FormAttachment(datasetGroup, margin);
-        recordGroupFormat.height = 65;
+        recordGroupFormat.height = 45;
         recordGroupFormat.width = 400;
         recordGroupFormat.left = new FormAttachment(middle, 0);
         recordGroup.setLayoutData(recordGroupFormat);
 
         recordName = buildText("Record Name", null, lsMod, middle, margin, recordGroup);
-        fileType = buildCombo("File Type", recordName, lsMod, middle, margin, recordGroup,new String[]{"", "CSV", "THOR"});
-
+        
        // recordDef = buildMultiText("Record Definition", recordName, lsMod, middle, margin, recordGroup);
         
         
+        fileName.addSelectionListener(new SelectionListener(){
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				String file = fileName.getText();
+				
+				ArrayList<String[]> details = hsi.fetchFileDetails(file);
+				
+				if(details != null && details.size()>0){
+					ErrorNotices en = new ErrorNotices();
+					if(en.openComfirmDialog(getParent(), "Do you want to eplace your current Record Structure on the\r\nFields tab with the one stored on the server?")){
+						ct.setRecordList(jobEntry.ArrayListToRecordList(details));
+						ct.redrawTable(true);
+					}
+				}
+				
+			}}); 
            item1.setControl(compForGrp);
         
         
@@ -274,108 +340,63 @@ public class ECLDatasetDialog extends JobEntryDialog implements JobEntryDialogIn
 
     }
 
-    private Text buildText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Text buildMultiText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.V_SCROLL);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 100;
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Combo buildCombo(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox, String[] items) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, margin);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // combo field
-        Combo combo = new Combo(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-        props.setLook(combo);
-        combo.setItems(items);
-        combo.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, margin);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 50;
-        combo.setLayoutData(fieldFormat);
-
-        return combo;
-    }
-
     private boolean validate(){
     	boolean isValid = true;
     	String errors = "";
     	
-    	//if manual entry disallow fields and record name and file type
-    	
-    	//datasetname
-    	//logical file name or manual entry fileName
-    	//recordname
-    	//filetype
     	
     	
-    	
-    	//if file then need fields
-    	
-    	//if(!datasetname.getText().equals("")){
-    	//	isValid = false;
-    	//	errors += "\"Job Entry Name\" is a required field!\r\n";
-    	//}
-    	
-    	
-    	if(!recordSet.getText().equals("")){
+    	if(this.jobEntryName.getText().equals("")){
     		isValid = false;
     		errors += "\"Job Entry Name\" is a required field!\r\n";
+    	}
+    	
+    	if(this.datasetName.getText().equals("")){
+    		isValid = false;
+    		errors += "\"Dataset Name\" is a required field!\r\n";
+    	}
+    	String fields = jobEntry.resultListToString(ct.getRecordList());
+    	if(!this.recordSet.getText().equals("")){
+    		//manual entry
+    		
+    		//we can't have fields or logical file name or File Type
+    		if(!this.fileName.getText().equals("")){
+    			isValid = false;
+        		errors += "\"Logical File Name\" is not allowed for manual entry!\r\n";
+    		}
+    		if(!this.fileType.getText().equals("")){
+    			isValid = false;
+        		errors += "\"File Type\" is not allowed for manual entry!\r\n";
+    		}
+    		if(!fields.equals("")){
+    			isValid = false;
+        		errors += "Values on the \"Fields Tab\" is not allowed for manual entry!\r\n";
+    		}
+    	}else{
+    		//using fields
+    		if(this.fileName.getText().equals("")){
+    			isValid = false;
+        		errors += "\"Logical File Name\" is a required field!\r\n";
+    		}
+    		if(this.fileType.getText().equals("")){
+    			isValid = false;
+        		errors += "\"File Type\" is a required field!\r\n";
+    		}
+    		if(this.recordName.getText().equals("")){
+    			isValid = false;
+        		errors += "\"Record Name\" is a required field!\r\n";
+    		}
+    		if(fields.equals("")){
+    			isValid = false;
+        		errors += "Values on the \"Fields Tab\" is a required!\r\n";
+    		}else{
+    			//we need to validate the fields
+    			String e = jobEntry.fieldsValid(ct.getRecordList());
+    			if(!e.equals("")){
+    				errors += e;
+    				isValid = false;
+    			}
+    		}
     	}
     	
     	if(!isValid){
@@ -410,9 +431,4 @@ public class ECLDatasetDialog extends JobEntryDialog implements JobEntryDialogIn
         dispose();
     }
 
-    public void dispose() {
-        WindowProperty winprop = new WindowProperty(shell);
-        props.setScreen(winprop);
-        shell.dispose();
-    }
 }

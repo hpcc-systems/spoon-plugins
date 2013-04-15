@@ -50,16 +50,18 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
-import org.hpccsystems.eclguifeatures.CreateTable;
-import org.hpccsystems.eclguifeatures.RecordBO;
-import org.hpccsystems.eclguifeatures.RecordList;
+import org.hpccsystems.recordlayout.CreateTable;
+import org.hpccsystems.eclguifeatures.ErrorNotices;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.mapper.*;
+import org.hpccsystems.ecljobentrybase.*;
 /**
  *
- * @author ChalaAX
+ * @author ShetyeD
  */
-public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogInterface {
+public class ECLProjectDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
 
     private ECLProject jobEntry;
     
@@ -73,7 +75,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
     private Text outRecordFormat;
     private Text transformName;
     private Text transformFormat;
-    private Text parameterName;
+    //private Text parameterName;
     private CreateTable tblOutput = null;
     private MainMapper tblMapper = null;
     private RecordList recordList = new RecordList();
@@ -148,7 +150,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
         				int count = 0;
         				for (Iterator<RecordBO> iterator = tblOutput.getRecordList().getRecords().iterator(); iterator.hasNext();) {
         					RecordBO obj = (RecordBO) iterator.next();
-        					cmbValues[count] = obj.getColumnName();
+        					cmbValues[count] = "self." + obj.getColumnName();
         					count++;
         				}
                       
@@ -248,7 +250,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
         //outRecordFormat = buildMultiText("Out Record Format", outRecordName, lsMod, middle, margin, distributeGroup);
         
         transformName = buildText("Transform Name", outRecordName, lsMod, middle, margin, distributeGroup);
-        parameterName = buildText("Parameter Name", transformName, lsMod, middle, margin, distributeGroup);
+       // parameterName = buildText("Parameter Name", transformName, lsMod, middle, margin, distributeGroup);
         
         //transformFormat = buildMultiText("Transform Format", parameterName, lsMod, middle, margin, distributeGroup);
         
@@ -258,7 +260,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
             tblOutput.setRecordList(jobEntry.getRecordList());
             
             if(recordList.getRecords() != null && recordList.getRecords().size() > 0) {
-                    System.out.println("Size: "+recordList.getRecords().size());
+                    //System.out.println("Size: "+recordList.getRecords().size());
                     for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
                             RecordBO obj = (RecordBO) iterator.next();
                     }
@@ -274,7 +276,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
 		TabItem item3 = new TabItem(tabFolder, SWT.NULL);
 		
 		ScrolledComposite sc3 = new ScrolledComposite(tabFolder, SWT.H_SCROLL | SWT.V_SCROLL);
-		Composite compForGrp3 = new Composite(sc3, SWT.NONE);
+		final Composite compForGrp3 = new Composite(sc3, SWT.NONE);
 		sc3.setContent(compForGrp3);
 
 		// Set the minimum size
@@ -347,6 +349,17 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
             }
         });
         
+        this.inRecordName.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                   System.out.print("inRecordName Listner");
+		        try{
+		        	populateDatasets();
+		        }catch (Exception excep){
+		        	System.out.println("Failed to load datasets");
+		        }
+            };
+        });
+
 
 
         //if (jobEntry.getJobName() != null) {
@@ -361,6 +374,11 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
         }
         if (jobEntry.getInRecordName() != null) {
             inRecordName.setText(jobEntry.getInRecordName());
+            try{
+            	populateDatasets();
+            }catch (Exception e){
+            	System.out.println("Failed to load datasets");
+            }
         }
          if (jobEntry.getRecordsetName() != null) {
             recordsetName.setText(jobEntry.getRecordsetName());
@@ -378,9 +396,9 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
         /*if (jobEntry.getTransformFormat() != null) {
             transformFormat.setText(jobEntry.getTransformFormat());
         }*/
-        if (jobEntry.getParameterName() != null) {
-            parameterName.setText(jobEntry.getParameterName());
-        }
+        //if (jobEntry.getParameterName() != null) {
+       //     parameterName.setText(jobEntry.getParameterName());
+       // }
 
 
         //shell.pack();
@@ -394,87 +412,84 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
         return jobEntry;
 
     }
-
-    private Text buildText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, 10);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, 10);
-        fieldFormat.right = new FormAttachment(100, 0);
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
-
-    private Text buildMultiText(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, 10);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // text field
-        Text text = new Text(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.V_SCROLL);
-        props.setLook(text);
-        text.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, 10);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 100;
-        text.setLayoutData(fieldFormat);
-
-        return text;
-    }
     
-    private Combo buildCombo(String strLabel, Control prevControl,
-            ModifyListener lsMod, int middle, int margin, Composite groupBox, String[] items) {
-        // label
-        Label fmt = new Label(groupBox, SWT.RIGHT);
-        fmt.setText(strLabel);
-        props.setLook(fmt);
-        FormData labelFormat = new FormData();
-        labelFormat.left = new FormAttachment(0, 0);
-        labelFormat.top = new FormAttachment(prevControl, 10);
-        labelFormat.right = new FormAttachment(middle, -margin);
-        fmt.setLayoutData(labelFormat);
-
-        // combo field
-        Combo combo = new Combo(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-        props.setLook(combo);
-        combo.setItems(items);
-        combo.addModifyListener(lsMod);
-        FormData fieldFormat = new FormData();
-        fieldFormat.left = new FormAttachment(middle, 0);
-        fieldFormat.top = new FormAttachment(prevControl, 10);
-        fieldFormat.right = new FormAttachment(100, 0);
-        fieldFormat.height = 50;
-        combo.setLayoutData(fieldFormat);
-
-        return combo;
+    private void populateDatasets() throws Exception{
+    	AutoPopulate ap = new AutoPopulate();
+    	Map<String, String[]> mapDataSets = null;
+		try {
+			mapDataSets = ap.parseDefExpressionBuilder(this.jobMeta.getJobCopies(), inRecordName.getText());
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		//(tblMapper.getTreeInputDataSet()).clearAll(false);
+		(tblMapper.getTreeInputDataSet()).removeAll();
+		Utils.fillTree(tblMapper.getTreeInputDataSet(), mapDataSets);
+		//System.out.println("Updated Input Recordsets");
+        tblMapper.reDrawTable();
     }
 
-    private void ok() {
+    private boolean validate(){
+    	boolean isValid = true;
+    	String errors = "";
+    	
+    	//only need to require a entry name
+    	if(this.jobEntryName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Job Entry Name\"!\r\n";
+    	}
+    	
+    	if(this.recordsetName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Resulting Recordset\"!\r\n";
+    	}
+    	
+    	if(this.inRecordName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"In Record Name\"!\r\n";
+    	}
+    	
+    	if(this.outRecordName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Out Record Name\"!\r\n";
+    	}
+    	
+    	if(this.transformName.getText().equals("")){
+    		//one is required.
+    		isValid = false;
+    		errors += "You must provide a \"Transform Name\"!\r\n";
+    	}
+    	
+    	//requre outputformat to atleast not be ""
+    	if(tblOutput.getRecordList().equals("")){
+    		isValid = false;
+    		errors += "You must provide a \"Output Format\"!\r\n";
+    	}
+    	
+    	//TODO: update this doesn't seem to work.
+    	//require transform format to atleast not be ""
+    	if(tblMapper.getMapperRecList().equals("")){
+    		isValid = false;
+    		errors += "You must provide a \"Transform Format\"!\r\n";
+    	}
 
+		if(!isValid){
+			ErrorNotices en = new ErrorNotices();
+			errors += "\r\n";
+			errors += "If you continue to save with errors you may encounter compile errors if you try to execute the job.\r\n\r\n";
+			isValid = en.openValidateDialog(getParent(),errors);
+		}
+		return isValid;
+		
+	}
+    
+    private void ok() {
+    	if(!validate()){
+    		return;
+    	}
         jobEntry.setName(jobEntryName.getText());
         jobEntry.setDeclareCounterString(declareCounter.getText());
         jobEntry.setRecordsetName(recordsetName.getText()); 
@@ -483,7 +498,7 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
         //jobEntry.setOutRecordFormat(outRecordFormat.getText());
         jobEntry.setTransformName(transformName.getText());
         //jobEntry.setTransformFormat(transformFormat.getText());
-        jobEntry.setParameterName(parameterName.getText());
+       // jobEntry.setParameterName(parameterName.getText());
         jobEntry.setRecordList(tblOutput.getRecordList());
         jobEntry.setMapperRecList(tblMapper.getMapperRecList());
         dispose();
@@ -495,9 +510,4 @@ public class ECLProjectDialog extends JobEntryDialog implements JobEntryDialogIn
         dispose();
     }
 
-    public void dispose() {
-        WindowProperty winprop = new WindowProperty(shell);
-        props.setScreen(winprop);
-        shell.dispose();
-    }
 }

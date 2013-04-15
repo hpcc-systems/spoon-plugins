@@ -1,15 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.hpccsystems.pentaho.job.eclindex;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.hpccsystems.ecldirect.Index;
-import org.hpccsystems.eclguifeatures.RecordBO;
-import org.hpccsystems.eclguifeatures.RecordList;
+import org.hpccsystems.javaecl.Index;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;
@@ -24,19 +20,18 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
+import org.hpccsystems.ecljobentrybase.*;
 
 /**
  *
- * @author ChalaAX
+ * @author ChambersJ
  */
-public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLIndex extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
     
     private RecordList keys = new RecordList();
     private RecordList payload = new RecordList();
     
     private String baserecset;
-   // private String keys;
-   // private String payload;
     private String indexfile;
     private String sorted;
     private String preload;
@@ -47,16 +42,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
     private String newindexfile;
     private String isDuplicate;
     private String overwrite;
-    /*
-    private String name = "";
-    
-    
-    public String getName(){
-        return name;
-    }
-    public void setName(String name){
-        this.name=name;
-    }*/
 
     public String getOverwrite() {
         return overwrite;
@@ -74,7 +59,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         this.isDuplicate = isDuplicate;
     }
     
-    
     public RecordList getKeys() {
         return keys;
     }
@@ -91,9 +75,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         this.payload = payload;
     }
     
-    
-    
-
     public String getBaserecset() {
         return baserecset;
     }
@@ -166,14 +147,14 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
     public void setSorted(String sorted) {
         this.sorted = sorted;
     }
+
     public String resultListToString(RecordList recordList){
         String out = "";
         
         if(recordList != null){
             if(recordList.getRecords() != null && recordList.getRecords().size() > 0) {
-                    System.out.println("Size: "+recordList.getRecords().size());
                     for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
-                            RecordBO record = (RecordBO) iterator.next();
+                            RecordBO record = iterator.next();
                             if(!out.equals("")){
                                 out += ",";
                             }
@@ -207,40 +188,35 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
                 index.setPayload(resultListToString(payload));
                 index.setIndexfile(indexfile);
                 index.setSorted(sorted);
+                index.setPreload(preload);
                 index.setOpt(opt);
                 index.setCompressed(compressed);
                 index.setDistributed(distributed);
             }
             
-            //logBasic("{Join Job} Previous =" + result.getLogText());
-
             result.setResult(true);
 
             RowMetaAndData data = new RowMetaAndData();
             data.addValue("ecl", Value.VALUE_TYPE_STRING, index.ecl());
            
 
-            List list = result.getRows();
+            List<RowMetaAndData> list = result.getRows();
             list.add(data);
             String eclCode = "";
-            if (list == null) {
-                list = new ArrayList();
-            } else {
-                try{
+            try{
                 for (int i = 0; i < list.size(); i++) {
-                    RowMetaAndData rowData = (RowMetaAndData) list.get(i);
+                    RowMetaAndData rowData = list.get(i);
                     
                     String code = rowData.getString("ecl", null);
                     if (code != null) {
                         eclCode += code;
                     }
                     
-                     }
-                }catch (Exception e){
+                 }
+            }catch (Exception e){
 
-                }
-                logBasic("{Join Job} ECL Code =" + eclCode);
             }
+            logBasic("{Index Job} ECL Code (below):\r\n" + eclCode);
 
             result.setRows(list);
         }
@@ -251,7 +227,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
     
     public String saveKeys(){
         String out = "";
-        ArrayList list = keys.getRecords();
+        List<RecordBO> list = keys.getRecords();
         Iterator<RecordBO> itr = list.iterator();
         boolean isFirst = true;
         while(itr.hasNext()){
@@ -269,12 +245,8 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         int len = strLine.length;
         if(len>0){
             keys = new RecordList();
-            System.out.println("Open Record List");
             for(int i =0; i<len; i++){
-                System.out.println("++++++++++++" + strLine[i]);
-                //this.recordDef.addRecord(new RecordBO(strLine[i]));
                 RecordBO rb = new RecordBO(strLine[i]);
-                System.out.println(rb.getColumnName());
                 keys.addRecordBO(rb);
             }
         }
@@ -282,7 +254,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
     
     public String savePayload(){
         String out = "";
-        ArrayList list = payload.getRecords();
+        ArrayList<RecordBO> list = payload.getRecords();
         Iterator<RecordBO> itr = list.iterator();
         boolean isFirst = true;
         while(itr.hasNext()){
@@ -300,12 +272,8 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         int len = strLine.length;
         if(len>0){
             payload = new RecordList();
-            System.out.println("Open Record List");
             for(int i =0; i<len; i++){
-                System.out.println("++++++++++++" + strLine[i]);
-                //this.recordDef.addRecord(new RecordBO(strLine[i]));
                 RecordBO rb = new RecordBO(strLine[i]);
-                System.out.println(rb.getColumnName());
                 payload.addRecordBO(rb);
             }
         }
@@ -316,7 +284,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         String rStr = "";
         if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, key)) != null){
                 rStr = XMLHandler.getNodeValue(XMLHandler.getSubNode(node, key));
-                //System.out.println("load XML Element " + key + " = " + XMLHandler.getNodeValue(XMLHandler.getSubNode(node, key)) + "|");
         }
         return rStr;
     }
@@ -326,12 +293,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         try {
             super.loadXML(node, list, list1);
             
-           // if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "index_name")) != null)
-           //     setName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "index_name")));
-            
             this.setBaserecset(loadXMLElement(node,"baserecset"));
-           // this.setKeys(loadXMLElement(node,"keys"));
-           // this.setPayload(loadXMLElement(node,"payload"));
            
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "keys")) != null)
                 openKeys(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "keys")));
@@ -347,7 +309,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
             this.setIndex(loadXMLElement(node,"index"));
             this.setNewindexfile(loadXMLElement(node,"newindexfile"));
             this.setIsDuplicate(loadXMLElement(node,"isDuplicate"));
-             this.setOverwrite(loadXMLElement(node,"overwrite"));
+            this.setOverwrite(loadXMLElement(node,"overwrite"));
 
         } catch (Exception e) {
             throw new KettleXMLException("ECL Join Job Plugin Unable to read step info from XML node", e);
@@ -366,8 +328,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
         
 
          retval += getXMLElement("baserecset", this.getBaserecset());
-        // retval += getXMLElement("keys", this.getKeys());
-         //retval += getXMLElement("payload", this.getPayload());
          retval += "		<keys eclIsDef=\"true\" eclType=\"keys\"><![CDATA[" + this.saveKeys() + "]]></keys>" + Const.CR;
          retval += "		<payload eclIsDef=\"true\" eclType=\"payload\"><![CDATA[" + this.savePayload() + "]]></payload>" + Const.CR;
          retval += getXMLElement("indexfile", this.getIndexfile());
@@ -381,7 +341,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
          retval += getXMLElement("isDuplicate", this.getIsDuplicate());
          retval += getXMLElement("overwrite", this.getOverwrite());
          
-  
         return retval;
 
     }
@@ -404,8 +363,6 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
             throws KettleException {
         try {
             this.setBaserecset(getRepElement(rep, id_jobentry, "baserecset"));
-            //this.setKeys(getRepElement(rep, id_jobentry, "keys"));
-            //this.setPayload(getRepElement(rep, id_jobentry, "payload"));
              if(rep.getStepAttributeString(id_jobentry, "keys") != null)
                 this.openKeys(rep.getStepAttributeString(id_jobentry, "keys")); //$NON-NLS-1$
              if(rep.getStepAttributeString(id_jobentry, "payload") != null)
@@ -419,7 +376,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
             this.setIndex(getRepElement(rep, id_jobentry, "index"));
             this.setNewindexfile(getRepElement(rep, id_jobentry, "newindexfile"));
             this.setIsDuplicate(getRepElement(rep, id_jobentry, "isDuplicate"));
-             this.setOverwrite(getRepElement(rep, id_jobentry, "overwrite"));
+            this.setOverwrite(getRepElement(rep, id_jobentry, "overwrite"));
                 
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -436,23 +393,7 @@ public class ECLIndex extends JobEntryBase implements Cloneable, JobEntryInterfa
     }
     public void saveRep(Repository rep, ObjectId id_job) throws KettleException {
         try {
-                            /*
-             *     private String baserecset;
-    private String keys;
-    private String payload;
-    private String indexfile;
-    private String sorted;
-    private String preload;
-    private String opt;
-    private String compressed;
-    private String distributed;
-    private String index;
-    private String newindexfile;
-             * 
-             */
            saveRepElement(rep,id_job,"baserecset",this.getBaserecset());
-           //saveRepElement(rep,id_job,"keys",this.getKeys());
-           //saveRepElement(rep,id_job,"payload",this.getPayload());
            rep.saveStepAttribute(id_job, getObjectId(), "keys", this.saveKeys()); //$NON-NLS-1$
            rep.saveStepAttribute(id_job, getObjectId(), "payload", this.savePayload()); //$NON-NLS-1$
            saveRepElement(rep,id_job,"indexfile",this.getIndexfile());

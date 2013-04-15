@@ -1,4 +1,4 @@
-package org.hpccsystems.pentaho.job.eclproject;
+package org.hpccsystems.mapper;
 
 public class MapperBO {
 	
@@ -37,7 +37,6 @@ public class MapperBO {
 	
     public void fromCSV(String in){
         String[] strArr = in.split("[,]");//"\\,"
-        System.out.println("in ---- " + in);
         opVariable = strArr[0];
         expression = strArr[1];
     }
