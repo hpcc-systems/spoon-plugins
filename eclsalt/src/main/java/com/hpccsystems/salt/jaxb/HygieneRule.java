@@ -31,6 +31,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="allow" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="spaces" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="onfail" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="field-specificity> type="string" maxOccurs="1" minOccurs="0" />
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -47,7 +48,8 @@ import javax.xml.bind.annotation.XmlType;
     "righttrim",
     "allow",
     "spaces",
-    "onfail"
+    "onfail",
+    "field-specificity"
 })
 public class HygieneRule {
 
@@ -59,6 +61,7 @@ public class HygieneRule {
     protected String allow;
     protected String spaces;
     protected String onfail;
+    protected String fieldspecificity = "0";
 
     /**
      * Gets the value of the name property.
@@ -227,5 +230,21 @@ public class HygieneRule {
     public void setOnfail(String value) {
         this.onfail = value;
     }
+
+	public String getFieldspecificity() {
+		if(fieldspecificity == null){
+			fieldspecificity = "0";
+		}
+		return fieldspecificity;
+	}
+
+	public void setFieldspecificity(String fieldspecificity) {
+		if(fieldspecificity == null){
+			fieldspecificity = "0";
+		}
+		this.fieldspecificity = fieldspecificity;
+	}
+    
+    
 
 }

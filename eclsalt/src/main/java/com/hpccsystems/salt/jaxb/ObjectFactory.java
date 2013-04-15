@@ -140,4 +140,12 @@ public class ObjectFactory {
         return new SaltSpecification.Fields();
     }
 
+    
+    public ConceptDef createConceptDef(){
+    	return new ConceptDef();
+    }
+    public ConceptDef.ConceptFields createConceptDefFields(){
+    	return new ConceptDef.ConceptFields();
+    }
+    
 }

@@ -2,7 +2,6 @@ package org.hpccsystems.saltui.concept;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -11,17 +10,10 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -31,7 +23,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -41,21 +32,22 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.hpccsystems.eclguifeatures.ErrorNotices;
-import org.hpccsystems.ecljobentrybase.ECLJobEntryDialog;
-import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.recordlayout.RecordLabels;
-import org.hpccsystems.recordlayout.RecordList;
-import org.pentaho.di.core.Const;
+import org.hpccsystems.saltui.concept.edit.ConfigureConceptsUI;
+import org.hpccsystems.saltui.concept.table.ConceptsRecordList;
+
+import com.hpccsystems.ui.constants.Constants;
 
 
 
 public class CreateTable {
+	//public Boolean hasChanged = false;
+	private ArrayList datasetFields = null;
 	private Shell shell;
 	private Table table;
 	private TableViewer tableViewer;
-	private EntryList entryList;
-	private ConceptRuleBO activeRule = new ConceptRuleBO();
+	private ConceptEntryList entryList;
+	private ConceptEntryBO activeRule = new ConceptEntryBO();
 	private Composite compForGrp2;
 	private ArrayList<TableEditor> tableEditEditor = new ArrayList<TableEditor>();
 	private ArrayList<TableEditor> tableDelEditor = new ArrayList<TableEditor>();
@@ -63,23 +55,10 @@ public class CreateTable {
 	
 	
 	private Shell editRuleDialog;
-	private ConceptRuleList ruleList;
+	//private ConceptRuleList ruleList;
 	private String rules[];
 	private Combo ruleName;
-	//private Text fieldName;
-	private Combo fieldName;
-	private Text displayName;
-	private Text machineRuleName;
-	private Text allowChars;
-	private Text spaceChars;
-	private Text ignoreChars;
-	private Button leftTrim;
-	private Button caps;
-	private Text lengths;
-	private Text noQuotes;
-	//private Combo like;
-	private Text words;
-	private Combo onfail;
+
 	
 	private String currentRuleName;
 	/**
@@ -88,16 +67,16 @@ public class CreateTable {
 
 	private String fields[];
 	
-	public void setEntryList(EntryList entryList) {
+	public void setEntryList(ConceptEntryList entryList) {
 		this.entryList = entryList;
 	}
-	public ConceptRuleList getRuleList() {
-		return ruleList;
-	}
-	public void setRuleList(ConceptRuleList ruleList) {
-		this.ruleList = ruleList;
-	}
-	public EntryList getEntryList() {
+	//public ConceptRuleList getRuleList() {
+	//	return ruleList;
+	//}
+	//public void setRuleList(ConceptRuleList ruleList) {
+	//	this.ruleList = ruleList;
+	//}
+	public ConceptEntryList getEntryList() {
 		return entryList;	
 	}
 	
@@ -105,6 +84,11 @@ public class CreateTable {
 	
 	public void loadFields(String fields[]){
 		this.fields = fields;
+		this.datasetFields = new ArrayList();
+		for(int i = 0; i< fields.length; i++){
+			this.datasetFields.add(fields[i]);
+		}
+		
 	}
 	public TabItem buildDetailsTab(String tabName, TabFolder tabFolder){
     	
@@ -113,11 +97,14 @@ public class CreateTable {
 		
 		/*Composite composite = new Composite(tabFolder, SWT.NONE);
 		tabItem.setControl(composite);*/
-
+		GridLayout sc2Layout = new GridLayout();
+		GridData s2cData = new GridData();
+		s2cData.grabExcessHorizontalSpace = true;
+		s2cData.grabExcessVerticalSpace = true;
 		ScrolledComposite sc2 = new ScrolledComposite(tabFolder, SWT.H_SCROLL | SWT.V_SCROLL);
 		compForGrp2 = new Composite(sc2, SWT.NONE);
 		sc2.setContent(compForGrp2);
-		
+		sc2.setLayout(sc2Layout);
 		// Set the minimum size
 		sc2.setMinSize(650, 450);
 
@@ -126,21 +113,24 @@ public class CreateTable {
 		sc2.setExpandVertical(true);
         
 
-        FormLayout groupLayout = new FormLayout();
-        groupLayout.marginWidth = 10;
-        groupLayout.marginHeight = 10;
+       // FormLayout groupLayout = new FormLayout();
+       // groupLayout.marginWidth = 10;
+       // groupLayout.marginHeight = 10;
 
         GridData gridData = new GridData (GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_BOTH);
         compForGrp2.setLayoutData (gridData);
 
 		// Set numColumns to 6 for the buttons 
-		GridLayout layout = new GridLayout(4, false);
+		GridLayout layout = new GridLayout(2, false);
 		compForGrp2.setLayout (layout);
 		
 		
 		int style = SWT.CHECK | SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION;
 
+		gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_BOTH);
+		
 		table = new Table(compForGrp2, style);
+		table.setLayoutData(gridData);
 		Listener paintListener = new Listener() {
 			   public void handleEvent(Event event) {
 			      // height cannot be per row so simply set
@@ -164,15 +154,18 @@ public class CreateTable {
 			};
 			table.addListener(SWT.MeasureItem,paintListener);
 			table.addListener(SWT.PaintItem,paintListener);
-			table.setRedraw(true);
+			
+			//table.setRedraw(true);
+		
 		tableViewer = new TableViewer(table);     
-                table.addListener (SWT.Selection, new Listener () {
+		        table.addListener (SWT.Selection, new Listener () {
                     public void handleEvent (Event event) {
                             tableViewer.refresh();
                             table.redraw();
                             
                     }
                 });      
+                
 		GridData tableGridData = new GridData(GridData.FILL_BOTH);
 		tableGridData.grabExcessVerticalSpace = true;
 		tableGridData.horizontalSpan = 4;
@@ -186,11 +179,12 @@ public class CreateTable {
 		addColumns();
 		loadData();
 		addRowButtons();
-		refreshTable();
+		//refreshTable();
         //tabItem.setControl(compForGrp2);
         tabItem.setControl(sc2);
         createButtons(compForGrp2);
-        sc2.redraw();
+        //compForGrp2.redraw();
+        //sc2.redraw();
 		return tabItem;
     }
 
@@ -200,7 +194,7 @@ public class CreateTable {
 	public void refreshTable(){
 		
 		tableViewer.refresh();
-	    table.redraw();
+	    //table.redraw();
 	}
 
 	public void removeRowButtons(){
@@ -245,7 +239,7 @@ public class CreateTable {
 		tableEditEditor.minimumWidth = 45;
 		tableEditEditor.minimumHeight = 18;
 		tableEditEditor.horizontalAlignment = SWT.CENTER;
-		tableEditEditor.setEditor(editButton,item,2);
+		tableEditEditor.setEditor(editButton,item,1);
 		GridData editBtnGrid = new GridData();
 		editBtnGrid.widthHint = 45;
 		editBtnGrid.heightHint = 18;
@@ -270,7 +264,7 @@ public class CreateTable {
 		tableDelEditor.minimumWidth = 45;
 		tableDelEditor.minimumHeight = 18;
 		tableDelEditor.horizontalAlignment = SWT.CENTER;
-		tableDelEditor.setEditor(deleteButton,item,3);
+		tableDelEditor.setEditor(deleteButton,item,2);
 		GridData delBtnGrid = new GridData();
 		delBtnGrid.widthHint = 45;
 		delBtnGrid.heightHint = 18;
@@ -306,431 +300,101 @@ public class CreateTable {
 		//refreshTable();
 	}
 	public CreateTable(){
-		ruleList = new ConceptRuleList();
-		ruleList.createDefault();
+		//ruleList = new ConceptRuleList();
+		//ruleList.createDefault();
 	}
 	public static void main(String[] args) {
-		EntryBO e = new EntryBO();
-		e.setField("test");
-		e.setRuleName("To Uppercase");
+		ConceptEntryBO e = new ConceptEntryBO();
+		e.setConceptName("tester");
+		
+		//e.setField("test");
+		//e.setRuleName("To Uppercase");
 		CreateTable ct = new CreateTable();
+		ct.datasetFields = new ArrayList();
+		ct.datasetFields.add("test");
+		ct.datasetFields.add("test2");
 		Display display = new Display ();
 		final Shell dialog = new Shell (display, SWT.DIALOG_TRIM);
 		ct.shell = dialog;
-		ct.createEditDialog(1, e);
+		//ct.createEditDialog(1, e);
+		//ct.editRuleDialog = new Shell(ct.shell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+		//ct.editRuleDialog.setText("Edit Concept");
+		//
+		ct.entryList = new ConceptEntryList();
 		
+		GridLayout layout = new GridLayout(1, false);
+		ct.shell.setLayout (layout);
+		
+		
+		ct.run(dialog);
 		while (!ct.shell.isDisposed ()) {
+			ct.refreshTable();
 			if (!display.readAndDispatch ()) display.sleep ();
 		}
 		ct.shell.dispose ();
 		
+		
+	}
+	
+	public void run(Shell shell) {
+		
+		this.shell = shell;
+	    shell.setText(Constants.ADD_CONCEPTS_TITLE);
+	    shell.setSize(800, 650);
+	    
+	    GridLayout layout = new GridLayout(2, false);
+		
+	    layout.numColumns = 1;
+	    layout.marginLeft = 10;
+	    layout.marginRight = 10;
+	    layout.makeColumnsEqualWidth = false;
+	    shell.setLayout(layout);
+	    TabFolder tabFolder = new TabFolder (shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
+	    TabItem item2 = this.buildDetailsTab("Concepts", tabFolder);
+	    
+	    Button tmpSave = new Button(shell, SWT.NONE);
+	    tmpSave.setText("Test Save");
+		Listener saveListener = new Listener() {
+
+            public void handleEvent(Event e) {
+                
+            }
+        };
+
+        tmpSave.addListener(SWT.Selection, saveListener);
+	    //addChildControls();
+		
+	    shell.open();
+	   
 	}
 
-	private void createEditDialog(int entryIndex, EntryBO newEntry){
+	private void createEditDialog(int entryIndex, ConceptEntryBO newEntry){
 			//tableViewer.getElementAt(index).
+		editRuleDialog = new Shell(this.shell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+		editRuleDialog.setText("Edit Concept");
+		String inputFields = "";
+		if(newEntry != null && newEntry.getRecordList() != null){
+			inputFields = newEntry.getRecordList().saveListAsString();
+		}
+		ConceptsRecordList recordList = new ConceptsRecordList(inputFields,datasetFields);
+	    newEntry.setRecordList(recordList);
+		ConfigureConceptsUI concept = new ConfigureConceptsUI(newEntry,tableViewer);
 		
-			final EntryBO entry = newEntry;//entryList.getEntry(index);
-			final int thisEntryIndex = entryIndex;
-			final String oldRuleName = newEntry.getRuleName();
-			currentRuleName = newEntry.getRuleName();
-			editRuleDialog = new Shell(this.shell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
-			editRuleDialog.setText("Edit Rule Field Relation ");
-			GridLayout layout = new GridLayout();
-			layout.marginWidth = 10;
-			layout.marginHeight = 10;
-			//formLayout.spacing = 10;
-			layout.numColumns = 2;
-			
-			GridData dialogGrid = new GridData();
-			dialogGrid.widthHint = 400;
-			dialogGrid.heightHint = 425;
-			dialogGrid.horizontalAlignment = SWT.CENTER;
-			editRuleDialog.setLayout(layout);
-			editRuleDialog.setLayoutData(dialogGrid);
-			// position near parent window location
-			editRuleDialog.setLocation(this.shell.getLocation().x + 10,this.shell.getLocation().y + 10);
-			//dialog.setSize(400, 400);
-			
-			
-			//final Combo combo = new Combo(dialog, SWT.NONE);
-			//combo.setItems (options);
-			ModifyListener lsMod = new ModifyListener() {
-
-	            public void modifyText(ModifyEvent e) {
-	                //jobEntry.setChanged();
-	            }
-	        };
-	        int middle = 20;
-	        int margin = Const.MARGIN;
-	        
-	        GridLayout groupLayout = new GridLayout();
-	        groupLayout.marginWidth = 10;
-	        groupLayout.marginHeight = 10;
-	        groupLayout.numColumns = 2;
-	        
-	        
-	    
-	        // Stepname line
-	        Group generalGroup = new Group(editRuleDialog, SWT.SHADOW_NONE);
-	       // props.setLook(generalGroup);
-	        generalGroup.setText("Field to Rule Association");
-	        generalGroup.setLayout(groupLayout);
-	        
-	        GridData gridData = new GridData();
-			gridData.widthHint = 500;
-			gridData.heightHint = 100;
-			gridData.grabExcessHorizontalSpace = true;
-			gridData.grabExcessVerticalSpace = true;
-			gridData.horizontalSpan = 2;
-			generalGroup.setLayoutData(gridData);
-
-	        
-			//fieldName = buildText("Field",  generalGroup);
-			fieldName = buildCombo("Field",  generalGroup, this.fields);
-			if(entry.getField() != null) fieldName.setText(entry.getField());
-			
-			rules = ruleList.getTitles();
-			ruleName = buildCombo("Rule", generalGroup, rules);
-			ruleName.add("New Rule");
-			
-			if(entry.getHygieneRuleListIndex() != -1 && ruleList.getFields().size() > 0){
-				activeRule = ruleList.get(entry.getHygieneRuleListIndex());
-			}else{
-				activeRule = new ConceptRuleBO();
-			}
-			
-			Group detailsGroup = new Group(editRuleDialog, SWT.SHADOW_NONE);
-		       // props.setLook(generalGroup);
-			detailsGroup.setText("Rule Details");
-			detailsGroup.setLayout(groupLayout);
-			
-			GridData detailData = new GridData();
-			detailData.widthHint = 500;
-			detailData.heightHint = 300;
-			detailData.grabExcessHorizontalSpace = true;
-			detailData.grabExcessVerticalSpace = true;
-			detailData.horizontalSpan = 2;
-			detailsGroup.setLayoutData(detailData);
-		        
-			displayName = buildText("Rule Name",  detailsGroup);
-			machineRuleName = buildText("Machine Rule Name",  detailsGroup);
-			machineRuleName.setEditable(false);
-			Color color = new Color(shell.getDisplay(),242,242,242);
-			machineRuleName.setBackground(color);
-			displayName.addKeyListener(new KeyListener() {
-
-				@Override
-				public void keyPressed(KeyEvent arg0) {
-					// TODO Auto-generated method stub
-					
-				}
-
-				@Override
-				public void keyReleased(KeyEvent arg0) {
-					machineRuleName.setText(displayName.getText().replace(" ", "_"));
-					
-				}
-				});
-			
-			
-			allowChars = buildText("Allowed Characters",  detailsGroup);
-			spaceChars = buildText("Characters treated as spaces",  detailsGroup);
-			ignoreChars = buildText("Characters Ignored",  detailsGroup);
-			leftTrim = buildCheckbox("Left Trim",  detailsGroup);
-			caps = buildCheckbox("All Letters are Capital",  detailsGroup);
-			lengths = buildText("Lengths",  detailsGroup);
-			noQuotes = buildText("Disallow Characters at Start/End (quotes)",  detailsGroup);
-			//like = buildCombo("Like",generalGroup,fieldTypes.getTitles());
-			words = buildText("Words",  detailsGroup);
-			onfail = buildCombo("On Fail",detailsGroup,new String[]{"IGNORE", "CLEAN", "BLANK"});
-			
-
-			Button edit = new Button(detailsGroup, SWT.PUSH);
-			edit.setText("Edit Rule");
-			GridData editFormat = new GridData();
-			editFormat.widthHint = 100;
-			//editFormat.horizontalSpan = 2;
-			editFormat.horizontalIndent = 10;
-			
-			//cancelFormat.horizontalAlignment = SWT.CENTER;
-			edit.setLayoutData(editFormat);
-            
-			//layout stuff...
-			//add listener for when cancel is pressed:
-			edit.addSelectionListener(new SelectionAdapter() {
-			 public void widgetSelected(SelectionEvent e) {
-					ErrorNotices en = new ErrorNotices();
-					
-		    		String notice = "Editing this rule will effect all fields using the rule!";
-					if(en.openComfirmDialog(editRuleDialog,notice)){
-						setDetailFieldsState(true);
-					}
-			 }
-			});
-			
-			Button del = new Button(detailsGroup, SWT.PUSH);
-			del.setText("Delete Rule");
-			GridData delFormat = new GridData();
-			delFormat.widthHint = 100;
-			//delFormat.horizontalSpan
-			
-			delFormat.horizontalIndent = 10;
-			//cancelFormat.horizontalAlignment = SWT.CENTER;
-			del.setLayoutData(delFormat);
-            
-			//layout stuff...
-			//add listener for when cancel is pressed:
-			del.addSelectionListener(new SelectionAdapter() {
-			 public void widgetSelected(SelectionEvent e) {
-				 
-				 ErrorNotices en = new ErrorNotices();
-					
-		    	 String notice = "Deleting this rule will effect all fields using the rule!";
-				 if(en.openComfirmDialog(editRuleDialog,notice)){
-					 //code to delete rule.
-					 //start here!!!!!!!!
-					 //get the index of rule to delete.
-					 String oldName = ruleName.getText();
-					 int indexToDel = ruleName.getSelectionIndex();
-					 
-					 if(indexToDel == -1){
-						 //rule hasn't changed we are still on the existing one
-						 indexToDel = entry.getHygieneRuleListIndex();
-					 }
-					 //set select to new rule
-					 ruleName.setText("New Rule");
-					 //remove rule from BO
-					 ruleList.remove(indexToDel);
-					 //remove rule from select
-					 ruleName.remove(indexToDel);
-					 loadRuleEditData(-1);
-					 ruleName.setText("New Rule");
-					 
-					 //now we need to update the list page.
-					 entryList.updateAll("", oldName);
-					 tableViewer.refresh();
-					 table.setRedraw(true);
-					 table.redraw();
-				 }
-			 }
-			});
-			
-			
-			setDetailFieldsState(false);
-			
-			
-			if(entry.getRuleName() != null){ 
-				ruleName.setText(entry.getRuleName());
-				loadRuleEditData(entry.getHygieneRuleListIndex());
-			}else{
-				ruleName.setText("New Rule");
-			}
-			
-			
-			ruleName.addSelectionListener(new SelectionAdapter() {
-				 public void widgetSelected(SelectionEvent e) {
-					 System.out.println("Rule Changed");
-					 //fieldTypes
-					 
-					 int selected = ruleName.getSelectionIndex();
-					 
-					 loadRuleEditData(selected);
-					 
-					 currentRuleName = ruleName.getText();
-				 }
-				});
-			
-			
-			//final ArrayList<Button> checkboxes = new ArrayList<Button>();
-			//for(int i = 0; i<fieldTypes.getFields().size(); i++){
-			//	checkboxes.add(buildCheckbox(fieldTypes.get(i).getDisplayTitle(), generalGroup));
-			//}
-			 //create cancel button
-			
-
-			//creates ok button
-			Button ok = new Button(editRuleDialog, SWT.PUSH);
-			ok.setText("OK");
-			GridData okFormat = new GridData();
-			okFormat.horizontalIndent = 175;
-			okFormat.widthHint = 50;
-			//okFormat.horizontalAlignment = SWT.CENTER;
-			ok.setLayoutData(okFormat);
-			//layout stuff...
-			//add listener when OK button pressed
-			ok.addSelectionListener(
-			// nested anonymous inner class for listener, could be separate class too
-			new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-
-				saveEditDialog(oldRuleName,entry,thisEntryIndex);
-
-			}
-
-			});
-			
-			Button cancel = new Button(editRuleDialog, SWT.PUSH);
-			cancel.setText("Cancel");
-			GridData cancelFormat = new GridData();
-			cancelFormat.widthHint = 50;
-			
-			//cancelFormat.horizontalAlignment = SWT.CENTER;
-			cancel.setLayoutData(cancelFormat);
-            
-			//layout stuff...
-			//add listener for when cancel is pressed:
-			cancel.addSelectionListener(new SelectionAdapter() {
-			 public void widgetSelected(SelectionEvent e) {
-			 System.out.println("User cancelled dialog");
-			 editRuleDialog.close();
-			 }
-			});
-			
-			
-			editRuleDialog.pack();
-			editRuleDialog.open();
-			
-	};
+		concept.run(editRuleDialog);
+				
+	}
 	
-	private void saveEditDialog(String oldRuleName, EntryBO entry, int thisEntryIndex){
+	private void saveEditDialog(String oldRuleName, ConceptEntryBO entry, int thisEntryIndex){
 
 		String errors = "";
 		Boolean isValid = true;
 		
-		if(fieldName.getText().equals("")){
-			isValid = false;
-			errors = "You must include a Field for this Field Rule Relation!" + "\r\n";
-		}
-		if(displayName.getText().equals("")){
-			//no save
-			errors = "You Must include a Rule Name for your rule!" + "\r\n";
-			isValid = false;
-		}
-		Boolean isUnique = true;
 		
-		if(isValid){
-			//lets make sure the name hasn't been used
-			
-			
-			int testIndex = ruleList.getIndex(displayName.getText()); //will be -1 if no match
-			
-			if(ruleName.getText().equalsIgnoreCase("New Rule")){
-				//we are creating a new rule and its name must be unique.
-				if(testIndex >= 0){
-					//rule name already exists and this is a new rule so we know its a duplicate
-					isUnique = false;
-				}
-				
-			}else{
-				//we may be updating a rule to a new name
-				
-				int currentIndex = ruleName.getSelectionIndex();
-				
-				if(currentIndex == -1){
-					//rule hasn't been changed check to make sure ruleName and display name match
-					//we need more logic here
-					if(ruleName.getText().equalsIgnoreCase(displayName.getText())){
-						//rule names match so we are editing the same rule
-						isUnique = true;
-					}else{
-						if(testIndex >= 0){
-							//rule name already exists now is this the same rule
-							if(entry.getHygieneRuleListIndex() == testIndex){
-								isUnique = true;//we are on the same rule
-							}else{
-								isUnique = false;
-							}
-						}
-					}
-					
-				}else if (currentIndex == testIndex){
-					//hey we are updating the same rule.
-					isUnique = true;
-				}else{
-					isUnique = false;
-				}
-				
-				
-				
-				
-			}
-			}
-			
-			if(!isUnique){
-				errors = "You must use a unique Name!"+ "\r\n";
-				isValid = false;
-			}
-		
-		if(!isValid){
-			ErrorNotices en = new ErrorNotices();
-    		errors += "\r\n";
-    		errors += "\r\n\r\n";
-    		en.openSaveErrorDialog(editRuleDialog,errors);
-		}else{
-			//we need to see if the name changed 
-			
-			
-
-			
-			if(fieldName.getText() != null)entry.setField(fieldName.getText());
-			
-			
-			int newRuleIndex = ruleList.getIndex(ruleName.getText());
-			int ruleIndex = entry.getHygieneRuleListIndex();//fieldTypes.getIndex(entry.getRuleName());
-			System.out.println("entry's current index: " + ruleIndex);
-			System.out.println("selected index: " + newRuleIndex);
-			//need to see if its a new record if so we will create a new record in memory
-			
-			if(ruleName.getText().equals("New Rule")){
-				 //new rule
-				System.out.println("new rule " + activeRule.getDisplayTitle());
-				 activeRule = new ConceptRuleBO();
-				 updateHygieneRuleBO();
-				 System.out.println("new rule " + activeRule.getDisplayTitle());
-				 
-				 ruleList.add(activeRule);
-				 int thisRuleIndex = ruleList.getIndex(displayName.getText());
-				 System.out.println("New Rule Index : " + thisRuleIndex);
-				 entry.setHygieneRuleListIndex(thisRuleIndex);
-				 entry.setRuleName(displayName.getText());
-				 ruleName.setItem(thisRuleIndex, displayName.getText());
-				 
-			 }else{
-				 if(!currentRuleName.equals(displayName.getText())){
-						//now iterate through any entries if fieldName is old update
-						//newname,oldname
-						if(!oldRuleName.equals("")){
-							entryList.updateAll(displayName.getText(), oldRuleName);
-						}
-					}
-				 
-				 updateHygieneRuleBO();
-				 System.out.println("update rule index: " + ruleIndex + " (" + entry.getRuleName() + ") Selected (newRuleIndex): " + newRuleIndex + "(" + ((ConceptRuleBO)ruleList.get(newRuleIndex)).getDisplayTitle() + ")");
-				 //if(entry.getFieldTypeListIndex() != -1){
-				//	 fieldTypes.update(entry.getFieldTypeListIndex(), activeFieldType);
-				 //}else 
-			     if (newRuleIndex != -1){
-					 //updates the existing rule list entry with the new info
-			    	 ruleList.update(newRuleIndex, activeRule);
-					 
-				 }
-				 entry.setHygieneRuleListIndex(newRuleIndex);
-				 //ruleName.setItem(newRuleIndex,displayName.getText());
-				 entry.setRuleName(displayName.getText());
-				 //updates the select with the new value
-				 entryList.updateEntry(thisEntryIndex,entry);
-				 //edit rule
-				 //ft = fieldTypes.get(selected);
-			 }
-		
-			
-			//activeRule = new HygieneRuleBO();
-		// close the message dialog
 			tableViewer.refresh();
 			table.setRedraw(true);
 			table.redraw();
 			editRuleDialog.close();
-		}
+		
 	}
 	private void setDetailFieldsState(Boolean enable){
 		
@@ -739,61 +403,21 @@ public class CreateTable {
 		if(enable){
 			color = new Color(shell.getDisplay(),255,255,255);
 		}
-		displayName.setEditable(enable);
-		displayName.setBackground(color);
+		//displayName.setEditable(enable);
 		
-		//machineRuleName.setEditable(enable);
-		//machineRuleName.setBackground(color);
-		
-		allowChars.setEditable(enable);
-		allowChars.setBackground(color);
-		
-		spaceChars.setEditable(enable);
-		spaceChars.setBackground(color);
-		
-		ignoreChars.setEditable(enable);
-		ignoreChars.setBackground(color);
-		
-		leftTrim.setEnabled(enable);
-		leftTrim.setBackground(color);
-		
-		caps.setEnabled(enable);
-		caps.setBackground(color);
-		
-		lengths.setEditable(enable);
-		lengths.setBackground(color);
-		
-		noQuotes.setEditable(enable);
-		noQuotes.setBackground(color);
-		
-		words.setEditable(enable);
-		words.setBackground(color);
-		
-		onfail.setEnabled(enable);
-		onfail.setBackground(color);
 		
 
 		
 	}
 private void updateHygieneRuleBO(){
 	
-	activeRule.setDisplayTitle(displayName.getText());
-	activeRule.setTypename(machineRuleName.getText());
-	activeRule.setAllow(allowChars.getText());
-	activeRule.setSpaces(spaceChars.getText());
-	activeRule.setIgnore(ignoreChars.getText());
-	activeRule.setLefttrim(leftTrim.getSelection());
-	activeRule.setCaps(caps.getSelection());
-	activeRule.setLengths(lengths.getText());
-	activeRule.setDisallowedQuotes(noQuotes.getText());
-	//activeFieldType.setLike(like.getText());
-	activeRule.setWords(words.getText());
-	activeRule.setOnfail(onfail.getText());
+	//activeRule.setDisplayTitle(displayName.getText());
+	
 	
 }
 private void loadRuleEditData(int selected){
 	
-	 
+	 /*
 	 System.out.println("loadRuleEditData - Selected Index: " + selected);
 	 if(selected > rules.length-1 || selected == -1 || ruleList.getTitles().length == 0 || ruleName.getText().equalsIgnoreCase("New Rule")){
 		 //new rule
@@ -803,25 +427,16 @@ private void loadRuleEditData(int selected){
 		 ruleName.setText("New Rule");
 		 
 	 }else{
-		 System.out.println("Current Active Rule : " +  activeRule.getDisplayTitle());
+		 System.out.println("Current Active Rule : " +  activeRule.getConceptName());
 		 System.out.println("Loading new (existing) Active Rule: " + selected);
 		 activeRule = ruleList.get(selected);
-		 System.out.println("Loading : " +  activeRule.getDisplayTitle());
+		 System.out.println("Loading : " +  activeRule.getConceptName());
 		 setDetailFieldsState(false);
 	 }
-	 System.out.println(activeRule.getDisplayTitle());
-	 displayName.setText(activeRule.getDisplayTitle());
-	 machineRuleName.setText(activeRule.getTypename());
-	 allowChars.setText(activeRule.getAllow());
-	 spaceChars.setText(activeRule.getSpaces());
-	 ignoreChars.setText(activeRule.getIgnore());
-	 leftTrim.setSelection(activeRule.isLefttrim());
-	 caps.setSelection(activeRule.isCaps());
-	 lengths.setText(activeRule.getLengths());
-	 noQuotes.setText(activeRule.getDisallowedQuotes());
-	// like.setText(activeFieldType.getLike());
-	 words.setText(activeRule.getWords());
-	 onfail.setText(activeRule.getOnfail());
+	 */
+	 System.out.println(activeRule.getConceptName());
+	// displayName.setText(activeRule.getDisplayTitle());
+	 
 	 
 
 }
@@ -842,22 +457,23 @@ private void createButtons(Composite parent) {
    		// Add a record and refresh the view
 		public void widgetSelected(SelectionEvent e) {
 			removeRowButtons();
+			//System.out.println("Index: " + table.getSelectionIndex());
 			entryList.addEntry(table.getSelectionIndex());
 			addRowButtons();
             tableViewer.refresh();
             table.redraw();
             
             createEditDialog(entryList.getEntries().size()-1, entryList.getEntry(entryList.getEntries().size()-1));
-            rules = ruleList.getTitles();
+           // rules = ruleList.getTitles();
             
 		}
 	});
 
 	//	Create and configure the "Delete" button
 	Button delete = new Button(parent, SWT.PUSH | SWT.CENTER);
-	delete.setText("Delete");
+	delete.setText("Delete Selected");
 	gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
-	gridData.widthHint = 80; 
+	gridData.widthHint = 90; 
 	delete.setLayoutData(gridData); 
 	delete.addSelectionListener(new SelectionAdapter() {
 		//Remove all the records that are checked and refresh the view
@@ -874,133 +490,36 @@ private void createButtons(Composite parent) {
 			Integer[] arrSortedIndexes = arlCheckedIndexes.toArray(new Integer[arlCheckedIndexes.size()]);
 			for (int j = arrSortedIndexes.length - 1 ; j>=0; j--) {
 				deleteEntry(arrSortedIndexes[j]);
-				//entryList.removeEntry(arrSortedIndexes[j]);
-				//table.remove(arrSortedIndexes[j]);
-				//tableViewer.refresh();
-                //                    table.redraw();
+
 			}
-                            //table.getItem(0).setImage(RecordLabels.getImage("unchecked"));
-                            //tableViewer.refresh();
-                            //table.redraw();
-                            table.getColumns()[0].setImage(RecordLabels.getImage("unchecked"));
+
+            table.getColumns()[0].setImage(RecordLabels.getImage("unchecked"));
 		}
 	});
 	
-	/*
 	
-	//Create and configure the "Move Up" button
-	Button btnRowUp = new Button(parent, SWT.PUSH | SWT.CENTER);
-	btnRowUp.setImage(RecordLabels.getImage("upArrow"));
-	btnRowUp.setText("Move Up");
-	gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
-	gridData.widthHint = 90; 
-	btnRowUp.setLayoutData(gridData); 
-
-	btnRowUp.addSelectionListener(new SelectionAdapter() {
-		//Move the selected record one level up and refresh the view
-		public void widgetSelected(SelectionEvent e) {
-			if(entryList.getEntries() != null && entryList.getEntries().size() > 0) {
-				int selectionIndex = 0;
-				for (int i = 0; i < table.getItemCount(); i++) {
-					if (table.getItems()[i].getChecked()) {
-						selectionIndex = i;
-					}
-				}
-				
-				if(table.getItem(selectionIndex).getChecked() && selectionIndex > 0){
-					Collections.swap(entryList.getEntries(), selectionIndex-1, selectionIndex);
-				}
-				
-				tableViewer.refresh();
-				if(selectionIndex > 0){
-					for (int i = 0; i < table.getItemCount(); i++) {
-						table.getItems()[i].setChecked(false);
-					}
-					table.getItem(selectionIndex-1).setChecked(true);
-				}
-			}
-                            tableViewer.refresh();
-                            table.redraw();
-		}
-	});
-	
-	///Create and configure the "Move Down" button
-	Button btnRowDown = new Button(parent, SWT.PUSH | SWT.CENTER);
-	btnRowDown.setImage(RecordLabels.getImage("downArrow"));
-	btnRowDown.setText("Move Down");
-	gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
-	gridData.widthHint = 90;
-	btnRowDown.setLayoutData(gridData); 
-
-	btnRowDown.addSelectionListener(new SelectionAdapter() {
-		//Move the selected record one level down and refresh the view
-		public void widgetSelected(SelectionEvent e) {
-			if(entryList.getEntries() != null && entryList.getEntries().size() > 0) {
-				int selectionIndex = 0;
-				for (int i = 0; i < table.getItemCount(); i++) {
-					if (table.getItems()[i].getChecked()) {
-						selectionIndex = i;
-						break;
-					}
-				}
-				
-				if(table.getItem(selectionIndex).getChecked() && selectionIndex < table.getItems().length -1){
-					Collections.swap(entryList.getEntries(), selectionIndex+1, selectionIndex);
-				}
-				
-				tableViewer.refresh();
-				if(selectionIndex < table.getItems().length - 1) {
-					for (int i = 0; i < table.getItemCount(); i++) {
-						table.getItems()[i].setChecked(false);
-					}
-					table.getItem(selectionIndex+1).setChecked(true);
-				}
-			}
-                            tableViewer.refresh();
-                            table.redraw();
-		}
-	});*/
 	
 }
 
 	public void addColumns(){
 		TableColumn column = new TableColumn(table, SWT.LEFT, 0);
-        column.setText("Fields");
-        column.setWidth(250);
+        column.setText("Concepts");
+        column.setWidth(500);
         
-        TableColumn column2 = new TableColumn(table, SWT.LEFT, 1);
-        column2.setText("Rules");
-        column2.setWidth(250);
+        
+        TableColumn column2 = new TableColumn(table, SWT.CENTER, 1);
+        column2.setText("Edit");
+        column2.setWidth(50);
         
         TableColumn column3 = new TableColumn(table, SWT.CENTER, 2);
-        column3.setText("Edit");
+        column3.setText("Delete");
         column3.setWidth(50);
-        
-        TableColumn column4 = new TableColumn(table, SWT.CENTER, 3);
-        column4.setText("Delete");
-        column4.setWidth(50);
 	}
 	
 	public void loadData(){
-		/*entryList = new EntryList();
-		EntryBO eb = new EntryBO();
-		eb.setField("test");
-		eb.setRuleName("test Rule");
-		entryList.add(eb);
-		EntryBO eb2 = new EntryBO();
-		eb2.setField("test2");
-		eb2.setRuleName("test Rule");
-		entryList.add(eb2);
-		EntryBO eb3 = new EntryBO();
-		eb3.setField("test3");
-		eb3.setRuleName("test Rule");
-		entryList.add(eb3);
-		EntryBO eb4 = new EntryBO();
-		eb4.setField("test4");
-		eb4.setRuleName("test Rule");
-		entryList.add(eb4);*/
+		
 		tableViewer.setContentProvider(new ExampleContentProvider());	//Set the Content Provider for the table	
-		tableViewer.setLabelProvider(new EntryLabels());	//Set the Label Provider for the table
+		tableViewer.setLabelProvider(new ConceptEntryLabels());	//Set the Label Provider for the table
 		tableViewer.setInput(entryList);
 		
 		table.setRedraw(true);
@@ -1008,10 +527,20 @@ private void createButtons(Composite parent) {
 	
 	
 	public CreateTable(Shell shell) {
-		ruleList = new ConceptRuleList();
-		ruleList.createDefault();
+	//	ruleList = new ConceptRuleList();
+		//ruleList.createDefault();
 		this.shell = shell;
 	}
+	
+	public CreateTable(Shell shell, String[] datasets) {
+		//	ruleList = new ConceptRuleList();
+			//ruleList.createDefault();
+			this.shell = shell;
+			this.datasetFields = new ArrayList();
+			for(int i = 0; i< datasets.length; i++){
+				this.datasetFields.add(datasets[i]);
+			}
+		}
 	
 	
 	
@@ -1019,13 +548,13 @@ private void createButtons(Composite parent) {
 	 * InnerClass that acts as a proxy for the RecordList providing content for the Table. It implements the IRecordListViewer 
 	 * interface since it must register changeListeners with the RecordList 
 	 */
-	class ExampleContentProvider implements IStructuredContentProvider, IEntryListViewer {
+	class ExampleContentProvider implements IStructuredContentProvider, IConceptEntryListViewer {
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
 			if (newInput != null) {
-				((EntryList) newInput).addChangeListener(this);
+				((ConceptEntryList) newInput).addChangeListener(this);
 			}
 			if (oldInput != null)
-				((EntryList) oldInput).removeChangeListener(this);
+				((ConceptEntryList) oldInput).removeChangeListener(this);
 		}
 
 		public void dispose() {
@@ -1037,7 +566,7 @@ private void createButtons(Composite parent) {
 			return entryList.getEntries().toArray();
 		}
 
-		public void addEntry(EntryBO record) {
+		public void addEntry(ConceptEntryBO record) {
                     //System.out.println("addRecord");
 			//Insert the record at a specific position
                    // removeRowButtons();
@@ -1057,7 +586,7 @@ private void createButtons(Composite parent) {
 			
 		}
 
-		public void modifyEntry(EntryBO record) {
+		public void modifyEntry(ConceptEntryBO record) {
 			tableViewer.update(record, null);	
 		}
 	}

@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="datatype" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         <hyg:field-specificity>4</hyg:field-specificity>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

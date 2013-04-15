@@ -39,9 +39,8 @@ public class SALTConcept extends ECLJobEntry{//extends JobEntryBase implements C
     private String layout;
     private String cleanData;
 	//private String rules;
-	private EntryList entryList = new EntryList();
-	private ConceptRuleList fieldTypeList = new ConceptRuleList();
-   
+	private ConceptEntryList entryList = new ConceptEntryList();
+	
 	public String getDatasetName() {
 		return datasetName;
 	}
@@ -54,16 +53,11 @@ public class SALTConcept extends ECLJobEntry{//extends JobEntryBase implements C
 	public void setLayout(String layout) {
 		this.layout = layout;
 	}
-    public ConceptRuleList getFieldTypeList() {
-		return fieldTypeList;
-	}
-	public void setFieldTypeList(ConceptRuleList fieldTypeList) {
-		this.fieldTypeList = fieldTypeList;
-	}
-	public EntryList getEntryList() {
+    
+	public ConceptEntryList getEntryList() {
 		return entryList;
 	}
-	public void setEntryList(EntryList entryList) {
+	public void setEntryList(ConceptEntryList entryList) {
 		this.entryList = entryList;
 	}
 	
@@ -77,8 +71,8 @@ public class SALTConcept extends ECLJobEntry{//extends JobEntryBase implements C
 	}
 	public String saveEntryList(){
         String out = "";
-        ArrayList<EntryBO> list = entryList.getEntries();
-        Iterator<EntryBO> itr = list.iterator();
+        ArrayList<ConceptEntryBO> list = entryList.getEntries();
+        Iterator<ConceptEntryBO> itr = list.iterator();
         boolean isFirst = true;
         while(itr.hasNext()){
             if(!isFirst){out+="|";}
@@ -95,9 +89,9 @@ public class SALTConcept extends ECLJobEntry{//extends JobEntryBase implements C
         String[] strLine = in.split("[|]");
         int len = strLine.length;
         if(len>0){
-            entryList = new EntryList();
+            entryList = new ConceptEntryList();
             for(int i =0; i<len; i++){
-                EntryBO eb = new EntryBO(strLine[i]);
+                ConceptEntryBO eb = new ConceptEntryBO(strLine[i]);
                 entryList.addEntryBO(eb);
             }
         }
@@ -107,15 +101,15 @@ public class SALTConcept extends ECLJobEntry{//extends JobEntryBase implements C
     
     public String saveFieldTypeList(){
         String out = "";
-        ArrayList<ConceptRuleBO> list = fieldTypeList.getFields();
-        Iterator<ConceptRuleBO> itr = list.iterator();
+        //ArrayList<ConceptEntryBO> list = entryList.getFields();
+       // Iterator<ConceptEntryBO> itr = list.iterator();
         boolean isFirst = true;
-        while(itr.hasNext()){
+       /* while(itr.hasNext()){
             if(!isFirst){out+="|";}
             
             out += itr.next().toCSV();
             isFirst = false;
-        }
+        }*/
         
         //fieldTypes
         return out;
@@ -126,11 +120,11 @@ public class SALTConcept extends ECLJobEntry{//extends JobEntryBase implements C
         int len = strLine.length;
         
         if(len>0){
-            fieldTypeList = new ConceptRuleList();
+           // fieldTypeList = new ConceptRuleList();
             for(int i =0; i<len; i++){
-                ConceptRuleBO ft = new ConceptRuleBO(strLine[i]);
-                ft.fromCSV(strLine[i]);
-                fieldTypeList.add(ft);
+               // ConceptRuleBO ft = new ConceptRuleBO(strLine[i]);
+                //ft.fromCSV(strLine[i]);
+                //fieldTypeList.add(ft);
             }
         }
         
@@ -143,115 +137,6 @@ public class SALTConcept extends ECLJobEntry{//extends JobEntryBase implements C
         
         Result result = prevResult;
         
-        AutoPopulate ap = new AutoPopulate();
-        String jobNameNoSpace = "";
-        JobMeta jobMeta = super.parentJob.getJobMeta();
-        try{
-                String jobName = ap.getGlobalVariable(jobMeta.getJobCopies(),"jobName");
-                jobNameNoSpace = jobName.replace(" ", "_");  
-                this.setLayout(ap.getDatasetsField("record_name", this.getDatasetName(),jobMeta.getJobCopies()));
-                
-            }catch (Exception e){
-                System.out.println("Error Parsing existing Global Variables ");
-                System.out.println(e.toString());
-                e.printStackTrace();
-
-            }
-        
-        SaltHygieneReport shr = new SaltHygieneReport();
-        shr.setDatasetName(datasetName);
-        shr.setName(this.getName());
-        shr.setSaltLib(jobNameNoSpace + "module");
-        shr.setLayout(this.getLayout());
-        if(cleanData.equalsIgnoreCase("yes")){
-        	shr.setOutputCleanedDataset(true);
-        }else{
-        	shr.setOutputCleanedDataset(false);
-        }
-        
-       
-        logBasic("{Dataset Job} Execute = " + shr.ecl());
-        logBasic("{Dataset Job} Previous =" + result.getLogText());
-        
-        result.setResult(true);
-        
-        RowMetaAndData data = new RowMetaAndData();
-        data.addValue("ecl", Value.VALUE_TYPE_STRING, shr.ecl());
-        
-        List list = result.getRows();
-        list.add(data);
-        String eclCode = "";
-        if (list == null) {
-            list = new ArrayList();
-        } else {
-            
-            for (int i = 0; i < list.size(); i++) {
-                RowMetaAndData rowData = (RowMetaAndData) list.get(i);
-                String code = rowData.getString("ecl", null);
-                if (code != null) {
-                    eclCode += code;
-                }
-            }
-            logBasic("{Dataset Job} ECL Code =" + eclCode);
-        }
-
-        result.setRows(list);
-        result.setLogText("ECLDataset executed, ECL code added");
-        
-        
-        
-        /*
-        AutoPopulate ap = new AutoPopulate();
-        String jobNameNoSpace = "";
-        JobMeta jobMeta = super.parentJob.getJobMeta();
-        
-        
-        try{
-        //Object[] jec = this.jobMeta.getJobCopies().toArray();
-
-            String jobName = ap.getGlobalVariable(jobMeta.getJobCopies(),"jobName");
-            jobNameNoSpace = jobName.replace(" ", "_"); 
-            
-            this.setLayout(ap.getDatasetsField("record_name", this.getDatasetName(),jobMeta.getJobCopies()));
-            
-        }catch (Exception e){
-            System.out.println("Error Parsing existing Global Variables ");
-            System.out.println(e.toString());
-            e.printStackTrace();
-
-        }
-        
-
-
-       
-        
-        logBasic("{Dataset Job} Previous =" + result.getLogText());
-        
-        result.setResult(true);
-        
-        RowMetaAndData data = new RowMetaAndData();
-        
-        
-        List list = result.getRows();
-        list.add(data);
-        String eclCode = "";
-        if (list == null) {
-            list = new ArrayList();
-        } else {
-            
-            for (int i = 0; i < list.size(); i++) {
-                RowMetaAndData rowData = (RowMetaAndData) list.get(i);
-                String code = rowData.getString("ecl", null);
-                if (code != null) {
-                    eclCode += code;
-                }
-            }
-            logBasic("{Dataset Job} ECL Code =" + eclCode);
-        }
-        
-        result.setRows(list);
-        result.setLogText("ECLDataset executed, ECL code added");
-        */
         return result;
     }
  

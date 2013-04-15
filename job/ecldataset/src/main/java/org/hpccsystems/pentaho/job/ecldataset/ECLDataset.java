@@ -142,16 +142,21 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
        // dataset.setRecordFormatString(getRecordDef());
         //use(hasNodeofType(type); from global variables here
         boolean isSaltHygiene = false;
+        boolean isSaltSpecificity = false;
         try{
         	isSaltHygiene = ap.hasNodeofType(jobs, "SALTHygiene");
+        	isSaltSpecificity = ap.hasNodeofType(jobs, "SALTSpecificity");
         }catch(Exception e){
         	
         }
+        /*TODO: you need to detect is salt and project spoonClusterID
+         * moved the spoonClusterID and spoonRecordID to be added in a project in the related plugin ecl code generation
+         * 
         if(isSaltHygiene){//need to check to see if saltHygine is enabled if so trigger this.
         	 logBasic("{Dataset Job} ADD HYGINE SETTINGS");
         	RecordBO saltID = new RecordBO();
-        	saltID.setColumnName("spoonGeneratedID");
-        	saltID.setColumnType("INTEGER");
+        	saltID.setColumnName("spoonClusterID");
+        	saltID.setColumnType("UNSIGNED6");
         	RecordBO saltSRC = new RecordBO();
         	//saltSRC.setColumnName("SRC");
         	//saltSRC.setColumnType("STRING");
@@ -159,13 +164,32 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         	this.recordList.addRecordBO(saltID);
         	//this.recordList.addRecordBO(saltSRC);
         }
+        
+        if(isSaltSpecificity){//need to check to see if saltHygine is enabled if so trigger this.
+       	 	logBasic("{Dataset Job} ADD Specificity SETTINGS");
+	       	RecordBO saltID = new RecordBO();
+	       	saltID.setColumnName("spoonClusterID");
+	       	saltID.setColumnType("INTEGER");
+	       	RecordBO saltSRC = new RecordBO();
+	       	this.recordList.addRecordBO(saltID);
+
+       }
+       */
         dataset.setRecordFormatString(resultListToString(this.recordList));
         dataset.setRecordName(getRecordName());
         dataset.setFileType(getFileType());
         dataset.setRecordSet(getRecordSet());
         
-
-        logBasic("{Dataset Job} Execute = " + dataset.ecl());
+        logBasic("{Dataset Job} Execute = " + dataset.ecl());//must be first so that it builds the below vars
+        
+        System.setProperty("Dataset-" + getDatasetName()+"-rsDef",  dataset.getRecordDef());
+        System.setProperty("Dataset-" + getDatasetName()+"-dsDef",  dataset.getDatasetDef());
+        System.setProperty("Dataset-" + getDatasetName()+"-rs", dataset.getRecordName());
+        System.setProperty("Dataset-" + getDatasetName()+"-ds", dataset.getName());
+        System.setProperty("Dataset-" + getDatasetName()+"-logical",this.getLogicalFileName());
+        System.setProperty("Dataset-" + getDatasetName()+"-type",this.getFileType());
+        
+        
         
         logBasic("{Dataset Job} Previous =" + result.getLogText());
         
@@ -244,8 +268,14 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
             for(int i =0; i<in.size(); i++){
                 RecordBO rb = new RecordBO();
                 rb.setColumnName(in.get(i)[0]);
-                rb.setColumnType(in.get(i)[1].replaceAll("\\d+",""));//replaces digit with "" so we get STRING/INTEGER etc
-                rb.setColumnWidth(in.get(i)[1].replaceAll("\\D+",""));//replace non digit with "" so we get just number 
+                //rb.setColumnType(in.get(i)[1].replaceAll("\\d+",""));//replaces digit with "" so we get STRING/INTEGER etc
+                //System.out.println("Letters: " + x.replaceAll("\\d+[_]*",""));
+                rb.setColumnType(in.get(i)[1].replaceAll("\\d+[_]*",""));//replaces digit with "" so we get STRING/INTEGER etc
+                
+                //rb.setColumnWidth(in.get(i)[1].replaceAll("\\D+",""));//replace non digit with "" so we get just number 
+                //System.out.println("Numbers: " + x.replaceAll("[^0-9_]+",""));
+                rb.setColumnWidth(in.get(i)[1].replaceAll("[^0-9_]+",""));//replace non digit with "" so we get just number 
+                
                 rb.setDefaultValue(in.get(i)[2]);
                 recordList.addRecordBO(rb);
             }

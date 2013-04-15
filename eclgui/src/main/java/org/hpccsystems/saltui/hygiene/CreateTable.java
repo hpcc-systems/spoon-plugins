@@ -43,9 +43,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.hpccsystems.ecljobentrybase.ECLJobEntryDialog;
-import org.hpccsystems.recordlayout.RecordBO;
-import org.hpccsystems.recordlayout.RecordLabels;
-import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.core.Const;
 
 
@@ -54,7 +51,7 @@ public class CreateTable {
 	private Shell shell;
 	private Table table;
 	private TableViewer tableViewer;
-	private EntryList entryList;
+	private HygieneEntryList entryList;
 	private HygieneRuleBO activeRule = new HygieneRuleBO();
 	private Composite compForGrp2;
 	private ArrayList<TableEditor> tableEditEditor = new ArrayList<TableEditor>();
@@ -88,7 +85,7 @@ public class CreateTable {
 
 	private String fields[];
 	
-	public void setEntryList(EntryList entryList) {
+	public void setEntryList(HygieneEntryList entryList) {
 		this.entryList = entryList;
 	}
 	public HygieneRuleList getRuleList() {
@@ -97,7 +94,7 @@ public class CreateTable {
 	public void setRuleList(HygieneRuleList ruleList) {
 		this.ruleList = ruleList;
 	}
-	public EntryList getEntryList() {
+	public HygieneEntryList getEntryList() {
 		return entryList;	
 	}
 	
@@ -310,7 +307,7 @@ public class CreateTable {
 		ruleList.createDefault();
 	}
 	public static void main(String[] args) {
-		EntryBO e = new EntryBO();
+		HygieneEntryBO e = new HygieneEntryBO();
 		e.setField("test");
 		e.setRuleName("To Uppercase");
 		CreateTable ct = new CreateTable();
@@ -326,10 +323,10 @@ public class CreateTable {
 		
 	}
 
-	private void createEditDialog(int entryIndex, EntryBO newEntry){
+	private void createEditDialog(int entryIndex, HygieneEntryBO newEntry){
 			//tableViewer.getElementAt(index).
 		
-			final EntryBO entry = newEntry;//entryList.getEntry(index);
+			final HygieneEntryBO entry = newEntry;//entryList.getEntry(index);
 			final int thisEntryIndex = entryIndex;
 			final String oldRuleName = newEntry.getRuleName();
 			currentRuleName = newEntry.getRuleName();
@@ -592,7 +589,7 @@ public class CreateTable {
 			
 	};
 	
-	private void saveEditDialog(String oldRuleName, EntryBO entry, int thisEntryIndex){
+	private void saveEditDialog(String oldRuleName, HygieneEntryBO entry, int thisEntryIndex){
 
 		String errors = "";
 		Boolean isValid = true;
@@ -882,7 +879,7 @@ private void createButtons(Composite parent) {
                             //table.getItem(0).setImage(RecordLabels.getImage("unchecked"));
                             //tableViewer.refresh();
                             //table.redraw();
-                            table.getColumns()[0].setImage(RecordLabels.getImage("unchecked"));
+                            table.getColumns()[0].setImage(HygieneRecordLabels.getImage("unchecked"));
 		}
 	});
 	
@@ -1000,7 +997,7 @@ private void createButtons(Composite parent) {
 		eb4.setRuleName("test Rule");
 		entryList.add(eb4);*/
 		tableViewer.setContentProvider(new ExampleContentProvider());	//Set the Content Provider for the table	
-		tableViewer.setLabelProvider(new EntryLabels());	//Set the Label Provider for the table
+		tableViewer.setLabelProvider(new HygieneEntryLabels());	//Set the Label Provider for the table
 		tableViewer.setInput(entryList);
 		
 		table.setRedraw(true);
@@ -1019,13 +1016,13 @@ private void createButtons(Composite parent) {
 	 * InnerClass that acts as a proxy for the RecordList providing content for the Table. It implements the IRecordListViewer 
 	 * interface since it must register changeListeners with the RecordList 
 	 */
-	class ExampleContentProvider implements IStructuredContentProvider, IEntryListViewer {
+	class ExampleContentProvider implements IStructuredContentProvider, IHygieneEntryListViewer {
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
 			if (newInput != null) {
-				((EntryList) newInput).addChangeListener(this);
+				((HygieneEntryList) newInput).addChangeListener(this);
 			}
 			if (oldInput != null)
-				((EntryList) oldInput).removeChangeListener(this);
+				((HygieneEntryList) oldInput).removeChangeListener(this);
 		}
 
 		public void dispose() {
@@ -1037,7 +1034,7 @@ private void createButtons(Composite parent) {
 			return entryList.getEntries().toArray();
 		}
 
-		public void addEntry(EntryBO record) {
+		public void addEntry(org.hpccsystems.saltui.hygiene.HygieneEntryBO record) {
                     //System.out.println("addRecord");
 			//Insert the record at a specific position
                    // removeRowButtons();
@@ -1057,7 +1054,7 @@ private void createButtons(Composite parent) {
 			
 		}
 
-		public void modifyEntry(EntryBO record) {
+		public void modifyEntry(HygieneEntryBO record) {
 			tableViewer.update(record, null);	
 		}
 	}
@@ -1105,7 +1102,9 @@ private void createButtons(Composite parent) {
          Label fmt = new Label(groupBox, SWT.RIGHT);
          fmt.setText(strLabel);
          Combo combo = new Combo(groupBox, SWT.MULTI | SWT.LEFT | SWT.BORDER);
-         combo.setItems(items);
+         if(items != null){
+        	 combo.setItems(items);
+ 		 }
          GridData gridData = new GridData();
          gridData.widthHint = 183;
          combo.setLayoutData(gridData);

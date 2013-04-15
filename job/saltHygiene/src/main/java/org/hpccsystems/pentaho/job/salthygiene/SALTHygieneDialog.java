@@ -48,7 +48,7 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
 import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
-import org.hpccsystems.recordlayout.RecordBO;
+//import org.hpccsystems.recordlayout.RecordBO;
 //import org.hpccsystems.saltui.
 import org.hpccsystems.saltui.hygiene.*;
 import org.hpccsystems.ecljobentrybase.*;
@@ -70,9 +70,10 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
     private SelectionAdapter lsDef;
     
     CreateTable createTable = null;
-    private EntryList entryList;
+    private HygieneEntryList entryList;
     private HygieneRuleList fieldTypeList;
     
+    private Combo srcField;
 	private Combo includeSrcOutliers;
     private Combo includeClusterSrc;
     private Combo includeClusterCounts;
@@ -166,40 +167,45 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
 
         //All other contols
         //Join Declaration
-        Group joinGroup = new Group(compForGrp, SWT.SHADOW_NONE);
-        props.setLook(joinGroup);
-        joinGroup.setText("Data Profiling Details");
-        joinGroup.setLayout(groupLayout);
-        FormData joinGroupFormat = new FormData();
-        joinGroupFormat.top = new FormAttachment(generalGroup, margin);
-        joinGroupFormat.width = 400;
-        joinGroupFormat.height = 150;
-        joinGroupFormat.left = new FormAttachment(middle, 0);
-        joinGroup.setLayoutData(joinGroupFormat);
+        Group hygieneGroup = new Group(compForGrp, SWT.SHADOW_NONE);
+        props.setLook(hygieneGroup);
+        hygieneGroup.setText("Data Profiling Details");
+        hygieneGroup.setLayout(groupLayout);
+        FormData hygieneGroupFormat = new FormData();
+        hygieneGroupFormat.top = new FormAttachment(generalGroup, margin);
+        hygieneGroupFormat.width = 400;
+        hygieneGroupFormat.height = 150;
+        hygieneGroupFormat.left = new FormAttachment(middle, 0);
+        hygieneGroup.setLayoutData(hygieneGroupFormat);
         
         
 
         item1.setControl(compForGrp);
-        this.datasetName = buildCombo("Dataset Name", null, lsMod, middle, margin, joinGroup,datasets);
-        this.cleanedOutput = buildCombo("Output Cleaned Dataset?", this.datasetName, lsMod,middle,margin,joinGroup,new String[]{"yes","no"});
+        this.datasetName = buildCombo("Dataset Name", null, lsMod, middle, margin, hygieneGroup,datasets);
+        this.cleanedOutput = buildCombo("Output Cleaned Dataset?", this.datasetName, lsMod,middle,margin,hygieneGroup,new String[]{"yes","no"});
         //this.layout = buildCombo("Layout", this.datasetName, lsMod, middle, margin, joinGroup,datasets);
         outLabel = buildLabel("The Output will be stored as a file on the cluster as \r\n" +
-        		"~SPOONFILES::[Dataset Name]_CleanedData.\r\n\r\n", this.cleanedOutput, lsMod, 0, margin, joinGroup);
-
-        
+        		"~SPOONFILES::[Dataset Name]_CleanedData.\r\n\r\n", this.cleanedOutput, lsMod, 0, margin, hygieneGroup);
+        String[] items = null;
+        try{
+	        items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies()); 
+        }catch (Exception exc){
+        	System.out.println("error loading dataset fields");
+        }
 
         Group optionalGroup = new Group(compForGrp, SWT.SHADOW_NONE);
         props.setLook(optionalGroup);
         optionalGroup.setText("Data Source Cluster Diagnostic Reports");
         optionalGroup.setLayout(groupLayout);
         FormData optionalGroupFormat = new FormData();
-        optionalGroupFormat.top = new FormAttachment(joinGroup, margin);
+        optionalGroupFormat.top = new FormAttachment(hygieneGroup, margin);
         optionalGroupFormat.width = 400;
         optionalGroupFormat.height = 150;
         optionalGroupFormat.left = new FormAttachment(middle, 0);
         optionalGroup.setLayoutData(optionalGroupFormat);
         
-        this.includeSrcOutliers = buildCombo("Include SrcOutliers", null, lsMod,middle,margin,optionalGroup,new String[]{"yes","no"});
+        this.srcField = buildCombo("Source Field", null, lsMod, middle, margin, optionalGroup,items);
+        this.includeSrcOutliers = buildCombo("Include SrcOutliers", this.srcField, lsMod,middle,margin,optionalGroup,new String[]{"yes","no"});
         this.includeClusterSrc = buildCombo("Include ClusterSrc?", this.includeSrcOutliers, lsMod,middle,margin,optionalGroup,new String[]{"yes","no"});
         this.includeClusterCounts = buildCombo("Include Cluster Counts?", this.includeClusterSrc, lsMod,middle,margin,optionalGroup,new String[]{"yes","no"});
         this.includeSrcProfiles = buildCombo("Include SrcProfiles?", this.includeClusterCounts, lsMod,middle,margin,optionalGroup,new String[]{"yes","no"});
@@ -207,7 +213,7 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
         
         createTable = new CreateTable(shell);
         try{
-	        String[] items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+	       // String[] items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
 	        createTable.loadFields(items);
 	        
         }catch (Exception exc){
@@ -219,6 +225,7 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
                 AutoPopulate ap = new AutoPopulate();
                 try{
                 	String[] items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+                	populateSrcField(datasetName.getText(), items);
                 	createTable.loadFields(items);
                 	outLabel.setText("The Output will be stored as a file on the cluster as \r\n~SPOONFILES::" + datasetName.getText() + "_CleanedData.\r\n\r\n");
                 }catch (Exception exc){
@@ -300,6 +307,14 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
             //this.joinCondition.setText(jobEntry.getJoinCondition());
         //}
         if (jobEntry.getDatasetName() != null) {
+            
+           // AutoPopulate ap = new AutoPopulate();
+            try{
+            	String[] newItems = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+            	populateSrcField(datasetName.getText(), newItems);
+            }catch (Exception exc){
+            	System.out.println("error loading dataset fields");
+            }
             this.datasetName.setText(jobEntry.getDatasetName());
         }
        // if (jobEntry.getLayout() != null) {
@@ -324,6 +339,9 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
         if (jobEntry.getIncludeSrcProfiles() != null) {
             this.includeSrcProfiles.setText(jobEntry.getIncludeSrcProfiles());
         }
+        if (jobEntry.getSrcField() != null) {
+            this.srcField.setText(jobEntry.getSrcField());
+        }
 
 
         shell.pack();
@@ -336,6 +354,15 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
 
         return jobEntry;
 
+    }
+    
+    public void populateSrcField(String dsName, String[] items){
+    	//this.srcField;
+    	this.srcField.removeAll();
+    	for (int i = 0; i<items.length; i++){
+    		this.srcField.add(items[i]);
+
+        }
     }
     
     private TabItem buildDetailsTab2(String tabName, TabFolder tabFolder){
@@ -488,6 +515,7 @@ public class SALTHygieneDialog extends ECLJobEntryDialog{//extends JobEntryDialo
         jobEntry.setIncludeClusterSrc((this.includeClusterSrc.getText()));
         jobEntry.setIncludeSrcOutliers((this.includeSrcOutliers.getText()));
         jobEntry.setIncludeSrcProfiles((this.includeSrcProfiles.getText()));
+        jobEntry.setSrcField((this.srcField.getText()));
         dispose();
     }
 

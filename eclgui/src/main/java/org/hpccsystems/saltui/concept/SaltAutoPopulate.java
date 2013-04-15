@@ -10,8 +10,8 @@ import org.w3c.dom.NodeList;
 
 public class SaltAutoPopulate {
 
-	public EntryList entryList = new EntryList();
-	public ConceptRuleList fieldTypeList = new ConceptRuleList();
+	public ConceptEntryList entryList = new ConceptEntryList();
+	//public ConceptRuleList fieldTypeList = new ConceptRuleList();
 	
 	
 	  public  String[] getRule(List<JobEntryCopy> jobs, String datasetName, String columnName) throws Exception{
@@ -120,7 +120,7 @@ public class SaltAutoPopulate {
 	  public  void openFieldTypeList(String in){
 	        String[] strLine = in.split("[|]");
 	        int len = strLine.length;
-	        
+	        /*
 	        if(len>0){
 	            fieldTypeList = new ConceptRuleList();
 	            for(int i =0; i<len; i++){
@@ -129,7 +129,7 @@ public class SaltAutoPopulate {
 	                fieldTypeList.add(ft);
 	            }
 	        }
-	        
+	        */
 	        //fieldTypes
 	    }
 	  
@@ -137,9 +137,9 @@ public class SaltAutoPopulate {
 	        String[] strLine = in.split("[|]");
 	        int len = strLine.length;
 	        if(len>0){
-	            entryList = new EntryList();
+	            entryList = new ConceptEntryList();
 	            for(int i =0; i<len; i++){
-	                EntryBO eb = new EntryBO(strLine[i]);
+	                ConceptEntryBO eb = new ConceptEntryBO(strLine[i]);
 	                entryList.addEntryBO(eb);
 	            }
 	        }

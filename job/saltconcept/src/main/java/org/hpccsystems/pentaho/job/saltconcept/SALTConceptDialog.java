@@ -4,7 +4,6 @@
  */
 package org.hpccsystems.pentaho.job.saltconcept;
 
-import java.util.Iterator;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -15,7 +14,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -24,11 +22,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
@@ -38,18 +34,15 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.job.entry.JobEntryDialogInterface;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.Repository;
-import org.pentaho.di.ui.core.gui.WindowProperty;
 import org.pentaho.di.ui.job.dialog.JobDialog;
-import org.pentaho.di.ui.job.entry.JobEntryDialog;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
 import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
-import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.saltui.concept.*;
+import org.hpccsystems.saltui.concept.edit.*;
 import org.hpccsystems.ecljobentrybase.*;
 /**
  *
@@ -61,15 +54,14 @@ public class SALTConceptDialog extends ECLJobEntryDialog{//extends JobEntryDialo
     private Text jobEntryName;
     private Combo datasetName;
     private Combo layout;
-    private Label outLabel;
     
     private Button wOK, wCancel;
     private boolean backupChanged;
     private SelectionAdapter lsDef;
     
     CreateTable createTable = null;
-    private EntryList entryList;
-    private ConceptRuleList fieldTypeList;
+    private ConceptEntryList entryList;
+    //private ConceptRuleList fieldTypeList;
     
 
 
@@ -174,15 +166,17 @@ public class SALTConceptDialog extends ECLJobEntryDialog{//extends JobEntryDialo
 
         item1.setControl(compForGrp);
         this.datasetName = buildCombo("Dataset Name", null, lsMod, middle, margin, joinGroup,datasets);
-        outLabel = buildLabel("The Output will be stored as a file on the cluster as \r\n" +
-        		"~SPOONFILES::[Dataset Name]_CleanedData.\r\n\r\n", this.datasetName, lsMod, 0, margin, joinGroup);
+       
 
         createTable = new CreateTable(shell);
+        String[] items = null;// = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
         try{
-	        String[] items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+	        //String[] items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+        	items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
 	        createTable.loadFields(items);
 	        
         }catch (Exception exc){
+        	exc.printStackTrace();
         	System.out.println("error loading dataset fields");
         }
         datasetName.addModifyListener(new ModifyListener(){
@@ -192,14 +186,13 @@ public class SALTConceptDialog extends ECLJobEntryDialog{//extends JobEntryDialo
                 try{
                 	String[] items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
                 	createTable.loadFields(items);
-                	outLabel.setText("The Output will be stored as a file on the cluster as \r\n~SPOONFILES::" + datasetName.getText() + "_CleanedData.\r\n\r\n");
-                }catch (Exception exc){
+                	}catch (Exception exc){
                 	System.out.println("error loading dataset fields");
                 }
             }
         });
         
-        createTable = new CreateTable(shell);
+        createTable = new CreateTable(shell,items);
         
         //String[] items = ap.fieldsByDataset( leftRecordSet.getText(),jobMeta.getJobCopies());
         
@@ -214,12 +207,12 @@ public class SALTConceptDialog extends ECLJobEntryDialog{//extends JobEntryDialo
                     }
             }*/
         }
-        if(jobEntry.getFieldTypeList() != null){
-        	fieldTypeList = jobEntry.getFieldTypeList();
-        	createTable.setRuleList(jobEntry.getFieldTypeList());
-        }
-        TabItem item2 = createTable.buildDetailsTab("Rules", tabFolder);
-       
+       // if(jobEntry.getFieldTypeList() != null){
+       // 	fieldTypeList = jobEntry.getFieldTypeList();
+        //	createTable.setRuleList(jobEntry.getFieldTypeList());
+        //}
+        TabItem item2 = createTable.buildDetailsTab("Concepts", tabFolder);
+        
         wOK = new Button(shell, SWT.PUSH);
         wOK.setText("OK");
         wCancel = new Button(shell, SWT.PUSH);
@@ -228,7 +221,7 @@ public class SALTConceptDialog extends ECLJobEntryDialog{//extends JobEntryDialo
         BaseStepDialog.positionBottomButtons(shell, new Button[]{wOK, wCancel}, margin, tabFolder);
 
         
-       
+        
       
         // Add listeners
         Listener cancelListener = new Listener() {
@@ -274,16 +267,14 @@ public class SALTConceptDialog extends ECLJobEntryDialog{//extends JobEntryDialo
         if (jobEntry.getDatasetName() != null) {
             this.datasetName.setText(jobEntry.getDatasetName());
         }
-       // if (jobEntry.getLayout() != null) {
-        //    this.layout.setText(jobEntry.getLayout());
-        //}
-        if (jobEntry.getCleanData() != null) {
-            this.cleanedOutput.setText(jobEntry.getCleanData());
-        }
-
+       
+        tabFolder.redraw();
         shell.pack();
         shell.open();
         while (!shell.isDisposed()) {
+        	//if(createTable.hasChanged){
+        	//	createTable.refreshTable();
+        	//}
             if (!display.readAndDispatch()) {
                 display.sleep();
             }
@@ -314,14 +305,6 @@ public class SALTConceptDialog extends ECLJobEntryDialog{//extends JobEntryDialo
         
 		
 	
-		/*
-		Composite compForGrp2 = new Composite(tabFolder, SWT.NONE);
-        //compForGrp.setLayout(new FillLayout(SWT.VERTICAL));
-        compForGrp2.setBackground(new Color(tabFolder.getDisplay(),255,255,255));
-        compForGrp2.setLayout(new FormLayout());
-        */
-        
-		//this.addChildControls(compForGrp2);
         FormLayout groupLayout = new FormLayout();
         groupLayout.marginWidth = 10;
         groupLayout.marginHeight = 10;
@@ -332,19 +315,7 @@ public class SALTConceptDialog extends ECLJobEntryDialog{//extends JobEntryDialo
             }
         };
         
-		/*Group generalGroup2 = new Group(compForGrp2, SWT.SHADOW_NONE);
-        props.setLook(generalGroup2);
-        generalGroup2.setText("General Details");
-        generalGroup2.setLayout(groupLayout);
-        FormData generalGroupFormat2 = new FormData();
-        generalGroupFormat2.top = new FormAttachment(0, 0);
-        generalGroupFormat2.width = 400;
-        generalGroupFormat2.height = 65;
-        generalGroupFormat2.left = new FormAttachment(0, 0);
-        generalGroup2.setLayoutData(generalGroupFormat2);
-        
-        Text jobEntryName2 = buildText("Job Entry Name", null, lsMod, 0, 0, generalGroup2);
-        */
+		
         GridData gridData = new GridData (GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_BOTH);
         compForGrp2.setLayoutData (gridData);
 
@@ -376,18 +347,15 @@ public class SALTConceptDialog extends ECLJobEntryDialog{//extends JobEntryDialo
 		table.setHeaderVisible(true);
 		
 		TableColumn column = new TableColumn(table, SWT.LEFT, 0);
-        column.setText("Fields");
-        column.setWidth(250);
+        column.setText("Concepts");
+        column.setWidth(500);
+      
         
-        TableColumn column2 = new TableColumn(table, SWT.LEFT, 1);
-        column2.setText("Rules");
-        column2.setWidth(250);
-        
-        TableColumn column3 = new TableColumn(table, SWT.CENTER, 2);
+        TableColumn column3 = new TableColumn(table, SWT.CENTER, 1);
         column3.setText("");
         column3.setWidth(50);
         
-        TableColumn column4 = new TableColumn(table, SWT.CENTER, 3);
+        TableColumn column4 = new TableColumn(table, SWT.CENTER, 2);
         column4.setText("");
         column4.setWidth(50);
 
@@ -411,10 +379,7 @@ public class SALTConceptDialog extends ECLJobEntryDialog{//extends JobEntryDialo
     		isValid = false;
     		errors += "\"Dataset Name\" is a required field!\r\n";
     	}
-    	//if(this.layout.getText().equals("")){
-    	//	isValid = false;
-    	//	errors += "\"Layout\" is a required field!\r\n";
-    	//}
+
     	
     	
     	if(!isValid){
@@ -436,8 +401,7 @@ public class SALTConceptDialog extends ECLJobEntryDialog{//extends JobEntryDialo
         jobEntry.setDatasetName(datasetName.getText());
         //jobEntry.setLayout(layout.getText());
         jobEntry.setEntryList(createTable.getEntryList());
-        jobEntry.setFieldTypeList(createTable.getRuleList());
-        jobEntry.setCleanData((this.cleanedOutput.getText()));
+      //  jobEntry.setFieldTypeList(createTable.getEntryList());
         dispose();
     }
 

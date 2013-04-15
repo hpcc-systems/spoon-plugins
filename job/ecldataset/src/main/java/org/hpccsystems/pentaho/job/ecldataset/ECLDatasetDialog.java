@@ -236,7 +236,7 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
 				
 				ArrayList<String[]> details = hsi.fetchFileDetails(file);
 				
-				if(details.size()>0){
+				if(details != null && details.size()>0){
 					ErrorNotices en = new ErrorNotices();
 					if(en.openComfirmDialog(getParent(), "Do you want to eplace your current Record Structure on the\r\nFields tab with the one stored on the server?")){
 						ct.setRecordList(jobEntry.ArrayListToRecordList(details));

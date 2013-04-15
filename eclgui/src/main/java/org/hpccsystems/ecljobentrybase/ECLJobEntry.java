@@ -78,8 +78,10 @@ return null;
     public void saveRep(Repository rep, ObjectId id_job) throws KettleException {
 
     }
-    
     public String resultListToString(RecordList recordList){
+    	return ECLJobEntry.resultListToStringStatic(recordList);
+    }
+    public static String resultListToStringStatic(RecordList recordList){
         String out = "";
         
         if(recordList != null){

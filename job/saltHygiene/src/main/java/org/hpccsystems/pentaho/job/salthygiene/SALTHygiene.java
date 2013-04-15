@@ -43,7 +43,7 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
     private String layout;
     private String cleanData;
 	//private String rules;
-	private EntryList entryList = new EntryList();
+	private HygieneEntryList entryList = new HygieneEntryList();
 	private String srcField;
 	
 	private String includeSrcOutliers;
@@ -71,10 +71,10 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
 	public void setFieldTypeList(HygieneRuleList fieldTypeList) {
 		this.fieldTypeList = fieldTypeList;
 	}
-	public EntryList getEntryList() {
+	public HygieneEntryList getEntryList() {
 		return entryList;
 	}
-	public void setEntryList(EntryList entryList) {
+	public void setEntryList(HygieneEntryList entryList) {
 		this.entryList = entryList;
 	}
 	
@@ -120,8 +120,8 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
 	}
 	public String saveEntryList(){
         String out = "";
-        ArrayList<EntryBO> list = entryList.getEntries();
-        Iterator<EntryBO> itr = list.iterator();
+        ArrayList<HygieneEntryBO> list = entryList.getEntries();
+        Iterator<HygieneEntryBO> itr = list.iterator();
         boolean isFirst = true;
         while(itr.hasNext()){
             if(!isFirst){out+="|";}
@@ -138,9 +138,9 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
         String[] strLine = in.split("[|]");
         int len = strLine.length;
         if(len>0){
-            entryList = new EntryList();
+            entryList = new HygieneEntryList();
             for(int i =0; i<len; i++){
-                EntryBO eb = new EntryBO(strLine[i]);
+                HygieneEntryBO eb = new HygieneEntryBO(strLine[i]);
                 entryList.addEntryBO(eb);
             }
         }
@@ -184,6 +184,9 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
 	@Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
+		String recordName = System.getProperties().getProperty("Dataset-" + this.datasetName+"-rs");
+		String fileType = System.getProperties().getProperty("Dataset-" + this.datasetName+"-type");
+		String dsName = System.getProperties().getProperty("Dataset-" + this.datasetName+"-ds");
         Result result = prevResult;
         
         AutoPopulate ap = new AutoPopulate();
@@ -203,6 +206,7 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
         
         SaltHygieneReport shr = new SaltHygieneReport();
         shr.setDatasetName(datasetName);
+        shr.setRecordName(recordName);
         shr.setName(this.getName());
         shr.setSaltLib(jobNameNoSpace + "module");
         shr.setLayout(this.getLayout());
@@ -212,6 +216,22 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
         	shr.setOutputCleanedDataset(false);
         }
         
+        if(this.srcField != null && !this.srcField.equals("")){
+        	if(this.includeClusterCounts.equalsIgnoreCase("yes")){
+        		shr.setIncludeClusterCounts(true);
+        	}
+        	
+        	if(this.includeClusterSrc.equalsIgnoreCase("yes")){
+        		shr.setIncludeClusterSrc(true);
+        	}
+        	
+        	if(this.includeSrcOutliers.equalsIgnoreCase("yes")){
+        		shr.setIncludeSrcOutliers(true);
+        	}
+        	if(this.includeSrcProfiles.equalsIgnoreCase("yes")){
+        		shr.setIncludeSrcProfiles(true);
+        	}
+        }
        
         logBasic("{Dataset Job} Execute = " + shr.ecl());
         logBasic("{Dataset Job} Previous =" + result.getLogText());

@@ -866,6 +866,12 @@ public class AutoPopulate {
                           
                                   
 
+                       }else if(type.equalsIgnoreCase("ECLExecute")){
+                    	   if(ofType.equalsIgnoreCase("file_name")){
+                               out = XMLHandler.getNodeValue(
+                                   XMLHandler.getSubNode(nNode, "file_name")
+                               );
+                          }
                        }
                       
                        
@@ -1018,5 +1024,7 @@ public class AutoPopulate {
          return isType;
 
      }
+    
+    
     
 }
