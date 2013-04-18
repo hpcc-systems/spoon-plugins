@@ -48,7 +48,7 @@ public class RenderWebDisplay {
             e.printStackTrace();
         }  
 		
-		this.openUrl(outFile);
+		//this.openUrl(outFile);
 		
 	}
 	
