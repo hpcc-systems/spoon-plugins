@@ -157,7 +157,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
         
 	
 	        JobMeta jobMeta = super.parentJob.getJobMeta();
-	                
+	        String serverAddress = "";        
 	        String serverHost = "";
 	        String serverPort = "";
 	        String cluster = "";
@@ -190,7 +190,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	
 	            serverHost = ap.getGlobalVariable(jobMeta.getJobCopies(),"server_ip");
 	            serverPort = ap.getGlobalVariable(jobMeta.getJobCopies(),"server_port");
-	
+	            serverAddress = "http://" + serverHost + ":" + serverPort;
 	            cluster = ap.getGlobalVariable(jobMeta.getJobCopies(),"cluster");
 	            jobName = ap.getGlobalVariable(jobMeta.getJobCopies(),"jobName");
 	            jobNameNoSpace = jobName.replaceAll("[^A-Za-z0-9]", "");//jobName.replace(" ", "_"); 
@@ -482,6 +482,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
              
             
             ArrayList<String> resultNames = eclDirect.getResultNames();
+            writeResultsLog(resultNames,eclDirect.getWuid(),jobName,serverAddress);
             for (int n = 0; n<resultNames.size(); n++){
             	System.out.println("+++Results --------------------" + resultNames.get(n));
             	resName = resultNames.get(n);
@@ -500,7 +501,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	         		}
 	            }
 	            
-	            cacheOutputInfo("Dataprofiling_SummaryReport","saltSummaryData", resName);
+	            //cacheOutputInfo("Dataprofiling_SummaryReport","saltSummaryData", resName);
 	            
 	            /*if(resName.equalsIgnoreCase("Dataprofiling_SummaryReport")){
 	            
@@ -513,7 +514,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	            }*/
 	            //Dataprofiling_OptimizedLayout
 	            //saltOptimizedLayouts
-	            cacheOutputInfo("Dataprofiling_OptimizedLayout","saltOptimizedLayouts", resName);
+	            //cacheOutputInfo("Dataprofiling_OptimizedLayout","saltOptimizedLayouts", resName);
 	            /*
 	            if(resName.equalsIgnoreCase("Dataprofiling_OptimizedLayout")){
 		            
@@ -527,17 +528,17 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	            */
 	         
 	            //SrcOutliers
-	            cacheOutputInfo("SrcOutliers","saltSrcOutliers", resName);
+	            //cacheOutputInfo("SrcOutliers","saltSrcOutliers", resName);
 	            //ClusterSrc
-	            cacheOutputInfo("ClusterSrc","saltClusterSrc", resName);
+	           // cacheOutputInfo("ClusterSrc","saltClusterSrc", resName);
 	            //ClusterCounts
-	            cacheOutputInfo("ClusterCounts","saltClusterCounts", resName);
+	            //cacheOutputInfo("ClusterCounts","saltClusterCounts", resName);
 	            //SrcProfiles
-	            cacheOutputInfo("SrcProfiles","saltSrcProfiles", resName);
+	            //cacheOutputInfo("SrcProfiles","saltSrcProfiles", resName);
 	            //Hygiene_ValidityErrors
-	            cacheOutputInfo("Hygiene_ValidityErrors","saltHygiene_ValidityErrors", resName);
+	            //cacheOutputInfo("Hygiene_ValidityErrors","saltHygiene_ValidityErrors", resName);
 	            //CleanedData
-	            cacheOutputInfo("CleanedData","saltCleanedData", resName);
+	           // cacheOutputInfo("CleanedData","saltCleanedData", resName);
             }
         
        }
@@ -546,7 +547,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
        return result;
     }
 	
-	public void cacheOutputInfo(String thisResName,String propertyName, String resName){
+	/*public void cacheOutputInfo(String thisResName,String propertyName, String resName){
 		try{
 		if(resName.equalsIgnoreCase(thisResName)){
             
@@ -560,8 +561,21 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 		}catch (Exception e){
 			System.out.println("Error Setting result data");
 		}
+	}*/
+	public void cacheOutputInfo(String fileName){
+		String propertyName = "resultsFile";
+		try{
+        	String resultData = System.getProperty(propertyName);
+     		if(resultData != null && !resultData.equals("")){
+     			System.setProperty(propertyName,  resultData + "," + fileName);
+     		}else{
+     			System.setProperty(propertyName,  fileName);
+     		}
+
+		}catch (Exception e){
+			System.out.println("Error Setting result data");
+		}
 	}
-	
 	
 	
     
@@ -634,7 +648,32 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
     }
     
     
-    
+   
+    public void writeResultsLog(ArrayList<String> resultNames, String wuid, String jobname, String serverAddress){
+    	String xml = "<elcResults>\r\n";
+    	xml += "<wuid><![CDATA[" + wuid + "]]></wuid>\r\n";
+    	xml += "<jobname><![CDATA[" + jobname + "]]></jobname>\r\n";
+    	xml += "<serverAddress><![CDATA[" + serverAddress + "]]></serverAddress>\r\n";
+    	for (int n = 0; n<resultNames.size(); n++){
+        	String resName = "";
+        	resName = resultNames.get(n);
+        	xml += "<result resulttype=\"" + resName + "\">";
+        	xml += "<![CDATA[" + this.fileName + "\\" + resName + ".csv]]>";
+        	xml += "</result>\r\n";
+    	}
+    	xml += "</elcResults>";
+    	//write file as results.xml
+    	String resultFile = this.fileName + "\\results.xml";
+    	 try {              
+             //System.getProperties().setProperty("resultsFile",resultFile);
+             cacheOutputInfo(resultFile);
+             BufferedWriter out = new BufferedWriter(new FileWriter(resultFile));
+             out.write(xml);
+             out.close();
+         } catch (IOException e) {
+              e.printStackTrace();
+         }   
+    }
     
     
    

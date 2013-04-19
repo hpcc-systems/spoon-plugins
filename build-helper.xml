@@ -28,8 +28,8 @@
 			<zipfileset dir="./eclsalt/target" includes="eclsalt.jar" prefix="hpcc-common" />
 			<zipfileset dir="./perspectives/eclresults/target" includes="eclresults.jar" prefix="spoon/eclresults" />
 			<zipfileset dir="./perspectives/eclresults/src/main/resources/plugin" includes="plugin.xml" prefix="spoon/eclresults" />
-			<zipfileset dir="./perspectives/saltresults/target" includes="saltresults.jar" prefix="spoon/saltresults" />
-			<zipfileset dir="./perspectives/saltresults/src/main/resources/plugin" includes="plugin.xml" prefix="spoon/saltresults" />
+			
+			
 			<zipfileset dir="./job/ecldataset/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecldataset" />
 			<zipfileset dir="./job/ecldataset/target" includes="ecldataset.jar" prefix="jobentries/ecldataset" />
 			<zipfileset dir="./job/ecldedup/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecldedup" />

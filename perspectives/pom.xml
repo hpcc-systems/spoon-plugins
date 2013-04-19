@@ -14,7 +14,8 @@
 
 	<modules>
 		<module>eclresults</module>
-		<module>saltresults</module>
+	
+		
 	</modules>
 
 	<properties>

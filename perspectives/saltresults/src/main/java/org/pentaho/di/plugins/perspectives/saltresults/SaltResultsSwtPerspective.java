@@ -138,7 +138,7 @@ public class SaltResultsSwtPerspective implements SpoonPerspective {
     };
      
     fileButton.addListener(SWT.Selection, fileOpenListener);
-Button fileButtonSummary = new Button(btnComp, SWT.PUSH | SWT.SINGLE | SWT.TOP);
+    Button fileButtonSummary = new Button(btnComp, SWT.PUSH | SWT.SINGLE | SWT.TOP);
     
     fileButtonSummary.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
     fileButtonSummary.setText("OPEN Data Summary FILE");
