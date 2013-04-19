@@ -146,6 +146,7 @@ public class Constants {
 	
 	public static final String OPTIMIZED_LAYOUT_TITLE = "Optimized Layout";
 	
+	// ****************** START OF FIELD'S FOR SOURCE_OUTLIERS REPORT **************************
 	// Column Headers for SourceOutliers Report
 	public static final String SOURCE_OUTLIERS_TITLE = "Source Outliers Report";
 	public static final String KEY_SOURCE_OUTLIERS_FIELD_NAME = "Field Name";
@@ -155,15 +156,43 @@ public class Constants {
 	public static final String[] ARRAY_SOURCE_OUTLIERS_COL_HEADERS = { KEY_SOURCE_OUTLIERS_FIELD_NAME,
 		KEY_SOURCE_OUTLIERS_FIELD_VALUE, KEY_SOURCE_OUTLIERS_SOURCE, KEY_SOURCE_OUTLIERS_COUNT };
 
-	// ****************** END OF FIELD'S FOR SourceOutliers REPORT ****************************
+	// ****************** END OF FIELD'S FOR SOURCE_OUTLIERS REPORT ****************************
 	
+	// ****************** START OF FIELD'S FOR CLUSTER_COUNTS REPORT **************************
 	// Column Headers for Cluster Counts Report
 	public static final String CLUSTER_COUNTS_TITLE = "Cluster Counts Report";
 	public static final String KEY_CLUSTER_COUNTS_INCLUSTER = "InCluster";
 	public static final String KEY_CLUSTER_COUNTS_NO_OF_CLUSTERS = "Number Of Clusters";
 	public static final String[] ARRAY_CLUSTER_COUNTS_COL_HEADERS = { KEY_CLUSTER_COUNTS_INCLUSTER, KEY_CLUSTER_COUNTS_NO_OF_CLUSTERS };
 
-	// ****************** END OF FIELD'S FOR Cluster Counts REPORT ****************************
+	// ****************** END OF FIELD'S FOR CLUSTER_COUNTS REPORT ****************************
 	
+	// ****************** START OF FIELD'S FOR CLUSTER_SOURCES REPORT **************************
 	
+	public static final String CLUSTER_SOURCES_REPORT_TITLE = "Cluster Sources Report";
+	public static final String CLUSTER_SOURCES_SOURCE = "Source";
+	public static final String CLUSTER_SOURCES_TOTAL_COUNT = "Total Count";
+	public static final String CLUSTER_SOURCES_OCCUR_PCNT = "Occur Pcnt";
+	public static final String CLUSTER_SOURCES = "Sources";
+	public static final String CLUSTER_SOURCES_SRC = "Source";
+	public static final String CLUSTER_SOURCES_COOCCUR_PCNT = "Cooccur Pcnt";
+	public static final String CLUSTER_SOURCES_COOCCUR = "Cooccur";
+	public static final String CLUSTER_SOURCES_EXPECTED_COOCCUR = "Expected Cooccur";
+	public static final String[] ARRAY_CLUSTER_SOURCES_COL_HEADERS = { CLUSTER_SOURCES_SOURCE, CLUSTER_SOURCES_TOTAL_COUNT, CLUSTER_SOURCES_OCCUR_PCNT, CLUSTER_SOURCES };
+	
+	// ****************** END OF FIELD'S FOR CLUSTER_SOURCES REPORT **************************
+	
+	// ****************** START OF FIELD'S FOR SOURCE_PROFILES REPORT **************************
+	
+	public static final String SOURCE_PROFILES_REPORT_TITLE = "Source Profiles Report";
+	public static final String SOURCE_PROFILES_SOURCE = "Source";
+	public static final String SOURCE_PROFILES_PARENT_FIELDS = "Fields";
+	public static final String SOURCE_PROFILES_FIELD = "Field";
+	public static final String SOURCE_PROFILES_UNIQUE_VALUE = "Unique Value";
+	public static final String SOURCE_PROFILES_ONLY_VALUE = "Only Value";
+	public static final String SOURCE_PROFILES_GLOBALLY_UNIQUE_VALUE = "Globally Unique Value";
+	public static final String SOURCE_PROFILES_IDS_WITH_SRC = "Ids With Src";
+	public static final String[] ARRAY_SOURCE_PROFILES_COL_HEADERS = { SOURCE_PROFILES_SOURCE, SOURCE_PROFILES_PARENT_FIELDS};
+	
+	// ****************** END OF FIELD'S FOR SOURCE_PROFILES REPORT **************************
 }

@@ -54,6 +54,8 @@ import com.lexisnexis.ui.dataprofiling.DataProfileTable;
 import com.lexisnexis.ui.datasummary.DataSummaryTable;
 import com.lexisnexis.ui.optimizedlayout.OptimizedLayoutMain;
 import com.lexisnexis.ui.sourceoutliers.SourceOutliersTable;
+import com.lexisnexis.ui.clustersources.ClusterSourcesTable;
+import com.lexisnexis.ui.sourceprofiles.SourceProfilesTable;
 
 public class ECLResultsSwtPerspective implements SpoonPerspective {
 
@@ -315,9 +317,10 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
   }
   public void buildClusterSrcTab(String thefilename,String resType,CTabFolder subfolder){
 	  System.out.println("buildClusterSrcTab");
-	   // ClusterSourceTable table = new ClusterSrcTable(thefilename);
-	    //table.createContents(folder);
-	  buildTab(thefilename,resType,subfolder);
+	  ClusterSourcesTable table = new ClusterSourcesTable(thefilename);
+	   table.createContents(subfolder);
+	   subfolder.setSelection(subfolder.getItemCount()-1);
+	   //buildTab(thefilename,resType,subfolder);
   }
   public void buildClusterCountsTab(String thefilename,String resType,CTabFolder subfolder){
 	  System.out.println("buildClusterCountsTab");
@@ -327,9 +330,10 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
   }
   public void buildSrcProfilesTab(String thefilename,String resType,CTabFolder subfolder){
 	  System.out.println("buildSrcProfilesTab");
-	   // SourceOutliersTable table = new SourceOutliersTable(thefilename);
-	   // table.createContents(folder);
-	  buildTab(thefilename,resType,subfolder);
+	    SourceProfilesTable table = new SourceProfilesTable(thefilename);
+	    table.createContents(subfolder);
+	    subfolder.setSelection(subfolder.getItemCount()-1);
+	  //buildTab(thefilename,resType,subfolder);
   }
   public void buildHygieneValidityErrorsTab(String thefilename,String resType,CTabFolder subfolder){
 	  System.out.println("buildHygieneValidityErrorsTab");
