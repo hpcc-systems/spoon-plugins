@@ -391,109 +391,115 @@ public class CreateTable {
 		
 	}// End of createTable method
 	
-	int currIndex = 0;
 	/**
-	 * Create a TableViewer
+	 * Create a TableViewer 
 	 */
 	private void createTableViewer() {
 
 		tableViewer = new TableViewer(table);
 		tableViewer.setUseHashlookup(true);
-		
 		tableViewer.setColumnProperties(columnNames);
 
 		// Create the cell editors
 		CellEditor[] editors = new CellEditor[columnNames.length];
-                
-                if(columnNames.length >= 1){
-                    // Column 1 : Column Name(Free text)
-                    TextCellEditor colNameTextEditor = new TextCellEditor(table);
-                    ((Text) colNameTextEditor.getControl()).setTextLimit(30);
-                    editors[0] = colNameTextEditor;
-                }
-                
-                if(columnNames.length >= 2){
-                    // Column 2 : Default Value(Free text)
-                    TextCellEditor colDefaultTextEditor = new TextCellEditor(table);
-                    ((Text) colDefaultTextEditor.getControl()).setTextLimit(30);
-                    editors[1] = colDefaultTextEditor;
-                }
-                
-                if(columnNames.length >= 3){
-                    // Column 3 : Column Type (Combo Box) 
-                    final ComboBoxCellEditor c = new ComboBoxCellEditor(table, recordList.getColTypes(), SWT.DROP_DOWN|SWT.READ_ONLY);
-                    
-                    
-                    currIndex = ((CCombo)c.getControl()).getSelectionIndex();
-                    c.getControl().addKeyListener(new KeyListener() {
-              	      String selectedItem = "";
+		
+		// Column 1 : Column Name(Free text)
+		if(columnNames.length >= 1) {
+			// Column 1 : Column Name(Free text)
+			TextCellEditor colNameTextEditor = new TextCellEditor(table);
+			((Text) colNameTextEditor.getControl()).setTextLimit(30);
+			editors[0] = colNameTextEditor;
+		}
+		
+		// Column 2 : Default Value(Free text)
+		if(columnNames.length >= 2) {
+			// Column 2 : Default Value(Free text)
+			TextCellEditor colDefaultTextEditor = new TextCellEditor(table);
+			((Text) colDefaultTextEditor.getControl()).setTextLimit(30);
+			editors[1] = colDefaultTextEditor;
+		}
+        
+		// Column 3 : Column Type (Combo Box) 
+		if(columnNames.length >= 3) {
+			// Column 3 : Column Type (Combo Box) 
+			final ComboBoxCellEditor c = new ComboBoxCellEditor(table, recordList.getColTypes(), SWT.DROP_DOWN|SWT.READ_ONLY);
+			c.getControl().addKeyListener(new KeyListener() {
+				String selectedItem = "";
+				public String letter = "";
+				public List<String> tempList = null;
+				public void keyPressed(KeyEvent e) {
+					
+				} //End of keyPressed event
 
-            	      public void keyPressed(KeyEvent e) {
-            	    	 // System.out.println("test: " + ((CCombo)c.getControl()).getText());
-            	        if (((CCombo)c.getControl()).getText().length() > 0) {
-            	        	System.out.println("cant getText");
-            	          //return;
-            	        }
-            	        int currentSel = ((CCombo)c.getControl()).getSelectionIndex();
+				public void keyReleased(KeyEvent e) {
+					String key = Character.toString(e.character);
+					String[] items = c.getItems();
+					for (int i = 0; i < items.length; i++) {
+						if (items[i].toLowerCase().startsWith(key.toLowerCase())) {
+							if(!letter.equals(key)){
+								tempList = new ArrayList<String>();
+							}
+							if (items[i].equalsIgnoreCase("select")) {
+								continue;
+							} else {
+								if(!tempList.contains(items[i])){
+									tempList.add(items[i]);
+									if(isLastItem(recordList.getColTypes(), items[i], key)){
+										((CCombo) c.getControl()).select(i);
+										tempList = new ArrayList<String>();
+									} else {
+										((CCombo) c.getControl()).select(i);
+									}
+									letter = key;
+									return;
+								} 
+							}
+						}
+					} //End of for loop
+				} //End of keyReleased event
 
-            	        String key = Character.toString(e.character);
-            	        String[] items = ((CCombo)c.getControl()).getItems();
-            	       
-            	        for (int i = currentSel; i < items.length; i++) {
-            	          if (items[i].toLowerCase().startsWith(key.toLowerCase())) {
-            	        	  if(i != currentSel){
-            	        		  currIndex = i;
-            	        		  return;
-            	        	  }
-            	          }
-            	        }
-            	        
-            	        for (int i = 1; i < items.length; i++) {
-              	          if (items[i].toLowerCase().startsWith(key.toLowerCase())) {
-              	        	  	  currIndex = i;
-              	        		  return;
-              	          }
-              	        }
-              	        
-            	      }
-
-					@Override
-					public void keyReleased(KeyEvent arg0) {
-						 int oldIndex = currIndex;
-						 currIndex = ((CCombo)c.getControl()).getSelectionIndex();
-						 
-						 //hack to fix double jump when box is open
-						 //if pentaho ever upgrades to new version of swing 
-						 //there is a cleaner way to do this
-						 if(Math.abs(currIndex-oldIndex) == 2){
-							 oldIndex--;
-						 }
-						 ((CCombo)c.getControl()).select(oldIndex);
-					}
-
-            	    });
-                    editors[2] = c;
-                }
-                if(columnNames.length >= 4){
-                    // Column 4 : Column Width (Text with digits only)
-                    TextCellEditor colWidthTextEditor = new TextCellEditor(table);
-                    ((Text) colWidthTextEditor.getControl()).setTextLimit(10);
-                    editors[3] = colWidthTextEditor;
-                    /*((Text) colWidthTextEditor.getControl()).addVerifyListener(
-
-                            new VerifyListener() {
-                                    public void verifyText(VerifyEvent e) {
-                                            // Here, we could use a RegExp such as the following 
-                                            // if using JRE1.4 such as  e.doit = e.text.matches("[\\-0-9]*");
-                                            e.doit = "0123456789".indexOf(e.text) >= 0 ;
-                                    }
-                            });
-                    editors[3] = colWidthTextEditor;*/
-                }
+			}); //End of addKeyListener
+			
+			editors[2] = c;
+		}
+		
+		// Column 4 : Column Width (Text with digits only)
+		if(columnNames.length >= 4){
+			TextCellEditor colWidthTextEditor = new TextCellEditor(table);
+			((Text) colWidthTextEditor.getControl()).setTextLimit(10);
+			editors[3] = colWidthTextEditor;
+		}
 		// Assign the cell editors to the viewer 
 		tableViewer.setCellEditors(editors);
 		// Set the cell modifier for the viewer
 		tableViewer.setCellModifier(new ColumnCellModifiers(this));
+	}
+	
+	/**
+	 * Check if the item is the last item in the array for the key.
+	 * @param array
+	 * @param item
+	 * @param key
+	 * @return true if it is the last element
+	 */
+	public boolean isLastItem(String[] array, String item, String key){ 
+		
+		boolean result = false;
+		List<String> listArl = new ArrayList<String>();
+		
+		for (int i = 0; i < array.length; i++) {
+			if(array[i].toLowerCase().startsWith(key)) {
+				listArl.add(array[i]);
+			}
+		}
+		
+		if(listArl != null && listArl.size() > 0) {
+			if(listArl.indexOf(item)+1 == listArl.size()){
+				result = true;
+			} 
+		}
+		
+		return result;
 	}
 	
 	/**
