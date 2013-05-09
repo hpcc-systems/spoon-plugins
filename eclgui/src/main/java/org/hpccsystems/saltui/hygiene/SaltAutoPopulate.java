@@ -183,10 +183,10 @@ public class SaltAutoPopulate {
 	    
 	}
 	  public  String[] getRule(List<JobEntryCopy> jobs, String datasetName, String columnName) throws Exception{
-	        System.out.println(" ------------ parseDataSet ------------- ");
-	        System.out.println(" ------------ parseDataSet ------------- ");
-	        System.out.println(" ------------ parseDataSet ------------- ");
-	        System.out.println(" ------------ parseDataSet ------------- ");
+	        //System.out.println(" ------------ parseDataSet ------------- ");
+	        //System.out.println(" ------------ parseDataSet ------------- ");
+	        //System.out.println(" ------------ parseDataSet ------------- ");
+	        //System.out.println(" ------------ parseDataSet ------------- ");
 		    //find the node "Salt Hygiene"
 		    //get the rule;
 		  
@@ -280,7 +280,7 @@ public class SaltAutoPopulate {
 	        }
 	        //saving the loop code using arraylists
 	        datasets = adDS.toArray(new String[k]);
-	        System.out.println(" ------------ end parseDataSet ------------- ");
+	        //System.out.println(" ------------ end parseDataSet ------------- ");
 	        return datasets;
 	    }
 	  

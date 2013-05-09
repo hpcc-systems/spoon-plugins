@@ -1,9 +1,13 @@
 package org.hpccsystems.pentaho.job.eclexecute;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -89,7 +93,7 @@ public class ECLExecuteSalt extends ECLJobEntry {
         	saltIncludePath = fileName+ "";
         }
         if(includeSALT.equalsIgnoreCase("true") && !isInternalLinking){
-        System.out.println("----------- insert code here to build spec file on compile");
+        //System.out.println("----------- insert code here to build spec file on compile");
 	        try{
 	        	//find all the datasets and build xml files
 	        	String[] datasets = ap.parseDatasets(jobMeta.getJobCopies());
@@ -297,10 +301,107 @@ public class ECLExecuteSalt extends ECLJobEntry {
 		return xml;
 	}
 	*/
+	public static void main(String[] args){
+		compileSalt("C:\\tools\\SALT", "C:\\Spoon Demos\\new\\saltdemos\\dataprofile_out\\salt.spc","C:\\Spoon Demos\\new\\saltdemos\\dataprofile_out","SpoonDataProfile","","C:\\Spoon Demos\\new\\saltdemos\\dataprofile_out");
+	}
+	
+	  public static boolean compileSalt(String saltPath, String spcFile, String outputDir, String jobNameNoSpace, String error, String fileName){
+		System.out.println("Start");
+		String saltExe = "salt.exe";
+		if (!System.getProperty("os.name").startsWith("Windows")) {
+        	saltExe = "salt";
+        }
+		boolean saltExists = (new File(saltPath + "\\" + saltExe)).exists();
+		boolean outExists = (new File(outputDir).exists());
+		boolean success = false;
+		if(saltExists && outExists){
+			String cmd = "\"" + saltPath + "\\" + saltExe + "\" -ga -D\"" + outputDir + "\" \"" + spcFile + "\"";
+			//System.out.println("-->" + cmd + "<--");
+		 	try{
+		 		String c = saltPath + "\\" + saltExe + "";
+		 		ArrayList<String> paramsAL = new ArrayList<String>();
+	            paramsAL.add(c);
+	            paramsAL.add("-ga");
+	            //paramsAL.add("-D");
+	            paramsAL.add("-D"+outputDir);
+	            paramsAL.add(spcFile);
+	            String [] params = new String[paramsAL.size()];
+	            paramsAL.toArray(params);
+		 		ProcessBuilder pb = new ProcessBuilder(params);
+		 		
+		 		System.out.println(pb.command().toString());
+	            pb.redirectErrorStream(true); // merge stdout, stderr of process
+	            //File path = new File(saltPath);
+	           // pb.directory(path);
+	            Process p = pb.start();
+	          //  System.out.println(pb.command());
+	            
+	            InputStream iError = p.getErrorStream();
+	            InputStreamReader isrError = new InputStreamReader(iError);
+	            BufferedReader brErr = new BufferedReader(isrError);
+	            String lineErr = "";
+	            String fullLineErr = "";
+	            while((lineErr = brErr.readLine()) != null){
+	                //System.out.println("#####"+lineErr);
+	                fullLineErr += lineErr;
+	            }
+	            
+	            InputStream is = p.getInputStream();
+	            InputStreamReader isr = new InputStreamReader(is);
+	            BufferedReader br = new BufferedReader(isr);
+	            String line = "";
+	            String fullLine = "";
+	            while((line = br.readLine()) != null){
+	                //System.out.println(line);
+	                fullLine += line;
+	            }
+	           //System.out.println(pb.command());
+	           // System.out.println("SALT ERROR:");
+				//System.out.println(lineErr);
+				//System.out.println("SALT Results");
+				//System.out.println(line);
+
+				//block until salt compile is completed
+	                int b = 0;
+	                while(!(new File(fileName + "\\" + jobNameNoSpace + "module")).exists() && b < 150){
+	                	Thread.sleep(1000);
+	                	b++;
+	                }
+	                System.out.println("Finished salt compile");
+					if((new File(fileName + "\\" + jobNameNoSpace + "module")).exists()){
+						success = true;
+					}
+				 System.out.println("SALT Success Status: " + success);
+				 
+                    
+		 	}catch (Exception e){
+	            System.out.println(e.toString());
+	            e.printStackTrace();
+	            error += "Couldn't Locate the Salt Install and/or the output Directory Please Verify settings!";
+	            return false;
+	        }
+		}else{
+			//salt install doesn't exist
+			if(!saltExists){error += "Salt not found in provided path, please check Global Variables! \r\n";}
+			if(!outExists){error += "Output Directory defined in Execute step doesn't exist";}
+			success = false;
+		}
+		
+		return success;
+	}
+	/*
 	public static boolean compileSalt(String saltPath, String spcFile, String outputDir, String jobNameNoSpace, String error, String fileName){
 		boolean saltExists = (new File(saltPath + "\\salt.exe")).exists();
 		boolean outExists = (new File(outputDir).exists());
 		boolean success = false;
+		
+		System.out.println(saltPath);
+		System.out.println(spcFile);
+		System.out.println(outputDir);
+		System.out.println(jobNameNoSpace);
+		System.out.println(error);
+		System.out.println(fileName);
+		
 		if(saltExists && outExists){
 			String cmd = "\"" + saltPath + "\\salt.exe\" -ga -D\"" + outputDir + "\" \"" + spcFile + "\"";
 			//System.out.println("-->" + cmd + "<--");
@@ -309,7 +410,7 @@ public class ECLExecuteSalt extends ECLJobEntry {
 				 File path = new File(saltPath);
 				 Runtime rt = java.lang.Runtime.getRuntime();
 				 Process p = rt.exec(cmd, null, path);
-				 
+				 System.out.println("completed salt exe");
 				//block until salt compile is completed
 	                int b = 0;
 	                while(!(new File(fileName + "\\" + jobNameNoSpace + "module")).exists() && b < 150){
@@ -340,7 +441,7 @@ public class ECLExecuteSalt extends ECLJobEntry {
 		
 		return success;
 	}
-	
+	*/
 	public static String buildHygieneRule(JobMeta jobMeta, String datasetName, String columnName, String columnType){
 		String xml = "";
        // JobMeta jobMeta = super.parentJob.getJobMeta();

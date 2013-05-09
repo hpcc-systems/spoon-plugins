@@ -5,9 +5,4 @@
 	xmlns:HTML="http://www.w3.org/Profiles/XHTML-transitional" height="600" width="800" onload="modeler.init()"
     xmlns:pen="http://www.pentaho.org/2008/xul" >
 
-	<menupopup id="edit-popup">
-	    <menuitem label="Perspective-Only Action" id="perspective-action"
-              command="spoonHelloExample.sayHelloToPerspective()" />
-	</menupopup>
-
 </overlay>

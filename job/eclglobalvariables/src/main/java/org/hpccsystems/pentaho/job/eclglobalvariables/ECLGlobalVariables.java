@@ -41,11 +41,11 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
     private String landingZone = "";
     
     private String mlPath = "";
-    private String eclccInstallDir = "C:\\Program Files\\HPCC Systems\\HPCC\\bin\\ver_3_0\\";
+    private String eclccInstallDir = "";
     private String jobName = "Spoon-job";
-    private String cluster = "hthor";
+    private String cluster = "";
     private boolean includeML = false;
-    
+    private String compileFlags = "";
     private String user = "";
     private String pass = "";
     
@@ -56,7 +56,15 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
     
     
     
-    public String getMaxReturn() {
+    public String getCompileFlags() {
+		return compileFlags;
+	}
+
+	public void setCompileFlags(String compileFlags) {
+		this.compileFlags = compileFlags;
+	}
+
+	public String getMaxReturn() {
 		return maxReturn;
 	}
 
@@ -251,6 +259,8 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
             
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"password")) != null)
             	pass = (XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"password")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"compileFlags")) != null)
+            	compileFlags = (XMLHandler.getNodeValue(XMLHandler.getSubNode(node,"compileFlags")));
             
         } catch (Exception e) {
             throw new KettleXMLException("ECL Distribute Job Plugin Unable to read step info from XML node", e);
@@ -287,7 +297,8 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
         
         retval += "             <includeSALT><![CDATA["+this.getIncludeSALT() + "]]></includeSALT>"+Const.CR;
         retval += "             <SALTPath><![CDATA["+this.getSALTPath()+"]]></SALTPath>"+Const.CR;
-      
+        retval += "             <compileFlags><![CDATA["+this.getCompileFlags()+"]]></compileFlags>"+Const.CR;
+        
        
         return retval;
 
@@ -316,6 +327,7 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
             
             this.setIncludeSALT( rep.getStepAttributeString(id_jobentry, "includeSALT"));
             this.setSALTPath( rep.getStepAttributeString(id_jobentry, "SALTPath"));
+            this.setCompileFlags( rep.getStepAttributeString(id_jobentry, "compileFlags"));
             
                     
         } catch (Exception e) {
@@ -341,6 +353,7 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
             rep.saveStepAttribute(id_job, getObjectId(), "password", pass);
             rep.saveStepAttribute(id_job, getObjectId(), "includeSALT", this.getIncludeSALT());
             rep.saveStepAttribute(id_job, getObjectId(), "SALTPath", this.getSALTPath());
+            rep.saveStepAttribute(id_job, getObjectId(), "compileFlags", this.getCompileFlags());
             
         
         } catch (Exception e) {

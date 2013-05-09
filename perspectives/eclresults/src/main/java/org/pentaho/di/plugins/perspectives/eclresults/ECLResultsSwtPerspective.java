@@ -93,7 +93,7 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
   }
   
   private ECLResultsSwtPerspective(){  
-    System.out.println("create eclResults ECLResultsSwtPerspective");
+   // System.out.println("create eclResults ECLResultsSwtPerspective");
     createUI();
   }
 
@@ -343,7 +343,7 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
   }
 
   public static ECLResultsSwtPerspective getInstance(){
-        System.out.println("ECLResultsSwtPerspective");
+       // System.out.println("ECLResultsSwtPerspective");
     return instance;
   }
 

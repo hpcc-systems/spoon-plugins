@@ -6,7 +6,7 @@
     xmlns:pen="http://www.pentaho.org/2008/xul" >
 
 	<menupopup id="tools-popup">
-	    <menuitem acceltext="CTRL-ALT-T" accesskey="ctrl-alt-t" label="${spoon_example_menu_label}"
+	    <menuitem acceltext="CTRL-ALT-R" accesskey="ctrl-alt-t" label="${spoon_example_menu_label}"
               command="spoonSaltResults.saltHello()" />
 	</menupopup>
 

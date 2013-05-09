@@ -15,10 +15,7 @@ public class SaltAutoPopulate {
 	
 	
 	  public  String[] getRule(List<JobEntryCopy> jobs, String datasetName, String columnName) throws Exception{
-	        System.out.println(" ------------ parseDataSet ------------- ");
-	        System.out.println(" ------------ parseDataSet ------------- ");
-	        System.out.println(" ------------ parseDataSet ------------- ");
-	        System.out.println(" ------------ parseDataSet ------------- ");
+	        //System.out.println(" ------------ parseDataSet ------------- ");
 		    //find the node "Salt Hygiene"
 		    //get the rule;
 		  
@@ -38,10 +35,10 @@ public class SaltAutoPopulate {
 	        	//System.out.println("TYPE: " + ((JobEntryCopy)jec[j]).getTypeDesc());
 	            if(((JobEntryCopy)jec[j]).getTypeDesc().equalsIgnoreCase("SALT Hygiene")){
 	            	//System.out.println("this is a hygiene node for : " + datasetName);
-	            	System.out.println("TYPE: " + ((JobEntryCopy)jec[j]).getTypeDesc());
+	            	//System.out.println("TYPE: " + ((JobEntryCopy)jec[j]).getTypeDesc());
 	               String xml = ((JobEntryCopy)jec[j]).getXML();
 	                
-	               System.out.println(xml);
+	               //System.out.println(xml);
 	               //we need to make sure this hygiene rule is for our dataset
 	               
 	               NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
@@ -112,7 +109,7 @@ public class SaltAutoPopulate {
 	        }
 	        //saving the loop code using arraylists
 	        datasets = adDS.toArray(new String[k]);
-	        System.out.println(" ------------ end parseDataSet ------------- ");
+	        //System.out.println(" ------------ end parseDataSet ------------- ");
 	        return datasets;
 	    }
 	  

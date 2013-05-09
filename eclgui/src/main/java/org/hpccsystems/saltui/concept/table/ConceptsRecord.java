@@ -71,13 +71,13 @@ public class ConceptsRecord {
 			}else{
 				select = false;
 			}
-			System.out.println("sel: " + select);
+			//System.out.println("sel: " + select);
 			if(tokens[1].equalsIgnoreCase("nonNull")){
 				nonNull = true;
 			}else{
 				nonNull = false;
 			}
-			System.out.println("nonNull: " + nonNull);
+			//System.out.println("nonNull: " + nonNull);
 			counter = Integer.parseInt(tokens[3]);
 		}
 	}

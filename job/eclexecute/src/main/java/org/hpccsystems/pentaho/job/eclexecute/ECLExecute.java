@@ -25,6 +25,7 @@ import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
+import org.pentaho.di.trans.steps.setvariable.*;
 import org.w3c.dom.Node;
 import org.hpccsystems.javaecl.Column;
 import java.io.*;
@@ -45,6 +46,8 @@ import org.hpccsystems.recordlayout.RecordList;
 import org.hpccsystems.salt.hygiene.Generate;
 import org.hpccsystems.saltui.hygiene.*;
 
+import com.hpccsystems.resources.PropertiesReader;
+
 
 /**
  *
@@ -58,7 +61,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
     private String serverPort = "";
     private String debugLevel = "";
     private String error = "";
-    
+    private ArrayList compileFlagAL;
     public static boolean isReady = false;
     boolean isValid = true;
 
@@ -136,9 +139,10 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 		}
 
 	}
+	@SuppressWarnings("unchecked")
 	@Override
     public Result execute(Result prevResult, int k) throws KettleException {
-		
+		//System.out.println("------ Execute of ECLExecute --------");
         
 		String resName = "";
       //Result result = null;
@@ -154,9 +158,13 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
              //  result.setResult(false);
            } 
         }else{
-        
+        	
 	
 	        JobMeta jobMeta = super.parentJob.getJobMeta();
+	        String mlPath = "";
+	        String SALTPath = "";
+	        String saltIncludePath = "";
+	        
 	        String serverAddress = "";        
 	        String serverHost = "";
 	        String serverPort = "";
@@ -165,7 +173,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	        String jobNameNoSpace ="";
 	        String maxReturn = "";
 	        String eclccInstallDir = "";
-	        String mlPath = "";
+	        
 	        String includeML = "";
 	        String user = "";
 	        String pass = "";
@@ -178,10 +186,10 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	        String dsName = "";
 	        String logicalFile = "";
 	        String fileType = "";
+	        String compileFlags = "";
 	        
-	        String SALTPath = "";
 	        String includeSALT = "";
-	        String saltIncludePath = "";
+	        
 	        Boolean isInternalLinking = false;
 	        
 	        AutoPopulate ap = new AutoPopulate();
@@ -195,18 +203,29 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	            jobName = ap.getGlobalVariable(jobMeta.getJobCopies(),"jobName");
 	            jobNameNoSpace = jobName.replaceAll("[^A-Za-z0-9]", "");//jobName.replace(" ", "_"); 
 	            maxReturn = ap.getGlobalVariable(jobMeta.getJobCopies(),"maxReturn");
-	            eclccInstallDir = ap.getGlobalVariable(jobMeta.getJobCopies(),"eclccInstallDir");
-	            mlPath = ap.getGlobalVariable(jobMeta.getJobCopies(),"mlPath");
+	            compileFlags = ap.getGlobalVariable(jobMeta.getJobCopies(),"compileFlags");
+	            //System.out.println("--- CompileFlags Raw String" + compileFlags );
 	            includeML = ap.getGlobalVariable(jobMeta.getJobCopies(),"includeML");
 	            user = ap.getGlobalVariable(jobMeta.getJobCopies(),"user_name");
                 pass = ap.getGlobalVariableEncrypted(jobMeta.getJobCopies(),"password");
 
                 isInternalLinking = ap.hasNodeofType(jobMeta.getJobCopies(), "SaltInternalLinking");
 	            
-	            SALTPath = ap.getGlobalVariable(jobMeta.getJobCopies(),"SALTPath");
+                
 	            includeSALT = ap.getGlobalVariable(jobMeta.getJobCopies(),"includeSALT");
 	            
-	            //System.out.println("@@@@@@@@@@@@@@@@@@@" + includeML + "@@@@@@");
+	            eclccInstallDir = ap.getGlobalVariable(jobMeta.getJobCopies(),"eclccInstallDir");
+	            mlPath = ap.getGlobalVariable(jobMeta.getJobCopies(),"mlPath");
+	            SALTPath = ap.getGlobalVariable(jobMeta.getJobCopies(),"SALTPath");
+	   
+	            if(!compileFlags.equals("")){
+	            	//parse flags
+	            	//System.out.println("CompileFlags String: " + compileFlags);
+	            	compileFlagAL = ap.compileFlagsToArrayList(compileFlags);
+	            	//System.out.println("compileFlags ArrayList size: " + compileFlagAL.size());
+	            }
+	            
+	            //System.out.println("@@@@@@@@@@@@@@@@@@@" + eclccInstallDir + "@@@@@@");
 	
 	        }catch (Exception e){
 	            System.out.println("Error Parsing existing Global Variables ");
@@ -396,6 +415,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
             
             
             EclDirect eclDirect = new EclDirect(this.serverAddress, cluster, this.serverPort);
+            eclDirect.setCompileFlagsAL(compileFlagAL);
             eclDirect.setEclccInstallDir(eclccInstallDir);
             eclDirect.setIncludeML(includeML);
             eclDirect.setJobName(jobName);
@@ -430,7 +450,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
                     includes += "IMPORT " +jobNameNoSpace + "module;\r\n\r\n";
                 }
                 
-                System.out.println("Execute -- Finished Imports");
+                //System.out.println("Execute -- Finished Imports");
                 eclCode = includes + eclCode;
                 
                 boolean isValid = false;
@@ -472,8 +492,11 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
             //write the executed ecl code to file
             try {              
                 System.getProperties().setProperty("eclCodeFile",fileName);
-                
-                BufferedWriter out = new BufferedWriter(new FileWriter(this.fileName + "\\eclcode.txt"));
+                String tempFileName = this.fileName + "eclcode.txt";
+                if (System.getProperty("os.name").startsWith("Windows")) {
+                	tempFileName = this.fileName + "\\eclcode.txt";
+                }
+                BufferedWriter out = new BufferedWriter(new FileWriter(tempFileName));
                 out.write(eclCode);
                 out.close();
             } catch (IOException e) {
@@ -482,22 +505,27 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
              
             
             ArrayList<String> resultNames = eclDirect.getResultNames();
-            writeResultsLog(resultNames,eclDirect.getWuid(),jobName,serverAddress);
+            writeResultsLog(resultNames,eclDirect.getWuid(),jobName,serverAddress, serverPort);
+
             for (int n = 0; n<resultNames.size(); n++){
-            	System.out.println("+++Results --------------------" + resultNames.get(n));
+            	//System.out.println("+++Results --------------------" + resultNames.get(n));
             	resName = resultNames.get(n);
             
 	            //resName = eclDirect.getResName();
-	            System.out.println("++Spring HTML -------------------------" + resName);
+	            //System.out.println("++Spring HTML -------------------------" + resName);
 	            if(resName.equalsIgnoreCase("dataProfilingResults") || resName.equalsIgnoreCase("Dataprofiling_AllProfiles")){ 
 	                RenderWebDisplay rwd = new RenderWebDisplay();
-	         		rwd.processFile(this.fileName + "\\" + resName + ".csv", this.fileName);
+	                String resFileName = this.fileName + resName + ".csv";
+	                if (System.getProperty("os.name").startsWith("Windows")) {
+	                	resFileName = this.fileName + "\\" + resName + ".csv";
+	                }
+	         		rwd.processFile(resFileName, this.fileName);
 	         		
 	         		String saltData = System.getProperty("saltData");
 	         		if(saltData!= null && !saltData.equals("")){
-	         			System.setProperty("saltData",  saltData + "," + this.fileName + "\\" + resName + ".csv");
+	         			System.setProperty("saltData",  saltData + "," + resFileName);
 	         		}else{
-	         			System.setProperty("saltData",  this.fileName + "\\" + resName + ".csv");
+	         			System.setProperty("saltData",  resFileName);
 	         		}
 	            }
 	            
@@ -540,10 +568,10 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	            //CleanedData
 	           // cacheOutputInfo("CleanedData","saltCleanedData", resName);
             }
-        
+            
        }
         
-        
+        //System.out.println("------ END Execute of ECLExecute --------");
        return result;
     }
 	
@@ -649,21 +677,34 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
     
     
    
-    public void writeResultsLog(ArrayList<String> resultNames, String wuid, String jobname, String serverAddress){
+    public void writeResultsLog(ArrayList<String> resultNames, String wuid, String jobname, String serverAddress, String port){
+    	this.getParentJob().setVariable("hpcc.wuid", wuid);
+    	//javascript:go('/WsWorkunits/WUInfo?Wuid=W20130507-104541&&IncludeExceptions=0&IncludeGraphs=0&IncludeSourceFiles=0&IncludeResults=0&IncludeVariables=0&IncludeTimers=0&IncludeDebugValues=0&IncludeApplicationValues=0&IncludeWorkflows&SuppressResultSchemas=1')
+    	this.getParentJob().setVariable("hpcc.eclwatch.link", serverAddress+ "/WsWorkunits/WUInfo?Wuid=" + wuid);
+        System.out.println("Setting wuid: --------- " +this.getVariable("hpcc.wuid"));
+        
     	String xml = "<elcResults>\r\n";
     	xml += "<wuid><![CDATA[" + wuid + "]]></wuid>\r\n";
     	xml += "<jobname><![CDATA[" + jobname + "]]></jobname>\r\n";
     	xml += "<serverAddress><![CDATA[" + serverAddress + "]]></serverAddress>\r\n";
+    	xml += "<serverPort><![CDATA[" + port + "]]></serverPort>\r\n";
     	for (int n = 0; n<resultNames.size(); n++){
         	String resName = "";
         	resName = resultNames.get(n);
         	xml += "<result resulttype=\"" + resName + "\">";
-        	xml += "<![CDATA[" + this.fileName + "\\" + resName + ".csv]]>";
+        	if (System.getProperty("os.name").startsWith("Windows")) {
+        		xml += "<![CDATA[" + this.fileName + "\\" + resName + ".csv]]>";
+        	}else{
+        		xml += "<![CDATA[" + this.fileName + "" + resName + ".csv]]>";
+        	}
         	xml += "</result>\r\n";
     	}
     	xml += "</elcResults>";
     	//write file as results.xml
-    	String resultFile = this.fileName + "\\results.xml";
+    	String resultFile = this.fileName + "results.xml";
+        if (System.getProperty("os.name").startsWith("Windows")) {
+        	resultFile = this.fileName + "\\eclcode.txt";
+        }
     	 try {              
              //System.getProperties().setProperty("resultsFile",resultFile);
              cacheOutputInfo(resultFile);

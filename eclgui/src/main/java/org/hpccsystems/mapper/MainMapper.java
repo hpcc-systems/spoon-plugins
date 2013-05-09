@@ -439,7 +439,7 @@ public class MainMapper {
 		compVariable.setLayoutData(data);
 		
 		Label lblVariableName = new Label(compVariable, SWT.NONE);
-		lblVariableName.setText("Variable Name:");
+		lblVariableName.setText("Output Variable Name:");
 		GridData gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
 		lblVariableName.setLayoutData(gridData);
 		
