@@ -528,9 +528,9 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	             	
 	                //String resFileName = this.fileName + resName + ".csv";
 	                if (System.getProperty("os.name").startsWith("Windows")) {
-	                	resFileName = this.fileName + "\\" + resName + ".csv";
+	                	resFileName = this.fileName + slash + resName + ".csv";
 	                }
-	         		rwd.processFile(resFileName, this.fileName);
+	         		rwd.processFile(resFileName, this.fileName + slash);
 	         		
 	         		String saltData = System.getProperty("saltData");
 	         		if(saltData!= null && !saltData.equals("")){

@@ -28,7 +28,7 @@ public class RenderWebDisplay {
 		}
 	
 	public void processFile(String fileName, String outFolder){
-		String fileStruct = outFolder + "\\Dataprofiling_OptimizedLayout.csv";
+		String fileStruct = outFolder + "Dataprofiling_OptimizedLayout.csv";
 		
 		String html = "";
 		html += makeHTMLHeader();
