@@ -381,6 +381,10 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
     }
     private void updatePaths(){
     	String eclPath = eclccInstallDir.getText();
+    	String slash = "\\";
+    	if(eclPath.contains("/") && !eclPath.contains("\\")){
+    		slash = "/";
+    	}
     	boolean eclLast = false;
     	if(eclPath.lastIndexOf("\\") == (eclPath.length()-1)){
     		//has last \
@@ -390,12 +394,13 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
     		eclLast = true;
     	}
     	if(!eclLast){
-    		eclccInstallDir.setText(eclccInstallDir.getText() + "\\");
+    		eclccInstallDir.setText(eclccInstallDir.getText() + slash);
     	}
     	
     	if(includeML.getText().equals("true")){
 	    	String mlP = mlPath.getText();
 	    	boolean mlLast = false;
+	    	
 	    	if(mlP.lastIndexOf("\\") == (mlP.length()-1)){
 	    		//has last \
 	    		mlLast = true;

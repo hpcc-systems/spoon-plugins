@@ -195,13 +195,14 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
 			tabHolder.setLayout(new GridLayout());
 			tabHolder.setLayoutData(new GridData(GridData.FILL_BOTH));
 			final String thisWuid = wuid;
+			final String thisServerAddress = serverAddress;
 			//add link here
 			//Label link = new Label();
 			Link link = new Link(tabHolder, SWT.NONE);
 			link.setText("<a>View Workunit in the Default Web Browser</a>");
 			link.addListener (SWT.Selection, new Listener () {
 		        public void handleEvent(Event event) {
-		        	openUrl(serverAddress + "/WsWorkunits/WUInfo?Wuid=" + thisWuid);
+		        	openUrl(thisServerAddress + "/WsWorkunits/WUInfo?Wuid=" + thisWuid);
 		        }
 		    });
 			

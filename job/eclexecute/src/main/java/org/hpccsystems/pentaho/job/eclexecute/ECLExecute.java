@@ -515,7 +515,18 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	            //System.out.println("++Spring HTML -------------------------" + resName);
 	            if(resName.equalsIgnoreCase("dataProfilingResults") || resName.equalsIgnoreCase("Dataprofiling_AllProfiles")){ 
 	                RenderWebDisplay rwd = new RenderWebDisplay();
+	                
+	                String slash = "\\";
 	                String resFileName = this.fileName + resName + ".csv";
+	             	if(this.fileName.contains("/") && !this.fileName.contains("\\")){
+	             		slash = "/";
+	             		
+	             	}
+	             	if(this.fileName.lastIndexOf("\\") != (this.fileName.length()-1) || this.fileName.lastIndexOf("/") != (this.fileName.length()-1)){
+	             		resFileName = this.fileName + slash + resName + ".csv";
+	         		}
+	             	
+	                //String resFileName = this.fileName + resName + ".csv";
 	                if (System.getProperty("os.name").startsWith("Windows")) {
 	                	resFileName = this.fileName + "\\" + resName + ".csv";
 	                }
@@ -681,7 +692,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
     	this.getParentJob().setVariable("hpcc.wuid", wuid);
     	//javascript:go('/WsWorkunits/WUInfo?Wuid=W20130507-104541&&IncludeExceptions=0&IncludeGraphs=0&IncludeSourceFiles=0&IncludeResults=0&IncludeVariables=0&IncludeTimers=0&IncludeDebugValues=0&IncludeApplicationValues=0&IncludeWorkflows&SuppressResultSchemas=1')
     	this.getParentJob().setVariable("hpcc.eclwatch.link", serverAddress+ "/WsWorkunits/WUInfo?Wuid=" + wuid);
-        System.out.println("Setting wuid: --------- " +this.getVariable("hpcc.wuid"));
+        //System.out.println("Setting wuid: --------- " +this.getVariable("hpcc.wuid"));
         
     	String xml = "<elcResults>\r\n";
     	xml += "<wuid><![CDATA[" + wuid + "]]></wuid>\r\n";
@@ -702,9 +713,19 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
     	xml += "</elcResults>";
     	//write file as results.xml
     	String resultFile = this.fileName + "results.xml";
-        if (System.getProperty("os.name").startsWith("Windows")) {
-        	resultFile = this.fileName + "\\eclcode.txt";
-        }
+    	String slash = "\\";
+     	if(this.fileName.contains("/") && !this.fileName.contains("\\")){
+     		slash = "/";
+     		
+     	}
+     	if(this.fileName.lastIndexOf("\\") != (this.fileName.length()-1) || this.fileName.lastIndexOf("/") != (this.fileName.length()-1)){
+     		resultFile = this.fileName + slash + "results.xml";
+ 		}
+     	
+        //if (System.getProperty("os.name").startsWith("Windows")) {
+        //	resultFile = this.fileName + "\\results.xml";
+        //}
+        System.out.println("writing results xml: " + resultFile);
     	 try {              
              //System.getProperties().setProperty("resultsFile",resultFile);
              cacheOutputInfo(resultFile);

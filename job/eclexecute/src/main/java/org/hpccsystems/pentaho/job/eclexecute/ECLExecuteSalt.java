@@ -173,10 +173,25 @@ public class ECLExecuteSalt extends ECLJobEntry {
 	        	
 	        	//xmlHygieneBuilder += buildConceptsSalt();
 	        	//System.out.println("-------------------------------------SALT COMPILE--------------------------------");
+	        	String path = fileName;
+	        	String slash = "/";
+                if(fileName.contains("/") && !fileName.contains("\\")){
+                	if(fileName.lastIndexOf("/") != (fileName.length()-1)){
+                		path += "/";
+                		slash = "/";
+                	}
+                	//path += "salt.spc";
+                }else{
+                	if(fileName.lastIndexOf("\\") != (fileName.length()-1)){
+                		path += "\\";
+                		slash = "\\";
+                	}
+                	//path += "salt.spc";
+                }
 	        	try {              
-	             
+	        		
 	                
-	                BufferedWriter out = new BufferedWriter(new FileWriter(fileName + "\\salt.xml"));
+	                BufferedWriter out = new BufferedWriter(new FileWriter(path + "salt.xml"));
 	                out.write(xmlHygieneBuilder);
 	                out.close();
 	                
@@ -184,14 +199,15 @@ public class ECLExecuteSalt extends ECLJobEntry {
 	               // 		this.fileName + "\\salt.xml");
 	                //need to compare xml bevore writting it to see if need to re-compile salt
 	        		Generate gen = new Generate();
-	        		String spec = gen.generateHygieneSpecFromXMLFile(fileName + "\\salt.xml");
-	        		BufferedWriter out2 = new BufferedWriter(new FileWriter(fileName + "\\salt.spc"));
+	        		String spec = gen.generateHygieneSpecFromXMLFile(path + "salt.xml");
+	        		BufferedWriter out2 = new BufferedWriter(new FileWriter(path + "salt.spc"));
 	                out2.write(spec);
 	                out2.close();
 	                
 	                String modFile = "";
 	                //System.out.println("-------------------------------------SALT COMPILE2--------------------------------");
-	                boolean compileSuccess = ECLExecuteSalt.compileSalt(SALTPath, fileName + "\\salt.spc", fileName+ "",jobNameNoSpace,error,fileName);
+	                
+	                boolean compileSuccess = ECLExecuteSalt.compileSalt(SALTPath, path + "salt.spc", fileName,jobNameNoSpace,error,fileName);
 	                
 	                if(!compileSuccess){
 	                	 String SaltError = "Unable to create the SALT files! Please check your salt path in Global Variables, and your output path in Execute.";
@@ -223,7 +239,7 @@ public class ECLExecuteSalt extends ECLJobEntry {
 	            }   
 	        	try {              
 
-	                BufferedWriter out = new BufferedWriter(new FileWriter(fileName + "\\" + jobNameNoSpace + "module\\layout_" + file_name + ".ecl"));
+	                BufferedWriter out = new BufferedWriter(new FileWriter(path + jobNameNoSpace + "module" + slash + "layout_" + file_name + ".ecl"));
 	                out.write(layoutECL);
 	                out.close();
 	            } catch (IOException e) {
@@ -306,19 +322,41 @@ public class ECLExecuteSalt extends ECLJobEntry {
 	}
 	
 	  public static boolean compileSalt(String saltPath, String spcFile, String outputDir, String jobNameNoSpace, String error, String fileName){
-		System.out.println("Start");
+		//debug
+		System.out.println("Compiling SALT -- START");
+		System.out.println("saltPath: " + saltPath);
+		System.out.println("spcFile: " + spcFile);
+		System.out.println("outputDir: " + outputDir);
+		System.out.println("jobNameNoSpace: " + jobNameNoSpace);
+		System.out.println("error: " +error);
+		System.out.println("fileName: " + fileName);
+		
 		String saltExe = "salt.exe";
 		if (!System.getProperty("os.name").startsWith("Windows")) {
         	saltExe = "salt";
         }
-		boolean saltExists = (new File(saltPath + "\\" + saltExe)).exists();
+		String saltSlash = "\\";
+		if(saltPath.contains("/") && !saltPath.contains("\\")){
+			saltSlash = "/";
+		}
+		String fileNameSlash = "\\";
+		if(fileName.contains("/") && !fileName.contains("\\")){
+			fileNameSlash = "/";
+		}
+		String saltExePath = saltPath + saltSlash + saltExe;
+		boolean saltExists = (new File(saltExePath)).exists();
 		boolean outExists = (new File(outputDir).exists());
 		boolean success = false;
+		//debug
+		System.out.println("Salt EXE Exists(" + saltExePath + "): " + saltExists);
+		System.out.println("Output Dir Exists("+outputDir+"): " + outExists);
 		if(saltExists && outExists){
-			String cmd = "\"" + saltPath + "\\" + saltExe + "\" -ga -D\"" + outputDir + "\" \"" + spcFile + "\"";
+			System.out.println("salt and out exists -- Starting salt compile");
+			//String cmd = "\"" + saltPath + "\\" + saltExe + "\" -ga -D\"" + outputDir + "\" \"" + spcFile + "\"";
 			//System.out.println("-->" + cmd + "<--");
 		 	try{
-		 		String c = saltPath + "\\" + saltExe + "";
+		 		System.out.println("entered try");
+		 		String c = saltExePath;
 		 		ArrayList<String> paramsAL = new ArrayList<String>();
 	            paramsAL.add(c);
 	            paramsAL.add("-ga");
@@ -327,9 +365,10 @@ public class ECLExecuteSalt extends ECLJobEntry {
 	            paramsAL.add(spcFile);
 	            String [] params = new String[paramsAL.size()];
 	            paramsAL.toArray(params);
+	            System.out.println("build process builder");
 		 		ProcessBuilder pb = new ProcessBuilder(params);
 		 		
-		 		System.out.println(pb.command().toString());
+		 		System.out.println("PB Command: " + pb.command().toString());
 	            pb.redirectErrorStream(true); // merge stdout, stderr of process
 	            //File path = new File(saltPath);
 	           // pb.directory(path);
@@ -342,7 +381,7 @@ public class ECLExecuteSalt extends ECLJobEntry {
 	            String lineErr = "";
 	            String fullLineErr = "";
 	            while((lineErr = brErr.readLine()) != null){
-	                //System.out.println("#####"+lineErr);
+	                System.out.println("#####"+lineErr);
 	                fullLineErr += lineErr;
 	            }
 	            
@@ -352,23 +391,23 @@ public class ECLExecuteSalt extends ECLJobEntry {
 	            String line = "";
 	            String fullLine = "";
 	            while((line = br.readLine()) != null){
-	                //System.out.println(line);
+	                System.out.println(line);
 	                fullLine += line;
 	            }
-	           //System.out.println(pb.command());
-	           // System.out.println("SALT ERROR:");
-				//System.out.println(lineErr);
-				//System.out.println("SALT Results");
-				//System.out.println(line);
+	            
+	            System.out.println("SALT ERROR:");
+				System.out.println(fullLineErr);
+				System.out.println("SALT Results");
+				System.out.println(fullLine);
 
 				//block until salt compile is completed
 	                int b = 0;
-	                while(!(new File(fileName + "\\" + jobNameNoSpace + "module")).exists() && b < 150){
+	                while(!(new File(fileName + fileNameSlash + jobNameNoSpace + "module")).exists() && b < 150){
 	                	Thread.sleep(1000);
 	                	b++;
 	                }
 	                System.out.println("Finished salt compile");
-					if((new File(fileName + "\\" + jobNameNoSpace + "module")).exists()){
+					if((new File(fileName + fileNameSlash + jobNameNoSpace + "module")).exists()){
 						success = true;
 					}
 				 System.out.println("SALT Success Status: " + success);
@@ -386,7 +425,7 @@ public class ECLExecuteSalt extends ECLJobEntry {
 			if(!outExists){error += "Output Directory defined in Execute step doesn't exist";}
 			success = false;
 		}
-		
+		System.out.println("Compiling SALT -- END");
 		return success;
 	}
 	/*
