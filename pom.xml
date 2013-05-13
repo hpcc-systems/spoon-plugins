@@ -159,7 +159,16 @@
 						<version>4.10</version>
 						<scope>test</scope>
 					</dependency>
-            
+            <dependency>
+				<groupId>org.eclipse.core</groupId>
+				<artifactId>commands</artifactId>
+				<version>3.3.0-I20070605-0010</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.equinox</groupId>
+				<artifactId>common</artifactId>
+				<version>3.3.0-v20070426</version>
+			</dependency>
 				</dependencies>
 			</dependencyManagement>
 
@@ -172,6 +181,15 @@
 					<groupId>junit</groupId>
 					<artifactId>junit</artifactId>
 					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.core</groupId>
+					<artifactId>commands</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.equinox</groupId>
+					<artifactId>common</artifactId>
+
 				</dependency>
 			</dependencies>
 		</profile>
