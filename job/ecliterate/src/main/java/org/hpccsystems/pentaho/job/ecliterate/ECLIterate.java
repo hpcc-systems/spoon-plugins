@@ -133,6 +133,8 @@ public class ECLIterate extends ECLJobEntry{//extends JobEntryBase implements Cl
         
         List list = result.getRows();
         list.add(data);
+        String eclCode = parseEclFromRowData(list);
+        /*
         String eclCode = "";
         
           
@@ -149,7 +151,7 @@ public class ECLIterate extends ECLJobEntry{//extends JobEntryBase implements Cl
             }
             logBasic("{Iterate Job} ECL Code =" + eclCode);
         }
-        
+        */
         result.setRows(list);
         
         

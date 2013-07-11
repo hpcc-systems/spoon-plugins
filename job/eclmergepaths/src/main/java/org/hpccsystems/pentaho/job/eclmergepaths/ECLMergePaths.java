@@ -116,6 +116,8 @@ public class ECLMergePaths extends ECLJobEntry{//extends JobEntryBase implements
            //globalResult.add(result);
            //result = globalResult;
            List list2 = result.getRows();
+           String eclCode = parseEclFromRowData(list);
+           /*
             String eclCode = "";
             if (list2 == null) {
                 list2 = new ArrayList();
@@ -131,7 +133,7 @@ public class ECLMergePaths extends ECLJobEntry{//extends JobEntryBase implements
                 }
                 logBasic("{Merge Paths Job} ECL Code =" + eclCode);
             }
-
+*/
             //result.setRows(list);
             ECLMergePaths.isReady = true;
             

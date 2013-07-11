@@ -149,6 +149,8 @@ public class SALTInternalLinking extends ECLJobEntry{//extends JobEntryBase impl
         
         List list = result.getRows();
         list.add(data);
+        String eclCode = parseEclFromRowData(list);
+        /*
         String eclCode = "";
         if (list == null) {
             list = new ArrayList();
@@ -163,7 +165,7 @@ public class SALTInternalLinking extends ECLJobEntry{//extends JobEntryBase impl
             }
             logBasic("{Dataset Job} ECL Code =" + eclCode);
         }
-        
+        */
         result.setRows(list);
         result.setLogText("ECLDataset executed, ECL code added");
         

@@ -109,6 +109,8 @@ public class SALTSpecificity extends ECLJobEntry{//extends JobEntryBase implemen
         
         List list = result.getRows();
         list.add(data);
+        String eclCode = parseEclFromRowData(list);
+        /*
         String eclCode = "";
         if (list == null) {
             list = new ArrayList();
@@ -123,7 +125,7 @@ public class SALTSpecificity extends ECLJobEntry{//extends JobEntryBase implemen
             }
             logBasic("{Dataset Job} ECL Code =" + eclCode);
         }
-
+*/
         result.setRows(list);
         result.setLogText("ECLDataset executed, ECL code added");
         

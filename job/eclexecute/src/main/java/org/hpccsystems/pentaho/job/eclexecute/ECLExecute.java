@@ -19,6 +19,7 @@ import org.pentaho.di.core.RowMetaAndData;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.job.entry.JobEntryCopy;
@@ -159,8 +160,9 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
            } 
         }else{
         	
-	
+        	
 	        JobMeta jobMeta = super.parentJob.getJobMeta();
+	        
 	        String mlPath = "";
 	        String SALTPath = "";
 	        String saltIncludePath = "";
@@ -397,22 +399,74 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 
 
             List<RowMetaAndData> list = result.getRows();
-            String eclCode = "";
+            String eclCode = parseEclFromRowData(list);
+           /* String eclCode = "";
             if (list == null) {
                 list = new ArrayList<RowMetaAndData>();
             } else {
 
-                for (int i = 0; i < list.size(); i++) {
-                    RowMetaAndData rowData = (RowMetaAndData) list.get(i);
-                    String code = rowData.getString("ecl", null);
-                    if (code != null) {
-                        eclCode += code;
-                    }
+            	for (int i = 0; i < list.size(); i++) {
+                	try{
+                		boolean hasECL = false;
+    	                RowMetaAndData rowData = (RowMetaAndData) list.get(i);
+    	                RowMeta rowMeta = (RowMeta) rowData.getRowMeta();
+    	                String[] fields = rowMeta.getFieldNames();
+    	                for(int cnt = 0; cnt<fields.length; cnt++){
+    	                	if(fields[cnt].equals("ecl")){
+    	                		hasECL = true;
+    	                	}
+    	                }
+    	                if(hasECL){
+    		                String code = rowData.getString("ecl", null);
+    		                if (code != null) {
+    		                    eclCode += code;
+    		                }
+    	                }
+                	}catch (Exception e){
+                		//ecl doesn't exist skip it
+                		//I can't find a way to check rowData if it exists
+                		e.printStackTrace();
+                	}
                 }
                 logBasic("{Execute Job} Execute Code =" + eclCode);
             }
           
+            */
+           
+           // List<RowMetaAndData> prevlist = result.getRows();
             
+            //for (int i = 0; i < list.size(); i++) {
+            for (int i = list.size()-1; i >=0; i--) {
+            	try{
+            		boolean hasECL = false;
+	                RowMetaAndData rowData = (RowMetaAndData) list.get(i);
+	                RowMeta rowMeta = (RowMeta) rowData.getRowMeta();
+	                String[] fields = rowMeta.getFieldNames();
+	                for(int cnt = 0; cnt<fields.length; cnt++){
+	                	System.out.println("Field: " + fields[cnt]);
+	                	if(fields[cnt].equals("ecl")){
+	                		hasECL = true;
+	                	}
+	                }
+	                if(hasECL){
+		                rowData.removeValue("ecl");
+		                list.add(i,rowData);
+		                if(fields.length == 1){
+		                	list.remove(i);
+		                	System.out.println("Removed index (" + i + ") from result list");
+	                	}
+	                }
+            	}catch (Exception e){
+            		//ecl doesn't exist skip it
+            		//I can't find a way to check rowData if it exists
+            		e.printStackTrace();
+            	}
+            }
+            /*
+            newResult.setRows(prevlist);
+            super.parentJob.setResult(newResult);
+            result = newResult;
+            */
             
             EclDirect eclDirect = new EclDirect(this.serverAddress, cluster, this.serverPort);
             eclDirect.setCompileFlagsAL(compileFlagAL);
@@ -459,10 +513,10 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
                 isValid = eclDirect.execute(eclCode, this.debugLevel);
                // System.out.println("---------------- finished submitToCluster");
 
-                //System.out.println("---------------- finished submitToCluster");
+                System.out.println("---------------- finished submitToCluster");
                 if(isValid){
                 	//System.out.println("---------------- writing file");
-                //	System.out.println("---------------- writing file");
+                	System.out.println("---------------- writing file");
                 	isValid = eclDirect.writeResultsToFile(this.fileName);
                 }
                 if(!isValid){
@@ -581,7 +635,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
             }
             
        }
-        
+        prevResult.clear();
         //System.out.println("------ END Execute of ECLExecute --------");
        return result;
     }
@@ -700,15 +754,17 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
     	xml += "<serverAddress><![CDATA[" + serverAddress + "]]></serverAddress>\r\n";
     	xml += "<serverPort><![CDATA[" + port + "]]></serverPort>\r\n";
     	for (int n = 0; n<resultNames.size(); n++){
-        	String resName = "";
-        	resName = resultNames.get(n);
-        	xml += "<result resulttype=\"" + resName + "\">";
-        	if (System.getProperty("os.name").startsWith("Windows")) {
-        		xml += "<![CDATA[" + this.fileName + "\\" + resName + ".csv]]>";
-        	}else{
-        		xml += "<![CDATA[" + this.fileName + "" + resName + ".csv]]>";
-        	}
-        	xml += "</result>\r\n";
+    		if(wuid != null && !wuid.equalsIgnoreCase("null")){
+	        	String resName = "";
+	        	resName = resultNames.get(n);
+	        	xml += "<result resulttype=\"" + resName + "\">";
+	        	if (System.getProperty("os.name").startsWith("Windows")) {
+	        		xml += "<![CDATA[" + this.fileName + "\\" + wuid + "_" + resName + ".csv]]>";
+	        	}else{
+	        		xml += "<![CDATA[" + this.fileName + ""+ wuid + "_" + resName + ".csv]]>";
+	        	}
+	        	xml += "</result>\r\n";
+    		}
     	}
     	xml += "</elcResults>";
     	//write file as results.xml
@@ -719,22 +775,24 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
      		
      	}
      	if(this.fileName.lastIndexOf("\\") != (this.fileName.length()-1) || this.fileName.lastIndexOf("/") != (this.fileName.length()-1)){
-     		resultFile = this.fileName + slash + "results.xml";
+     		resultFile = this.fileName + slash + wuid + "_results.xml";
  		}
      	
         //if (System.getProperty("os.name").startsWith("Windows")) {
         //	resultFile = this.fileName + "\\results.xml";
         //}
-        System.out.println("writing results xml: " + resultFile);
-    	 try {              
-             //System.getProperties().setProperty("resultsFile",resultFile);
-             cacheOutputInfo(resultFile);
-             BufferedWriter out = new BufferedWriter(new FileWriter(resultFile));
-             out.write(xml);
-             out.close();
-         } catch (IOException e) {
-              e.printStackTrace();
-         }   
+     	if(wuid != null && !wuid.equalsIgnoreCase("null")){
+	        System.out.println("writing results xml: " + resultFile);
+	    	 try {              
+	             //System.getProperties().setProperty("resultsFile",resultFile);
+	             cacheOutputInfo(resultFile);
+	             BufferedWriter out = new BufferedWriter(new FileWriter(resultFile));
+	             out.write(xml);
+	             out.close();
+	         } catch (IOException e) {
+	              e.printStackTrace();
+	         }   
+    	}
     }
     
     

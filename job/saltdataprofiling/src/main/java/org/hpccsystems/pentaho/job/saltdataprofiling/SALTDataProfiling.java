@@ -66,7 +66,7 @@ public class SALTDataProfiling extends ECLJobEntry{//extends JobEntryBase implem
         String jobNameNoSpace = "";
         JobMeta jobMeta = super.parentJob.getJobMeta();
         
-        
+        System.out.println("Fetch AP for saltDP");
         try{
         //Object[] jec = this.jobMeta.getJobCopies().toArray();
 
@@ -74,7 +74,8 @@ public class SALTDataProfiling extends ECLJobEntry{//extends JobEntryBase implem
             jobNameNoSpace = jobName.replace(" ", ""); 
             
             this.setLayout(ap.getDatasetsField("record_name", this.getDatasetName(),jobMeta.getJobCopies()));
-            
+           // System.out.println("----------------- Layout: " + this.layout);
+           // System.out.println(ap.getDatasetsField("record_name", this.getDatasetName(),jobMeta.getJobCopies()));
         }catch (Exception e){
             System.out.println("Error Parsing existing Global Variables ");
             System.out.println(e.toString());
@@ -101,6 +102,8 @@ public class SALTDataProfiling extends ECLJobEntry{//extends JobEntryBase implem
         
         List list = result.getRows();
         list.add(data);
+        String eclCode = parseEclFromRowData(list);
+        /*
         String eclCode = "";
         if (list == null) {
             list = new ArrayList();
@@ -115,7 +118,7 @@ public class SALTDataProfiling extends ECLJobEntry{//extends JobEntryBase implem
             }
             logBasic("{Dataset Job} ECL Code =" + eclCode);
         }
-        
+        */
         result.setRows(list);
         result.setLogText("ECLDataset executed, ECL code added");
         

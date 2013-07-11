@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Combo;
+import org.hpccsystems.ecljobentrybase.ECLJobEntry;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;
@@ -27,7 +28,7 @@ import org.w3c.dom.Node;
  *
  * @author ChalaAX
  */
-public class ECLSaltDataProfiling extends JobEntryBase implements Cloneable, JobEntryInterface {
+public class ECLSaltDataProfiling extends ECLJobEntry {
     
     
     private String fileName = "";
@@ -63,7 +64,8 @@ public class ECLSaltDataProfiling extends JobEntryBase implements Cloneable, Job
         
         List list = result.getRows();
         list.add(data);
-        String eclCode = "";
+        
+        //String eclCode = "";
         //indata:= dataset('~in::testing',R,CSV(SEPARATOR('')));
         
         String ft = "";
@@ -101,7 +103,8 @@ public class ECLSaltDataProfiling extends JobEntryBase implements Cloneable, Job
         result.setResult(true);
 
         data.addValue("ecl", Value.VALUE_TYPE_STRING, ecl);
-          
+        String eclCode = parseEclFromRowData(list);
+       /*   
         if (list == null) {
             list = new ArrayList();
         } else {
@@ -115,7 +118,7 @@ public class ECLSaltDataProfiling extends JobEntryBase implements Cloneable, Job
             }
             logBasic("{Iterate Job} ECL Code =" + eclCode);
         }
-        
+        */
         result.setRows(list);
         
         

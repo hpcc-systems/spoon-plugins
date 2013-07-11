@@ -102,6 +102,8 @@ public class ECLML_Associate extends ECLJobEntry{//extends JobEntryBase implemen
         
         List list = result.getRows();
         list.add(data);
+        String eclCode = parseEclFromRowData(list);
+        /*
         String eclCode = "";
         
           
@@ -118,7 +120,7 @@ public class ECLML_Associate extends ECLJobEntry{//extends JobEntryBase implemen
             }
             logBasic("{Iterate Job} ECL Code =" + eclCode);
         }
-        
+        */
         result.setRows(list);
         
         

@@ -209,7 +209,7 @@ public class GlobalVarsUI {
 	public void run(Display display) {
 		shell = new Shell(display);
 		
-	    shell.setText(Constants.ADD_CONCEPTS_TITLE);
+	    shell.setText(Constants.ADD_CONFIG_TITLE);
 	    shell.setSize(800, 550);
 	    GridLayout layout = new GridLayout();
 	    layout.numColumns = 3;

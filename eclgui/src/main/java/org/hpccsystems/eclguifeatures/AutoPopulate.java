@@ -276,12 +276,12 @@ public class AutoPopulate {
         int k = 0;
 
         for(int j = 0; j<jec.length; j++){
-            //System.out.println("Node(i): " + j + " | " +((JobEntryCopy)jec[j]).getName());
+           // System.out.println("Node(i): " + j + " | " +((JobEntryCopy)jec[j]).getName());
 
             if(!((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("START") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("OUTPUT") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("SUCCESS")){
-                //System.out.println("Node(k): " + k);
+                System.out.println("Node(k): " + k);
                 
-                //adDS.add((String)((JobEntryCopy)jec[j]).getName());
+                adDS.add((String)((JobEntryCopy)jec[j]).getName());
                 String xml = ((JobEntryCopy)jec[j]).getXML();
                 //System.out.println(xml);
                 
@@ -322,9 +322,9 @@ public class AutoPopulate {
 				                		   
 				                		   if(defValue.equals(datasetValue)){
 				                			   //System.out.println("Verify that " + defValue + " = " + datasetValue);
-				                			  // System.out.println("-------------Yes----------" + tType);
+				                			   //System.out.println("-------------Yes----------" + tType);
 				                    		   type = tType;
-				                    		   datasetNode = nNode;
+				                    		   this.datasetNode = nNode;
 				                    		   nodeIndex = i;
 				                    		   k++;
 				                    		   //to save execution time lets exit on the first find as it is most likely to be the one we want
@@ -334,7 +334,7 @@ public class AutoPopulate {
 				                    	   }
 				                		   
 				                	   }else{
-				                		   //System.out.println("NODE_VALUE: IS NULL");
+				                		   System.out.println("NODE_VALUE: IS NULL");
 				                	   }
 				                   }
 	                		   }
@@ -904,17 +904,18 @@ public class AutoPopulate {
      * def of the datasets
      */
     public String getDatasetsField(String fieldName, String datasetName,List<JobEntryCopy> jobs)throws Exception{
-        //System.out.println(" ------------ fieldsByDatasetList ------------ ");
-        Object[] jec = jobs.toArray();
-        Node node = null;
-        RecordList recordList = null;
+       // System.out.println(" ------------ fieldsByDatasetList " + fieldName + " " + datasetName + " ------------ ");
+        //Object[] jec = jobs.toArray();
+        //Node node = null;
+        //RecordList recordList = null;
         String type = getType(jobs, datasetName);
+        //System.out.println("----------- Type: " + type);
         //datasetNode is set in getType
         //return datasetNode;
-        
+        //System.out.println(datasetNode.toString());
         String recordName = XMLHandler.getNodeValue(
                 XMLHandler.getSubNode(datasetNode, fieldName));
-       
+       // System.out.println("END ------------ fieldsByDatasetList " + fieldName + " " + datasetName + " ------------ ");
         return recordName;
     }
     

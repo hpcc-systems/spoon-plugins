@@ -796,13 +796,25 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
         		errors += "\"Recordset Name\" is a Required field for \"Input Type\" Recordset!\r\n";
     		}
     		
+    		try{
     		//if File then require type
+    			
+    		if(!this.outputType.isDisposed() && this.outputType.getText() != null && this.outputType.getText().equalsIgnoreCase("Piped")){
+    			if(!this.typeOptions.isDisposed() && this.typeOptions.getText().equals("")){
+    				//make sure you have minimum options
+    				isValid = false;
+            		errors += "\"Pipe Options\" is Required for \"Type\" Piped!\r\n";
+    			}
+    		}
+    		}catch(Exception e){
+    			
+    		}
     	}else{
     		//error
     		isValid = false;
     		errors += "\"Input Type\" can not be blank!\r\n";
     	}
-
+    	//System.out.println(this.outputType.getText() + " | " + this.typeOptions.getText());
     	
     	if(!isValid){
     		ErrorNotices en = new ErrorNotices();

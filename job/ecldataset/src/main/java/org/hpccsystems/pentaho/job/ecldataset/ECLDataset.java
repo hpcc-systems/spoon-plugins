@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.hpccsystems.javaecl.Dataset;
+import org.hpccsystems.javaecl.GetHeader;
+import org.hpccsystems.javaecl.Header;
 import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.cluster.SlaveServer;
@@ -43,6 +45,11 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
     private String fileType = "";
     
     private RecordList recordList = new RecordList();
+    
+    private String hasHeaderRow = "No";
+    private String csvSeparator = "";
+    private String csvTerminator = "";
+    private String csvQuote = "";
 
     public RecordList getRecordList() {
         return recordList;
@@ -100,11 +107,45 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         this.fileType = fileType;
     }
     
+    
+    
     //public String resultListToString(){
     //	return resultListToString(this.recordList);
     //}
     
-    public String fieldsValid(RecordList recordList){
+    public String getHasHeaderRow() {
+		return hasHeaderRow;
+	}
+
+	public void setHasHeaderRow(String hasHeaderRow) {
+		this.hasHeaderRow = hasHeaderRow;
+	}
+
+	public String getCsvSeparator() {
+		return csvSeparator;
+	}
+
+	public void setCsvSeparator(String csvSeparator) {
+		this.csvSeparator = csvSeparator;
+	}
+
+	public String getCsvTerminator() {
+		return csvTerminator;
+	}
+
+	public void setCsvTerminator(String csvTerminator) {
+		this.csvTerminator = csvTerminator;
+	}
+
+	public String getCsvQuote() {
+		return csvQuote;
+	}
+
+	public void setCsvQuote(String csvQuote) {
+		this.csvQuote = csvQuote;
+	}
+
+	public String fieldsValid(RecordList recordList){
         String errors = "";
         
         if(recordList != null){
@@ -127,10 +168,16 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         
         return errors;
     }
-                            
-                            
+	/*
+        public String prepCSVFormat(String in){
+        	String out = "";
+        	String[] vals = in.split(",");
+        	return out;
+        }
+      */                      
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
+    	System.out.println("Dataset Execute Start");
     	JobMeta jobMeta = super.parentJob.getJobMeta();
         List<JobEntryCopy> jobs = jobMeta.getJobCopies();
         AutoPopulate ap = new AutoPopulate();
@@ -180,14 +227,17 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         dataset.setFileType(getFileType());
         dataset.setRecordSet(getRecordSet());
         
-        logBasic("{Dataset Job} Execute = " + dataset.ecl());//must be first so that it builds the below vars
+        dataset.setCsvQuote(csvQuote);
+        dataset.setCsvSeparator(csvSeparator);
+        dataset.setCsvTerminator(csvTerminator);
+        System.out.println("hasHeaderRow: " + hasHeaderRow );
+        if(hasHeaderRow.equalsIgnoreCase("Yes")){
+        	dataset.setHasHeaderRow(true);
+        }else{
+        	dataset.setHasHeaderRow(false);
+        }
         
-        System.setProperty("Dataset-" + getDatasetName()+"-rsDef",  dataset.getRecordDef());
-        System.setProperty("Dataset-" + getDatasetName()+"-dsDef",  dataset.getDatasetDef());
-        System.setProperty("Dataset-" + getDatasetName()+"-rs", dataset.getRecordName());
-        System.setProperty("Dataset-" + getDatasetName()+"-ds", dataset.getName());
-        System.setProperty("Dataset-" + getDatasetName()+"-logical",this.getLogicalFileName());
-        System.setProperty("Dataset-" + getDatasetName()+"-type",this.getFileType());
+        
         
         
         
@@ -201,6 +251,8 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         
         List list = result.getRows();
         list.add(data);
+        String eclCode = parseEclFromRowData(list);
+        /*
         String eclCode = "";
         if (list == null) {
             list = new ArrayList();
@@ -215,9 +267,17 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
             }
             logBasic("{Dataset Job} ECL Code =" + eclCode);
         }
-        
+        */
         result.setRows(list);
         result.setLogText("ECLDataset executed, ECL code added");
+        
+        
+        System.setProperty("Dataset-" + getDatasetName()+"-rsDef",  dataset.getRecordDef());
+        System.setProperty("Dataset-" + getDatasetName()+"-dsDef",  dataset.getDatasetDef());
+        System.setProperty("Dataset-" + getDatasetName()+"-rs", dataset.getRecordName());
+        System.setProperty("Dataset-" + getDatasetName()+"-ds", dataset.getName());
+        System.setProperty("Dataset-" + getDatasetName()+"-logical",this.getLogicalFileName());
+        System.setProperty("Dataset-" + getDatasetName()+"-type",this.getFileType());
         
         return result;
     }
@@ -304,6 +364,18 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
             
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fileType")) != null)
                 setFileType(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fileType")));
+            
+            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csvSeparator")) != null)
+                setCsvSeparator(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csvSeparator")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csvTerminator")) != null)
+                setCsvTerminator(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csvTerminator")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csvQuote")) != null)
+                setCsvQuote(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "csvQuote")));
+            
+            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "hasHeaderRow")) != null)
+                setHasHeaderRow(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "hasHeaderRow")));
 
         } catch (Exception e) {
             throw new KettleXMLException("ECL Dataset Job Plugin Unable to read step info from XML node", e);
@@ -323,6 +395,11 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         retval += "		<recordSet><![CDATA[" + recordSet + "]]></recordSet>" + Const.CR;
         retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
         retval += "		<fileType><![CDATA[" + fileType + "]]></fileType>" + Const.CR;
+
+        retval += "		<csvSeparator><![CDATA[" + csvSeparator + "]]></csvSeparator>" + Const.CR;
+        retval += "		<csvTerminator><![CDATA[" + csvTerminator + "]]></csvTerminator>" + Const.CR;
+        retval += "		<csvQuote><![CDATA[" + csvQuote + "]]></csvQuote>" + Const.CR;
+        retval += "		<hasHeaderRow><![CDATA[" + hasHeaderRow + "]]></hasHeaderRow>" + Const.CR;
         
         return retval;
 
@@ -349,6 +426,16 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
              if(rep.getStepAttributeString(id_jobentry, "fileType") != null)
                 fileType = rep.getStepAttributeString(id_jobentry, "fileType"); //$NON-NLS-1$
         
+
+             if(rep.getStepAttributeString(id_jobentry, "csvSeparator") != null)
+            	 csvSeparator = rep.getStepAttributeString(id_jobentry, "csvSeparator"); //$NON-NLS-1$
+             if(rep.getStepAttributeString(id_jobentry, "csvTerminator") != null)
+            	 csvTerminator = rep.getStepAttributeString(id_jobentry, "csvTerminator"); //$NON-NLS-1$
+             if(rep.getStepAttributeString(id_jobentry, "csvQuote") != null)
+            	 csvQuote = rep.getStepAttributeString(id_jobentry, "csvQuote"); //$NON-NLS-1$
+            
+             if(rep.getStepAttributeString(id_jobentry, "hasHeaderRow") != null)
+            	 hasHeaderRow = rep.getStepAttributeString(id_jobentry, "hasHeaderRow"); //$NON-NLS-1$
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
         }
@@ -365,6 +452,11 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
             rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "fileType", fileType); //$NON-NLS-1$
             
+            rep.saveStepAttribute(id_job, getObjectId(), "csvSeparator", csvSeparator); //$NON-NLS-1$
+            rep.saveStepAttribute(id_job, getObjectId(), "csvTerminator", csvTerminator); //$NON-NLS-1$
+            rep.saveStepAttribute(id_job, getObjectId(), "csvQuote", csvQuote); //$NON-NLS-1$
+            rep.saveStepAttribute(id_job, getObjectId(), "hasHeaderRow", hasHeaderRow); //$NON-NLS-1$
+           
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);
         }
@@ -376,5 +468,36 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
 
     public boolean isUnconditional() {
         return true;
+    }
+    
+    public ArrayList<String[]> parseFileHeader(String serverHost, int serverPort, String user,String pass, String fileName){
+    	
+    	GetHeader header = new GetHeader(serverHost,serverPort,user,pass);
+    	
+    	List<Header> headers = new ArrayList<Header>();
+			
+		headers = header.retrieveHeaderInformation(fileName);
+		ArrayList<String[]> details = new ArrayList<String[]>();
+		for (Iterator<Header> iter = headers.iterator(); iter.hasNext();) 
+		{
+			Header entry = (Header) iter.next();
+			System.out.println("Column Name: " + entry.getColumnName());		
+			System.out.println("Data Type: " + entry.getDataType());
+			String[] column = new String[5];
+			column[0] = entry.getColumnName();
+			column[1] = entry.getDataType();
+			column[2] = "";
+			column[3] = "";
+			column[4] = "";
+			details.add(column);
+		}
+		/*
+		 * column[0] = attributes.getNamedItem("label").getTextContent();
+		   column[1] = attributes.getNamedItem("ecltype").getTextContent();
+		   column[2] = "";
+		   column[3] = attributes.getNamedItem("size").getTextContent();
+		   column[4] = attributes.getNamedItem("size").getTextContent();
+		 */
+    	return details;
     }
 }

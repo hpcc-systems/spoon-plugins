@@ -133,7 +133,8 @@ public class ECLExecuteSalt extends ECLJobEntry {
 	        		file_name = ap.getDatasetsField("record_name", datasets[i],jobMeta.getJobCopies());
 	        		
 	        		//todo: write layout_<file_name> to file needed for soap
-	        		layoutECL = "EXPORT layout_" + file_name + " := RECORD\r\n" + resultListToStringStatic(fields);
+	        		layoutECL = "//spoon generated code\r\n";
+	        		layoutECL += "EXPORT layout_" + file_name + " := RECORD\r\n" + resultListToStringStatic(fields);
 	        		layoutECL += "UNSIGNED6 spoonClusterID := 0;\r\n";
 	        		layoutECL += "UNSIGNED6 spoonRecordID := 0;\r\n";
 	        		layoutECL += "\r\nEND;\r\n\r\n";

@@ -78,6 +78,9 @@ public class Constants {
 	
 	// ****************** END OF FIELD'S FOR DATASUMMARY REPORT ****************************
 	
+	
+	public static final String ADD_CONFIG_TITLE = "HPCC Default Config";
+	
 	// ****************** START OF FIELD FOR ADD CONCEPTS UI *******************************
 	
 	public static final String ADD_CONCEPTS_TITLE = "Add Concepts";
