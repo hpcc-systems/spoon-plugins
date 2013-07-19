@@ -14,6 +14,7 @@ import org.pentaho.di.core.RowMetaAndData;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.job.entry.JobEntryInterface;
@@ -70,22 +71,8 @@ public class ECLGeneric extends ECLJobEntry{//extends JobEntryBase implements Cl
         
         List list = result.getRows();
         list.add(data);
-        String eclCode = "";
         
-          
-        if (list == null) {
-            list = new ArrayList();
-        } else {
-            
-            for (int i = 0; i < list.size(); i++) {
-                RowMetaAndData rowData = (RowMetaAndData) list.get(i);
-                String code = rowData.getString("ecl", null);
-                if (code != null) {
-                    eclCode += code;
-                }
-            }
-            logBasic("{Iterate Job} ECL Code =" + eclCode);
-        }
+        //String eclCode = parseEclFromRowData(list);
         
         result.setRows(list);
         

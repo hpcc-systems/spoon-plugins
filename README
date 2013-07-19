@@ -7,22 +7,42 @@ To build a "drop-in" installable zip file to use in Pentaho Data Integration (Ke
    mvn -s settings.xml -P run-once install
    
 2. From the spoon-plugins directory (the project root), run the following 
+
+2. Refer to the java-ecl-api project to install and build, this will create a binary an
+	install it into your local maven repository.
+	
+3. From the spoon-plugins directory (the project root), run the following 
    command to build the individual project components:    
    
    mvn -s settings.xml install
 
 3. Upon successful execution of the previous step, run the following command
+4. Upon successful execution of the previous step, run the following command
    to create the distributable zip file: 
    
    mvn -s settings.xml -P create-distribution install
+	- To build the distribution with no Library support (spoon-plugins-distribution.zip)
+		mvn -s settings.xml -P create-distribution install
    
 4. Upon successful execution the file "spoon-plugins-distribution.zip" will be
+	- To build the distribution with the ML Library support (spoon-plugins-distribution-ml.zip)
+		mvn -s settings.xml -P create-distribution-ml install
+   
+	- To build the distribution with the SALT Library support (spoon-plugins-distribution-salt.zip)
+		mvn -s settings.xml -P create-distribution-salt install
+   
+	- To build the distribution with both SALT & ML Library support (spoon-plugins-distribution-full.zip)
+		mvn -s settings.xml -P create-distribution-full install
+   
+5. Upon successful execution the file "spoon-plugins-distribution.zip" will be
    found in the project's target directory.
 
 5. To install in Pentaho Data Integration (Kettle), unzip the above file into
+6. To install in Pentaho Data Integration (Kettle), unzip the above file into
    the "data-integration/plugins" directory of the Kettle installation.
    
 6. The directory structure of Kettle should look like this:
+7. The directory structure of Kettle should look like this:
    data-integration/
        /plugins
            /spoon 
@@ -31,6 +51,8 @@ To build a "drop-in" installable zip file to use in Pentaho Data Integration (Ke
            /hpcc-common
                ecldirect.jar
                eclgui.jar
+			   /properties
+					libraryInclude.properties
        /jobentries
            /ecldataset
                ecldataset.jar
@@ -39,10 +61,13 @@ To build a "drop-in" installable zip file to use in Pentaho Data Integration (Ke
            ...   
 
 7. Delete spoon-plugins-distribution.zip file from the Kettle installation.
+8. Delete spoon-plugins-distribution.zip file from the Kettle installation.
 
 NOTE: If so desired you may incorporate the Maven settings into your
 .m2/settings.xml file, eliminating the need to specify this project's
 settings.xml file on the command line.
 
-You will also need the java-ecl-api located at https://github.com/hpcc-systems/java-ecl-api.  
-You will need to build java-ecl-api and copy the resulting javaecl-0.1.0.jar into the plugins/hpcc-common folder.
+
+NOTE: In order to use the SALT features you must obtain a commercial license of SALT, and 
+install SALT on your system please visit hpccsystems.com for more details.  Without SALT 
+installed the SALT features will fail to work.

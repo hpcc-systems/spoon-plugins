@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="SALTInternalLinking"
+	iconfile="icon.png"
+	description="Salt Internal Linking"
+	tooltip="Salt Internal Linking" 
+	category="HPCC Systems SALT"
+	classname="org.hpccsystems.pentaho.job.saltinternallinking.SALTInternalLinking">
+            
+    <libraries>
+    	<library name="../../hpcc-common/eclsalt.jar"/>
+	 	<library name="../../hpcc-common/javaecl-0.1.0.jar"/>
+        <library name="../../hpcc-common/eclgui.jar"/>
+        <library name="saltinternallinking.jar"/>
+    </libraries>            
+</plugin>

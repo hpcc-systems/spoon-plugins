@@ -103,6 +103,8 @@ public class ECLCount extends ECLJobEntry{//extends JobEntryBase implements Clon
 		
 		List list = result.getRows();
 		list.add(data);
+		String eclCode = parseEclFromRowData(list);
+		/*
 		String eclCode = "";
 		if (list == null) {
 			list = new ArrayList();
@@ -115,6 +117,7 @@ public class ECLCount extends ECLJobEntry{//extends JobEntryBase implements Clon
 			}
 			logBasic("{Count job} ECL Code = " + eclCode);
 		}
+		*/
 		result.setRows(list);
 		
 		return result;
@@ -124,12 +127,16 @@ public class ECLCount extends ECLJobEntry{//extends JobEntryBase implements Clon
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
         try {
             super.loadXML(node, list, list1);
-            
-            setRecordsetName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset_name")));
-            setRecordSet(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset")));
-            setExpression(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "expression")));
-            setKeyed(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "keyed")));
-            setValueList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "valuelist")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset_name")) != null)
+            	setRecordsetName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset_name")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset")) != null)
+            	setRecordSet(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "expression")) != null)
+            	setExpression(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "expression")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "keyed")) != null)
+            	setKeyed(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "keyed")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "valuelist")) != null)
+            	setValueList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "valuelist")));
 
         } catch (Exception e) {
             throw new KettleXMLException("ECL Count Job Plugin Unable to read step info from XML node", e);
@@ -155,11 +162,16 @@ public class ECLCount extends ECLJobEntry{//extends JobEntryBase implements Clon
     public void loadRep(Repository rep, ObjectId id_jobentry, List<DatabaseMeta> databases, List<SlaveServer> slaveServers)
             throws KettleException {
         try {
-            this.recordsetName = rep.getStepAttributeString(id_jobentry, "recordset_name"); //$NON-NLS-1$
-            this.recordset = rep.getStepAttributeString(id_jobentry, "recordset"); //$NON-NLS-1$
-            this.expression = rep.getStepAttributeString(id_jobentry, "expression"); //$NON-NLS-1$
-            this.keyed = rep.getStepAttributeString(id_jobentry, "keyed"); //$NON-NLS-1$
-            this.valuelist = rep.getStepAttributeString(id_jobentry, "valuelist"); //$NON-NLS-1$
+        	if(rep.getStepAttributeString(id_jobentry, "recordset_name") != null)
+        		this.recordsetName = rep.getStepAttributeString(id_jobentry, "recordset_name"); //$NON-NLS-1$
+        	if(rep.getStepAttributeString(id_jobentry, "recordset") != null)
+        		this.recordset = rep.getStepAttributeString(id_jobentry, "recordset"); //$NON-NLS-1$
+        	if(rep.getStepAttributeString(id_jobentry, "expression") != null)
+        		this.expression = rep.getStepAttributeString(id_jobentry, "expression"); //$NON-NLS-1$
+        	if(rep.getStepAttributeString(id_jobentry, "keyed") != null)
+        		this.keyed = rep.getStepAttributeString(id_jobentry, "keyed"); //$NON-NLS-1$
+        	if(rep.getStepAttributeString(id_jobentry, "valuelist") != null)
+        		this.valuelist = rep.getStepAttributeString(id_jobentry, "valuelist"); //$NON-NLS-1$
                 
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);

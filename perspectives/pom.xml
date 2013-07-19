@@ -14,6 +14,8 @@
 
 	<modules>
 		<module>eclresults</module>
+	    <module>eclconfig</module>
+		
 	</modules>
 
 	<properties>
@@ -85,6 +87,7 @@
 				<version>4.10</version>
 				<scope>test</scope>
 			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -118,5 +121,6 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 </project>

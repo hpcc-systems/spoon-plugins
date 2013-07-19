@@ -82,6 +82,7 @@
                 </plugins>
             </build>
         </profile>
+		
 		<profile>
 			<id>build-all</id>
 			<activation>
@@ -89,12 +90,14 @@
 			</activation>
 			<modules>
 				<module>eclgui</module>
+				<module>eclsalt</module>
 				<module>perspectives</module>
 				<module>job</module>
 			</modules>
 			<build>
 				<finalName>${project.artifactId}</finalName>
 				<plugins>
+
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-compiler-plugin</artifactId>
@@ -110,6 +113,7 @@
 									<goal>compile</goal>
 								</goals>
 							</execution>
+							
 						</executions>
 					</plugin>
 					<plugin>
@@ -138,6 +142,7 @@
 							</execution>
 						</executions>
 					</plugin>
+					
 				</plugins>
 			</build>
 
@@ -154,6 +159,21 @@
 						<version>4.10</version>
 						<scope>test</scope>
 					</dependency>
+            <dependency>
+				<groupId>org.eclipse.core</groupId>
+				<artifactId>commands</artifactId>
+				<version>3.3.0-I20070605-0010</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.equinox</groupId>
+				<artifactId>common</artifactId>
+				<version>3.3.0-v20070426</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse</groupId>
+				<artifactId>swt</artifactId>
+				<version>3.3.0-v3346</version>
+			</dependency>
 				</dependencies>
 			</dependencyManagement>
 
@@ -166,6 +186,18 @@
 					<groupId>junit</groupId>
 					<artifactId>junit</artifactId>
 					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.core</groupId>
+					<artifactId>commands</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.equinox</groupId>
+					<artifactId>common</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse</groupId>
+					<artifactId>swt</artifactId>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -186,6 +218,7 @@
 								<phase>package</phase>
 								<configuration>
 									<target>
+										<ant antfile="build-helper.xml" target="create-base" />
 										<ant antfile="build-helper.xml" target="create-distribution" />
 									</target>
 								</configuration>
@@ -193,11 +226,235 @@
 									<goal>run</goal>
 								</goals>
 							</execution>
+							 							
 						</executions>
 					</plugin>
 				</plugins>
 			</build>
 		</profile>
+		
+		
+		<profile>
+			<id>build-with-salt</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
+				<module>eclgui</module>
+				<module>eclsalt</module>
+				<module>perspectives</module>
+				<module>job</module>
+				<module>job-salt</module>
+			</modules>
+			<build>
+				<finalName>${project.artifactId}</finalName>
+				<plugins>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+                        <version>${maven.compiler.plugin.version}</version>
+						<configuration>
+							<source>1.6</source>
+							<target>1.6</target>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>compile</phase>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+							</execution>
+							
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+                        <version>${maven.source.plugin.version}</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven.javadoc.plugin.version}</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					
+				</plugins>
+			</build>
+
+			<dependencyManagement>
+				<dependencies>
+					<dependency>
+						<groupId>commons-io</groupId>
+						<artifactId>commons-io</artifactId>
+						<version>2.1</version>
+					</dependency>
+					<dependency>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+						<version>4.10</version>
+						<scope>test</scope>
+					</dependency>
+            <dependency>
+				<groupId>org.eclipse.core</groupId>
+				<artifactId>commands</artifactId>
+				<version>3.3.0-I20070605-0010</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.equinox</groupId>
+				<artifactId>common</artifactId>
+				<version>3.3.0-v20070426</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse</groupId>
+				<artifactId>swt</artifactId>
+				<version>3.3.0-v3346</version>
+			</dependency>
+				</dependencies>
+			</dependencyManagement>
+
+			<dependencies>
+				<dependency>
+					<groupId>commons-io</groupId>
+					<artifactId>commons-io</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.core</groupId>
+					<artifactId>commands</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.equinox</groupId>
+					<artifactId>common</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse</groupId>
+					<artifactId>swt</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+		
+		<profile>
+			<id>create-distribution-salt</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>${maven.antrun.plugin.version}</version>
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<configuration>
+									<target>
+										<ant antfile="build-helper.xml" target="create-base" />
+										
+										<ant antfile="build-helper.xml" target="create-salt" />
+										<ant antfile="build-helper.xml" target="create-distribution-salt" />
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+							 							
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		
+		<profile>
+			<id>create-distribution-ml</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>${maven.antrun.plugin.version}</version>
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<configuration>
+									<target>
+										<ant antfile="build-helper.xml" target="create-base" />
+										<ant antfile="build-helper.xml" target="create-ml" />
+										<ant antfile="build-helper.xml" target="create-distribution-ml" />
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+							 							
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		
+		<profile>
+			<id>create-distribution-full</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>${maven.antrun.plugin.version}</version>
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<configuration>
+									<target>
+										<ant antfile="build-helper.xml" target="create-base" />
+										<ant antfile="build-helper.xml" target="create-salt" />
+										<ant antfile="build-helper.xml" target="create-ml" />
+										<ant antfile="build-helper.xml" target="create-distribution-full" />
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+							 							
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		
 	</profiles>
 
 </project>

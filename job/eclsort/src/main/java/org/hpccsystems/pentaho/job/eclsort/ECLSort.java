@@ -90,6 +90,8 @@ public class ECLSort extends ECLJobEntry{//extends JobEntryBase implements Clone
         
         List list = result.getRows();
         list.add(data);
+        String eclCode = parseEclFromRowData(list);
+        /*
         String eclCode = "";
         if (list == null) {
             list = new ArrayList();
@@ -104,7 +106,7 @@ public class ECLSort extends ECLJobEntry{//extends JobEntryBase implements Clone
             }
             logBasic("{Sort Job} ECL Code =" + eclCode);
         }
-        
+        */
         result.setRows(list);
         
         

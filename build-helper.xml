@@ -22,11 +22,18 @@
           Create the distributable zip archive to be expanded in the user's Kettle plugins
           directory.
          ================================================================================= -->
-	<target name="create-distribution" description="Build installable distribution">
-		<zip destfile="./target/spoon-plugins-distribution.zip">
-			<zipfileset dir="./eclgui/target" includes="eclgui.jar" prefix="hpcc-common" />
+	<target name="create-base" description="Build installable distribution">
+		<zip destfile="./target/spoon-plugins.zip">
+			
+			<zipfileset dir="./job/eclglobalvariables/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclglobalvariables" />
+			<zipfileset dir="./job/eclglobalvariables/target" includes="eclglobalvariables.jar" prefix="jobentries/eclglobalvariables" />
+			
+			<zipfileset dir="./eclgui/target" includes="eclgui.jar" prefix="hpcc-common"  />
+			<zipfileset dir="./eclsalt/target" includes="eclsalt.jar" prefix="hpcc-common"  />
 			<zipfileset dir="./perspectives/eclresults/target" includes="eclresults.jar" prefix="spoon/eclresults" />
 			<zipfileset dir="./perspectives/eclresults/src/main/resources/plugin" includes="plugin.xml" prefix="spoon/eclresults" />
+			<zipfileset dir="./perspectives/eclconfig/target" includes="eclconfig.jar" prefix="spoon/eclconfig" />
+			<zipfileset dir="./perspectives/eclconfig/src/main/resources/plugin" includes="plugin.xml" prefix="spoon/eclconfig" />
 			<zipfileset dir="./job/ecldataset/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecldataset" />
 			<zipfileset dir="./job/ecldataset/target" includes="ecldataset.jar" prefix="jobentries/ecldataset" />
 			<zipfileset dir="./job/ecldedup/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecldedup" />
@@ -39,8 +46,6 @@
 			<zipfileset dir="./job/eclexecute/target" includes="eclexecute.jar" prefix="jobentries/eclexecute" />
 			<zipfileset dir="./job/eclgeneric/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclgeneric" />
 			<zipfileset dir="./job/eclgeneric/target" includes="eclgeneric.jar" prefix="jobentries/eclgeneric" />
-			<zipfileset dir="./job/eclglobalvariables/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclglobalvariables" />
-			<zipfileset dir="./job/eclglobalvariables/target" includes="eclglobalvariables.jar" prefix="jobentries/eclglobalvariables" />
 			<zipfileset dir="./job/eclgroup/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclgroup" />
 			<zipfileset dir="./job/eclgroup/target" includes="eclgroup.jar" prefix="jobentries/eclgroup" />
 			<zipfileset dir="./job/eclindex/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclindex" />
@@ -51,20 +56,6 @@
 			<zipfileset dir="./job/ecljoin/target" includes="ecljoin.jar" prefix="jobentries/ecljoin" />
 			<zipfileset dir="./job/eclmergepaths/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmergepaths" />
 			<zipfileset dir="./job/eclmergepaths/target" includes="eclmergepaths.jar" prefix="jobentries/eclmergepaths" />
-			<zipfileset dir="./job/eclmlassociate/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmlassociate" />
-			<zipfileset dir="./job/eclmlassociate/target" includes="eclmlassociate.jar" prefix="jobentries/eclmlassociate" />
-			<zipfileset dir="./job/eclmlbuildclassify/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmlbuildclassify" />
-			<zipfileset dir="./job/eclmlbuildclassify/target" includes="eclmlbuildclassify.jar" prefix="jobentries/eclmlbuildclassify" />
-			<zipfileset dir="./job/eclmlclassify/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmlclassify" />
-			<zipfileset dir="./job/eclmlclassify/target" includes="eclmlclassify.jar" prefix="jobentries/eclmlclassify" />
-			<zipfileset dir="./job/eclmldiscretize/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmldiscretize" />
-			<zipfileset dir="./job/eclmldiscretize/target" includes="eclmldiscretize.jar" prefix="jobentries/eclmldiscretize" />
-			<zipfileset dir="./job/eclmlfromfield/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmlfromfield" />
-			<zipfileset dir="./job/eclmlfromfield/target" includes="eclmlfromfield.jar" prefix="jobentries/eclmlfromfield" />
-			<zipfileset dir="./job/eclmlkmeans/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmlkmeans" />
-			<zipfileset dir="./job/eclmlkmeans/target" includes="eclmlkmeans.jar" prefix="jobentries/eclmlkmeans" />
-			<zipfileset dir="./job/eclmltofield/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmltofield" />
-			<zipfileset dir="./job/eclmltofield/target" includes="eclmltofield.jar" prefix="jobentries/eclmltofield" />
 			<zipfileset dir="./job/ecloutput/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecloutput" />
 			<zipfileset dir="./job/ecloutput/target" includes="ecloutput.jar" prefix="jobentries/ecloutput" />
 			<zipfileset dir="./job/eclproject/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclproject" />
@@ -77,7 +68,6 @@
 			<zipfileset dir="./job/eclsprayfile/target" includes="eclsprayfile.jar" prefix="jobentries/eclsprayfile" />
 			<zipfileset dir="./job/ecltable/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecltable" />
 			<zipfileset dir="./job/ecltable/target" includes="ecltable.jar" prefix="jobentries/ecltable" />
-			
 			<zipfileset dir="./job/eclcount/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclcount" />
 			<zipfileset dir="./job/eclcount/target" includes="eclcount.jar" prefix="jobentries/eclcount" />
 			<zipfileset dir="./job/ecldespray/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecldespray" />
@@ -88,7 +78,69 @@
 			<zipfileset dir="./job/eclloop/target" includes="eclloop.jar" prefix="jobentries/eclloop" />
 			<zipfileset dir="./job/eclmerge/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmerge" />
 			<zipfileset dir="./job/eclmerge/target" includes="eclmerge.jar" prefix="jobentries/eclmerge" />
+		
 		</zip>
 	</target>
-
+	<target name="create-ml">
+		<zip destfile="./target/spoon-plugins-ml.zip">
+			<zipfileset dir="./job-ml/eclmlassociate/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmlassociate" />
+			<zipfileset dir="./job-ml/eclmlassociate/target" includes="eclmlassociate.jar" prefix="jobentries/eclmlassociate" />
+			<zipfileset dir="./job-ml/eclmlbuildclassify/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmlbuildclassify" />
+			<zipfileset dir="./job-ml/eclmlbuildclassify/target" includes="eclmlbuildclassify.jar" prefix="jobentries/eclmlbuildclassify" />
+			<zipfileset dir="./job-ml/eclmlclassify/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmlclassify" />
+			<zipfileset dir="./job-ml/eclmlclassify/target" includes="eclmlclassify.jar" prefix="jobentries/eclmlclassify" />
+			<zipfileset dir="./job-ml/eclmldiscretize/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmldiscretize" />
+			<zipfileset dir="./job-ml/eclmldiscretize/target" includes="eclmldiscretize.jar" prefix="jobentries/eclmldiscretize" />
+			<zipfileset dir="./job-ml/eclmlfromfield/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmlfromfield" />
+			<zipfileset dir="./job-ml/eclmlfromfield/target" includes="eclmlfromfield.jar" prefix="jobentries/eclmlfromfield" />
+			<zipfileset dir="./job-ml/eclmlkmeans/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmlkmeans" />
+			<zipfileset dir="./job-ml/eclmlkmeans/target" includes="eclmlkmeans.jar" prefix="jobentries/eclmlkmeans" />
+			<zipfileset dir="./job-ml/eclmltofield/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclmltofield" />
+			<zipfileset dir="./job-ml/eclmltofield/target" includes="eclmltofield.jar" prefix="jobentries/eclmltofield" />
+			
+		</zip>
+	</target>
+	<target name="create-salt" >
+		<zip destfile="./target/spoon-plugins-salt.zip">
+			<zipfileset dir="./job-salt/saltdataprofiling/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/saltdataprofiling" />
+			<zipfileset dir="./job-salt/saltdataprofiling/target" includes="saltdataprofiling.jar" prefix="jobentries/saltdataprofiling" />
+			<zipfileset dir="./job-salt/salthygiene/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/salthygiene" />
+			<zipfileset dir="./job-salt/salthygiene/target" includes="salthygiene.jar" prefix="jobentries/salthygiene" />
+			<zipfileset dir="./job-salt/saltinternallinking/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/saltinternallinking" />
+			<zipfileset dir="./job-salt/saltinternallinking/target" includes="saltinternallinking.jar" prefix="jobentries/saltinternallinking" />
+			
+		</zip>
+	</target>
+	<target name="create-distribution-salt" >
+		<zip destfile="./target/spoon-plugins-distribution-salt.zip">
+			<zipgroupfileset dir="target" includes="spoon-plugins.zip" />
+			<zipgroupfileset dir="target" includes="spoon-plugins-salt.zip" />
+			<zipfileset dir="./eclgui/src/main/resources/properties/salt" includes="libraryInclude.properties" prefix="hpcc-common/properties" />
+			
+		</zip>
+	</target>
+	<target name="create-distribution-ml" >
+		<zip destfile="./target/spoon-plugins-distribution-ml.zip">
+			
+			<zipgroupfileset dir="target" includes="spoon-plugins.zip" />
+			<zipgroupfileset dir="target" includes="spoon-plugins-ml.zip" />
+			<zipfileset dir="./eclgui/src/main/resources/properties/ml" includes="libraryInclude.properties" prefix="hpcc-common/properties" />
+			
+		</zip>
+	</target>
+	<target name="create-distribution-full">
+		<zip destfile="./target/spoon-plugins-distribution-full.zip">
+			<zipfileset dir="./eclgui/src/main/resources/properties/full" includes="libraryInclude.properties" prefix="hpcc-common/properties" />
+			<zipgroupfileset dir="target" includes="spoon-plugins.zip" />
+			<zipgroupfileset dir="target" includes="spoon-plugins-ml.zip" />
+			<zipgroupfileset dir="target" includes="spoon-plugins-salt.zip" />
+		</zip>
+	</target>
+	<target name="create-distribution">
+		<zip destfile="./target/spoon-plugins-distribution.zip">
+			<zipfileset dir="./eclgui/src/main/resources/properties/nolib" includes="libraryInclude.properties" prefix="hpcc-common/properties" />
+			<zipgroupfileset dir="target" includes="spoon-plugins.zip" />
+		</zip>
+	</target>
+	
 </project>

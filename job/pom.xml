@@ -24,13 +24,6 @@
 		<module>ecliterate</module>
 		<module>ecljoin</module>
 		<module>eclmergepaths</module>
-		<module>eclmlassociate</module>
-		<module>eclmlbuildclassify</module>
-		<module>eclmlclassify</module>
-		<module>eclmldiscretize</module>
-		<module>eclmlfromfield</module>
-		<module>eclmlkmeans</module>
-		<module>eclmltofield</module>
 		<module>ecloutput</module>
 		<module>eclproject</module>
 		<module>eclrollup</module>
@@ -86,6 +79,11 @@
                 <artifactId>eclgui</artifactId>
                 <version>0.1.0</version>
             </dependency>
+			<dependency>
+                <groupId>org.hpccsystems.pentaho</groupId>
+                <artifactId>eclsalt</artifactId>
+                <version>0.1.0</version>
+            </dependency>
 			
 		</dependencies>
 	</dependencyManagement>
@@ -118,6 +116,10 @@
         <dependency>
             <groupId>org.hpccsystems.pentaho</groupId>
             <artifactId>eclgui</artifactId>
+        </dependency>
+		<dependency>
+            <groupId>org.hpccsystems.pentaho</groupId>
+            <artifactId>eclsalt</artifactId>
         </dependency>
 	</dependencies>
 </project>

@@ -41,6 +41,9 @@ import java.io.*;
 import org.hpccsystems.eclguifeatures.*;
 import org.hpccsystems.ecljobentrybase.*;
 
+import com.hpccsystems.resources.IncludeLibPropertiesReader;
+import com.hpccsystems.resources.PropertiesReader;
+
 
 /**
  *
@@ -50,6 +53,8 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
 
     private ECLGlobalVariables jobEntry;
     
+    private boolean includeSaltLib = true;
+    private boolean includeMLLib = true;
     private Text jobEntryName;
 
     private Text userName;
@@ -64,6 +69,8 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
     private Text eclccInstallDir;
     private Text mlPath;
     private Combo includeML;
+    
+    private Text compileFlags;
  /*
              *  private String mlPath = "ecl-ml";
     private String eclccInstallDir = "C:\\Program Files\\HPCC Systems\\HPCC\\bin\\ver_3_0\\";
@@ -75,12 +82,27 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
     
     
     
-    private Button wOK, wCancel, mlFileOpenButton, eclFileOpenButton;
+    private Text SALTPath;
+    private Combo includeSALT;
+
+    private Button wOK, wCancel, mlFileOpenButton, eclFileOpenButton,saltFileOpenButton;
     private boolean backupChanged;
     private SelectionAdapter lsDef;
 
     public ECLGlobalVariablesDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
         super(parent, jobEntryInt, rep, jobMeta);
+       
+        if(IncludeLibPropertiesReader.getProperty("includeSalt").equalsIgnoreCase("true")){
+        	includeSaltLib = true;
+        }else{
+        	includeSaltLib = false;
+        }
+        if(IncludeLibPropertiesReader.getProperty("includeML").equalsIgnoreCase("true")){
+        	includeMLLib = true;
+        }else{
+        	includeMLLib = false;
+        }
+        
         jobEntry = (ECLGlobalVariables) jobEntryInt;
         if (this.jobEntry.getName() == null) {
             this.jobEntry.setName("Global Variables");
@@ -155,12 +177,12 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         props.setLook(varGroup);
         varGroup.setText("Server Details");
         varGroup.setLayout(groupLayout);
-        FormData datasetGroupFormat = new FormData();
-        datasetGroupFormat.top = new FormAttachment(generalGroup, margin);
-        datasetGroupFormat.width = 400;
-        datasetGroupFormat.height = 355;
-        datasetGroupFormat.left = new FormAttachment(middle, 0);
-        varGroup.setLayoutData(datasetGroupFormat);
+        FormData varGroupFormat = new FormData();
+        varGroupFormat.top = new FormAttachment(generalGroup, margin);
+        varGroupFormat.width = 400;
+        varGroupFormat.height = 375;
+        varGroupFormat.left = new FormAttachment(middle, 0);
+        varGroup.setLayoutData(varGroupFormat);
 
         //name = buildText("Distribute Name", null, lsMod, middle, margin, distributeGroup);
 
@@ -191,31 +213,85 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         };
         this.eclFileOpenButton.addListener(SWT.Selection, eclFileOpenListener);
         
-        includeML = buildCombo("Include ML Library?", eclFileOpenButton, lsMod, middle, margin, varGroup, new String[]{"true", "false"});
-        mlPath = buildText("Path to ML Library", includeML, lsMod, middle, margin, varGroup);
-        this.mlFileOpenButton = buildButton("Choose Location", mlPath, lsMod, middle, margin, varGroup);
-        controls.put("fOpen", mlFileOpenButton);
+        this.compileFlags = this.buildMultiText("Compile Flags", eclFileOpenButton, lsMod, middle, margin, varGroup);
         
-        Listener mlFileOpenListener = new Listener() {
-
-            public void handleEvent(Event e) {
-                String newFile = buildDirectoryDialog();
-                if(newFile != ""){
-                	mlPath.setText(newFile);
-                }
+        Group mlGroup = null;
+        if(includeMLLib){
+        	mlGroup = new Group(shell, SWT.SHADOW_NONE);
+            props.setLook(mlGroup);
+            mlGroup.setText("ML Details");
+            mlGroup.setLayout(groupLayout);
+            FormData mlGroupData = new FormData();
+            mlGroupData.top = new FormAttachment(varGroup, margin);
+            mlGroupData.width = 400;
+            mlGroupData.height = 100;
+            mlGroupData.left = new FormAttachment(middle, 0);
+            mlGroup.setLayoutData(mlGroupData);
+            
+	        includeML = buildCombo("Include ML Library?", compileFlags, lsMod, middle, margin, mlGroup, new String[]{"true", "false"});
+	        mlPath = buildText("Path to ML Library", includeML, lsMod, middle, margin, mlGroup);
+	        this.mlFileOpenButton = buildButton("Choose Location", mlPath, lsMod, middle, margin, mlGroup);
+	        controls.put("fOpen", mlFileOpenButton);
+	        
+	        Listener mlFileOpenListener = new Listener() {
+	
+	            public void handleEvent(Event e) {
+	                String newFile = buildDirectoryDialog();
+	                if(newFile != ""){
+	                	mlPath.setText(newFile);
+	                }
+	            }
+	        };
+	        this.mlFileOpenButton.addListener(SWT.Selection, mlFileOpenListener);
+        }
+        Group saltGroup = null;
+        if(includeSaltLib){
+        	saltGroup = new Group(shell, SWT.SHADOW_NONE);
+            props.setLook(saltGroup);
+            saltGroup.setText("SALT Details");
+            saltGroup.setLayout(groupLayout);
+            FormData saltGroupData = new FormData();
+            if(includeMLLib){
+            	saltGroupData.top = new FormAttachment(mlGroup, margin);
+            }else{
+            	saltGroupData.top = new FormAttachment(varGroup, margin);
             }
-        };
-        this.mlFileOpenButton.addListener(SWT.Selection, mlFileOpenListener);
+            saltGroupData.width = 400;
+            saltGroupData.height = 100;
+            saltGroupData.left = new FormAttachment(middle, 0);
+            saltGroup.setLayoutData(saltGroupData);
+            
+        	includeSALT = buildCombo("Include SALT Library?", mlFileOpenButton, lsMod, middle, margin, saltGroup, new String[]{"true", "false"});
+        	SALTPath = buildText("Path to SALT Library", includeSALT, lsMod, middle, margin, saltGroup);
+        	// includeSALT.setVisible(false);
+        	// SALTPath.setVisible(false);
+        	this.saltFileOpenButton = buildButton("Choose Location", SALTPath, lsMod, middle, margin, saltGroup);
+        	controls.put("fOpen", saltFileOpenButton);
         
-        
+        	Listener saltFileOpenListener = new Listener() {
 
+        		public void handleEvent(Event e) {
+        			String newFile = buildDirectoryDialog();
+        			if(newFile != ""){
+        				SALTPath.setText(newFile);
+        			}
+        		}
+        	};
+        	this.saltFileOpenButton.addListener(SWT.Selection, saltFileOpenListener);
+        }
+        
+        
         wOK = new Button(shell, SWT.PUSH);
         wOK.setText("OK");
         wCancel = new Button(shell, SWT.PUSH);
         wCancel.setText("Cancel");
-
-        BaseStepDialog.positionBottomButtons(shell, new Button[]{wOK, wCancel}, margin, varGroup);
-
+        if(includeSaltLib){
+        	BaseStepDialog.positionBottomButtons(shell, new Button[]{wOK, wCancel}, margin, saltGroup);
+        }else if(includeMLLib){
+        	BaseStepDialog.positionBottomButtons(shell, new Button[]{wOK, wCancel}, margin, mlGroup);
+        }else{
+        	BaseStepDialog.positionBottomButtons(shell, new Button[]{wOK, wCancel}, margin, varGroup);
+        }
         // Add listeners
         Listener cancelListener = new Listener() {
 
@@ -264,7 +340,7 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         
 
 
-     
+        PropertiesReader.getApplicationProperties();
         
         //if (jobEntry.getJobName() != null) {
         //    jobEntryName.setText(jobEntry.getJobName());
@@ -272,38 +348,65 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         if (jobEntry.getName() != null) {
             jobEntryName.setText(jobEntry.getName());
         }
-        if (jobEntry.getServerIP() != null) {
+        if (jobEntry.getServerIP() != null && !jobEntry.getServerIP().equals("")) {
             serverIP.setText(jobEntry.getServerIP());
+            System.out.println("IP -- using set value of : " + jobEntry.getServerIP());
+        }else{
+        	serverIP.setText(PropertiesReader.getProperty("hpcc.host"));
+        	System.out.println("IP -- using default value of : " + PropertiesReader.getProperty("hpcc.host"));
         }
-        if (jobEntry.getServerPort() != null) {
+        if (jobEntry.getServerPort() != null && !jobEntry.getServerPort().equals("")) {
             serverPort.setText(jobEntry.getServerPort());
+        }else{
+        	serverPort.setText(PropertiesReader.getProperty("hpcc.port"));
         }
         
-        if (jobEntry.getLandingZone() != null) {
+        if (jobEntry.getLandingZone() != null && !jobEntry.getLandingZone().equals("")) {
             landingZone.setText(jobEntry.getLandingZone());
+        }else{
+        	landingZone.setText(PropertiesReader.getProperty("hpcc.landingzone"));
         }
 
         
-        if (jobEntry.getCluster() != null) {
+        if (jobEntry.getCluster() != null && !jobEntry.getCluster().equals("")) {
             cluster.setText(jobEntry.getCluster());
+        }else{
+        	cluster.setText(PropertiesReader.getProperty("hpcc.cluster"));
         }
         
         if (jobEntry.getJobName() != null) {
             jobName.setText(jobEntry.getJobName());
         }
-        if (jobEntry.getMaxReturn() != null) {
+        if (jobEntry.getMaxReturn() != null && !jobEntry.getMaxReturn().equals("")) {
             maxReturn.setText(jobEntry.getMaxReturn());
+        }else{
+        	maxReturn.setText(PropertiesReader.getProperty("hpcc.maxreturn"));
         }
-        if (jobEntry.getEclccInstallDir() != null) {
+        if (jobEntry.getEclccInstallDir() != null && !jobEntry.getEclccInstallDir().equals("")) {
             eclccInstallDir.setText(jobEntry.getEclccInstallDir());
+        }else{
+        	eclccInstallDir.setText(PropertiesReader.getProperty("hpcc.eclcc"));
         }
-        if (jobEntry.getMlPath() != null) {
-            mlPath.setText(jobEntry.getMlPath());
+        if(includeMLLib){
+	        if (jobEntry.getMlPath() != null && !jobEntry.getMlPath().equals("")) {
+	            mlPath.setText(jobEntry.getMlPath());
+	        }else{
+	        	 mlPath.setText(PropertiesReader.getProperty("ml.lib"));
+	        }
+	        if (jobEntry.getIncludeML() != null) {
+	            includeML.setText(jobEntry.getIncludeML());
+	        }
         }
-        if (jobEntry.getIncludeML() != null) {
-            includeML.setText(jobEntry.getIncludeML());
+        if(includeSaltLib){
+	        if (jobEntry.getSALTPath() != null && !jobEntry.getSALTPath().equals("")) {
+	            SALTPath.setText(jobEntry.getSALTPath());
+	        }else{
+	        	SALTPath.setText(PropertiesReader.getProperty("salt.lib"));
+	        }
+	        if (jobEntry.getIncludeSALT() != null) {
+	            includeSALT.setText(jobEntry.getIncludeSALT());
+	        }
         }
-
         if (jobEntry.getUser() != null) {
             userName.setText(jobEntry.getUser());
         }
@@ -311,7 +414,12 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
             password.setText(jobEntry.getPass());
         }
       
-
+        if (jobEntry.getCompileFlags() != null) {
+            compileFlags.setText(jobEntry.getCompileFlags());
+        }
+        
+       
+       
 
         shell.pack();
         shell.open();
@@ -326,6 +434,10 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
     }
     private void updatePaths(){
     	String eclPath = eclccInstallDir.getText();
+    	String slash = "\\";
+    	if(eclPath.contains("/") && !eclPath.contains("\\")){
+    		slash = "/";
+    	}
     	boolean eclLast = false;
     	if(eclPath.lastIndexOf("\\") == (eclPath.length()-1)){
     		//has last \
@@ -335,12 +447,13 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
     		eclLast = true;
     	}
     	if(!eclLast){
-    		eclccInstallDir.setText(eclccInstallDir.getText() + "\\");
+    		eclccInstallDir.setText(eclccInstallDir.getText() + slash);
     	}
     	
     	if(includeML.getText().equals("true")){
 	    	String mlP = mlPath.getText();
 	    	boolean mlLast = false;
+	    	
 	    	if(mlP.lastIndexOf("\\") == (mlP.length()-1)){
 	    		//has last \
 	    		mlLast = true;
@@ -362,24 +475,23 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
     	
     	String errorTxt = "Some Fields Were Not Correct:\r\n";
     	
-    	eclccExists = (new File(eclccInstallDir.getText())).exists();
+    	/*eclccExists = (new File(eclccInstallDir.getText())).exists();
     	if(!eclccExists){
     		//warn
     		System.out.println("no eclcc install found");
     		errorTxt += "The \"eclcc Install Dir\" could not be located\r\n";
-    	}
-    	if(includeML.getText().equals("true")){
-    		mlExists = (new File(mlPath.getText())).exists();
-    		if(!mlExists){
-    			//warn
-    			errorTxt += "The \"Path to ML Library\" could not be located\r\n";
-    			System.out.println("No ML Library found");
-    		}
-    	}
-    	if(eclccExists && mlExists){
-    	
-
-	    	if(eclccExists && mlExists){
+    	}*/
+    	if(includeMLLib){
+	    	if(includeML.getText().equals("true")){
+	    		mlExists = (new File(mlPath.getText())).exists();
+	    		if(!mlExists){
+	    			//warn
+	    			errorTxt += "The \"Path to ML Library\" could not be located\r\n";
+	    			System.out.println("No ML Library found");
+	    		}
+	    	}
+	    	//eclccExists && 
+	    	if(mlExists){
 	    		isReady = true;
 	    		System.out.println("paths validated");
 	    	}else{
@@ -413,12 +525,58 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
 		        dialog.setDefaultButton (okButton);
 		    	dialog.pack ();
 		    	dialog.open ();
-	    	
-	    	
 	    	}
+    	}
+    	if(includeSaltLib){
+			if(includeSALT.getText().equals("true")){
+				saltExists = (new File(SALTPath.getText())).exists();
+				if(!saltExists){
+					//warn
+					errorTxt += "The \"Path to SALT Library\" could not be located\r\n";
+					System.out.println("No SALT Library found");
+				}
+			}
+	    	if(saltExists && eclccExists && mlExists){
+		    		isReady = true;
+		    		System.out.println("paths validated");
+			}else{
+				Shell parentShell = getParent();
+				//Display display = parentShell.getDisplay();
+				//final Shell dialog = new Shell (display, SWT.DIALOG_TRIM);
+				final Shell dialog = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
+				System.out.println("No SALT Library found - dialog open");
+				Label label = new Label (dialog, SWT.NONE);
+				label.setText (errorTxt);
+				Button okButton = new Button (dialog, SWT.PUSH);
+				okButton.setText ("&OK");
+	   
+				Listener cancelListener = new Listener() {
+	
+					public void handleEvent(Event e) {
+						dialog.close();
+					}
+				};
+				
+				okButton.addListener(SWT.Selection, cancelListener);
+				
+				FormLayout form = new FormLayout ();
+				form.marginWidth = form.marginHeight = 8;
+				dialog.setLayout (form);
+				FormData okData = new FormData ();
+				okData.top = new FormAttachment (label, 8);
+				okButton.setLayoutData (okData);
+				
+				
+				dialog.setDefaultButton (okButton);
+				dialog.pack ();
+				dialog.open ();
+			
+			
+			}
     	}
     	return isReady;
     }
+
 
     private boolean validate(){
     	boolean isValid = true;
@@ -460,13 +618,13 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
     		isValid = false;
     		errors += "You must provide a \"Job Name\"!\r\n";
     	}
-    	if(this.eclccInstallDir.getText().equals("")){
+    	/*if(this.eclccInstallDir.getText().equals("")){
     		//one is required.
     		isValid = false;
     		errors += "You must provide a \"eclcc Install Dir\"!\r\n";
-    	}
+    	}*/
     	
-    	if(this.includeML.getText().equals("true")){
+    	if(includeMLLib && this.includeML.getText().equals("true")){
     		if(this.mlPath.getText().equals("")){
         		//one is required.
         		isValid = false;
@@ -503,14 +661,17 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         jobEntry.setMaxReturn(maxReturn.getText());
         
         jobEntry.setEclccInstallDir(eclccInstallDir.getText());
-        jobEntry.setMlPath(mlPath.getText());
-        jobEntry.setIncludeML(includeML.getText());
-        
+        if(includeMLLib){
+        	jobEntry.setMlPath(mlPath.getText());
+        	jobEntry.setIncludeML(includeML.getText());
+        }
         jobEntry.setUser(userName.getText());
         jobEntry.setPass(password.getText());
-
-
-
+		if(includeSaltLib){
+	        jobEntry.setSALTPath(SALTPath.getText());
+	        jobEntry.setIncludeSALT(includeSALT.getText());
+		}
+        jobEntry.setCompileFlags(compileFlags.getText());
         dispose();
     }
 

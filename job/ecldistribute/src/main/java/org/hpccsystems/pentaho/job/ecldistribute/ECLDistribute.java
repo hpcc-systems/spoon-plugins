@@ -120,6 +120,8 @@ public class ECLDistribute extends ECLJobEntry{//extends JobEntryBase implements
         
         List list = result.getRows();
         list.add(data);
+        String eclCode = parseEclFromRowData(list);
+        /*
         String eclCode = "";
         if (list == null) {
             list = new ArrayList();
@@ -134,7 +136,7 @@ public class ECLDistribute extends ECLJobEntry{//extends JobEntryBase implements
             }
             logBasic("{Distribute Job} ECL Code =" + eclCode);
         }
-        
+        */
         result.setRows(list);
         
         

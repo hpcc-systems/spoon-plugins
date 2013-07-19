@@ -194,6 +194,8 @@ public class ECLDedup extends ECLJobEntry{//extends JobEntryBase implements Clon
         
         List list = result.getRows();
         list.add(data);
+        String eclCode = parseEclFromRowData(list);
+        /*
         String eclCode = "";
         if (list == null) {
             list = new ArrayList();
@@ -208,7 +210,7 @@ public class ECLDedup extends ECLJobEntry{//extends JobEntryBase implements Clon
             }
             logBasic("{Dedup Job} ECL Code =" + eclCode);
         }
-        
+        */
         result.setRows(list);
         
         

@@ -548,7 +548,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
         recordsetDetailsGroup.layout();
 
 
-        this.outputFormat = buildText("Format", null, lsMod, middle, margin, recordsetDetailsGroup);
+        this.outputFormat = buildText("Limit Columns (CSV)", null, lsMod, middle, margin, recordsetDetailsGroup);
         this.outputType = buildCombo("Type", this.outputFormat, lsMod, middle, margin, recordsetDetailsGroup,new String[]{"", "File", "File - CSV", "File - XML", "Piped", "Named"});
         
         if(jobEntry.getOutputFormat() != null){
@@ -637,18 +637,22 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
         
         String serverHost = "";
         int serverPort = 8010;
+        String user = "";
+        String pass = "";
         try{
             //Object[] jec = this.jobMeta.getJobCopies().toArray();
                 
                 serverHost = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_ip");
                 serverPort = Integer.parseInt(ap.getGlobalVariable(jobMeta.getJobCopies(),"server_port"));
-               
+                user = ap.getGlobalVariable(jobMeta.getJobCopies(),"user_name");
+                pass = ap.getGlobalVariableEncrypted(jobMeta.getJobCopies(),"password");
+                
             }catch (Exception e){
                 System.out.println("Error Parsing existing Global Variables ");
                 System.out.println(e.toString());
                 
             }
-        HPCCServerInfo hsi = new HPCCServerInfo(serverHost,serverPort);
+        HPCCServerInfo hsi = new HPCCServerInfo(serverHost,serverPort,user,pass);
         
         clusters = hsi.fetchTargetClusters();
         
@@ -772,6 +776,10 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
     	if(isDef.getText().equalsIgnoreCase("")){
     		isValid = false;
     		errors += "\"Is Definition\" is a required field!\r\n";
+    	}else if(isDef.getText().equalsIgnoreCase("yes")){
+    		isValid = false;
+    		errors += "Warning: \"Is Definition\" is set to yes, please keep in mind this output will not be executed until called.\r\n";
+    		errors += "\tAlso if this is your only output and the Definition isn't called then this will cause an error.\r\n";
     	}
     	
     	if(this.inputType.getText().equals("Expression")){
@@ -788,17 +796,29 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
         		errors += "\"Recordset Name\" is a Required field for \"Input Type\" Recordset!\r\n";
     		}
     		
+    		try{
     		//if File then require type
+    			
+    		if(!this.outputType.isDisposed() && this.outputType.getText() != null && this.outputType.getText().equalsIgnoreCase("Piped")){
+    			if(!this.typeOptions.isDisposed() && this.typeOptions.getText().equals("")){
+    				//make sure you have minimum options
+    				isValid = false;
+            		errors += "\"Pipe Options\" is Required for \"Type\" Piped!\r\n";
+    			}
+    		}
+    		}catch(Exception e){
+    			
+    		}
     	}else{
     		//error
     		isValid = false;
     		errors += "\"Input Type\" can not be blank!\r\n";
     	}
-
+    	//System.out.println(this.outputType.getText() + " | " + this.typeOptions.getText());
     	
     	if(!isValid){
     		ErrorNotices en = new ErrorNotices();
-    		errors += "If you continue to save with errors you may encounter compile errors.\r\n\r\n";
+    		errors += "If you continue to save with Errors/Warnings you may encounter compile errors.\r\n\r\n";
     		
     		isValid = en.openValidateDialog(getParent(),errors);
     	}
@@ -816,7 +836,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
 	        String serverPort = "";
 	            try{
 	            //Object[] jec = this.jobMeta.getJobCopies().toArray();
-	                
+	                 
 	                serverHost = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_ip");
 	                serverPort = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_port");
 	            }catch (Exception e){

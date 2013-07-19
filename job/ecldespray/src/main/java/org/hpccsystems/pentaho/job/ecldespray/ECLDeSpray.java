@@ -139,6 +139,8 @@ public class ECLDeSpray extends ECLJobEntry{//extends JobEntryBase implements Cl
 		
 		List list = result.getRows();
 		list.add(data);
+		String eclCode = parseEclFromRowData(list);
+		/*
 		String eclCode = "";
 		if (list == null) {
 			list = new ArrayList();
@@ -151,6 +153,7 @@ public class ECLDeSpray extends ECLJobEntry{//extends JobEntryBase implements Cl
 			}
 			logBasic("{DeSpray job} ECL Code = " + eclCode);
 		}
+		*/
 		result.setRows(list);
 		
 		return result;

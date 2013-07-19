@@ -133,6 +133,8 @@ public class ECLGroup extends ECLJobEntry{//extends JobEntryBase implements Clon
 		
 		List list = result.getRows();
 		list.add(data);
+		String eclCode = parseEclFromRowData(list);
+		/*
 		String eclCode = "";
 		if (list == null) {
 			list = new ArrayList();
@@ -145,6 +147,7 @@ public class ECLGroup extends ECLJobEntry{//extends JobEntryBase implements Clon
 			}
 			logBasic("{Group job} ECL Code = " + eclCode);
 		}
+		*/
 		result.setRows(list);
 		
 		return result;

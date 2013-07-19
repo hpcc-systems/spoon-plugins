@@ -26,6 +26,7 @@ public class RecordList {
 		"SET OF STRING",
 		"SET OF UNICODE",
 		"UNICODE", 
+		"UNSIGNED INTEGER",
 		"VARSTRING", 
 		"VARUNICODE"
 		};
