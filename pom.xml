@@ -93,6 +93,8 @@
 				<module>eclsalt</module>
 				<module>perspectives</module>
 				<module>job</module>
+				<module>job-ml</module>
+				<module>job-salt</module>
 			</modules>
 			<build>
 				<finalName>${project.artifactId}</finalName>
