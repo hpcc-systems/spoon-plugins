@@ -17,7 +17,17 @@ To build a "drop-in" installable zip file to use in Pentaho Data Integration (Ke
 4. Upon successful execution of the previous step, run the following command
    to create the distributable zip file: 
    
-   mvn -s settings.xml -P create-distribution install
+	- To build the distribution with no Library support (spoon-plugins-distribution.zip)
+		mvn -s settings.xml -P create-distribution install
+   
+	- To build the distribution with the ML Library support (spoon-plugins-distribution-ml.zip)
+		mvn -s settings.xml -P create-distribution-ml install
+   
+	- To build the distribution with the SALT Library support (spoon-plugins-distribution-salt.zip)
+		mvn -s settings.xml -P create-distribution-salt install
+   
+	- To build the distribution with both SALT & ML Library support (spoon-plugins-distribution-full.zip)
+		mvn -s settings.xml -P create-distribution-full install
    
 5. Upon successful execution the file "spoon-plugins-distribution.zip" will be
    found in the project's target directory.
@@ -34,6 +44,8 @@ To build a "drop-in" installable zip file to use in Pentaho Data Integration (Ke
            /hpcc-common
                ecldirect.jar
                eclgui.jar
+			   /properties
+					libraryInclude.properties
        /jobentries
            /ecldataset
                ecldataset.jar
@@ -47,5 +59,6 @@ NOTE: If so desired you may incorporate the Maven settings into your
 .m2/settings.xml file, eliminating the need to specify this project's
 settings.xml file on the command line.
 
-NOTE: In order to use the SALT features you must obtain a commercial license of SALT and install 
-it on your system please visit hpccsystems.com for more details.
+NOTE: In order to use the SALT features you must obtain a commercial license of SALT, and 
+install SALT on your system please visit hpccsystems.com for more details.  Without SALT 
+installed the SALT features will fail to work.

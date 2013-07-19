@@ -183,7 +183,7 @@ public class ECLExecuteDialog extends ECLJobEntryDialog{//extends JobEntryDialog
         
         this.fileOpenButton = buildButton("Choose Location", fileName, lsMod, middle, margin, fileGroup);
         controls.put("fOpen", fileOpenButton);
-        
+
         Listener fileOpenListener = new Listener() {
 
             public void handleEvent(Event e) {
