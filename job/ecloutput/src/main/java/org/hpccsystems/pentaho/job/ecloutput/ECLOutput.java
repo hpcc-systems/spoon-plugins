@@ -288,6 +288,8 @@ public class ECLOutput extends ECLJobEntry {
         
         List list = result.getRows();
         list.add(data);
+        String eclCode = parseEclFromRowData(list);
+        /*
         String eclCode = "";
         
           
@@ -304,7 +306,7 @@ public class ECLOutput extends ECLJobEntry {
             }
             logBasic("{Iterate Job} ECL Code =" + eclCode);
         }
-        
+        */
         result.setRows(list);
         
         

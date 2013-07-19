@@ -151,9 +151,13 @@ public class ECLDeSprayDialog extends ECLJobEntryDialog{//extends JobEntryDialog
         logicalName = buildText("Logical Name", null, lsMod, middle, margin, desprayGroup);
         destinationIP = buildText("Destination IP", logicalName, lsMod, middle, margin, desprayGroup);
         destinationPath = buildText("Destination Path", destinationIP, lsMod, middle, margin, desprayGroup);
+        //optional fields
         timeout = buildText("Timeout", destinationPath, lsMod, middle, margin, desprayGroup);
         espserverISPport = buildText("ESP Server ISP Port", timeout, lsMod, middle, margin, desprayGroup);
-        maxConnections = buildText("Max Connections", espserverISPport, lsMod, middle, margin, desprayGroup);
+        //shoudl put a lable here with
+        //protocal://IP:port/path
+        Label espHelp = this.buildLabel("protocal://IP:port/path", espserverISPport, lsMod, middle, margin, desprayGroup);
+        maxConnections = buildText("Max Connections", espHelp, lsMod, middle, margin, desprayGroup);
         allowOverwrite = buildCombo("Allow Overwrite", maxConnections, lsMod, middle, margin, desprayGroup,new String[]{"false", "true"});
      
         wOK = new Button(shell, SWT.PUSH);
@@ -274,7 +278,7 @@ public class ECLDeSprayDialog extends ECLJobEntryDialog{//extends JobEntryDialog
     		errors += "You must provide a \"Destination IP\"!\r\n";
     	}
     	//destinationpath
-    	if(this.jobEntryName.getText().equals("")){
+    	if(this.destinationPath.getText().equals("")){
     		//one is required.
     		isValid = false;
     		errors += "You must provide a \"Destination Path\"!\r\n";

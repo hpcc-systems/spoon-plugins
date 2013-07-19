@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="SALTSpecificity"
+	iconfile="icon.png"
+	description="Salt Specificity"
+	tooltip="Salt Specificity" 
+	category="HPCC Systems SALT"
+	classname="org.hpccsystems.pentaho.job.saltspecificity.SALTSpecificity">
+            
+    <libraries>
+    	<library name="../../hpcc-common/eclsalt.jar"/>
+	 	<library name="../../hpcc-common/javaecl-0.1.0.jar"/>
+        <library name="../../hpcc-common/eclgui.jar"/>
+        <library name="saltspecificity.jar"/>
+    </libraries>            
+</plugin>

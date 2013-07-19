@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="ECLDataProfiling"
+	iconfile="icon.png"
+	description="Data Profiling (SALT)"
+	tooltip="Data Profiling" 
+	category="HPCC Systems"
+	classname="org.hpccsystems.pentaho.job.eclsaltdataprofiling.ECLSaltDataProfiling">
+            
+    <libraries>
+	  <library name="../../hpcc-common/javaecl-0.1.0.jar"/>
+      <library name="../../hpcc-common/eclgui.jar"/>
+      <library name="eclsaltdataprofiling.jar"/>
+    </libraries>            
+</plugin>

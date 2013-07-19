@@ -276,12 +276,12 @@ public class AutoPopulate {
         int k = 0;
 
         for(int j = 0; j<jec.length; j++){
-            //System.out.println("Node(i): " + j + " | " +((JobEntryCopy)jec[j]).getName());
+           // System.out.println("Node(i): " + j + " | " +((JobEntryCopy)jec[j]).getName());
 
             if(!((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("START") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("OUTPUT") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("SUCCESS")){
-                //System.out.println("Node(k): " + k);
+                System.out.println("Node(k): " + k);
                 
-                //adDS.add((String)((JobEntryCopy)jec[j]).getName());
+                adDS.add((String)((JobEntryCopy)jec[j]).getName());
                 String xml = ((JobEntryCopy)jec[j]).getXML();
                 //System.out.println(xml);
                 
@@ -322,9 +322,9 @@ public class AutoPopulate {
 				                		   
 				                		   if(defValue.equals(datasetValue)){
 				                			   //System.out.println("Verify that " + defValue + " = " + datasetValue);
-				                			  // System.out.println("-------------Yes----------" + tType);
+				                			   //System.out.println("-------------Yes----------" + tType);
 				                    		   type = tType;
-				                    		   datasetNode = nNode;
+				                    		   this.datasetNode = nNode;
 				                    		   nodeIndex = i;
 				                    		   k++;
 				                    		   //to save execution time lets exit on the first find as it is most likely to be the one we want
@@ -334,7 +334,7 @@ public class AutoPopulate {
 				                    	   }
 				                		   
 				                	   }else{
-				                		   //System.out.println("NODE_VALUE: IS NULL");
+				                		   System.out.println("NODE_VALUE: IS NULL");
 				                	   }
 				                   }
 	                		   }
@@ -750,7 +750,7 @@ public class AutoPopulate {
     
     public String getGlobalVariableEncrypted(List<JobEntryCopy> jobs, String ofType) throws Exception{
     	String pass = getGlobalVariable(jobs,ofType);
-    	if(pass.equalsIgnoreCase("")){
+    	if(pass == null || pass.equalsIgnoreCase("")){
 			return "";
 		}else{
 			return Encr.decryptPassword(pass);
@@ -799,59 +799,84 @@ public class AutoPopulate {
                                     XMLHandler.getSubNode(nNode, "server_port")
                                 );
                            }
-                          if(ofType.equalsIgnoreCase("landing_zone")){
+                           if(ofType.equalsIgnoreCase("landing_zone")){
                                 out = XMLHandler.getNodeValue(
                                     XMLHandler.getSubNode(nNode, "landing_zone")
                                 );
-                          }
+                           }
                           
-                          if(ofType.equalsIgnoreCase("cluster")){
+                           if(ofType.equalsIgnoreCase("cluster")){
                                 out = XMLHandler.getNodeValue(
                                     XMLHandler.getSubNode(nNode, "cluster")
                                 );
-                          }
+                           }
                           
-                          if(ofType.equalsIgnoreCase("jobName")){
+                           if(ofType.equalsIgnoreCase("jobName")){
                                 out = XMLHandler.getNodeValue(
                                     XMLHandler.getSubNode(nNode, "jobName")
                                 );
-                          }
+                           }
                           
-                          if(ofType.equalsIgnoreCase("maxReturn")){
+                           if(ofType.equalsIgnoreCase("maxReturn")){
                               out = XMLHandler.getNodeValue(
                                   XMLHandler.getSubNode(nNode, "maxReturn")
                               );
-                        }
+                           }
                           
-                          if(ofType.equalsIgnoreCase("eclccInstallDir")){
+                           if(ofType.equalsIgnoreCase("eclccInstallDir")){
                                 out = XMLHandler.getNodeValue(
                                     XMLHandler.getSubNode(nNode, "eclccInstallDir")
                                 );
-                          }
+                           }
                           
-                          if(ofType.equalsIgnoreCase("mlPath")){
+                           if(ofType.equalsIgnoreCase("mlPath")){
                                 out = XMLHandler.getNodeValue(
                                     XMLHandler.getSubNode(nNode, "mlPath")
                                 );
-                          }
+                           }
                           
-                          if(ofType.equalsIgnoreCase("includeML")){
+                           if(ofType.equalsIgnoreCase("includeML")){
                                 out = XMLHandler.getNodeValue(
                                     XMLHandler.getSubNode(nNode, "includeML")
                                 );
-                          }
-                          if(ofType.equalsIgnoreCase("user_name")){
+                           }
+                           if(ofType.equalsIgnoreCase("user_name")){
                               out = XMLHandler.getNodeValue(
                                   XMLHandler.getSubNode(nNode, "user_name")
                               );
-                        }
+                           }
                           
-                          if(ofType.equalsIgnoreCase("password")){
+                           if(ofType.equalsIgnoreCase("password")){
                               out = XMLHandler.getNodeValue(
                                   XMLHandler.getSubNode(nNode, "password")
                               );
-                        }      
+                           }      
 
+                           if(ofType.equalsIgnoreCase("SALTPath")){
+                              out = XMLHandler.getNodeValue(
+                                  XMLHandler.getSubNode(nNode, "SALTPath")
+                              );
+                           }
+                        
+                           if(ofType.equalsIgnoreCase("includeSALT")){
+                              out = XMLHandler.getNodeValue(
+                                  XMLHandler.getSubNode(nNode, "includeSALT")
+                              );
+                           }
+                           if(ofType.equalsIgnoreCase("compileFlags")){
+                        	   System.out.println("--fetch compile flags");
+	                            out = XMLHandler.getNodeValue(
+	                                XMLHandler.getSubNode(nNode, "compileFlags")
+	                            );
+                           }  
+                                  
+
+                       }else if(type.equalsIgnoreCase("ECLExecute")){
+                    	   if(ofType.equalsIgnoreCase("file_name")){
+                               out = XMLHandler.getNodeValue(
+                                   XMLHandler.getSubNode(nNode, "file_name")
+                               );
+                          }
                        }
                       
                        
@@ -865,6 +890,9 @@ public class AutoPopulate {
             datasets = adDS.toArray(new String[k]);
 
         }
+        if(out == null){
+        	out = "";
+        }
         return out;
 
     }
@@ -876,17 +904,18 @@ public class AutoPopulate {
      * def of the datasets
      */
     public String getDatasetsField(String fieldName, String datasetName,List<JobEntryCopy> jobs)throws Exception{
-        //System.out.println(" ------------ fieldsByDatasetList ------------ ");
-        Object[] jec = jobs.toArray();
-        Node node = null;
-        RecordList recordList = null;
+       // System.out.println(" ------------ fieldsByDatasetList " + fieldName + " " + datasetName + " ------------ ");
+        //Object[] jec = jobs.toArray();
+        //Node node = null;
+        //RecordList recordList = null;
         String type = getType(jobs, datasetName);
+        //System.out.println("----------- Type: " + type);
         //datasetNode is set in getType
         //return datasetNode;
-        
+        //System.out.println(datasetNode.toString());
         String recordName = XMLHandler.getNodeValue(
                 XMLHandler.getSubNode(datasetNode, fieldName));
-       
+       // System.out.println("END ------------ fieldsByDatasetList " + fieldName + " " + datasetName + " ------------ ");
         return recordName;
     }
     
@@ -904,7 +933,7 @@ public class AutoPopulate {
         //datasetNode is set in getType
         node = datasetNode;
         if(type != null && type.equalsIgnoreCase("ECLDataset")){
-        	System.out.println("-------------GETTING RECORD LIST---------------");
+        	//System.out.println("-------------GETTING RECORD LIST---------------");
         	System.out.println("Type: " + type);
         	if(node != null){
         		
@@ -976,5 +1005,97 @@ public class AutoPopulate {
          return logicalFileNames;
 
      }
+    
+    
+    public boolean hasNodeofType(List<JobEntryCopy> jobs, String ofType) throws Exception{
+        // System.out.println(" ------------ " + ofTYpe + " ------------- ");
+    	 boolean isType = false;
+         Object[] jec = jobs.toArray();
+         if(jec != null){
+            
+             for(int j = 0; j<jec.length; j++){
+                    String xml = ((JobEntryCopy)jec[j]).getXML();
+                    NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
+                    for (int temp = 0; temp < nl.getLength(); temp++){
+                        Node nNode = nl.item(temp);
+                        
+                        String type = XMLHandler.getNodeValue(
+                            XMLHandler.getSubNode(nNode, "type")
+                            );
+                        //System.out.println("Type: " + type);
+                        if(type.equalsIgnoreCase(ofType)){
+                        	isType = true;
+                            return isType;//no need to keep looping;
+                        }
+                    }
+             }
+         }
+         return isType;
+
+     }
+    
+    public ArrayList<String[]> compileFlagsToArrayList(String compileFlags){
+    	//System.out.println("-- Testing custom Flag add in -- ");
+    	ArrayList<String[]> flags = new ArrayList<String[]>();
+    	
+    	//break string on line break
+    	String[] strLine = compileFlags.split("\r?\n");
+    	//break key,value on first space
+    	
+    	for(int i =0; i< strLine.length; i++){
+    		//System.out.println("--loop iteration " + i);
+    		String str = strLine[i];
+    		String[] pair = new String[2];
+    		if(str.contains(" ")){
+    			//System.out.println("---- Has Key:value pair");
+	    		String key = str.substring(0,str.indexOf(' '));
+	    		String val = str.substring(str.indexOf(' ')+1);
+	    		pair[0] = key;
+	    		pair[1] = val;
+	    		//System.out.println("Key: " + key + " value: " + val);
+    		}else{
+    			//System.out.println("---- Has Key Only " + str);
+	    		pair[0] = str;
+	    		pair[1] = "";
+    		}
+    		
+    		flags.add(pair);
+    	}
+    	
+    	return flags;
+    }
+    
+    public static void main(String[] args){
+    	AutoPopulate ap = new AutoPopulate();
+    	System.out.println("Single Line Test");
+    	String compileFlags = "-I /home/ubuntu/DeepGlance";
+    	ArrayList<String[]> compileFlagsAL = ap.compileFlagsToArrayList(compileFlags);
+    	
+    	for(int i = 0; i<compileFlagsAL.size(); i++){
+    		if(compileFlagsAL.get(i).length == 2){
+    			if(!compileFlagsAL.get(i)[0].equals("")){
+    				System.out.println("Flag: " + compileFlagsAL.get(i)[0]);
+    			}
+    			if(!compileFlagsAL.get(i)[1].equals("")){
+    				System.out.println("Value: " + compileFlagsAL.get(i)[1]);
+    			}
+    		}
+    	}
+    	System.out.println("_______________________");
+    	System.out.println("Multiple Line Test");
+    	compileFlags = "-I /home/ubuntu/DeepGlance\r\n-I /ho me/ubu ntu/DeepGlance\r\n-O\r\n";
+    	compileFlagsAL = ap.compileFlagsToArrayList(compileFlags);
+    	
+    	for(int i = 0; i<compileFlagsAL.size(); i++){
+    		if(compileFlagsAL.get(i).length == 2){
+    			if(!compileFlagsAL.get(i)[0].equals("")){
+    				System.out.println("Flag: " + compileFlagsAL.get(i)[0]);
+    			}
+    			if(!compileFlagsAL.get(i)[1].equals("")){
+    				System.out.println("Value: " + compileFlagsAL.get(i)[1]);
+    			}
+    		}
+    	}
+    }
     
 }

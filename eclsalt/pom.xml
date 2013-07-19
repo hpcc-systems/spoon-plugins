@@ -1,0 +1,93 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>eclsalt</artifactId>
+	<packaging>jar</packaging>
+	<name>HPCC Systems Pentaho Data Integration ECLSalt</name>
+	<description></description>
+	<parent>
+		<groupId>org.hpccsystems.pentaho</groupId>
+		<artifactId>spoon-plugins</artifactId>
+		<version>0.1.0</version>
+	</parent>
+	<build>
+	<plugins>
+	<plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>xmlbeans-maven-plugin</artifactId>
+		<version>2.3.3</version>
+		<executions>
+		  <execution>
+			
+			<goals>
+			  <goal>xmlbeans</goal>
+			</goals>
+			<configuration>
+			<inherited>true</inherited>
+			 <schemaDirectory>src/main/xsd</schemaDirectory>
+			</configuration>
+		  </execution>
+		</executions>
+	  </plugin>
+	  
+	  <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>target/generated-classes/xmlbeans</source>
+          
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+	  
+	  
+	  </plugins>
+			</build>
+			
+	  <dependencyManagement>
+			<dependencies>
+				<dependency>
+					<groupId>org.apache.xmlbeans</groupId>
+					<artifactId>xmlbeans</artifactId>
+					<version>2.4.0</version>
+				</dependency>
+				<dependency>
+					<groupId>org.hpccsystems</groupId>
+					<artifactId>javaecl</artifactId>
+					<version>0.1.0</version>
+				</dependency>
+				<dependency>
+					<groupId>org.hpccsystems.pentaho</groupId>
+					<artifactId>eclgui</artifactId>
+					<version>0.1.0</version>
+				</dependency>
+			</dependencies>
+		</dependencyManagement>
+
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.xmlbeans</groupId>
+				<artifactId>xmlbeans</artifactId>
+				<version>2.4.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hpccsystems</groupId>
+				<artifactId>javaecl</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.hpccsystems.pentaho</groupId>
+				<artifactId>eclgui</artifactId>
+			</dependency>
+		</dependencies>
+</project>

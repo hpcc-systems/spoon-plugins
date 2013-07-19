@@ -1,0 +1,67 @@
+<hyg:hygiene-spec xmlns:hyg="http://hpccsystems.org/salt/hygiene/bean">
+    <hyg:module-name>Customers2</hyg:module-name>
+    <hyg:file-name>Customers_File</hyg:file-name>
+	<hyg:ridfield>spoongeneratedrid</hyg:ridfield>
+	<hyg:idfield>Customers_File</hyg:idfield>
+	<hyg:idname>Customers_File</hyg:idname>
+	<hyg:idfieldExists>true</hyg:idfieldExists>
+	 <hyg:sourcefield>test</hyg:sourcefield>
+	 <hyg:ridfield>rid</hyg:ridfield>
+    <hyg:field-rule>
+        <hyg:field-name>first_name</hyg:field-name>
+        <hyg:field-type>STRING50</hyg:field-type>
+        
+        <hyg:caps>false</hyg:caps>
+        <hyg:left-trim>true</hyg:left-trim>
+        <hyg:right-trim>true</hyg:right-trim>
+        <hyg:allow>ABCDEFGHIJKLMNOPQRSTUVWXYZ</hyg:allow>
+        <hyg:spaces>{()}</hyg:spaces>
+        <hyg:on-fail>BLANK</hyg:on-fail>
+    </hyg:field-rule>
+    <hyg:field-rule>
+        <hyg:field-name>last_name</hyg:field-name>
+        <hyg:field-type>STRING50</hyg:field-type>
+		<hyg:field-specificity>4</hyg:field-specificity>
+    </hyg:field-rule>
+    <hyg:field-rule>
+        <hyg:field-name>phone_number</hyg:field-name>
+        <hyg:field-type>STRING50</hyg:field-type>
+        <hyg:caps>false</hyg:caps>
+        <hyg:left-trim>true</hyg:left-trim>
+        <hyg:right-trim>true</hyg:right-trim>
+		<hyg:field-specificity>4</hyg:field-specificity>
+    </hyg:field-rule>
+	
+	<hyg:concept-def>
+		<hyg:concept-name>testConcept</hyg:concept-name>
+		<hyg:effectOnSpecificity>testConcept</hyg:effectOnSpecificity>
+		<hyg:threshold>ccc</hyg:threshold>
+		<hyg:useBagOfWords>true</hyg:useBagOfWords>
+		<hyg:reOrderType>2</hyg:reOrderType>
+		<hyg:segmentType>3</hyg:segmentType>
+		<hyg:scale>4</hyg:scale>
+		<hyg:specificity>5</hyg:specificity>
+		<hyg:switchValue>6</hyg:switchValue>
+		<hyg:concept-fields>
+			<hyg:conceptFieldname>fieldName</hyg:conceptFieldname>
+			<hyg:nonNull>true</hyg:nonNull>
+		</hyg:concept-fields>
+		<hyg:concept-fields>
+			<hyg:conceptFieldname>fieldName2</hyg:conceptFieldname>
+			<hyg:nonNull>false</hyg:nonNull>
+		</hyg:concept-fields>
+		<hyg:concept-fields>
+			<hyg:conceptFieldname>fieldName3</hyg:conceptFieldname>
+			<hyg:nonNull>true</hyg:nonNull>
+		</hyg:concept-fields>
+	</hyg:concept-def>
+	
+	<hyg:concept-def>
+		<hyg:concept-name>testConcept2</hyg:concept-name>
+		<hyg:concept-fields>
+			<hyg:conceptFieldname>fieldName</hyg:conceptFieldname>
+			<hyg:nonNull>false</hyg:nonNull>
+		</hyg:concept-fields>
+	</hyg:concept-def>
+
+</hyg:hygiene-spec>

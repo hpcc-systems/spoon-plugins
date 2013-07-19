@@ -1,0 +1,12 @@
+<hygiene-spec xmlns="http://hpccsystems.org/salt/hygiene/bean">
+  <module-name>HelloWorld</module-name>
+  <file-name>HelloWorld_File</file-name>
+  <idfield>HelloWorld_File_ID</idfield>
+  <idname>HellowWOrldIDName</idname>
+  <idname-exists>true</idname-exists>
+  <sourcefield>test</sourcefield>
+  <field-rule>
+    <field-name>First</field-name>
+    <left-trim>true</left-trim>
+  </field-rule>
+</hygiene-spec>"src/main/xsd/example.xml"

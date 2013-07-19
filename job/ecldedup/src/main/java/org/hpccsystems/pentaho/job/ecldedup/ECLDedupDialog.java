@@ -155,7 +155,7 @@ public class ECLDedupDialog extends ECLJobEntryDialog{//extends JobEntryDialog i
 
         recordsetName = buildText("Result Recordset", null, lsMod, middle, margin, iterateGroup);
         recordset = buildCombo("Recordset", recordsetName, lsMod, middle, margin, iterateGroup,datasets);
-        condition = buildText("Condtion", recordset, lsMod, middle, margin, iterateGroup);
+        condition = buildText("Condition", recordset, lsMod, middle, margin, iterateGroup);
         
     /*private Text isAll;
     private Text isHash;

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://hpccsystems.org/salt/hygiene/bean"
+        xmlns:tns="http://hpccsystems.org/salt/hygiene/bean" elementFormDefault="qualified">
+
+    <element name="hygiene-spec">
+        <complexType>
+            <sequence>
+                <element name="module-name" type="string" maxOccurs="1" minOccurs="1"/>
+                <element name="file-name" type="string" maxOccurs="1" minOccurs="1"/>
+				<element name="idfield" type="string" maxOccurs="1" minOccurs="1"/>
+				<element name="idname" type="string" maxOccurs="1" minOccurs="0"/>
+				<element name="idfieldExists" type="string" maxOccurs="1" minOccurs="0"/>
+				<element name="sourcefield" type="string" maxOccurs="1" minOccurs="0"/>
+				<element name="ridfield" type="string" maxOccurs="1" minOccurs="0"/>
+                <element name="field-rule" type="tns:field-hygiene-rule" maxOccurs="unbounded" minOccurs="0"/>
+                <element name="concept-def" type="tns:concept-def" maxOccurs="unbounded" minOccurs="0"/>
+            </sequence>
+        </complexType>
+    </element>
+
+    <complexType name="field-hygiene-rule">
+        <sequence>
+            <element name="field-name" type="string" maxOccurs="1" minOccurs="1"/>
+            <element name="field-type" type="string" maxOccurs="1" minOccurs="0"/>
+            <element name="caps" type="boolean" maxOccurs="1" minOccurs="0"/>
+            <element name="left-trim" type="boolean" maxOccurs="1" minOccurs="0"/>
+            <element name="right-trim" type="boolean" maxOccurs="1" minOccurs="0"/>
+            <element name="allow" type="string" maxOccurs="1" minOccurs="0"/>
+            <element name="spaces" type="string" maxOccurs="1" minOccurs="0"/>
+            <element name="on-fail" type="string" maxOccurs="1" minOccurs="0"/>
+            <element name="field-specificity" type="string" maxOccurs="1" minOccurs="0" />
+        </sequence>
+    </complexType>
+    
+    <complexType name="concept-def">
+    	<sequence>
+    		<element name="concept-name" type="string" maxOccurs="1" minOccurs="1"/>
+    		<element name="effectOnSpecificity" type="string" maxOccurs="1" minOccurs="0"/>
+    		<element name="threshold" type="string" maxOccurs="1" minOccurs="0"/>
+			<element name="useBagOfWords" type="string" maxOccurs="1" minOccurs="0"/>
+			<element name="reOrderType" type="string" maxOccurs="1" minOccurs="0"/>
+			<element name="segmentType" type="string" maxOccurs="1" minOccurs="0"/>
+			<element name="scale" type="string" maxOccurs="1" minOccurs="0"/>
+			<element name="specificity" type="string" maxOccurs="1" minOccurs="0"/>
+			<element name="switchValue" type="string" maxOccurs="1" minOccurs="0"/>
+			<element name="concept-fields" type="tns:concept-fields" maxOccurs="unbounded" minOccurs="0"/>
+    	</sequence>
+    </complexType>
+
+	<complexType name="concept-fields">
+		<sequence>
+			<element name="conceptFieldname" type="string" maxOccurs="1" minOccurs="1"/>
+    		<element name="nonNull" type="string" maxOccurs="1" minOccurs="0"/>
+		</sequence>
+	</complexType>
+</schema>

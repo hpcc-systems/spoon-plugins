@@ -18,6 +18,7 @@ import org.pentaho.di.core.RowMetaAndData;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.job.entry.JobEntryInterface;
@@ -60,6 +61,7 @@ return null;
             super.loadXML(node, list, list1);
     }
 
+
     public String getXML() {
         String retval = "";
         
@@ -78,8 +80,10 @@ return null;
     public void saveRep(Repository rep, ObjectId id_job) throws KettleException {
 
     }
-    
     public String resultListToString(RecordList recordList){
+    	return ECLJobEntry.resultListToStringStatic(recordList);
+    }
+    public static String resultListToStringStatic(RecordList recordList){
         String out = "";
         
         if(recordList != null){
@@ -138,7 +142,40 @@ return null;
     }
     
     
-    
+    public String parseEclFromRowData(List<RowMetaAndData> list){
+    	 String eclCode = "";
+         if (list == null) {
+             list = new ArrayList<RowMetaAndData>();
+         } else {
+
+         	for (int i = 0; i < list.size(); i++) {
+             	try{
+             		boolean hasECL = false;
+ 	                RowMetaAndData rowData = (RowMetaAndData) list.get(i);
+ 	                RowMeta rowMeta = (RowMeta) rowData.getRowMeta();
+ 	                String[] fields = rowMeta.getFieldNames();
+ 	                for(int cnt = 0; cnt<fields.length; cnt++){
+ 	                	if(fields[cnt].equals("ecl")){
+ 	                		hasECL = true;
+ 	                	}
+ 	                }
+ 	                if(hasECL){
+ 		                String code = rowData.getString("ecl", null);
+ 		                if (code != null) {
+ 		                    eclCode += code;
+ 		                }
+ 	                }
+             	}catch (Exception e){
+             		//ecl doesn't exist skip it
+             		//I can't find a way to check rowData if it exists
+             		e.printStackTrace();
+             	}
+             }
+             logBasic("{Execute Job} Execute Code =" + eclCode);
+         }
+         
+         return eclCode;
+    }
     
    
 }

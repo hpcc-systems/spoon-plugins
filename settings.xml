@@ -14,14 +14,14 @@
       </pluginRepositories>
 		  <repositories>
 				<repository>
-          <id>codehaus</id>
-					<name>Codehaus Repository</name>
-					<url>http://repository.codehaus.org</url>
-				</repository>
-				<repository>
-          <id>repo.pentaho.org</id>
+					<id>repo.pentaho.org</id>
 					<name>repo.pentaho.org-releases</name>
 					<url>http://repository.pentaho.org/artifactory/pentaho</url>
+				</repository>
+				<repository>
+          			<id>codehaus</id>
+					<name>Codehaus Repository</name>
+					<url>http://repository.codehaus.org</url>
 				</repository>
 				<repository>
 					<id>maven-central</id>

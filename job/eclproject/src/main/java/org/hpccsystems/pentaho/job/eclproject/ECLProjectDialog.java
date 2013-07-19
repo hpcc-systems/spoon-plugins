@@ -286,7 +286,7 @@ public class ECLProjectDialog extends ECLJobEntryDialog{//extends JobEntryDialog
 		sc3.setExpandHorizontal(true);
 		sc3.setExpandVertical(true);
         
-		item3.setText ("Transform Format");
+		item3.setText ("Transform");
         item3.setControl(sc3);
 		
         GridLayout mapperCompLayout = new GridLayout();

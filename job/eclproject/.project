@@ -3,6 +3,7 @@
 	<name>eclproject</name>
 	<comment></comment>
 	<projects>
+		<project>eclgui</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -21,4 +22,3 @@
 		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 	</natures>
 </projectDescription>
-

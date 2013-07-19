@@ -4,6 +4,11 @@
  */
 package org.hpccsystems.pentaho.job.ecldataset;
 
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -48,6 +53,7 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 import org.hpccsystems.javaecl.HPCCServerInfo;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
+import org.hpccsystems.eclguifeatures.HPCCFileBrowser;
 import org.hpccsystems.recordlayout.CreateTable;
 import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.recordlayout.RecordList;
@@ -58,17 +64,18 @@ import org.hpccsystems.ecljobentrybase.*;
  */
 public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
 
+	private String currentLogicalFile = "";
     private ECLDataset jobEntry;
     private Text jobEntryName;
     private Text recordName;
    // private Text recordDef;
     private Text recordSet;
-    private Combo fileName;
+    //private Combo fileName;
     private Text datasetName;
     private Button wOK, wCancel;
     private boolean backupChanged;
     private SelectionAdapter lsDef;
-    
+    private Text logicalFile;
     private Combo fileType;
     
     private Table table;
@@ -77,6 +84,19 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
     // Create a RecordList and assign it to an instance variable
     private RecordList recordList = new RecordList();
     private CreateTable ct = null;
+    
+    
+    private String serverHost = "";
+    private int serverPort = 8010;
+    private String user = "";
+    private String pass = "";
+    
+    private Combo hasHeaderRow;
+    //private Text csvSeparator;
+    //private Text csvQuote;
+    //private Text csvTerminator;
+    
+    private String manualEntryText = "";
 
     public ECLDatasetDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
         super(parent, jobEntryInt, rep, jobMeta);
@@ -96,7 +116,7 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
         TabFolder tabFolder = new TabFolder (shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
         FormData data = new FormData();
         
-        data.height = 500;
+        data.height = 525;
         data.width = 650;
         tabFolder.setLayoutData(data);
         
@@ -161,24 +181,29 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
         datasetGroupFormat.left = new FormAttachment(middle, 0);
         datasetGroup.setLayoutData(datasetGroupFormat);
 
+        
         AutoPopulate ap = new AutoPopulate();
         String[] fileList = new String[0];
         
-        String serverHost = "";
-        int serverPort = 8010;
+        
         try{
             //Object[] jec = this.jobMeta.getJobCopies().toArray();
                 
                 serverHost = ap.getGlobalVariable(this.jobMeta.getJobCopies(),"server_ip");
                 serverPort = Integer.parseInt(ap.getGlobalVariable(jobMeta.getJobCopies(),"server_port"));
+                user = ap.getGlobalVariable(jobMeta.getJobCopies(),"user_name");
+                pass = ap.getGlobalVariableEncrypted(jobMeta.getJobCopies(),"password");
+                
                
             }catch (Exception e){
                 System.out.println("Error Parsing existing Global Variables ");
                 System.out.println(e.toString());
                 
             }
-        final HPCCServerInfo hsi = new HPCCServerInfo(serverHost,serverPort);
-        fileList = hsi.fetchFileList();
+
+        final HPCCServerInfo hsi = new HPCCServerInfo(serverHost,serverPort,user,pass);
+        final HPCCFileBrowser fileBrowser = new HPCCFileBrowser(serverHost,serverPort,user,pass);
+        //fileList = hsi.fetchFileList();
         try{
         	ArrayList<String> files = ap.getLogicalFileName(this.jobMeta.getJobCopies());
         	if(files != null){
@@ -197,9 +222,126 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
         fileList = tempFiles.toArray(new String[tempFiles.size()]);
        
         datasetName = buildText("Dataset Name", null, lsMod, middle, margin, datasetGroup);
-        fileName = buildCombo("Logical File Name", datasetName, lsMod, middle, margin, datasetGroup, fileList);
-        fileType = buildCombo("File Type", fileName, lsMod, middle, margin, datasetGroup,new String[]{"", "CSV", "THOR"});
+        logicalFile = buildText("Logical File", datasetName, lsMod, middle, margin, datasetGroup);
+        
+        Button fileBrowse  = buildButton("Browse", logicalFile, lsMod, middle, margin, datasetGroup);
+        //Button fileBrowse = new Button(datasetGroup, SWT.PUSH);
+        //fileBrowse.moveBelow(logicalFile);
+        //fileBrowse.setText("Browse");
 
+        // Add listeners
+        Listener logicalFileListener = new Listener() {
+
+            public void handleEvent(Event e) {
+            	String newFile = fileBrowser.run(shell,logicalFile.getText());
+            	if(newFile != null && !newFile.equals("")){
+	                logicalFile.setText("~" + newFile);
+	               // recordSet.setEnabled(false);
+					//manualEntryText = recordSet.getText();
+					
+	                String file = logicalFile.getText();
+					if(!currentLogicalFile.equalsIgnoreCase(file)){
+						currentLogicalFile = file;
+						//value has changed
+						//System.out.println("fetch field list: " + file);
+						ArrayList<String[]> details = hsi.fetchFileDetails(file);
+						
+						if(hsi.isLogonFail){
+							ErrorNotices en = new ErrorNotices();
+							en.openSaveErrorDialog(getParent(), "Permission Denied!\r\nCan not fetch field definitions, please make sure you have permissions to that file\r\nYou should also verify your user/pass in Global Variables");
+							//en.openDialog("Permission Denied", "You either do not have permissions to access this file or your credentials for the server are wrong.", "");
+						}
+						if(details != null && details.size()>0){
+							ErrorNotices en = new ErrorNotices();
+							if(en.openComfirmDialog(getParent(), "Do you want to replace your current Record Structure on the\r\nFields tab with the one stored on the server?")){
+								ct.setRecordList(jobEntry.ArrayListToRecordList(details));
+								ct.redrawTable(true);
+							}
+						}else{
+							ErrorNotices en = new ErrorNotices();
+							if(en.openComfirmDialog(getParent(), "Does the file have a header row, if so would you like to import the field list?")){
+
+								details=jobEntry.parseFileHeader(serverHost,serverPort,user,pass,file);
+								if(details.size()> 0){
+									ct.setRecordList(jobEntry.ArrayListToRecordList(details));
+									ct.redrawTable(true);
+								}else{
+									ErrorNotices en2 = new ErrorNotices();
+									en2.openSaveErrorDialog(getParent(), "Sorry, unable to parse the field definitions from the file");
+									
+								}
+								
+							}
+						}
+					}
+            	}else{
+            		//System.out.println("No text in logica File button");
+					//recordSet.setEnabled(true);
+					//recordSet.setText(manualEntryText);
+            	}
+            }
+        };
+        fileBrowse.addListener(SWT.Selection, logicalFileListener);
+        
+        ModifyListener logicalFileChange = new ModifyListener(){
+			@Override
+			public void modifyText(ModifyEvent arg0) {
+				Color grey = shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
+				Color white = shell.getDisplay().getSystemColor(SWT.COLOR_WHITE);
+				// TODO Auto-generated method stub
+				System.out.println("Modified LogicalFile");
+				if(logicalFile.getText().equals("")){
+					//no logical file
+					System.out.println("No text in logica File");
+					recordSet.setEnabled(true);
+					recordSet.setText(manualEntryText);
+					recordSet.setBackground(white);
+				}else{
+					//no manual entry
+					System.out.println("Text in logical file");
+					recordSet.setEnabled(false);
+					if(!recordSet.getText().equals("")){
+						manualEntryText = recordSet.getText();
+					}
+					recordSet.setText("");
+					recordSet.setBackground(grey);
+					
+				}
+			}
+        	
+        };
+        logicalFile.addModifyListener(logicalFileChange);
+        
+        //fileName = buildCombo("Logical File Name", logicalFile, lsMod, middle, margin, datasetGroup, fileList);
+        fileType = buildCombo("File Type", fileBrowse, lsMod, middle, margin, datasetGroup,new String[]{"CSV", "THOR"});
+        ModifyListener fileTypeChange = new ModifyListener(){
+        	@Override
+			public void modifyText(ModifyEvent arg0) {
+        		Color grey = shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW);
+				Color white = shell.getDisplay().getSystemColor(SWT.COLOR_WHITE);
+        		if(fileType.getText().equalsIgnoreCase("CSV")){
+        			//csvSeparator.setEnabled(true);
+                	//csvQuote.setEnabled(true);
+                	//csvTerminator.setEnabled(true);
+                	hasHeaderRow.setEnabled(true);
+                	//csvSeparator.setBackground(white);
+                	//csvQuote.setBackground(white);
+                	//csvTerminator.setBackground(white);
+                	hasHeaderRow.setBackground(white);
+        		}else{
+        			//csvSeparator.setEnabled(false);
+                	//csvQuote.setEnabled(false);
+                	//csvTerminator.setEnabled(false);
+                	hasHeaderRow.setEnabled(false);
+                	//csvSeparator.setBackground(grey);
+                	//csvQuote.setBackground(grey);
+                	//csvTerminator.setBackground(grey);
+                	hasHeaderRow.setBackground(grey);
+        		}
+        	}
+        };
+        fileType.addModifyListener(fileTypeChange);
+        
         recordSet = buildMultiText("Manual Record Entry", fileType, lsMod, middle, margin, datasetGroup);
 
         //Record Declaration
@@ -216,37 +358,26 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
 
         recordName = buildText("Record Name", null, lsMod, middle, margin, recordGroup);
         
-       // recordDef = buildMultiText("Record Definition", recordName, lsMod, middle, margin, recordGroup);
         
         
-        fileName.addSelectionListener(new SelectionListener(){
+      //Record Declaration
+        Group layoutGroup = new Group(compForGrp, SWT.SHADOW_NONE);
+        props.setLook(layoutGroup);
+        layoutGroup.setText("Define CSV Parameters");
+        layoutGroup.setLayout(groupLayout);
+        FormData layoutGroupFormat = new FormData();
+        layoutGroupFormat.top = new FormAttachment(recordGroup, margin);
+        layoutGroupFormat.height = 45;//125
+        layoutGroupFormat.width = 400;
+        layoutGroupFormat.left = new FormAttachment(middle, 0);
+        layoutGroup.setLayoutData(layoutGroupFormat);
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				// TODO Auto-generated method stub
-				String file = fileName.getText();
-				
-				ArrayList<String[]> details = hsi.fetchFileDetails(file);
-				
-				if(details.size()>0){
-					ErrorNotices en = new ErrorNotices();
-					if(en.openComfirmDialog(getParent(), "Do you want to eplace your current Record Structure on the\r\nFields tab with the one stored on the server?")){
-						ct.setRecordList(jobEntry.ArrayListToRecordList(details));
-						ct.redrawTable(true);
-					}
-				}
-				
-			}}); 
-           item1.setControl(compForGrp);
+        hasHeaderRow = buildCombo("First row is Header", null, lsMod, middle, margin, layoutGroup,new String[]{"No", "Yes"});
+        //csvSeparator = buildText("CSV Separator", hasHeaderRow, lsMod, middle, margin, layoutGroup);
+        //csvQuote = buildText("CSV Quote", csvSeparator, lsMod, middle, margin, layoutGroup);
+        //csvTerminator = buildText("CSV Terminator", csvQuote, lsMod, middle, margin, layoutGroup);
         
-        
-       
+        item1.setControl(compForGrp);
         
          if(jobEntry.getRecordList() != null){
             recordList = jobEntry.getRecordList();
@@ -307,7 +438,7 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
             jobEntryName.setText(jobEntry.getName());
         }
         if (jobEntry.getLogicalFileName() != null) {
-            fileName.setText(jobEntry.getLogicalFileName());
+        	logicalFile.setText(jobEntry.getLogicalFileName());
         }
         if (jobEntry.getDatasetName() != null) {
             datasetName.setText(jobEntry.getDatasetName());
@@ -324,6 +455,20 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
         }
         if (jobEntry.getFileType() != null) {
             fileType.setText(jobEntry.getFileType());
+        }
+        
+
+        if (jobEntry.getCsvSeparator() != null) {
+        //	csvSeparator.setText(jobEntry.getCsvSeparator());
+        }
+        if (jobEntry.getCsvTerminator() != null) {
+        //	csvTerminator.setText(jobEntry.getCsvTerminator());
+        }
+        if (jobEntry.getCsvQuote() != null) {
+        //	csvQuote.setText(jobEntry.getCsvQuote());
+        }
+        if(jobEntry.getHasHeaderRow() != null){
+        	hasHeaderRow.setText(jobEntry.getHasHeaderRow());
         }
 
         shell.pack();
@@ -358,7 +503,7 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
     		//manual entry
     		
     		//we can't have fields or logical file name or File Type
-    		if(!this.fileName.getText().equals("")){
+    		if(!this.logicalFile.getText().equals("")){
     			isValid = false;
         		errors += "\"Logical File Name\" is not allowed for manual entry!\r\n";
     		}
@@ -372,7 +517,7 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
     		}
     	}else{
     		//using fields
-    		if(this.fileName.getText().equals("")){
+    		if(this.logicalFile.getText().equals("")){
     			isValid = false;
         		errors += "\"Logical File Name\" is a required field!\r\n";
     		}
@@ -413,13 +558,17 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
     	}
     	
         jobEntry.setName(jobEntryName.getText());
-        jobEntry.setLogicalFileName(fileName.getText());
+        jobEntry.setLogicalFileName(logicalFile.getText());
         jobEntry.setDatasetName(datasetName.getText());
         jobEntry.setRecordName(recordName.getText());
        // jobEntry.setRecordDef(recordDef.getText());
         jobEntry.setRecordSet(recordSet.getText());
         jobEntry.setRecordList(ct.getRecordList());
         jobEntry.setFileType(fileType.getText());
+       // jobEntry.setCsvSeparator(csvSeparator.getText());
+        //jobEntry.setCsvTerminator(csvTerminator.getText());
+        //jobEntry.setCsvQuote(csvQuote.getText());
+        jobEntry.setHasHeaderRow(hasHeaderRow.getText());
         dispose();
     }
 

@@ -325,6 +325,8 @@ public class ECLProject extends ECLJobEntry{//extends JobEntryBase implements Cl
         
         List list = result.getRows();
         list.add(data);
+        String eclCode = parseEclFromRowData(list);
+        /*
         String eclCode = "";
         if (list == null) {
             list = new ArrayList();
@@ -339,7 +341,7 @@ public class ECLProject extends ECLJobEntry{//extends JobEntryBase implements Cl
             }
             logBasic("{Project Job} ECL Code =" + eclCode);
         }
-        
+        */
         result.setRows(list);
         
         
@@ -385,9 +387,9 @@ public class ECLProject extends ECLJobEntry{//extends JobEntryBase implements Cl
         retval += super.getXML();
 
         retval += "		<declareCounter><![CDATA[" + this.getDeclareCounterString() + "]]></declareCounter>" + Const.CR;
-        retval += "		<recordset_name><![CDATA[" + recordsetName + "]]></recordset_name>" + Const.CR;
+        retval += "		<recordset_name eclIsDef=\"true\" eclType=\"dataset\"><![CDATA[" + recordsetName + "]]></recordset_name>" + Const.CR;
         retval += "		<inRecordName><![CDATA[" + inRecordName + "]]></inRecordName>" + Const.CR;
-        retval += "		<outRecordName eclIsDef=\"true\" eclType=\"recordset\"><![CDATA[" + outRecordName + "]]></outRecordName>" + Const.CR;
+        retval += "		<outRecordName clIsDef=\"true\" eclType=\"record\"><![CDATA[" + outRecordName + "]]></outRecordName>" + Const.CR;
         retval += "		<outRecordFormat><![CDATA[" + outRecordFormat + "]]></outRecordFormat>" + Const.CR;
         retval += "		<transformName><![CDATA[" + transformName + "]]></transformName>" + Const.CR;
         retval += "		<transformFormat><![CDATA[" + transformFormat + "]]></transformFormat>" + Const.CR;

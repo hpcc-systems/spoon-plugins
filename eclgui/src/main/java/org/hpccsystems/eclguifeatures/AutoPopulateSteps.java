@@ -187,7 +187,7 @@ public static Map<String, List<String>> getDefFields(List<StepMeta> jobs){
     }
     
     public String[] parseDatasets(List<StepMeta> jobs) throws Exception{
-        System.out.println(" ------------ parseDataSet ------------- ");
+        //System.out.println(" ------------ parseDataSet ------------- ");
         String datasets[] = null;
         ArrayList<String> adDS = new ArrayList<String>();
       
