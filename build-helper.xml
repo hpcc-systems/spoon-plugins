@@ -108,6 +108,10 @@
 			<zipfileset dir="./job-salt/salthygiene/target" includes="salthygiene.jar" prefix="jobentries/salthygiene" />
 			<zipfileset dir="./job-salt/saltinternallinking/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/saltinternallinking" />
 			<zipfileset dir="./job-salt/saltinternallinking/target" includes="saltinternallinking.jar" prefix="jobentries/saltinternallinking" />
+			<zipfileset dir="./job-salt/saltconcept/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/saltconcept" />
+			<zipfileset dir="./job-salt/saltconcept/target" includes="saltconcept.jar" prefix="jobentries/saltconcept" />
+			<zipfileset dir="./job-salt/saltSpecificity/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/saltspecificity" />
+			<zipfileset dir="./job-salt/saltSpecificity/target" includes="saltspecificity.jar" prefix="jobentries/saltspecificity" />
 			
 		</zip>
 	</target>
