@@ -75,7 +75,6 @@ public class ECLMergePaths extends ECLJobEntry{//extends JobEntryBase implements
        logBasic("Number of Paths Remaining =" + ECLMergePaths.numberOfPathsRemaining);
        ECLMergePaths.numberOfPathsRemaining--;
        
-         //globalResult.add(result);
         RowMetaAndData data = new RowMetaAndData();
         List list = result.getRows();
         List listGlobal = globalResult.getRows();
@@ -85,22 +84,10 @@ public class ECLMergePaths extends ECLJobEntry{//extends JobEntryBase implements
        if(ECLMergePaths.numberOfPathsRemaining != 0){
            result.setStopped(true);
            isValid = false;
-           //result.setResult(false);
            
-           //try to find exitstatus documentation
-           //result.setExitStatus(5);
-           
-           //globalResult.setRows(list);
            globalResult = result;
            logBasic("Not last job --------------------------");
-           //this.clear();
-          // this.parentJob.stopAll();
-         
-           //return new Result();
-           //while(!ECLMergePaths.isReady){
-               //delay this thread until the last to finish finishes
-               
-           //}
+           
            ECLMergePaths.isReady = false;
            int count = 0;
            while(count < 10000){
@@ -113,38 +100,14 @@ public class ECLMergePaths extends ECLJobEntry{//extends JobEntryBase implements
            result.setResult(true);
            globalResult = result;
            logBasic("Is last job --------------------------");
-           //globalResult.add(result);
-           //result = globalResult;
+           
            List list2 = result.getRows();
            String eclCode = parseEclFromRowData(list);
-           /*
-            String eclCode = "";
-            if (list2 == null) {
-                list2 = new ArrayList();
-            } else {
-
-                for (int i = 0; i < list2.size(); i++) {
-                    RowMetaAndData rowData = (RowMetaAndData) list2.get(i);
-                   logBasic("RAW DATA =" + rowData.getData().toString());
-                    String code = rowData.getString("ecl", null);
-                    if (code != null) {
-                        eclCode += code;
-                    }
-                }
-                logBasic("{Merge Paths Job} ECL Code =" + eclCode);
-            }
-*/
-            //result.setRows(list);
-            ECLMergePaths.isReady = true;
-            
-            ECLMergePaths.numberOfPathsRemaining = ECLMergePaths.numberOfPathsStat;
-            //Result globalResult;
-           
+           ECLMergePaths.isReady = true;
+           ECLMergePaths.numberOfPathsRemaining = ECLMergePaths.numberOfPathsStat;
+        
        }
-           
-        
-         
-        
+
         return globalResult;
     }
 

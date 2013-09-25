@@ -46,7 +46,7 @@ public class ECLError extends ECLJobEntry{//extends JobEntryBase implements Clon
 
     
     public static boolean isReady = false;
-    boolean isValid = true;
+    //boolean isValid = true;
 
     public static boolean isIsReady() {
         return isReady;
@@ -62,7 +62,7 @@ public class ECLError extends ECLJobEntry{//extends JobEntryBase implements Clon
 	public Result execute(Result prevResult, int k) throws KettleException {
 	
 	
-		Result result = prevResult;
+		Result result = modifyResults(prevResult);
 		if(result.isStopped()){
 		    logBasic("{Output Job is Stopped}");
 		}else{
@@ -167,14 +167,7 @@ public class ECLError extends ECLJobEntry{//extends JobEntryBase implements Clon
         }
     }
 
-    public boolean evaluates() {
-    	return isValid;
-        //return true;
-    }
-
-    public boolean isUnconditional() {
-        return false;
-    }
+    
     
     public static boolean isGuiMode() {
         boolean guiMode = false;

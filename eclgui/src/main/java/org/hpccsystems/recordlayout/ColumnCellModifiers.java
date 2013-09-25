@@ -25,7 +25,36 @@ public class ColumnCellModifiers implements ICellModifier{
 
 		Object result = null;
 		RecordBO record = (RecordBO) element;
+		System.out.println("getValue - " + property);
 
+		if(property.equalsIgnoreCase(CreateTable.NAME_COLUMN)){
+			result = record.getColumnName();
+			
+		}else
+		if(property.equalsIgnoreCase(CreateTable.DEFAULT_VALUE)){
+			result = record.getDefaultValue();
+		}else
+		if(property.equalsIgnoreCase(CreateTable.TYPE_COLUMN)){
+			String stringValue = record.getColumnType();
+			String[] choices = createTableObject.getChoices(property);
+			int i = choices.length - 1;
+			while (!stringValue.equals(choices[i]) && i > 0)
+				--i;
+			result = new Integer(i);	
+		}else
+		if(property.equalsIgnoreCase(CreateTable.WIDTH_COLUMN)){
+			result = record.getColumnWidth();
+		}else
+		if(property.equalsIgnoreCase(CreateTable.SORT_ORDER)){
+			System.out.println("getValue of SORT_ORDER - " + property);
+			String stringValue = record.getSortOrder();
+			String[] choices = createTableObject.getChoices(property);
+			int i = choices.length - 1;
+			while (!stringValue.equals(choices[i]) && i > 0)
+				--i;
+			result = new Integer(i);	
+		}
+		/*
 		switch (columnIndex) {
 			case 0 : // COLUMN_NAME
 				result = record.getColumnName();
@@ -46,7 +75,8 @@ public class ColumnCellModifiers implements ICellModifier{
 				break;
 			default :
 				result = "";
-		}
+		}*/
+		System.out.println("getValue2");
 		return result;	
 	}
 
@@ -62,7 +92,35 @@ public class ColumnCellModifiers implements ICellModifier{
 		RecordBO record = (RecordBO) item.getData();
 		String valueString;
 
-		switch (columnIndex) {
+		if(property.equalsIgnoreCase(CreateTable.NAME_COLUMN)){
+			valueString = ((String) value).trim();
+			record.setColumnName(valueString);
+		}else
+		if(property.equalsIgnoreCase(CreateTable.DEFAULT_VALUE)){
+			valueString = ((String) value).trim();
+			record.setDefaultValue(valueString);
+		}else
+		if(property.equalsIgnoreCase(CreateTable.TYPE_COLUMN)){
+			valueString = createTableObject.getChoices(property)[((Integer) value).intValue()].trim();
+			if (!record.getColumnType().equals(valueString)) {
+				record.setColumnType(valueString);
+			}
+		}else
+		if(property.equalsIgnoreCase(CreateTable.WIDTH_COLUMN)){
+			valueString = ((String) value).trim();
+			record.setColumnWidth(valueString);
+		}else
+		if(property.equalsIgnoreCase(CreateTable.SORT_ORDER)){
+			//result = 1;
+			
+			valueString = createTableObject.getChoices(property)[((Integer) value).intValue()].trim();
+			System.out.println("----" + valueString);
+			if (!record.getColumnType().equals(valueString)) {
+				record.setSortOrder(valueString);
+			}
+		}
+		
+		/*switch (columnIndex) {
 			case 0 : // COLUMN_NAME
 				valueString = ((String) value).trim();
 				record.setColumnName(valueString);
@@ -82,7 +140,7 @@ public class ColumnCellModifiers implements ICellModifier{
 				record.setColumnWidth(valueString);
 				break;
 			default :
-			}
+			}*/
 		createTableObject.getRecordList().modifyRecord(record);
 	}
 	

@@ -64,7 +64,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
     private String error = "";
     private ArrayList compileFlagAL;
     public static boolean isReady = false;
-    boolean isValid = true;
+    public boolean isValid = false;
 
 
     public String getAttributeName() {
@@ -143,7 +143,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	@SuppressWarnings("unchecked")
 	@Override
     public Result execute(Result prevResult, int k) throws KettleException {
-		//System.out.println("------ Execute of ECLExecute --------");
+		System.out.println("------ Execute of ECLExecute --------");
         
 		String resName = "";
       //Result result = null;
@@ -151,7 +151,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 		String xmlHygieneBuilder = "";
 		String layoutECL = "";
         
-        Result result = prevResult;
+		Result result = modifyResults(prevResult);
         if(result.isStopped()){
             logBasic("{Output Job is Stopped}");
 
@@ -399,7 +399,17 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 
 
             List<RowMetaAndData> list = result.getRows();
-            String eclCode = parseEclFromRowData(list);
+            String eclCode = parseEclFromRowData(list,true);
+            
+            System.out.println("---------------------------------------");
+            System.out.println("---------------------------------------");
+            System.out.println("---------------------------------------");
+            System.out.println("---------------------------------------");
+            System.out.println(eclCode);
+            
+            System.out.println("---------------------------------------");
+            System.out.println("---------------------------------------");
+            System.out.println("---------------------------------------");
            /* String eclCode = "";
             if (list == null) {
                 list = new ArrayList<RowMetaAndData>();
@@ -490,6 +500,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
             //System.out.println("Output -- Finished setting up ECLDirect");
             try{
                 String includes = "";
+                includes += "#option ('skipFileFormatCrcCheck', true);";
                 includes += "IMPORT Std;\n";
                 if(includeML.equalsIgnoreCase("true")){
                     includes += "IMPORT * FROM ML;\r\n\r\n";
@@ -507,7 +518,7 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
                 //System.out.println("Execute -- Finished Imports");
                 eclCode = includes + eclCode;
                 
-                boolean isValid = false;
+                //boolean isValid = false;
                // System.out.println("---------------- submitToCluster");
 
                 isValid = eclDirect.execute(eclCode, this.debugLevel);
@@ -633,9 +644,15 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
 	            //CleanedData
 	           // cacheOutputInfo("CleanedData","saltCleanedData", resName);
             }
+            if(isValid){
+            	prevResult.clear();
+                result.clear();
+                result.setStopped(false);
+	            result.setResult(true);
+            }
             
        }
-        prevResult.clear();
+       
         //System.out.println("------ END Execute of ECLExecute --------");
        return result;
     }
@@ -732,13 +749,20 @@ public class ECLExecute extends ECLJobEntry{//extends JobEntryBase implements Cl
         }
     }
 
-    public boolean evaluates() {
+    /*public boolean evaluates() {
+    	//boolean isValid = true;
+    	System.out.println("{EXECUTE: isValid (start): " + isValid);
+    	System.out.println(ECLJobEntry.timesExecutedMap.get(this.getName()));
+    	if(isValid && ECLJobEntry.validMap.containsKey(this.getName())){
+    		isValid = ECLJobEntry.validMap.get(this.getName());
+    	}
+    	System.out.println("{EXECUTE: isValid (end): " + isValid);
+    	System.out.println(ECLJobEntry.timesExecutedMap.get(this.getName()));
     	return isValid;
-    }
+    	
+    }*/
 
-    public boolean isUnconditional() {
-        return false;
-    }
+    
     
     
    

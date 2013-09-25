@@ -183,11 +183,14 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
     
 	@Override
     public Result execute(Result prevResult, int k) throws KettleException {
-        
+		Result result = modifyResults(prevResult);
+		if(result.isStopped()){
+        	return result;
+ 		}
 		String recordName = System.getProperties().getProperty("Dataset-" + this.datasetName+"-rs");
 		String fileType = System.getProperties().getProperty("Dataset-" + this.datasetName+"-type");
 		String dsName = System.getProperties().getProperty("Dataset-" + this.datasetName+"-ds");
-        Result result = prevResult;
+		
         
         AutoPopulate ap = new AutoPopulate();
         String jobNameNoSpace = "";
@@ -437,11 +440,5 @@ public class SALTHygiene extends ECLJobEntry{//extends JobEntryBase implements C
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
 
-    public boolean isUnconditional() {
-        return true;
-    }
 }

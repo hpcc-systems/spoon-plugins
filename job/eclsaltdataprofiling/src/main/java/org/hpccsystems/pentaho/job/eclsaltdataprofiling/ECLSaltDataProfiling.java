@@ -54,7 +54,7 @@ public class ECLSaltDataProfiling extends ECLJobEntry {
 	@Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-        Result result = prevResult;
+		Result result = modifyResults(prevResult);
         
 
 
@@ -180,11 +180,5 @@ public class ECLSaltDataProfiling extends ECLJobEntry {
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
-
-    public boolean isUnconditional() {
-        return true;
-    }
+    
 }

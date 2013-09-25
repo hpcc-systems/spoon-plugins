@@ -109,10 +109,10 @@ public class ECLJoin extends ECLJobEntry{//extends JobEntryBase implements Clone
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-        Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         
         if(result.isStopped()){
-            
+        	return result;
             
         }else{
         
@@ -246,11 +246,5 @@ public class ECLJoin extends ECLJobEntry{//extends JobEntryBase implements Clone
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
-
-    public boolean isUnconditional() {
-        return true;
-    }
+   
 }

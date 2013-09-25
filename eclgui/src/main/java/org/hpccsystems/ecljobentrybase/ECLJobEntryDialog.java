@@ -178,7 +178,12 @@ public class ECLJobEntryDialog extends JobEntryDialog implements JobEntryDialogI
     }
 
     public Text buildMultiText(String strLabel, Control prevControl,
-                ModifyListener lsMod, int middle, int margin, Composite groupBox) {
+            ModifyListener lsMod, int middle, int margin, Composite groupBox) {
+    	return buildMultiText(strLabel,prevControl,lsMod,middle,margin,groupBox,100);
+    	
+    }
+    public Text buildMultiText(String strLabel, Control prevControl,
+                ModifyListener lsMod, int middle, int margin, Composite groupBox, int height) {
             // label
             Label fmt = new Label(groupBox, SWT.RIGHT);
             fmt.setText(strLabel);
@@ -197,7 +202,7 @@ public class ECLJobEntryDialog extends JobEntryDialog implements JobEntryDialogI
             fieldFormat.left = new FormAttachment(middle, 0);
             fieldFormat.top = new FormAttachment(prevControl, margin);
             fieldFormat.right = new FormAttachment(100, 0);
-            fieldFormat.height = 100;
+            fieldFormat.height = height;
             text.setLayoutData(fieldFormat);
 
             return text;

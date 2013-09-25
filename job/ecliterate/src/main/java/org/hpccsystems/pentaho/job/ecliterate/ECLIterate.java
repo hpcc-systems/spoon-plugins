@@ -112,8 +112,10 @@ public class ECLIterate extends ECLJobEntry{//extends JobEntryBase implements Cl
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-        Result result = prevResult;
-
+    	Result result = modifyResults(prevResult);
+    	if(result.isStopped()){
+        	return result;
+ 		}
         Iterate iterate = new Iterate();
         iterate.setRunLocal(this.getRunLocal());
         iterate.setTransformName(this.getTransformName());
@@ -283,11 +285,5 @@ public class ECLIterate extends ECLJobEntry{//extends JobEntryBase implements Cl
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
-
-    public boolean isUnconditional() {
-        return true;
-    }
+    
 }

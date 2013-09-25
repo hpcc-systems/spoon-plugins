@@ -80,8 +80,10 @@ public class ECLCount extends ECLJobEntry{//extends JobEntryBase implements Clon
 	@Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-		Result result = prevResult;
-		
+		Result result = modifyResults(prevResult);
+		if(result.isStopped()){
+			return result;
+		}
 		logBasic("{Count job} Creating Count object");
 		
 		Count count = new Count();
@@ -190,11 +192,5 @@ public class ECLCount extends ECLJobEntry{//extends JobEntryBase implements Clon
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
-
-    public boolean isUnconditional() {
-        return true;
-    }
+ 
 }

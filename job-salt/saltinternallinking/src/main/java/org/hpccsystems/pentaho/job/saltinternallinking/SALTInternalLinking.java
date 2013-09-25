@@ -87,7 +87,10 @@ public class SALTInternalLinking extends ECLJobEntry{//extends JobEntryBase impl
 	@Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-        Result result = prevResult;
+		Result result = modifyResults(prevResult);
+		if(result.isStopped()){
+        	return result;
+ 		}
         String SALTPath = "";
         AutoPopulate ap = new AutoPopulate();
         String jobNameNoSpace = "";
@@ -402,11 +405,5 @@ public class SALTInternalLinking extends ECLJobEntry{//extends JobEntryBase impl
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
 
-    public boolean isUnconditional() {
-        return true;
-    }
 }

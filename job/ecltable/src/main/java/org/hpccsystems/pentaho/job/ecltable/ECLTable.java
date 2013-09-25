@@ -274,8 +274,10 @@ public class ECLTable extends ECLJobEntry{//extends JobEntryBase implements Clon
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-        Result result = prevResult;
-        
+    	Result result = modifyResults(prevResult);
+    	if(result.isStopped()){
+        	return result;
+ 		}
 
         
         Table table = new Table();
@@ -427,11 +429,5 @@ public class ECLTable extends ECLJobEntry{//extends JobEntryBase implements Clon
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
 
-    public boolean isUnconditional() {
-        return true;
-    }
 }

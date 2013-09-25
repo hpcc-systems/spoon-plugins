@@ -250,17 +250,25 @@ public class Utils {
 		// Turn drawing back on!
 		tree.setRedraw(true);
 	}
-	
 	public static void fillTree(Tree tree, Map<String, String[]> mapDataSets) {
+		fillTree(tree, mapDataSets, true);
+		
+	}
+	public static void fillTree(Tree tree, Map<String, String[]> mapDataSets, boolean includeInput) {
 		
 		for (Map.Entry<String, String[]> entry : mapDataSets.entrySet()) {
 		    String key = entry.getKey();
 		    TreeItem item = new TreeItem(tree, SWT.NONE);
 			item.setText(key);
 			String[] value = entry.getValue();
+			String append = "";
+			if(includeInput){
+				append = "input.";
+			}
 			for (int i = 0; i < value.length; i++) {
 				TreeItem child = new TreeItem(item, SWT.NONE);
-				child.setText("input." + value[i]);
+				
+				child.setText(append + value[i]);
 			}
 		}
 		// Turn drawing back on!

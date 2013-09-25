@@ -250,8 +250,10 @@ public class ECLOutput extends ECLJobEntry {
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-        Result result = prevResult;
-        
+    	Result result = modifyResults(prevResult);
+    	if(result.isStopped()){
+        	return result;
+ 		}
         //ECLOutput.isReady=true;
         //logBasic("not waiting: " + ECLOutput.isReady);
         Output op = new Output();
@@ -585,13 +587,9 @@ public class ECLOutput extends ECLJobEntry {
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
+   
 
-    public boolean isUnconditional() {
-        return true;
-    }
+    
     
     
     

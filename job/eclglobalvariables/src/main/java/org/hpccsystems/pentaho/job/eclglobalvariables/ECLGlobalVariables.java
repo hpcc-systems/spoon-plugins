@@ -361,13 +361,7 @@ public class ECLGlobalVariables extends ECLJobEntry{//extends JobEntryBase imple
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
-
-    public boolean isUnconditional() {
-        return true;
-    }
+   
     
     
    

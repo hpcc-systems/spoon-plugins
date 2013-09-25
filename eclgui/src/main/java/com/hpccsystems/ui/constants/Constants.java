@@ -104,6 +104,8 @@ public class Constants {
 	
 	public static final String TABLE_HEADER_CHILDREN = "Children";
 	public static final String TABLE_HEADER_NON_NULL = "Non-Null";
+	public static final String TABLE_HEADER_SORT_COLUMN = "Sort Column";
+	public static final String TABLE_HEADER_DESCENDING = "Descending?";
 	
 	// ****************** END OF FIELD FOR ADD CONCEPTS UI *********************************
 	

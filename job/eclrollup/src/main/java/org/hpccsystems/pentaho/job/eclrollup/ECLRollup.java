@@ -141,8 +141,10 @@ public class ECLRollup extends ECLJobEntry{
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-        Result result = prevResult;
-
+    	Result result = modifyResults(prevResult);
+    	if(result.isStopped()){
+        	return result;
+ 		}
         Rollup rollup = new Rollup();
         rollup.setName(this.getRecordsetName());
         rollup.setRecordset(this.getRecordset());
@@ -379,11 +381,5 @@ public class ECLRollup extends ECLJobEntry{
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
-
-    public boolean isUnconditional() {
-        return true;
-    }
+    
 }

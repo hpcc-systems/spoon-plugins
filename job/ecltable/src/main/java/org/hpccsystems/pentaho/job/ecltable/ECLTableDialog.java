@@ -12,6 +12,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Color;
@@ -106,7 +107,7 @@ INTEGER4 PersonCount := 1;
 
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
         ct = new CreateTable(shell);
-        
+        ct.setIncludeCopyParent(true);
         TabFolder tabFolder = new TabFolder (shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
         FormData data = new FormData();
         
@@ -188,6 +189,27 @@ INTEGER4 PersonCount := 1;
         recordsetName = buildText("Resulting Recordset", null, lsMod, middle, margin, tableGroup);
         
         recordset = buildCombo("Recordset", recordsetName, lsMod, middle, margin, tableGroup, datasets);
+        recordset.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				AutoPopulate ap = new AutoPopulate();
+				try{
+					RecordList fields = ap.rawFieldsByDataset(recordset.getText(), jobMeta.getJobCopies());
+					ct.setParentLayout(fields);
+				}catch (Exception e){
+					System.out.println(e);
+				}
+			}
+        	
+        });
         expression = buildMultiText("Expression", recordset, lsMod, middle, margin, tableGroup);
         //format = buildMultiText("Format", expression, lsMod, middle, margin, tableGroup);
         size = buildCombo("Size", expression, lsMod, middle, margin, tableGroup, new String[]{"","FEW", "MANY"});

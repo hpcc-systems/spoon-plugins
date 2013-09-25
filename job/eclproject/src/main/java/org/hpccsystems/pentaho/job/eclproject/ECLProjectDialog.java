@@ -16,6 +16,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Color;
@@ -100,7 +101,7 @@ public class ECLProjectDialog extends ECLJobEntryDialog{//extends JobEntryDialog
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
 
         tblOutput = new CreateTable(shell); //Instantiate the Table to be used in "Output Format" tab
-
+        tblOutput.setIncludeCopyParent(true);
         
         props.setLook(shell);
         JobDialog.setShellImage(shell, jobEntry);
@@ -245,6 +246,30 @@ public class ECLProjectDialog extends ECLJobEntryDialog{//extends JobEntryDialog
         
         declareCounter = buildCombo("Declare Counter", recordsetName, lsMod, middle, margin, distributeGroup, new String[]{"no", "yes"});
         inRecordName = buildCombo("In Record Name", declareCounter, lsMod, middle, margin, distributeGroup,datasets);
+        //listner
+        inRecordName.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				AutoPopulate ap = new AutoPopulate();
+				try{
+					RecordList fields = ap.rawFieldsByDataset(inRecordName.getText(), jobMeta.getJobCopies());
+					tblOutput.setParentLayout(fields);
+				}catch (Exception e){
+					System.out.println(e);
+				}
+			}
+        	
+        });
+        //tblOutput
+        
         
         outRecordName = buildText("Out Record Name", inRecordName, lsMod, middle, margin, distributeGroup);
         //outRecordFormat = buildMultiText("Out Record Format", outRecordName, lsMod, middle, margin, distributeGroup);
@@ -379,6 +404,12 @@ public class ECLProjectDialog extends ECLJobEntryDialog{//extends JobEntryDialog
             }catch (Exception e){
             	System.out.println("Failed to load datasets");
             }
+			try{
+				RecordList fields = ap.rawFieldsByDataset(inRecordName.getText(), jobMeta.getJobCopies());
+				tblOutput.setParentLayout(fields);
+			}catch (Exception e){
+				System.out.println(e);
+			}
         }
          if (jobEntry.getRecordsetName() != null) {
             recordsetName.setText(jobEntry.getRecordsetName());

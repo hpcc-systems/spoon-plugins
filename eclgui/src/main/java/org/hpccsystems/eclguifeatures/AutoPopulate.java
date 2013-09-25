@@ -440,7 +440,9 @@ public class AutoPopulate {
         }else if(type != null && type.equalsIgnoreCase("ECLDistribute")){
         	fieldsByParent("ECLDistribute","dataset_name", adDS,datasetName,jobs);
         }else if(type != null && type.equalsIgnoreCase("ECLMerge")){
-        	fieldsByParent("ECLMerge","recordsetSet", adDS,datasetName,jobs);	
+        	fieldsByParent("ECLMerge","recordsetSet", adDS,datasetName,jobs);
+        }else if(type != null && type.equalsIgnoreCase("ECLFilter")){
+        	fieldsByParent("ECLFilter","inRecordName", adDS,datasetName,jobs);	
         //need to add in statments for all the ML funtions
         }else if(type != null && type.equalsIgnoreCase("ECLML_FromField")){
         	

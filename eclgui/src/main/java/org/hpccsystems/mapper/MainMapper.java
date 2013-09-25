@@ -44,7 +44,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 public class MainMapper {
-	
+	private String layoutStyle = "transform";
 	// The table viewer
 	private TableViewer tableViewer;
 	// Create a RecordList and assign it to an instance variable
@@ -66,9 +66,21 @@ public class MainMapper {
 	private String newExpression = "";
 	private int previousSelectedIndex;
 	
+	private String filterStatement = "";
+	private String oldFilterStatement = "";
+	
 	//private boolean hasChanged = false;
 	MapperBO objRecord;
 	
+	
+	public String getLayoutStyle() {
+		return layoutStyle;
+	}
+
+	public void setLayoutStyle(String layoutStyle) {
+		this.layoutStyle = layoutStyle;
+	}
+
 	public Tree getTreeInputDataSet() {
 		return treeInputDataSet;
 	}
@@ -100,6 +112,27 @@ public class MainMapper {
 	public void setPreviousSelectedIndex(int previousSelectedIndex) {
 		this.previousSelectedIndex = previousSelectedIndex;
 	}
+	
+
+	public String getFilterStatement() {
+		filterStatement = this.txtExpression.getText();
+		return filterStatement;
+	}
+
+	public void setFilterStatement(String filterStatement) {
+		this.filterStatement = filterStatement;
+		this.txtExpression.setText(this.filterStatement);
+	}
+	
+	
+
+	public String getOldFilterStatement() {
+		return oldFilterStatement;
+	}
+
+	public void setOldFilterStatement(String oldFilterStatement) {
+		this.oldFilterStatement = oldFilterStatement;
+	}
 
 	/**
 	 * This method redraws the table.
@@ -116,18 +149,36 @@ public class MainMapper {
 			}
 		}
 		oldRL = null;
-		tableViewer.setInput(mapperRecList);
-		tableViewer.getTable().setRedraw(true);
+		if(this.layoutStyle.equalsIgnoreCase("transform")){
+			tableViewer.setInput(mapperRecList);
+			tableViewer.getTable().setRedraw(true);
+		}
                
 	}
 	
 	
 	//The Constructor has input as 
+	
 	public MainMapper(Composite parentComp, Map<String, String[]> mapDataSets, String[] arrCmbValues){
+		setupVars(parentComp, mapDataSets, arrCmbValues, "transform");
+	}
+	public MainMapper(Composite parentComp, Map<String, String[]> mapDataSets, String[] arrCmbValues,String layoutStyle){
+		setupVars(parentComp, mapDataSets, arrCmbValues, layoutStyle);
+	}
+	
+	private void setupVars(Composite parentComp, Map<String, String[]> mapDataSets, String[] arrCmbValues,String layoutStyle){
+		this.layoutStyle = layoutStyle;
 		setCmbListValues(arrCmbValues);
 		populateFunctionList();
 		populateOperatorList();
 		this.addChildControls(parentComp, mapDataSets);
+		if(this.layoutStyle.equalsIgnoreCase("transform")){
+			int numExpressions = tableViewer.getTable().getItemCount();
+			if(numExpressions>1 && !layoutStyle.equalsIgnoreCase("transform")){
+				this.btnAddExpression.setEnabled(false);
+			}
+		}
+			
 	}
 	
 	/**
@@ -135,9 +186,11 @@ public class MainMapper {
 	 * @return the shell that was created	 
 	 */
 	private void addChildControls(Composite parentComp, Map<String, String[]> mapDataSets) {
-		Composite tblComposite = new Composite(parentComp, SWT.NONE);
-		createTable(tblComposite);		// Create the table
-		createButtons(tblComposite);
+		if(this.layoutStyle.equalsIgnoreCase("transform")){
+			Composite tblComposite = new Composite(parentComp, SWT.NONE);
+			createTable(tblComposite);		// Create the table
+			createButtons(tblComposite);
+		}
 		buildExpressionPanel(parentComp, mapDataSets);	// Add the widgets needed to build a Expression Panel
 		
 	}
@@ -222,7 +275,12 @@ public class MainMapper {
 		//1St Column - Output
 		final TableColumn tableColumn0 = new TableColumn(table, SWT.LEFT, 0);
 		tableColumn0.setImage(MapperLabelsProvider.getImage("unchecked"));
-		tableColumn0.setText("Variable");
+		if(this.layoutStyle.equalsIgnoreCase("transform")){
+			tableColumn0.setText("Variable");
+		}else{
+			tableColumn0.setText("");
+		}
+		
 		tableColumn0.setWidth(200);
 		
 		// 3rd column - Expression
@@ -389,6 +447,9 @@ public class MainMapper {
 				for (int j = arrSortedIndexes.length - 1 ; j>=0; j--) {
 					mapperRecList.removeRecord(arrSortedIndexes[j]);
 				}
+				if(arlCheckedIndexes.size() > 0 && !layoutStyle.equalsIgnoreCase("transform")){
+					btnAddExpression.setEnabled(true);
+				}
 				tableViewer.refresh();
 				tableViewer.getTable().getColumns()[0].setImage(MapperLabelsProvider.getImage("unchecked"));
 			}
@@ -411,6 +472,9 @@ public class MainMapper {
 		return result;
 	}
 	private ToolTip inputTip ;
+	
+	
+	
 	public void buildExpressionPanel(Composite parentComp, Map<String, String[]> mapDataSets){
 		
 		Composite comp2 = new Composite(parentComp, SWT.NONE);
@@ -422,7 +486,7 @@ public class MainMapper {
 		comp2.setLayoutData(data);
 		
 		Group group1 = new Group(comp2, SWT.SHADOW_IN);
-	    group1.setText("ECL Expression Builder");
+	    
 	    layout = new GridLayout();
 		layout.numColumns = 2;
 		layout.makeColumnsEqualWidth = true;
@@ -438,22 +502,37 @@ public class MainMapper {
 		compVariable.setLayout(layout);
 		compVariable.setLayoutData(data);
 		
-		Label lblVariableName = new Label(compVariable, SWT.NONE);
-		lblVariableName.setText("Output Variable Name:");
+		Label lblVariableName = null;
+		
 		GridData gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
-		lblVariableName.setLayoutData(gridData);
+		if(this.layoutStyle.equalsIgnoreCase("transform")){
+			lblVariableName = new Label(compVariable, SWT.NONE);
+			lblVariableName.setText("Output Variable Name:");
+			group1.setText("ECL Expression Builder");
+			
+			lblVariableName.setLayoutData(gridData);
+			
+			cmbVariableName = new Combo(compVariable, SWT.DROP_DOWN);
+			gridData = new GridData (GridData.FILL_HORIZONTAL);
+			gridData.widthHint = 280;
+			cmbVariableName.setLayoutData(gridData);
+			
+			cmbVariableName.setItems(getCmbListValues()); //Set the Combo Values
+			if(!this.layoutStyle.equalsIgnoreCase("transform")){
+				cmbVariableName.setVisible(false);
+			}
+		}else{
+			//lblVariableName.setText("Column To Filter On:");
+			group1.setText("Filter Builder");
+			//lblVariableName.setVisible(false);
+		}
+		
 		
 		/*txtVariableName = new Text(compVariable, SWT.SINGLE | SWT.BORDER );
 		gridData = new GridData (GridData.FILL_HORIZONTAL);
 		gridData.widthHint = 280;
 		txtVariableName.setLayoutData(gridData);*/
 		
-		cmbVariableName = new Combo(compVariable, SWT.DROP_DOWN);
-		gridData = new GridData (GridData.FILL_HORIZONTAL);
-		gridData.widthHint = 280;
-		cmbVariableName.setLayoutData(gridData);
-		
-		cmbVariableName.setItems(getCmbListValues()); //Set the Combo Values
 		
 		
 		Composite compTreePanel = new Composite(group1, SWT.NONE);
@@ -465,7 +544,12 @@ public class MainMapper {
 		compTreePanel.setLayoutData(data);
 		
 		Label lblInput = new Label(compTreePanel, SWT.NONE);
-		lblInput.setText("Input:");
+		if(this.layoutStyle.equalsIgnoreCase("transform")){
+			lblInput.setText("Input:");
+		}else{
+			lblInput.setText("Columns:");
+		}
+		
 		gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
 		lblInput.setLayoutData(gridData);
 		
@@ -478,49 +562,17 @@ public class MainMapper {
 		lblOperators.setText("Operators:");
 		gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
 		lblOperators.setLayoutData(gridData);
-		
-		
-		
-		
+
 		treeInputDataSet = new Tree(compTreePanel, SWT.SINGLE | SWT.BORDER);
 		
-		
-		/*inputTip = new ToolTip(compTreePanel.getShell(), SWT.BALLOON | SWT.ICON_INFORMATION);		
-	    Listener inputList = new Listener(){
-
-			@Override
-			public void handleEvent(Event event) {
-				// TODO Auto-generated method stub
-				switch (event.type) {
-				case SWT.MouseMove: {
-					inputTip.setVisible(false);
-				}
-					case SWT.MouseHover: {
-						Point coords = new Point(event.x, event.y);
-						TreeItem item = treeInputDataSet.getItem(coords);
-						
-						
-						if(item != null){
-							//System.out.println("Show tool tip " + coords + " " + item.getText());
-							inputTip.setText("Info");
-							inputTip.setMessage(item.getText());
-							inputTip.setVisible(true);
-						}else{
-							//System.out.println("hide tool tip");
-							inputTip.setVisible(false);
-						}
-					}
-				}
-			}};
-			
-			treeInputDataSet.addListener(SWT.MouseHover, inputList);
-			treeInputDataSet.addListener(SWT.MouseMove, inputList);
-		*/
-		//treeInputDataSet.setToolTipText("Select the column from the input dataset");
 		gridData = new GridData(GridData.FILL_HORIZONTAL);
 	    gridData.heightHint = 100;
 	    treeInputDataSet.setLayoutData(gridData);
-	    Utils.fillTree(treeInputDataSet, mapDataSets); //Get the values from the HashMap passed as an argument
+	    boolean includeInput = false;
+	    if(this.layoutStyle.equalsIgnoreCase("transform")){
+	    	includeInput = true;
+	    }
+	    Utils.fillTree(treeInputDataSet, mapDataSets, includeInput); //Get the values from the HashMap passed as an argument
 	    treeInputDataSet.addMouseListener(new MouseListener() {
 			
 			@Override
@@ -738,7 +790,12 @@ public class MainMapper {
 		});
 		
 		Label lblEclText = new Label(group1, SWT.NONE);
-		lblEclText.setText("ECL Text:");
+		if(this.layoutStyle.equalsIgnoreCase("transform")){
+			lblEclText.setText("ECL Text:");
+		}else{
+			lblEclText.setText("Filter Statement:");
+		}
+		
 		gridData = new GridData (GridData.HORIZONTAL_ALIGN_BEGINNING);
 		lblEclText.setLayoutData(gridData);
 		
@@ -746,7 +803,7 @@ public class MainMapper {
 		gridData = new GridData (GridData.FILL_BOTH);
 		gridData.horizontalSpan = 2;
 		txtExpression.setLayoutData(gridData);
-		
+		txtExpression.setText(filterStatement);
 		
 		Composite compButton = new Composite(group1, SWT.NONE);
 		layout = new GridLayout();
@@ -754,6 +811,7 @@ public class MainMapper {
 		data = new GridData();
 		compButton.setLayout(layout);
 		compButton.setLayoutData(data);
+		
 		
 		btnSaveExpression = new Button(compButton, SWT.PUSH | SWT.CENTER);
 		btnSaveExpression.setText("Save Expression");
@@ -841,6 +899,10 @@ public class MainMapper {
 					setNewExpression("");
 					tableViewer.refresh();
 					
+					if(!layoutStyle.equalsIgnoreCase("transform")){
+						btnAddExpression.setEnabled(false);
+					}
+					
 				}
 			}
 		});
@@ -892,6 +954,12 @@ public class MainMapper {
 			
 		});
 		
+		
+		if(!this.layoutStyle.equalsIgnoreCase("transform")){
+			btnCancelExpression.setVisible(false);
+			btnAddExpression.setVisible(false);
+			btnSaveExpression.setVisible(false);
+		}
 		/*Composite comp3 = new Composite(parentComp, SWT.NONE);
 		layout = new GridLayout();
 		layout.numColumns = 3;

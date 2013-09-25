@@ -165,7 +165,7 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         FormData generalGroupFormat = new FormData();
         generalGroupFormat.top = new FormAttachment(0, margin);
         generalGroupFormat.width = 400;
-        generalGroupFormat.height = 65;
+        generalGroupFormat.height = 50;
         generalGroupFormat.left = new FormAttachment(middle, 0);
         generalGroup.setLayoutData(generalGroupFormat);
         
@@ -180,7 +180,7 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         FormData varGroupFormat = new FormData();
         varGroupFormat.top = new FormAttachment(generalGroup, margin);
         varGroupFormat.width = 400;
-        varGroupFormat.height = 375;
+        varGroupFormat.height = 305;
         varGroupFormat.left = new FormAttachment(middle, 0);
         varGroup.setLayoutData(varGroupFormat);
 
@@ -213,7 +213,7 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
         };
         this.eclFileOpenButton.addListener(SWT.Selection, eclFileOpenListener);
         
-        this.compileFlags = this.buildMultiText("Compile Flags", eclFileOpenButton, lsMod, middle, margin, varGroup);
+        this.compileFlags = this.buildMultiText("Compile Flags", eclFileOpenButton, lsMod, middle, margin, varGroup,30);
         
         Group mlGroup = null;
         if(includeMLLib){
@@ -224,7 +224,7 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
             FormData mlGroupData = new FormData();
             mlGroupData.top = new FormAttachment(varGroup, margin);
             mlGroupData.width = 400;
-            mlGroupData.height = 100;
+            mlGroupData.height = 95;
             mlGroupData.left = new FormAttachment(middle, 0);
             mlGroup.setLayoutData(mlGroupData);
             
@@ -257,7 +257,7 @@ public class ECLGlobalVariablesDialog extends ECLJobEntryDialog{//extends JobEnt
             	saltGroupData.top = new FormAttachment(varGroup, margin);
             }
             saltGroupData.width = 400;
-            saltGroupData.height = 100;
+            saltGroupData.height = 95;
             saltGroupData.left = new FormAttachment(middle, 0);
             saltGroup.setLayoutData(saltGroupData);
             

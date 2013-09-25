@@ -8,6 +8,14 @@ import org.eclipse.swt.graphics.Image;
 
 public class RecordLabels extends LabelProvider implements ITableLabelProvider{
 	
+	private String layoutType = "";
+	public RecordLabels(){
+		layoutType = "datasetLayout";
+	}
+	public RecordLabels(String type){
+		layoutType = type;
+	}
+	
 	// Names of images used. This are the actually file names
 	public static final String CHECKED_IMAGE = "checked";
 	public static final String UNCHECKED_IMAGE = "unchecked";
@@ -29,6 +37,7 @@ public class RecordLabels extends LabelProvider implements ITableLabelProvider{
 		return imageRegistry.get(key);
 	}
 	
+	
 	public String getColumnText(Object element, int columnIndex) {
 		String result = "";
 		RecordBO objRecord = (RecordBO) element;
@@ -37,7 +46,11 @@ public class RecordLabels extends LabelProvider implements ITableLabelProvider{
 			result = objRecord.getColumnName();
 			break;
 		case 1: 
-			result = objRecord.getDefaultValue();
+			if(layoutType.equals("sortLayout")){
+				result = objRecord.getSortOrder();
+			}else{
+				result = objRecord.getDefaultValue();
+			}
 			break;
 		case 2:
 			result = objRecord.getColumnType();

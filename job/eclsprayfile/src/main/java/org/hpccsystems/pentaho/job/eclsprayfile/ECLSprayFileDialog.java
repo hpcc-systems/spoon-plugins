@@ -68,6 +68,7 @@ public class ECLSprayFileDialog extends ECLJobEntryDialog{//extends JobEntryDial
     private ECLSprayFile jobEntry;
     private Text jobEntryName;
     //private Text ipAddress;
+    private Text landingZoneIP;
     private Text filePath;
     private Text logicalFileName;
     private Combo fileType;
@@ -191,12 +192,13 @@ public class ECLSprayFileDialog extends ECLJobEntryDialog{//extends JobEntryDial
         FormData sourceGroupFormat = new FormData();
         sourceGroupFormat.top = new FormAttachment(generalGroup, margin);
         sourceGroupFormat.width = 400;
-        sourceGroupFormat.height = 140;
+        sourceGroupFormat.height = 160;
         sourceGroupFormat.left = new FormAttachment(middle, 0);
         sourceGroup.setLayoutData(sourceGroupFormat);
        
         //ipAddress = buildText("IP Address", jobEntryName, lsMod, middle, margin, sourceGroup);
-        groupName = buildText("Destination Group", null, lsMod, middle, margin, sourceGroup);
+        landingZoneIP = buildText("Server IP Override", null, lsMod, middle, margin, sourceGroup);
+        groupName = buildText("Destination Group", landingZoneIP, lsMod, middle, margin, sourceGroup);
         filePath = buildText("File Name", groupName, lsMod, middle, margin, sourceGroup);
         logicalFileName = buildText("Logical File Name", filePath, lsMod, middle, margin, sourceGroup);
         fileType = buildCombo("File Type", logicalFileName, lsMod, middle, margin, sourceGroup, new String[]{"Fixed", "Variable"});
@@ -356,6 +358,10 @@ public class ECLSprayFileDialog extends ECLJobEntryDialog{//extends JobEntryDial
         	groupName.setText(jobEntry.getGroupName());
         }
         
+        if (jobEntry.getLandingZoneIP() != null) {
+        	landingZoneIP.setText(jobEntry.getLandingZoneIP());
+        }
+        
         fileType.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				System.out.println("Item selected: "+fileType.getText());
@@ -505,6 +511,8 @@ public class ECLSprayFileDialog extends ECLJobEntryDialog{//extends JobEntryDial
         jobEntry.setFixedRecordSize(fixedRecordSize.getText());
         jobEntry.setAllowOverwrite(allowOverwrite.getText());
         jobEntry.setGroupName(groupName.getText());
+        
+        jobEntry.setLandingZoneIP(landingZoneIP.getText());
         //jobEntry.setRecordList(ct.getRecordList());
         dispose();
     }

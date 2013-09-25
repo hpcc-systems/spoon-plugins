@@ -30,7 +30,9 @@ public class RecordList {
 		"VARSTRING", 
 		"VARUNICODE"
 		};
-	
+	static final String[] COLUMN_SORT_ORDER_ARRAY = {"ASCENDING", 
+		"DESENDING"
+		};
 	//following will need more hlep
 	/*
 	 TYPEOF
@@ -43,6 +45,11 @@ public class RecordList {
 		super();
 	}
 	
+	//Returns the values used in Column Type Combo Box
+		public String[] getColSortOrder() {
+			return COLUMN_SORT_ORDER_ARRAY;
+		}
+		
 	//Returns the values used in Column Type Combo Box
 	public String[] getColTypes() {
 		return COLUMN_TYPE_ARRAY;

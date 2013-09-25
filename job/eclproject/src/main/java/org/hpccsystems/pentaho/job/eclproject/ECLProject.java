@@ -289,7 +289,10 @@ public class ECLProject extends ECLJobEntry{//extends JobEntryBase implements Cl
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-        Result result = prevResult;
+    	Result result = modifyResults(prevResult);
+    	if(result.isStopped()){
+        	return result;
+ 		}
       /*  private boolean declareCounter;
     private String inRecordName;
     private String outRecordName;
@@ -457,11 +460,5 @@ public class ECLProject extends ECLJobEntry{//extends JobEntryBase implements Cl
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
-
-    public boolean isUnconditional() {
-        return true;
-    }
+   
 }

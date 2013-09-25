@@ -113,8 +113,10 @@ public class ECLDeSpray extends ECLJobEntry{//extends JobEntryBase implements Cl
 	@Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-		Result result = prevResult;
-		
+		Result result = modifyResults(prevResult);
+		if(result.isStopped()){
+        	return result;
+ 		}
 		logBasic("{DeSpray job} Creating Count object");
 		
 		DeSpray dspray = new DeSpray();
@@ -225,11 +227,5 @@ public class ECLDeSpray extends ECLJobEntry{//extends JobEntryBase implements Cl
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
 
-    public boolean isUnconditional() {
-        return true;
-    }
 }

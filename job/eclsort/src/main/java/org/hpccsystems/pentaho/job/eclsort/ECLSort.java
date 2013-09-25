@@ -5,8 +5,11 @@
 package org.hpccsystems.pentaho.job.eclsort;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.hpccsystems.javaecl.Sort;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;
@@ -31,10 +34,21 @@ public class ECLSort extends ECLJobEntry{//extends JobEntryBase implements Clone
     
     //private String logicalFileName;
     private String datasetName = "";
-    private String fields = "";//Comma separated list of fieldNames. a "-" prefix to the field name will indicate descending order
+    //private String fields = "";//Comma separated list of fieldNames. a "-" prefix to the field name will indicate descending order
     private String recordsetName = "";
+    private RecordList recordList = new RecordList();
+    
+    
 
-    public String getDatasetName() {
+    public RecordList getRecordList() {
+		return recordList;
+	}
+
+	public void setRecordList(RecordList recordList) {
+		this.recordList = recordList;
+	}
+
+	public String getDatasetName() {
         return datasetName;
     }
 
@@ -50,13 +64,13 @@ public class ECLSort extends ECLJobEntry{//extends JobEntryBase implements Clone
         this.logicalFileName = fileName;
     }
   */  
-    public String getFields() {
-        return fields;
-    }
+    //public String getFields() {
+    //    return fields;
+    //}
 
-    public void setFields(String fields) {
-        this.fields = fields;
-    }
+    //public void setFields(String fields) {
+    //    this.fields = fields;
+    //}
     
     public String getRecordsetName() {
         return recordsetName;
@@ -68,16 +82,45 @@ public class ECLSort extends ECLJobEntry{//extends JobEntryBase implements Clone
 
     
     
+    public String recordListToSortECL(){
+        String out = "";
+        
+        if(recordList != null){
+            if(recordList.getRecords() != null && recordList.getRecords().size() > 0) {
+                   
+                    for (Iterator<RecordBO> iterator = recordList.getRecords().iterator(); iterator.hasNext();) {
+                            RecordBO record = (RecordBO) iterator.next();
+                        	System.out.println("record.getSortOrder()----------------------" + record.getSortOrder());
+                            if(!out.equals("")){
+                            	out += ",";
+                            }
+                            if(record.getSortOrder().equalsIgnoreCase("DESENDING")){
+                            	out += "-";
+                            }
+                            out += record.getColumnName();
+                            
+                            
+                    }
+            }
+        }
+        
+        return out;
+    }
+    
 
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-        Result result = prevResult;
-        
+    	Result result = modifyResults(prevResult);
+    	if(result.isStopped()){
+        	return result;
+ 		}
         Sort sort = new Sort();
-        sort.setFields(getFields());
+        //sort.setFields(getFields());
         sort.setDatasetName(getDatasetName());
         sort.setName(getRecordsetName());
+        System.out.println("------------------- GET RECORDS ------------------");
+        sort.setFields(recordListToSortECL());
         logBasic("{Sort Job} Execute = " + sort.ecl());
         
         logBasic("{Sort Job} Previous =" + result.getLogText());
@@ -118,13 +161,15 @@ public class ECLSort extends ECLJobEntry{//extends JobEntryBase implements Clone
         try {
             super.loadXML(node, list, list1);
             
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fields")) != null)
-                setFields(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fields")));
+            //if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fields")) != null)
+                //setFields(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "fields")));
             //setRecordName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "record_name")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dataset_name")) != null)
                 setDatasetName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dataset_name")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset_name")) != null)
                 setRecordsetName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordset_name")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
+                openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
            
         } catch (Exception e) {
             throw new KettleXMLException("ECL Sort Job Plugin Unable to read step info from XML node", e);
@@ -140,8 +185,9 @@ public class ECLSort extends ECLJobEntry{//extends JobEntryBase implements Clone
         //retval += "		<record_name>" + recordName + "</record_name>" + Const.CR;
         
         retval += "		<dataset_name ><![CDATA[" + datasetName + "]]></dataset_name>" + Const.CR;
-        retval += "		<fields><![CDATA[" + fields + "]]></fields>" + Const.CR;
+        //retval += "		<fields><![CDATA[" + fields + "]]></fields>" + Const.CR;
         retval += "		<recordset_name eclIsDef=\"true\" eclType=\"recordset\"><![CDATA[" + recordsetName + "]]></recordset_name>" + Const.CR;
+        retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
 
         return retval;
 
@@ -150,8 +196,8 @@ public class ECLSort extends ECLJobEntry{//extends JobEntryBase implements Clone
     public void loadRep(Repository rep, ObjectId id_jobentry, List<DatabaseMeta> databases, List<SlaveServer> slaveServers)
             throws KettleException {
         try {
-            if(rep.getStepAttributeString(id_jobentry, "fields") != null)
-                fields = rep.getStepAttributeString(id_jobentry, "fields"); //$NON-NLS-1$
+            //if(rep.getStepAttributeString(id_jobentry, "fields") != null)
+            //    fields = rep.getStepAttributeString(id_jobentry, "fields"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "datasetName") != null)
                 datasetName = rep.getStepAttributeString(id_jobentry, "datasetName"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "recordset_name") != null)
@@ -159,6 +205,9 @@ public class ECLSort extends ECLJobEntry{//extends JobEntryBase implements Clone
             //recordName = rep.getStepAttributeString(id_jobentry, "recordName"); //$NON-NLS-1$
             //recordDef = rep.getStepAttributeString(id_jobentry, "recordDef"); //$NON-NLS-1$
         
+            if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
+                this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
+            
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
         }
@@ -166,9 +215,10 @@ public class ECLSort extends ECLJobEntry{//extends JobEntryBase implements Clone
 
     public void saveRep(Repository rep, ObjectId id_job) throws KettleException {
         try {
-            rep.saveStepAttribute(id_job, getObjectId(), "fields", fields); //$NON-NLS-1$
+            //rep.saveStepAttribute(id_job, getObjectId(), "fields", fields); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "datasetName", datasetName); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "recordset_name", recordsetName); //$NON-NLS-1$
+            rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
            // rep.saveStepAttribute(id_job, getObjectId(), "recordName", recordName); //$NON-NLS-1$
            // rep.saveStepAttribute(id_job, getObjectId(), "recordDef", recordDef); //$NON-NLS-1$
         } catch (Exception e) {
@@ -176,11 +226,64 @@ public class ECLSort extends ECLJobEntry{//extends JobEntryBase implements Clone
         }
     }
 
-    public boolean evaluates() {
-        return true;
+    
+    
+    public String saveRecordList(){
+        String out = "";
+        ArrayList list = recordList.getRecords();
+        Iterator<RecordBO> itr = list.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
     }
-
-    public boolean isUnconditional() {
-        return true;
+    
+    public void openRecordList(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            recordList = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList.addRecordBO(rb);
+            }
+        }
     }
+    /*
+    public RecordList ArrayListToRecordList(ArrayList<String[]> in){
+    	
+    	RecordList recordList = null;
+  
+        
+        if(in.size()>0){
+            recordList = new RecordList();
+            for(int i =0; i<in.size(); i++){
+                RecordBO rb = new RecordBO();
+                rb.setColumnName(in.get(i)[0]);
+                //rb.setColumnType(in.get(i)[1].replaceAll("\\d+",""));//replaces digit with "" so we get STRING/INTEGER etc
+                //System.out.println("Letters: " + x.replaceAll("\\d+[_]*",""));
+                rb.setColumnType(in.get(i)[1].replaceAll("\\d+[_]*",""));//replaces digit with "" so we get STRING/INTEGER etc
+                
+                //rb.setColumnWidth(in.get(i)[1].replaceAll("\\D+",""));//replace non digit with "" so we get just number 
+                //System.out.println("Numbers: " + x.replaceAll("[^0-9_]+",""));
+                rb.setColumnWidth(in.get(i)[1].replaceAll("[^0-9_]+",""));//replace non digit with "" so we get just number 
+                
+                rb.setDefaultValue(in.get(i)[2]);
+                rb.setSortOrder(in.get(i)[4]);
+                recordList.addRecordBO(rb);
+            }
+        }
+        return recordList;
+    }
+*/
+   
 }

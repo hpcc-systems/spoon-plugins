@@ -6,6 +6,7 @@ public class RecordBO {
 	private String defaultValue 	= "";
 	private String columnType 	= "";
 	private String columnWidth = "";
+	private String sortOrder = "ASCENDING";
 	
 	public RecordBO(){
 		super();
@@ -53,33 +54,56 @@ public class RecordBO {
         
         
         
-        public String toCSV(){
-            return columnName + "," + columnType + "," + columnWidth + "," + defaultValue;
+        public String getSortOrder() {
+		return sortOrder;
+	}
+	public void setSortOrder(String sortOrder) {
+		this.sortOrder = sortOrder;
+	}
+		public String toCSV(){
+			String out = "";
+            out += columnName + "," + columnType + "," + columnWidth + "," + defaultValue;
+            if(!sortOrder.equals("")){
+            	out += ","+sortOrder;
+            }
+            return out;
         }
         public void fromCSV(String in){
             String[] strArr = in.split("[,]");//"\\,"
             //System.out.println("in ---- " + in);
-            if(strArr.length == 4){
+            
+            if(strArr.length == 5){
                 columnName = strArr[0];
                 columnType = strArr[1];
                 columnWidth = strArr[2];
                 defaultValue = strArr[3];
+                sortOrder = strArr[4];
+
+            } else if(strArr.length == 4){
+                columnName = strArr[0];
+                columnType = strArr[1];
+                columnWidth = strArr[2];
+                defaultValue = strArr[3];
+                sortOrder = "";
 
             } else if(strArr.length == 3){
                 columnName = strArr[0];
                 columnType = strArr[1];
                 columnWidth = strArr[2];
                 defaultValue = "";
+                sortOrder = "";
             } else if(strArr.length == 2){
             	columnName = strArr[0];
                 columnType = strArr[1];
                 columnWidth = "";
                 defaultValue = "";
+                sortOrder = "";
             } else if(strArr.length == 1){
             	columnName = strArr[0];
                 columnType = "";
                 columnWidth = "";
                 defaultValue = "";
+                sortOrder = "";
             }
         }
 	

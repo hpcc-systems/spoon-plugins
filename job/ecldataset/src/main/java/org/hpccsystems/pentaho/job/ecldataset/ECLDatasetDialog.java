@@ -112,7 +112,7 @@ public class ECLDatasetDialog extends ECLJobEntryDialog{//extends JobEntryDialog
 
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
         ct = new CreateTable(shell);
-        
+        ct.setIncludeCopyParent(false);
         TabFolder tabFolder = new TabFolder (shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
         FormData data = new FormData();
         

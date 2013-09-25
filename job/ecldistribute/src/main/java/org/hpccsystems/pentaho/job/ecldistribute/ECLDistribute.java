@@ -97,8 +97,10 @@ public class ECLDistribute extends ECLJobEntry{//extends JobEntryBase implements
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-        Result result = prevResult;
-        
+    	Result result = modifyResults(prevResult);
+    	if(result.isStopped()){
+        	return result;
+ 		}
         Distribute distribute = new Distribute();
         distribute.setName(this.getRecordsetName());
         distribute.setDatasetName(this.getDatasetName());
@@ -233,11 +235,5 @@ public class ECLDistribute extends ECLJobEntry{//extends JobEntryBase implements
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
-
-    public boolean isUnconditional() {
-        return true;
-    }
+    
 }

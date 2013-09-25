@@ -10,6 +10,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Color;
@@ -30,6 +31,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.hpccsystems.recordlayout.CreateTable;
+import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.recordlayout.RecordList;
@@ -61,7 +63,7 @@ public class ECLIndexDialog extends ECLJobEntryDialog{//extends JobEntryDialog i
     private ECLIndex jobEntry;    
     private Text jobEntryName;
     
-    private Text baserecset;
+    private Combo baserecset;
     private Text indexfile;
     private Combo sorted;
     private Combo preload;
@@ -174,6 +176,16 @@ public class ECLIndexDialog extends ECLJobEntryDialog{//extends JobEntryDialog i
         data.width = 690;
         tabFolder.setLayoutData(data);
         
+        String datasets[] = null;
+        AutoPopulate ap = new AutoPopulate();
+        try{
+            datasets = ap.parseDatasetsRecordsets(this.jobMeta.getJobCopies());
+        }catch (Exception e){
+            System.out.println("Error Parsing existing Datasets");
+            System.out.println(e.toString());
+            datasets = new String[]{""};
+        }
+        
         Composite compForGrp = new Composite(tabFolder, SWT.NONE);
 
         compForGrp.setBackground(new Color(tabFolder.getDisplay(),255,255,255));
@@ -244,7 +256,14 @@ public class ECLIndexDialog extends ECLJobEntryDialog{//extends JobEntryDialog i
         indexGroup.setLayoutData(joinGroupFormat);
 
         
-        this.baserecset = buildText("Baserecset", null, lsMod, middle, margin, indexGroup);
+        //this.baserecset = buildText("Baserecset", null, lsMod, middle, margin, indexGroup);
+        this.baserecset  = buildCombo("Baserecset", null, lsMod, middle, margin, indexGroup,datasets);
+        
+        
+       
+        //tblOutput
+        
+        
         this.indexfile = buildText("Index File", baserecset, lsMod, middle, margin, indexGroup);
         this.sorted = buildCombo("Is Sorted", indexfile, lsMod, middle, margin, indexGroup, new String[]{COMBO_ITEM_NO, COMBO_ITEM_YES});
         this.preload = buildCombo("Is Preload", sorted, lsMod, middle, margin, indexGroup, new String[]{COMBO_ITEM_NO, COMBO_ITEM_YES,});
@@ -274,7 +293,7 @@ public class ECLIndexDialog extends ECLJobEntryDialog{//extends JobEntryDialog i
                     };
             });
        
-        
+        keysCT.setIncludeCopyParent(true);
         keysCT.buildDefTab("Keys", tabFolder);
        
         
@@ -290,8 +309,33 @@ public class ECLIndexDialog extends ECLJobEntryDialog{//extends JobEntryDialog i
             }
         }
         
+        baserecset.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				AutoPopulate ap = new AutoPopulate();
+				try{
+					RecordList fields = ap.rawFieldsByDataset(baserecset.getText(), jobMeta.getJobCopies());
+					payloadCT.setParentLayout(fields);
+					keysCT.setParentLayout(fields);
+				}catch (Exception e){
+					System.out.println(e);
+				}
+			}
+        	
+        });
+        payloadCT.setIncludeCopyParent(true);
+        
         payloadCT.buildDefTab("Payload", tabFolder);
         keysCT.redrawTable(true);
+        
        
         wOK = new Button(shell, SWT.PUSH);
         wOK.setText("OK");

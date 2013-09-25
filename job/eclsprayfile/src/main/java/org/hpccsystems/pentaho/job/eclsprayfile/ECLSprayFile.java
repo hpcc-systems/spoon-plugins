@@ -48,6 +48,8 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
     private String allowOverwrite = "True";
     private String groupName = "";
     
+    private String landingZoneIP = "";
+    
     private boolean isValid = true;
     
     //private RecordList recordList = new RecordList();
@@ -68,7 +70,15 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
         return outputField;
     }
 
-    public String getGroupName() {
+    public String getLandingZoneIP() {
+		return landingZoneIP;
+	}
+
+	public void setLandingZoneIP(String landingZoneIP) {
+		this.landingZoneIP = landingZoneIP;
+	}
+
+	public String getGroupName() {
 		return groupName;
 	}
 
@@ -148,6 +158,10 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
 
     @Override
     public Result execute(Result prevResult, int i) throws KettleException {
+    	Result result = modifyResults(prevResult);
+        if(result.isStopped()){
+        	return result;
+ 		}
         JobMeta jobMeta = super.parentJob.getJobMeta();
         String serverHost = "";
         String serverPort = "";
@@ -188,7 +202,7 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
 
         
         
-        Result result = prevResult;
+            
         
         Spray spray = new Spray();
         spray.setClusterName("mythor");
@@ -202,7 +216,7 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
         spray.setRecordSize(getFixedRecordSize());
         spray.setAllowOverWrite(getAllowOverwrite());
         spray.setGroupName(getGroupName());
-        
+        spray.setLandingZoneOverrideIP(getLandingZoneIP());
          
         //logBasic(spray.ecl());
         logBasic("{Spray Job} Execute = " + spray.ecl());
@@ -307,7 +321,10 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
             
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "groupName")) != null)
             	setGroupName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "groupName")));
-            
+           
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "landingZoneIP")) != null)
+            	setLandingZoneIP(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "landingZoneIP")));
+
           //  if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
            //     openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
 
@@ -334,7 +351,7 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
         retval += "		<logical_file_name><![CDATA[" + logicalFileName + "]]></logical_file_name>" + Const.CR;
         retval += "		<allowOverwrite><![CDATA[" + allowOverwrite + "]]></allowOverwrite>" + Const.CR;
         retval += "		<groupName><![CDATA[" + groupName + "]]></groupName>" + Const.CR;
-        
+        retval += "		<landingZoneIP><![CDATA[" + landingZoneIP + "]]></landingZoneIP>" + Const.CR;
        // retval += "		<recordList>" + this.saveRecordList() + "</recordList>" + Const.CR;
         return retval;
 
@@ -367,6 +384,8 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
             if(rep.getStepAttributeString(id_jobentry, "groupName") != null)
             	groupName = rep.getStepAttributeString(id_jobentry, "groupName"); //$NON-NLS-1$
             
+            if(rep.getStepAttributeString(id_jobentry, "landingZoneIP") != null)
+            	landingZoneIP = rep.getStepAttributeString(id_jobentry, "landingZoneIP"); //$NON-NLS-1$
           //  if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
           //      this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
             
@@ -388,18 +407,23 @@ public class ECLSprayFile extends ECLJobEntry{//extends JobEntryBase implements 
             rep.saveStepAttribute(id_job, getObjectId(), "logicalFileName", logicalFileName); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "allowOverwrite", allowOverwrite); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "groupName", groupName); //$NON-NLS-1$
-            
+           
+            rep.saveStepAttribute(id_job, getObjectId(), "landingZoneIP",landingZoneIP);
           //  rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);
         }
     }
 
+    
     public boolean evaluates() {
-        return isValid;
+        //return isValid;
+    	//boolean isValid = true;
+    	if(validMap.containsKey(this.getName())){
+    		isValid = validMap.get(this.getName());
+    	}
+    	return isValid;
     }
 
-    public boolean isUnconditional() {
-        return false;
-    }
+    
 }

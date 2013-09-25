@@ -150,7 +150,7 @@ public class ECLDeSprayDialog extends ECLJobEntryDialog{//extends JobEntryDialog
         //logicalName = buildText("Logical Name", recordset, lsMod, middle, margin, desprayGroup);
         logicalName = buildText("Logical Name", null, lsMod, middle, margin, desprayGroup);
         destinationIP = buildText("Destination IP", logicalName, lsMod, middle, margin, desprayGroup);
-        destinationPath = buildText("Destination Path", destinationIP, lsMod, middle, margin, desprayGroup);
+        destinationPath = buildText("Destination Path/filename", destinationIP, lsMod, middle, margin, desprayGroup);
         //optional fields
         timeout = buildText("Timeout", destinationPath, lsMod, middle, margin, desprayGroup);
         espserverISPport = buildText("ESP Server ISP Port", timeout, lsMod, middle, margin, desprayGroup);

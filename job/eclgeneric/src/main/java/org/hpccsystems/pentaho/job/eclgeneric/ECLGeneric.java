@@ -60,9 +60,10 @@ public class ECLGeneric extends ECLJobEntry{//extends JobEntryBase implements Cl
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-        Result result = prevResult;
-        
-
+    	Result result = modifyResults(prevResult);
+    	if(result.isStopped()){
+        	return result;
+ 		}
 
         
         RowMetaAndData data = new RowMetaAndData();
@@ -145,11 +146,5 @@ public class ECLGeneric extends ECLJobEntry{//extends JobEntryBase implements Cl
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
 
-    public boolean isUnconditional() {
-        return true;
-    }
 }

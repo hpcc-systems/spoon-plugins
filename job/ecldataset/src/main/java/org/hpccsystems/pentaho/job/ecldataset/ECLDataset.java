@@ -36,7 +36,7 @@ import org.hpccsystems.ecljobentrybase.*;
  * @author ChambersJ
  */
 public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cloneable, JobEntryInterface {
-    
+  
     private String logicalFileName = "";
     private String datasetName = "";
     private String recordName = "";
@@ -177,12 +177,17 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
       */                      
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
+    	Result result = modifyResults(prevResult);
+        if(result.isStopped()){
+        	return result;
+ 		}
+         System.out.println("Execute K value: " + k);
     	System.out.println("Dataset Execute Start");
+    
     	JobMeta jobMeta = super.parentJob.getJobMeta();
         List<JobEntryCopy> jobs = jobMeta.getJobCopies();
         AutoPopulate ap = new AutoPopulate();
-        Result result = prevResult;
-        
+       
         Dataset dataset = new Dataset();
         dataset.setLogicalFileName(getLogicalFileName());
         dataset.setName(getDatasetName());
@@ -196,32 +201,7 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         }catch(Exception e){
         	
         }
-        /*TODO: you need to detect is salt and project spoonClusterID
-         * moved the spoonClusterID and spoonRecordID to be added in a project in the related plugin ecl code generation
-         * 
-        if(isSaltHygiene){//need to check to see if saltHygine is enabled if so trigger this.
-        	 logBasic("{Dataset Job} ADD HYGINE SETTINGS");
-        	RecordBO saltID = new RecordBO();
-        	saltID.setColumnName("spoonClusterID");
-        	saltID.setColumnType("UNSIGNED6");
-        	RecordBO saltSRC = new RecordBO();
-        	//saltSRC.setColumnName("SRC");
-        	//saltSRC.setColumnType("STRING");
-        	//saltSRC.setDefaultValue("SPOON_");
-        	this.recordList.addRecordBO(saltID);
-        	//this.recordList.addRecordBO(saltSRC);
-        }
-        
-        if(isSaltSpecificity){//need to check to see if saltHygine is enabled if so trigger this.
-       	 	logBasic("{Dataset Job} ADD Specificity SETTINGS");
-	       	RecordBO saltID = new RecordBO();
-	       	saltID.setColumnName("spoonClusterID");
-	       	saltID.setColumnType("INTEGER");
-	       	RecordBO saltSRC = new RecordBO();
-	       	this.recordList.addRecordBO(saltID);
-
-       }
-       */
+       
         dataset.setRecordFormatString(resultListToString(this.recordList));
         dataset.setRecordName(getRecordName());
         dataset.setFileType(getFileType());
@@ -244,14 +224,16 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         logBasic("{Dataset Job} Previous =" + result.getLogText());
         
         result.setResult(true);
-        
+        System.out.println("dataset adding ecl to row");
         RowMetaAndData data = new RowMetaAndData();
         data.addValue("ecl", Value.VALUE_TYPE_STRING, dataset.ecl());
         
         
         List list = result.getRows();
         list.add(data);
-        String eclCode = parseEclFromRowData(list);
+        result.setRows(list);
+        System.out.println("dataset end adding ecl to row");
+        //String eclCode = parseEclFromRowData(list);
         /*
         String eclCode = "";
         if (list == null) {
@@ -268,7 +250,7 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
             logBasic("{Dataset Job} ECL Code =" + eclCode);
         }
         */
-        result.setRows(list);
+        
         result.setLogText("ECLDataset executed, ECL code added");
         
         
@@ -462,13 +444,7 @@ public class ECLDataset extends ECLJobEntry{//extends JobEntryBase implements Cl
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
-
-    public boolean isUnconditional() {
-        return true;
-    }
+  
     
     public ArrayList<String[]> parseFileHeader(String serverHost, int serverPort, String user,String pass, String fileName){
     	

@@ -73,8 +73,10 @@ public class SALTSpecificity extends ECLJobEntry{//extends JobEntryBase implemen
 	@Override
     public Result execute(Result prevResult, int k) throws KettleException {
         
-        Result result = prevResult;
-        
+		Result result = modifyResults(prevResult);
+		if(result.isStopped()){
+        	return result;
+ 		}
         AutoPopulate ap = new AutoPopulate();
         String jobNameNoSpace = "";
         JobMeta jobMeta = super.parentJob.getJobMeta();
@@ -194,11 +196,5 @@ public class SALTSpecificity extends ECLJobEntry{//extends JobEntryBase implemen
         }
     }
 
-    public boolean evaluates() {
-        return true;
-    }
 
-    public boolean isUnconditional() {
-        return true;
-    }
 }
