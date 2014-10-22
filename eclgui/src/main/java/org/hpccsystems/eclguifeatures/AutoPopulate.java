@@ -385,6 +385,30 @@ public class AutoPopulate {
         }
     }
     
+    
+    public void getRecordLayoutFromNode(Node node, ArrayList<String> adDS, String datasetName,List<JobEntryCopy> jobs, String recField) throws KettleXMLException{
+    	//ok we need to loop through fields and identify the one that is recordList and populate adDS
+    	String columns = XMLHandler.getNodeValue(
+                XMLHandler.getSubNode(node, recField));
+
+    	String[] colArr = columns.split("[|]");
+    	 int len = colArr.length;
+    	 if(len>0){
+    		 buildRecordList(columns);
+    		// System.out.println("Len: " + len);
+             for(int i =0; i<len; i++){
+            	 //get just the name
+            	 String[] fieldArr = colArr[i].split("[,]");
+            	 if(fieldArr.length>1){
+            		 //System.out.println(fieldArr[0]);
+            		 adDS.add(fieldArr[0]);
+            	 }
+            	 
+             }
+    	 }
+    }
+    
+    
     public void getRecordListFromECLDataset(Node node, ArrayList<String> adDS, String datasetName,List<JobEntryCopy> jobs) throws KettleXMLException{
     	//ok we need to loop through fields and identify the one that is recordList and populate adDS
     	String columns = XMLHandler.getNodeValue(
@@ -451,7 +475,10 @@ public class AutoPopulate {
         }else if(type != null && type.equalsIgnoreCase("ECLSort")){
         	fieldsByParent("ECLSort","dataset_name", adDS,datasetName,jobs);
         }else if(type != null && type.equalsIgnoreCase("ECLProject")){
-        	fieldsByParent("ECLProject","inRecordName", adDS,datasetName,jobs);
+        	if(node != null){
+        		//System.out.println("We have Node");
+        		getRecordLayoutFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
         }else if(type != null && type.equalsIgnoreCase("ECLDistribute")){
         	fieldsByParent("ECLDistribute","dataset_name", adDS,datasetName,jobs);
         }else if(type != null && type.equalsIgnoreCase("ECLMerge")){
