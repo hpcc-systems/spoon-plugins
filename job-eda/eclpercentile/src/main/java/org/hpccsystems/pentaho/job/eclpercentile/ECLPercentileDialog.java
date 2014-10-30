@@ -59,6 +59,7 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
 import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
+import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.recordlayout.RecordLabels;
 import org.hpccsystems.recordlayout.RecordList;
 import org.hpccsystems.ecljobentrybase.*;
@@ -77,16 +78,16 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
 	private String normlist = "";
     private ECLPercentile jobEntry;
     private Text jobEntryName;
-    private String outTables[] = null;
+    //private String outTables[] = null;
     private Combo datasetName;
-    private Combo outputType;
+    private Text outName;
     public Button chkBox;
     public static Text outputName;
     public static Label label;
     private String persist;
     private Composite composite; 
     private String defJobName;
-	
+    private RecordList recordList;
 	ArrayList<String> Fieldfilter = new ArrayList<String>();
     java.util.List fields;
    
@@ -191,13 +192,13 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
         FormData fieldsGroupFormat = new FormData();
         fieldsGroupFormat.top = new FormAttachment(generalGroup, margin);
         fieldsGroupFormat.width = 400;
-        fieldsGroupFormat.height = 70;
+        fieldsGroupFormat.height = 90;
         fieldsGroupFormat.left = new FormAttachment(middle, 0);
         fieldsGroupFormat.right = new FormAttachment(100, 0);
         fieldsGroup.setLayoutData(fieldsGroupFormat);
 
         datasetName = buildCombo("Dataset Name :", jobEntryName, lsMod, middle, margin, fieldsGroup, datasets);
-        
+        outName = buildText("Output Name :", datasetName, lsMod, middle, margin, fieldsGroup);
         //Begin
         
         Group perGroup = new Group(compForGrp, SWT.SHADOW_NONE);
@@ -486,10 +487,14 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
 				RecordList rec = null;
           try{
       		
-              //String[] items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
-              rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+              String[] items = ap.fieldsRecByDataset( datasetName.getText(),jobMeta.getJobCopies());
+              //rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+              rec = ap.buildMyRecordList(items);
               
-              for(int i = 0; i < rec.getRecords().size(); i++){
+              
+              
+              for(int i = 0; i < rec.getRecords().size(); i++){            	              	 
+            	  
                   TreeItem item = new TreeItem(tab, SWT.NONE);
                   item.setText(0, rec.getRecords().get(i).getColumnName().toLowerCase());
                   String type = "String";
@@ -506,7 +511,8 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
                   }
                   
                   field.add(new String[]{rec.getRecords().get(i).getColumnName().toLowerCase(),"false",type+width});
-            }
+              }
+              
               
               
           }catch (Exception ex){
@@ -666,14 +672,33 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
         Listener okListener = new Listener() {
 
             public void handleEvent(Event e) {
-            	outTables = new String[table.getItemCount()];
+            	recordList = new RecordList();
+            	RecordBO bucket = new RecordBO();
+                bucket.setColumnName("Field");
+                bucket.setColumnType("STRING"); 
+                bucket.setDefaultValue("");
+                recordList.addRecordBO(bucket);
+                
+                bucket = new RecordBO();
+                bucket.setColumnName("Percentiles");
+                bucket.setColumnType("REAL");
+                bucket.setDefaultValue("0");
+                recordList.addRecordBO(bucket);
+                
+                bucket = new RecordBO();
+                bucket.setColumnName("Value");
+                bucket.setColumnType("REAL");
+                bucket.setDefaultValue("0");
+                recordList.addRecordBO(bucket);
+            	
+            	//outTables = new String[table.getItemCount()];
             	normlist = new String();
             	for(int i = 0; i<table.getItemCount(); i++){
             		if(i == table.getItemCount()-1)
             			normlist += table.getItem(i).getText()+"-"+table.getItem(i).getText(1);
             		else
             			normlist += table.getItem(i).getText()+"-"+table.getItem(i).getText(1)+"#";
-            		outTables[i] = table.getItem(i).getText()+"_"+jobEntryName.getText();
+            		//outTables[i] = table.getItem(i).getText()+"_"+jobEntryName.getText();
             	}
                 ok();
             }
@@ -706,7 +731,12 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
         if (jobEntry.getDatasetName() != null) {
             datasetName.setText(jobEntry.getDatasetName());
         }
-        
+        if (jobEntry.getOutName() != null) {
+            outName.setText(jobEntry.getOutName());
+        }
+        if (jobEntry.getRecordList() != null) {
+        	recordList = jobEntry.getRecordList();
+        }
         //if(jobEntry.getoutTables() != null){
         	//outTables = jobEntry.getoutTables();
         //}
@@ -776,6 +806,10 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
    			isValid = false;
        		errors += "You need to select at least one field\r\n";
    		}
+   		if(this.outName.getText().equals("")){
+   			isValid = false;
+       		errors += "You need to enter Output Dataset Name\r\n";
+   		}
    		
     	if(!isValid){
     		ErrorNotices en = new ErrorNotices();
@@ -797,7 +831,9 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
         jobEntry.setDatasetName(this.datasetName.getText());
         jobEntry.setnormList(this.normlist);
         jobEntry.setFields(fields);
-        jobEntry.setoutTables(outTables);
+//      jobEntry.setoutTables(outTables);
+        jobEntry.setOutName(outName.getText());
+        jobEntry.setRecordList(recordList);
        
         if(chkBox.getSelection() && outputName != null){
         	jobEntry.setOutputName(outputName.getText());

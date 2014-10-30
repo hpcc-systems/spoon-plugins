@@ -117,7 +117,7 @@ public class ECLRegression extends ECLJobEntry{//extends JobEntryBase implements
         	frequency += "Beta := Reg.Betas;\n";
         	frequency += "BetaRec := RECORD\n	STRING Independant;\n	REAL Beta_Values;\nEND;\n";
         	frequency += "SET OF STRING depends := ['intercept',"+indep+"];\n";
-        	frequency += "BetaRec Trans1(Beta L, INTEGER C) := TRANSFORM\n	SELF.independant := depends[L.number+1];\n	SELF.Beta_Values := L.Value;\nEND;\n";
+        	frequency += "BetaRec Trans1(Beta L, INTEGER C) := TRANSFORM\n	SELF.independant := depends[IF(L.number=0,1,L.number)];\n	SELF.Beta_Values := L.Value;\nEND;\n";
         	frequency += "Beta_fields := PROJECT(Beta,Trans1(LEFT,COUNTER));\n";
         	frequency += "OUTPUT(Beta_fields,NAMED('Betas'));\n";
         	

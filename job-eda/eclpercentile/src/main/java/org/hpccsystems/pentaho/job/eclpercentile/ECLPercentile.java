@@ -21,6 +21,8 @@ import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.ecljobentrybase.*;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 
 
 /**
@@ -32,14 +34,32 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
 	private String Name = "";
 	private String DatasetName = "";
 	private String normList = "";
-	private String outTables[] = null;
+	//private String outTables[] = null;
 	//private ArrayList<String[]> percentileSettings = new ArrayList<String[]>();
 	private java.util.List fields = new ArrayList();
 	private String label ="";
 	private String outputName ="";
 	private String persist = "";
 	private String defJobName = "";
+	private String OutName = "";
+	private RecordList recordList = new RecordList();
 	
+	public RecordList getRecordList() {
+		return recordList;
+	}
+
+	public void setRecordList(RecordList recordList) {
+		this.recordList = recordList;
+	}
+		
+	public String getOutName() {
+		return OutName;
+	}
+
+	public void setOutName(String outName) {
+		OutName = outName;
+	}
+
 	public String getDefJobName() {
 		return defJobName;
 	}
@@ -80,14 +100,14 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
 		return fields;
 	}
 	
-	public void setoutTables(String[] outTables){
+/*	public void setoutTables(String[] outTables){
 		this.outTables = outTables;
 	}
 	
 	public String[] getoutTables(){
 		return outTables;
 	}
-	
+*/	
 	public String getName(){
 		return Name;
 	}
@@ -212,9 +232,20 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
 						  "SELF := L;\n"+
 						  "END;\n";
 	        percentile += "percentileTab := ROLLUP(MyTable, LEFT.percentiles = RIGHT.percentiles AND LEFT.field=RIGHT.field, RollThem(LEFT,RIGHT));\n";
-	        for(int i = 0, j=norm.length; i<norm.length; i++,j++){
+	        percentile += getOutName()+":=TABLE(percentileTab,{field,percentiles,value});\n";
+	        if(persist.equalsIgnoreCase("true")){
+        		if(outputName != null && !(outputName.trim().equals(""))){
+        			percentile += "OUTPUT("+getOutName()+",,'~eda::"+outputName+"::percentile', __compressed__, overwrite,NAMED('Percentile'))"+";\n";
+        		}else{
+        			percentile += "OUTPUT("+getOutName()+",,'~eda::"+defJobName+"::percentile', __compressed__, overwrite,NAMED('Percentile'))"+";\n";
+        		}
+        	}
+        	else{
+        		percentile += "OUTPUT("+getOutName()+",NAMED('Percentile'));\n";
+        	}
+	        /*for(int i = 0, j=norm.length; i<norm.length; i++,j++){
 	        	String[] S = norm[i].split("-");
-	        	percentile += S[0]+"_"+getName()+":=TABLE(percentileTab(field='"+S[0]+"'),{field,percentiles,value});\n";
+	        	percentile += S[0]+"_"+getName()+":=TABLE(percentileTab(field='"+S[0]+"'),{field,percentiles,value});\n";	        	
 	        	if(persist.equalsIgnoreCase("true")){
 	        		if(outputName != null && !(outputName.trim().equals(""))){
 	        			percentile += "OUTPUT("+S[0]+"_"+getName()+",,'~eda::"+outputName+S[0]+"::percentile', __compressed__, overwrite,NAMED('Percentile_"+S[0]+"'))"+";\n";
@@ -226,7 +257,7 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
 	        		percentile += "OUTPUT("+S[0]+"_"+getName()+",NAMED('Percentile_"+S[0]+"'));\n";
 	        	}
 	        	//percentile += "OUTPUT("+S[0]+"_"+getName()+",THOR);\n";
-	        }
+	        }*/
         	
 	        RowMetaAndData data = new RowMetaAndData();
 	        data.addValue("ecl", Value.VALUE_TYPE_STRING, percentile);
@@ -275,8 +306,37 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
         }
     }
 
+    public String saveRecordList(){
+        String out = "";
+        ArrayList list = recordList.getRecords();
+        Iterator<RecordBO> itr = list.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
+    }
     
-    public String saveOutTables(){
+    public void openRecordList(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            recordList = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList.addRecordBO(rb);
+            }
+        }
+    }
+/*    public String saveOutTables(){
     	String out = "";int i = 0;    	
     	boolean isFirst = true;
     	if(outTables!=null){
@@ -290,7 +350,7 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
     	}
     	return out;
     }
-
+*/
 /*    public void openOutTables(String in){
     	String[] strLine = in.split("[|]");
     	int len = strLine.length;
@@ -337,13 +397,18 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")) != null)
                 setDefJobName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")));
             
-            String[] S = normList.split("#");
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "OutName")) != null)
+                setOutName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "OutName")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
+                openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
+
+/*            String[] S = normList.split("#");
         	this.outTables = new String[S.length];        	
         	for(int i = 0; i<S.length; i++){
         		String[] s = S[i].split("-");
         		this.outTables[i] = s[0]+"_"+getName();
         	}
-            
+*/            
         } catch (Exception e) {
             throw new KettleXMLException("ECL Dataset Job Plugin Unable to read step info from XML node", e);
         }
@@ -359,13 +424,15 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
         retval += "		<normList><![CDATA[" + this.getnormList() + "]]></normList>" + Const.CR;
         retval += "		<dataset_name><![CDATA[" + DatasetName + "]]></dataset_name>" + Const.CR;
         //retval += "		<percentileSettings><![CDATA[" + this.savePercentile() + "]]></percentileSettings>" + Const.CR;
-        for(int i = 0; i<saveOutTables().split("[|]").length; i++){
+/*        for(int i = 0; i<saveOutTables().split("[|]").length; i++){
         	retval += "		<outTables eclIsGraphable=\"true\"><![CDATA[" + saveOutTables().split("[|]")[i] + "]]></outTables>" + Const.CR;
         }
-        retval += "		<label><![CDATA[" + label + "]]></label>" + Const.CR;
+*/        retval += "		<label><![CDATA[" + label + "]]></label>" + Const.CR;
         retval += "		<output_name><![CDATA[" + outputName + "]]></output_name>" + Const.CR;
         retval += "		<persist_Output_Checked><![CDATA[" + persist + "]]></persist_Output_Checked>" + Const.CR;
         retval += "		<defJobName><![CDATA[" + defJobName + "]]></defJobName>" + Const.CR;
+        retval += "		<OutName eclIsDef=\"true\" eclType=\"dataset\"><![CDATA[" + OutName + "]]></OutName>" + Const.CR;
+        retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
         return retval;
 
     }
@@ -401,6 +468,11 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
             
             if(rep.getStepAttributeString(id_jobentry, "defJobName") != null)
             	defJobName = rep.getStepAttributeString(id_jobentry, "defJobName"); //$NON-NLS-1$
+            
+            if(rep.getStepAttributeString(id_jobentry, "OutName") != null)
+            	OutName = rep.getStepAttributeString(id_jobentry, "OutName"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
+                this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
 
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -418,12 +490,14 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
         	//rep.saveStepAttribute(id_job, getObjectId(), "percentileSettings", this.savePercentile()); //$NON-NLS-1$
         	
         	rep.saveStepAttribute(id_job, getObjectId(), "fields", this.saveFields()); //$NON-NLS-1$
-        	for(int i = 0; i<saveOutTables().split("[|]").length; i++)
+/*        	for(int i = 0; i<saveOutTables().split("[|]").length; i++)
         		rep.saveStepAttribute(id_job, getObjectId(), "outTables", this.saveOutTables().split("[|]")[i]); //$NON-NLS-1$
-        	rep.saveStepAttribute(id_job, getObjectId(), "outputName", outputName);
+*/        	rep.saveStepAttribute(id_job, getObjectId(), "outputName", outputName);
         	rep.saveStepAttribute(id_job, getObjectId(), "label", label);
         	rep.saveStepAttribute(id_job, getObjectId(), "persist_Output_Checked", persist);
         	rep.saveStepAttribute(id_job, getObjectId(), "defJobName", defJobName);
+        	rep.saveStepAttribute(id_job, getObjectId(), "OutName", OutName);
+        	rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
         	
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);

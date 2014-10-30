@@ -74,6 +74,20 @@ public class RecordList {
 			iterator.next().addRecord(record);
 		}
 	}
+	
+	//Add a new Record to the existing list
+	public void addRecord(int index, RecordBO record) {
+		//RecordBO record = new RecordBO();
+		if(index >= 0){
+			arlRecords.add(index, record);
+		} else {
+			arlRecords.add(arlRecords.size(), record);
+		}
+		Iterator<IRecordListViewer> iterator = changeListeners.iterator();
+		while (iterator.hasNext()){
+			iterator.next().addRecord(record);
+		}
+	}
 
 	public void removeRecord(int index) {
 		arlRecords.remove(index);

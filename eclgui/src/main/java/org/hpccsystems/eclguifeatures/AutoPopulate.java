@@ -31,6 +31,8 @@ public class AutoPopulate {
     private int nodeIndex;
     private String[] recordSets;
     private Node datasetNode = null;//used internally to store the node in the load record list functions
+    public String mytype;
+    public String edatype;
     
     private RecordList datasetFields = new RecordList();
 
@@ -270,9 +272,22 @@ public class AutoPopulate {
         datasets = adDS.toArray(new String[adDS.size()]);
         return datasets;
     }
-    
-   
-    
+
+    /*
+     * Gets the Dataset fields from all existing nodes
+     * this function uses fieldsByDatasetList to build a List<String>
+     * then it converts that to a String[] for use in the dialog classes
+     * 
+     */
+    public String[] fieldsRecByDataset(String datasetName,List<JobEntryCopy> jobs)throws Exception{
+        //System.out.println("***fieldsByDataset***");
+        String datasets[] = new String[1];
+        ArrayList<String> adDS = new ArrayList<String>();
+        this.fieldsRecByDatasetList(adDS, datasetName,jobs);
+        datasets = adDS.toArray(new String[adDS.size()]);
+        return datasets;
+    }
+
     public String getType(List<JobEntryCopy> jobs, String datasetValue) throws KettleXMLException{
     	String type = "";
     	String attributeName = "eclIsDef";
@@ -281,7 +296,7 @@ public class AutoPopulate {
     	//find the dataset declaration from the value in the select
     	
     	
-    	 //System.out.println(" ------------ parseDataSet ------------- ");
+    	//System.out.println(" ------------ parseDataSet ------------- ");
         String datasets[] = null;
         ArrayList<String> adDS = new ArrayList<String>();
       
@@ -385,6 +400,57 @@ public class AutoPopulate {
         }
     }
     
+    // for the eda plugins
+    public RecordList buildMyRecordList(String[] in){
+    	RecordList Fields = new RecordList();
+    	for(int i = 0; i<in.length; i++){	        	                
+	        RecordBO rb = new RecordBO(in[i]);
+	        Fields.addRecordBO(rb);	        	        
+    	}
+        return Fields;
+    }
+    
+    
+    public void getRecordLayoutFromNode(Node node, ArrayList<String> adDS, String datasetName,List<JobEntryCopy> jobs, String recField) throws KettleXMLException{
+    	//ok we need to loop through fields and identify the one that is recordList and populate adDS
+    	String columns = XMLHandler.getNodeValue(
+                XMLHandler.getSubNode(node, recField));
+
+    	String[] colArr = columns.split("[|]");
+    	 int len = colArr.length;
+    	 if(len>0){
+    		 buildRecordList(columns);
+    		// System.out.println("Len: " + len);
+             for(int i =0; i<len; i++){
+            	 //get just the name
+            	 String[] fieldArr = colArr[i].split("[,]");
+            	 if(fieldArr.length>1){
+            		 //System.out.println(fieldArr[0]);
+            		 adDS.add(fieldArr[0]);
+            	 }
+            	 
+             }
+    	 }
+    }
+    
+    public void getRecordListFromNode(Node node, ArrayList<String> adDS, String datasetName,List<JobEntryCopy> jobs, String recField) throws KettleXMLException{
+    	//ok we need to loop through fields and identify the one that is recordList and populate adDS
+    	String columns = XMLHandler.getNodeValue(
+                XMLHandler.getSubNode(node, recField));
+
+    	String[] colArr = columns.split("[|]");
+    	 int len = colArr.length;
+    	 if(len>0){
+    		 buildRecordList(columns);
+    		// System.out.println("Len: " + len);
+             for(int i =0; i<len; i++){
+            	 //get just the name
+            	 adDS.add(colArr[i]);            	             	 
+             }
+    	 }
+    }
+
+    
     public void getRecordListFromECLDataset(Node node, ArrayList<String> adDS, String datasetName,List<JobEntryCopy> jobs) throws KettleXMLException{
     	//ok we need to loop through fields and identify the one that is recordList and populate adDS
     	String columns = XMLHandler.getNodeValue(
@@ -451,7 +517,25 @@ public class AutoPopulate {
         }else if(type != null && type.equalsIgnoreCase("ECLSort")){
         	fieldsByParent("ECLSort","dataset_name", adDS,datasetName,jobs);
         }else if(type != null && type.equalsIgnoreCase("ECLProject")){
-        	fieldsByParent("ECLProject","inRecordName", adDS,datasetName,jobs);
+        	if(node != null){
+        		//System.out.println("We have Node");
+        		getRecordLayoutFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}        	        	
+        }else if(type != null && type.equalsIgnoreCase("ECLPercentileBuckets")){
+        	if(node != null){
+        		//System.out.println("We have Node");
+        		getRecordLayoutFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
+        }else if(type != null && type.equalsIgnoreCase("ECLPercentileBuckets")){
+        	if(node != null){
+        		//System.out.println("We have Node");
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
+        }else if(type != null && type.equalsIgnoreCase("ECLPercentile")){
+        	if(node != null){
+        		//System.out.println("We have Node");
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
         }else if(type != null && type.equalsIgnoreCase("ECLDistribute")){
         	fieldsByParent("ECLDistribute","dataset_name", adDS,datasetName,jobs);
         }else if(type != null && type.equalsIgnoreCase("ECLMerge")){
@@ -481,6 +565,51 @@ public class AutoPopulate {
         }
        
     }
+
+    /*
+     * Gets the EDA Dataset fields from all existing nodes
+     * This uses recursion to travel up from joins etc to the 
+     * def of the datasets
+     */
+    public void fieldsRecByDatasetList(ArrayList<String> adDS, String datasetName,List<JobEntryCopy> jobs)throws Exception{
+        //System.out.println(" ------------ fieldsByDatasetList ------------ ");
+        Object[] jec = jobs.toArray();
+        Node node = null;
+        
+        edatype = getType(jobs, datasetName);
+        //datasetNode is set in getType
+        node = datasetNode;
+        //place any outliers above the else will catch all that has a single parent with filed name recordset
+        if(edatype != null && edatype.equalsIgnoreCase("ECLProject")){
+        	if(node != null){
+        		//System.out.println("We have Node");
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}        	        	
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLPercentileBuckets")){
+        	if(node != null){
+        		//System.out.println("We have Node");
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLPercentile")){
+        	if(node != null){
+        		//System.out.println("We have Node");
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLAggregate")){
+        	if(node != null){
+        		//System.out.println("We have Node");
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLDataset")){
+        	if(node != null){
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
+        }else if(edatype != null && !edatype.equals("")){
+        	fieldsByParent(edatype,"recordset", adDS,datasetName,jobs);
+        }
+       
+    }
+
     
     public String getRecordListFromField(Node node, ArrayList<String> adDS, String datasetName,List<JobEntryCopy> jobs) throws KettleXMLException{
     	//use Layout Record -- fromType
@@ -961,43 +1090,46 @@ public class AutoPopulate {
         Object[] jec = jobs.toArray();
         Node node = null;
         RecordList recordList = null;
-        String type = getType(jobs, datasetName);
+        mytype = getType(jobs, datasetName);
         //datasetNode is set in getType
         node = datasetNode;
         //String parent = null;
 		ArrayList<String> parents = new ArrayList<String>();
-		System.out.println("TYPE: " + type);
-		if(type != null && type.equalsIgnoreCase("ECLCount")){
+		System.out.println("TYPE: " + mytype);
+		if(mytype != null && mytype.equalsIgnoreCase("ECLCount")){
 		parents.add(datasetParentName("recordset"));
-        }else if(type != null && type.equalsIgnoreCase("ECLJoin")){
+        }else if(mytype != null && mytype.equalsIgnoreCase("ECLJoin")){
          parents.add(datasetParentName("right_recordset"));
          parents.add(datasetParentName("left_recordset"));
          //System.out.println("xxx " + parent);
-        }else if(type != null && type.equalsIgnoreCase("ECLSort")){
+        }else if(mytype != null && mytype.equalsIgnoreCase("ECLSort")){
          parents.add(datasetParentName("dataset_name"));
         
-        }else if(type != null && type.equalsIgnoreCase("ECLProject")){
+        }else if(mytype != null && mytype.equalsIgnoreCase("ECLProject")){
          parents.add(datasetParentName("inRecordName"));
         
-        }else if(type != null && type.equalsIgnoreCase("ECLDistribute")){
+        }else if(mytype != null && mytype.equalsIgnoreCase("ECLDistribute")){
          parents.add(datasetParentName("dataset_name"));
 
-        }else if(type != null && type.equalsIgnoreCase("ECLMerge")){
+        }else if(mytype != null && mytype.equalsIgnoreCase("ECLPercentileBuckets")){
+            parents.add(datasetParentName("OutName")); // need to something like dataset just below over here
+            
+        }else if(mytype != null && mytype.equalsIgnoreCase("ECLMerge")){
          parents.add(datasetParentName("recordsetSet"));
         
         }
-        else if(type != null && type.equalsIgnoreCase("ECLFilter")){
+        else if(mytype != null && mytype.equalsIgnoreCase("ECLFilter")){
          parents.add(datasetParentName("inRecordName"));
-        }else if(type != null && type.equalsIgnoreCase("ECLML_FromField")){
+        }else if(mytype != null && mytype.equalsIgnoreCase("ECLML_FromField")){
         
          if(node != null){
          parents.add(datasetParentName("inDS"));
          }
         
         
-        }else if(type != null && type.equalsIgnoreCase("ECLDataset")){
+        }else if(mytype != null && mytype.equalsIgnoreCase("ECLDataset")){
         	if(node != null){
-				System.out.println("Type: " + type);
+				System.out.println("Type: " + mytype);
 				recordList = fetchFieldsRecordListByDataset(node);
 				ArrayList<RecordBO> recArrList =recordList.getRecords();
 				int k = recArrList.size();
@@ -1006,15 +1138,15 @@ public class AutoPopulate {
 				System.out.println("Added : " + recArrList.get(i).getColumnName());
 			}
            }
-        }else if(type != null && !type.equals("")){
+        }else if(mytype != null && !mytype.equals("")){
         	//System.out.println("PARENT: " + parent);
         	parents.add(datasetParentName("recordset"));
         }
 
-		if(parents != null && parents.size()>0 && type != null && !type.equalsIgnoreCase("ECLDataset") && count < 9999){
+		if(parents != null && parents.size()>0 && mytype != null && !mytype.equalsIgnoreCase("ECLDataset") && count < 9999){
 			//recursive call
 			for(int q = 0; q<parents.size(); q++){
-				System.out.println("RecursiveCall for " + parents.get(q) + " of type " + type);
+				System.out.println("RecursiveCall for " + parents.get(q) + " of type " + mytype);
 				rawFieldsByDatasetRecursive(parents.get(q),jobs,fieldList,++count);
 			}
 
