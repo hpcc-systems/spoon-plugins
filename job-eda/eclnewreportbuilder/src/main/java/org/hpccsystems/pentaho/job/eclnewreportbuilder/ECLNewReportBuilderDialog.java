@@ -101,10 +101,13 @@ public class ECLNewReportBuilderDialog extends ECLJobEntryDialog{//extends JobEn
     private ArrayList<String> Items;
     private ArrayList<String> Types;
     private Text ReportName;
+    private RecordList recordList;
     @SuppressWarnings("unused")
 	private SelectionAdapter lsDef;
    
-    
+    private Combo Rule;
+	private String outlierRules[] = null;
+	private String[] items;
     
     public ECLNewReportBuilderDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
         super(parent, jobEntryInt, rep, jobMeta);
@@ -120,6 +123,7 @@ public class ECLNewReportBuilderDialog extends ECLJobEntryDialog{//extends JobEn
         
         String datasets[] = null;
         String datasets1[] = null;
+        String outlRules[] = null;//contains outlier rules
                 
         AutoPopulate ap = new AutoPopulate();
         try{            
@@ -131,11 +135,21 @@ public class ECLNewReportBuilderDialog extends ECLJobEntryDialog{//extends JobEn
             datasets = new String[]{""};            
         }
 
+        try{
+        	outlRules = ap.parseOutlierRules(this.jobMeta.getJobCopies());
+        	//outlierRules = Arrays.asList(outlRules);
+        }catch (Exception e){
+            System.out.println("Error Parsing existing outlier rules");
+            System.out.println(e.toString());
+            outlRules = new String[]{""};
+        }
         
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
         Items = new ArrayList<String>();
         Types = new ArrayList<String>();
         people = new ArrayList();
+        items = null;
+        recordList = new RecordList();
         TabFolder tab = new TabFolder(shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
         FormData datatab = new FormData();
         
@@ -223,6 +237,17 @@ public class ECLNewReportBuilderDialog extends ECLJobEntryDialog{//extends JobEn
         datasetName = buildCombo("Original Dataset :", jobEntryName, lsMod, middle, margin, datasetGroup, C);     
         ReportName = buildText("Report Name :", datasetName, lsMod, middle, margin, datasetGroup);
         //datasetName1 = buildCombo("Derived Dataset :", datasetName, lsMod, middle, margin, datasetGroup, datasets1);
+        
+        String rul = "";
+		for(int i=0; i<outlRules.length; i++){
+			rul += "|";
+			rul += outlRules[i];
+		}
+		outlierRules = rul.split("\\|");
+		
+	        Rule = buildCombo("Rule:", ReportName, lsMod, middle, margin, datasetGroup, outlierRules );
+		    Rule.setItems(outlierRules);
+        
         item1.setControl(compForGrp);
         /**
          * Code Editor in new Tab starts
@@ -414,27 +439,35 @@ public class ECLNewReportBuilderDialog extends ECLJobEntryDialog{//extends JobEn
 			public void widgetSelected(SelectionEvent arg0) {
 				AutoPopulate ap = new AutoPopulate();
 		    	RecordList rec = null;
-		    	String[] items = null;
+		    	//String[] items = null;
 		    	String[] types = null;
 		    	if(!datasetName.getText().equals("")){ 
-		    		try{          			                  
+		    		/*try{          			                  
 		    			rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());	                  	                 
 		    		}catch (Exception ex){
 		    			System.out.println("failed to load record definitions");
 		    			System.out.println(ex.toString());
 		    			ex.printStackTrace();
-		    		}
+		    		}*/
 		    	}
 	              if(!datasetName.getText().equals("")){
+	            	  
+	                  //RecordList rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+	                  
+	                  
 	            	  try {
-						items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+	            		  items = ap.fieldsRecByDataset( datasetName.getText(),jobMeta.getJobCopies());
+						//items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
 					} catch (Exception e) {
 						
 						e.printStackTrace();
 					}
+	            	  rec = ap.buildMyRecordList(items);
+	                  
+	                  
 	            	  int i = 0;types = new String[items.length];
 	            	  for(Iterator<RecordBO> I = rec.getRecords().iterator();I.hasNext();){
-							RecordBO ob = (RecordBO) I.next();						
+							RecordBO ob = (RecordBO) I.next();							
 							types[i] = ob.getColumnType()+ob.getColumnWidth();
 							i++;
 							
@@ -448,7 +481,7 @@ public class ECLNewReportBuilderDialog extends ECLJobEntryDialog{//extends JobEn
 		            	  pouplateTable(tbl,items,types);
 		   				  for(int i = 0; i<items.length; i++){
 		   					  fields.add(rec.getRecords().get(i).getColumnName().toLowerCase());
-		   					  Items.add(rec.getRecords().get(i).getColumnName().toLowerCase());
+		   					  Items.add(items[i]);
 		   					  Types.add(types[i]);
 		   				  }			
 		              }
@@ -468,6 +501,23 @@ public class ECLNewReportBuilderDialog extends ECLJobEntryDialog{//extends JobEn
         Listener okListener = new Listener() {
 
             public void handleEvent(Event e) {
+            	recordList = new RecordList();
+            	AutoPopulate ap = new AutoPopulate();
+            	String[] items = new String[Items.size()];                
+                int i = 0;
+                for(Iterator<String> it = Items.iterator(); it.hasNext();){            
+                	items[i] = it.next();
+                	i++;
+                }
+            	recordList = ap.buildMyRecordList(items);
+            	for(Iterator<Person> it = people.iterator(); it.hasNext();){
+            		Person P = (Person) it.next();
+            		RecordBO ob = new RecordBO();
+            		ob.setColumnName(P.getVariableName());
+            		ob.setColumnType("REAL");
+            		ob.setDefaultValue("0");
+            		recordList.addRecordBO(ob);
+            	}
                 ok();
             }
         };
@@ -508,7 +558,15 @@ public class ECLNewReportBuilderDialog extends ECLJobEntryDialog{//extends JobEn
         	people = jobEntry.getPeople();
         	tv.setInput(people);
         }
+        
+        if(jobEntry.getRule() != null){
+        	Rule.setText(jobEntry.getRule());
+        }
                      
+        if (jobEntry.getRecordList() != null) {
+        	recordList = jobEntry.getRecordList();
+        }
+ 
         if (jobEntry.getItems() != null || jobEntry.getTypes() != null) {        	
             Items = jobEntry.getItems();
             Types = jobEntry.getTypes();
@@ -543,7 +601,8 @@ public class ECLNewReportBuilderDialog extends ECLJobEntryDialog{//extends JobEn
     	if(items.length>0){
 	    	for(int i = 0; i<items.length; i++){
 	    		TableItem it = new TableItem(tbl, SWT.NONE);
-	    		it.setText(0, items[i]);
+	    		String S = items[i].split(",")[0];
+	    		it.setText(0, S);
 	    		if(types.length > 0)
 	    			it.setText(1, types[i]);
 	    		else
@@ -594,6 +653,8 @@ public class ECLNewReportBuilderDialog extends ECLJobEntryDialog{//extends JobEn
         jobEntry.setTypes(Types);        
         jobEntry.setPeople(this.people);
         jobEntry.setReportname(ReportName.getText());
+        jobEntry.setRule(Rule.getText());
+        jobEntry.setRecordList(recordList);
         dispose();
     }
 

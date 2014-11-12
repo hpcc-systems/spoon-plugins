@@ -20,6 +20,8 @@ import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
 import org.hpccsystems.ecljobentrybase.*;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 
 
 /**
@@ -34,9 +36,25 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
     private java.util.List people = new ArrayList();
     private ArrayList<String> vars = new ArrayList<String>();
     private String reportname = "";
-    
-    
+	private String rule = "";	
+	private RecordList recordList = new RecordList();
+	
+	public RecordList getRecordList() {
+		return recordList;
+	}
 
+	public void setRecordList(RecordList recordList) {
+		this.recordList = recordList;
+	}
+
+	public String getRule() {
+		return rule;
+	}
+
+	public void setRule(String rule) {
+		this.rule = rule;
+	}
+    
 	public String getReportname() {
 		return reportname;
 	}
@@ -93,7 +111,8 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         	return result;
         }
         else{
-        	String report = getName()+"Rec := RECORD\n"+getDatasetName()+";\n";boolean flag = false;
+        	String report = "RepDS := "+getDatasetName()+"("+getRule()+");\n";
+        	report += getName().replaceAll("\\s", "")+"Rec := RECORD\nRepDS;\n";boolean flag = false;
         	for(Iterator it = people.iterator(); it.hasNext();){
         		Person P = (Person) it.next();
         		String varName = P.getVariableName().trim();
@@ -101,7 +120,7 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         		report += "	REAL8 "+varName+";\n";        		
         	}
         	report += "END;\n";
-        	report += getName()+"Rec "+getName()+"Trans("+getDatasetName()+" L, INTEGER C) := TRANSFORM\n";
+        	report += getName().replaceAll("\\s", "")+"Rec "+getName().replaceAll("\\s", "")+"Trans(RepDS L, INTEGER C) := TRANSFORM\n";
 
         	for(Iterator it = people.iterator(); it.hasNext();){
         		String S1 = "";String[] S = new String[]{};
@@ -121,14 +140,14 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         				{
         					if(s.contains("(") && s.contains(")")){
         						if(!s.toLowerCase().startsWith("count"))
-        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, getDatasetName()+","+getDatasetName()+".").toString()+"/";
+        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, "RepDS,RepDS.").toString()+"/";
         						else{
-        							S1 += "COUNT("+getDatasetName()+")/"; 
+        							S1 += "COUNT(RepDS)+"; 
         						}
         							
             				}
         					else
-        						S1 += "L."+s+"/";
+        						S1 += "L."+s+"+";
         				}
         				else
         					S1 += "SELF."+s+"+";
@@ -144,14 +163,14 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         				{
         					if(s.contains("(") && s.contains(")")){
         						if(!s.toLowerCase().startsWith("count"))
-        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, getDatasetName()+","+getDatasetName()+".").toString()+"/";
+        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, "RepDS,RepDS.").toString()+"/";
         						else{
-        							S1 += "COUNT("+getDatasetName()+")/"; 
+        							S1 += "COUNT(RepDS)-"; 
         						}
         							
             				}
         					else
-        						S1 += "L."+s+"/";
+        						S1 += "L."+s+"-";
         				}
         				else
         					S1 += "SELF."+s+"-";
@@ -166,14 +185,14 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         				if(!vars.contains(s.toLowerCase())){
         					if(s.contains("(") && s.contains(")")){
         						if(!s.toLowerCase().startsWith("count"))
-        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, getDatasetName()+","+getDatasetName()+".").toString()+"/";
+        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, "RepDs,RepDS.").toString()+"/";
         						else{
-        							S1 += "COUNT("+getDatasetName()+")/"; 
+        							S1 += "COUNT(RepDS)*"; 
         						}
         							
             				}
         					else
-        						S1 += "L."+s+"/";
+        						S1 += "L."+s+"*";
         				}
         					
         				else
@@ -189,9 +208,9 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         				if(!vars.contains(s.toLowerCase())){
         					if(s.contains("(") && s.contains(")")){
         						if(!s.toLowerCase().startsWith("count"))
-        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, getDatasetName()+","+getDatasetName()+".").toString()+"/";
+        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, "RepDS,RepDS.").toString()+"/";
         						else{
-        							S1 += "COUNT("+getDatasetName()+")/"; 
+        							S1 += "COUNT(RepDS)/"; 
         						}
         							
             				}
@@ -212,14 +231,14 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         				if(!vars.contains(s.toLowerCase())){
         					if(s.contains("(") && s.contains(")")){
         						if(!s.toLowerCase().startsWith("count"))
-        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, getDatasetName()+","+getDatasetName()+".").toString()+"/";
+        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, "RepDS,RepDS.").toString()+"/";
         						else{
-        							S1 += "COUNT("+getDatasetName()+")/"; 
+        							S1 += "COUNT(RepDS)%"; 
         						}
         							
             				}
         					else
-        						S1 += "L."+s+"/";
+        						S1 += "L."+s+"%";
         				}        					
         				else
         					S1 += "SELF."+s+"%";
@@ -234,9 +253,9 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         				if(!vars.contains(s.toLowerCase())){
         					if(s.contains("(") && s.contains(")")){
         						if(!s.toLowerCase().startsWith("count"))
-        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, getDatasetName()+","+getDatasetName()+".").toString()+"/";
+        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, "RepDS,RepDS.").toString()+"/";
         						else{
-        							S1 += "COUNT("+getDatasetName()+")/"; 
+        							S1 += "COUNT(RepDS)/"; 
         						}
         							
             				}
@@ -257,8 +276,8 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         	}
         	
         	report += "SELF := L;\nEND;\n";
-        	report += "My"+getName()+"DS := PROJECT("+getDatasetName()+","+getName()+"Trans(LEFT,COUNTER));\n";
-        	report += "OUTPUT(My"+getName()+"DS,NAMED('Report_"+reportname+"'));\n";
+        	report += reportname+" := PROJECT(RepDS,"+getName().replaceAll("\\s", "")+"Trans(LEFT,COUNTER));\n";
+        	report += "OUTPUT("+reportname+",NAMED('Report_"+reportname+"'));\n";
         	//report += "OUTPUT(My"+getName()+"DS,NAMED('Report2'));\n";
         	
         	logBasic("ReportBuilder =" + report);//{Dataset Job} 
@@ -362,6 +381,36 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         	}
         }
     }
+    public String saveRecordList(){
+        String out = "";
+        ArrayList list = recordList.getRecords();
+        Iterator<RecordBO> itr = list.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
+    }
+    
+    public void openRecordList(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            recordList = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList.addRecordBO(rb);
+            }
+        }
+    }
 
     @Override
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
@@ -378,6 +427,10 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
            		openTypes(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "types")));
            	if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "people")) != null)
                 openPeople(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "people")));
+           	if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "rule")) != null)
+                setRule(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "rule")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
+                openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
             
         } catch (Exception e) {
             throw new KettleXMLException("ECL Dataset Job Plugin Unable to read step info from XML node", e);
@@ -391,10 +444,12 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         retval += super.getXML();
       
         retval += "		<dataset_name><![CDATA[" + datasetName + "]]></dataset_name>" + Const.CR;
-        retval += "		<report_name><![CDATA[" + reportname + "]]></report_name>" + Const.CR;
+        retval += "		<report_name eclIsDef=\"true\" eclType=\"dataset\"><![CDATA[" + reportname + "]]></report_name>" + Const.CR;
         retval += "		<people><![CDATA[" + this.savePeople() + "]]></people>" + Const.CR;
         retval += "		<items><![CDATA[" + this.saveItems() + "]]></items>" + Const.CR;
         retval += "		<types><![CDATA[" + this.saveTypes() + "]]></types>" + Const.CR;
+        retval += "		<rule><![CDATA[" + rule + "]]></rule>" + Const.CR;
+        retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
         return retval;
 
     }
@@ -412,7 +467,10 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
                 this.openTypes(rep.getStepAttributeString(id_jobentry, "types")); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "people") != null)
                 this.openPeople(rep.getStepAttributeString(id_jobentry, "people")); //$NON-NLS-1$
-            
+            if(rep.getStepAttributeString(id_jobentry, "rule") != null)
+                rule = rep.getStepAttributeString(id_jobentry, "rule"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
+                this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
         }
@@ -425,6 +483,8 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
             rep.saveStepAttribute(id_job, getObjectId(), "items", this.saveItems()); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "types", this.saveTypes()); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "people", this.savePeople()); //$NON-NLS-1$
+            rep.saveStepAttribute(id_job, getObjectId(), "rule", rule); //$NON-NLS-1$
+        	rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
             
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);

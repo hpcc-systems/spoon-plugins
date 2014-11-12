@@ -631,9 +631,10 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
 		    	String[] types = null;
               try{
           		
-                  //items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
-                  //mapDataSets = ap.parseDefExpressionBuilder(jobMeta.getJobCopies(), datasetName.getText());
-                  rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+            	  items = ap.fieldsRecByDataset( datasetName.getText(),jobMeta.getJobCopies());
+                  //RecordList rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+                  
+                  rec = ap.buildMyRecordList(items);
                   
                   for(int i = 0; i < rec.getRecords().size(); i++){
                       TreeItem item = new TreeItem(tab, SWT.NONE);

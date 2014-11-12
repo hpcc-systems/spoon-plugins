@@ -918,8 +918,10 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
 		AutoPopulate ap = new AutoPopulate();
     try{
 		
-        //String[] items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
-        RecordList rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+        String[] items = ap.fieldsRecByDataset( datasetName.getText(),jobMeta.getJobCopies());
+        //RecordList rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+        
+        RecordList rec = ap.buildMyRecordList(items);
         
         for(int i = 0; i < rec.getRecords().size(); i++){
             TreeItem item = new TreeItem(tab, SWT.NONE);
@@ -930,7 +932,7 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
                    type = rec.getRecords().get(i).getColumnType();
                    width = rec.getRecords().get(i).getColumnWidth();
                    item.setText(1,type+width);
-                   if(rec.getRecords().get(i).getColumnType().startsWith("String")){
+                   if(rec.getRecords().get(i).getColumnType().toLowerCase().startsWith("string")){
                   	 item.setBackground(0, new Color(null,211,211,211));
                    }
             }catch (Exception e){

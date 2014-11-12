@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.hpccsystems.javaecl.Table;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;
@@ -37,7 +39,36 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
 	private String outputName ="";
 	private String persist = "";
 	private String defJobName = "";
+	private String rule = "";	
+	private String OutName = "";		
+	private RecordList recordList = new RecordList();
 	
+			
+
+	public RecordList getRecordList() {
+		return recordList;
+	}
+
+	public void setRecordList(RecordList recordList) {
+		this.recordList = recordList;
+	}
+
+	public String getOutName() {
+		return OutName;
+	}
+
+	public void setOutName(String outName) {
+		OutName = outName;
+	}
+
+	public String getRule() {
+		return rule;
+	}
+
+	public void setRule(String rule) {
+		this.rule = rule;
+	}
+
 	public String getDefJobName() {
 		return defJobName;
 	}
@@ -120,98 +151,95 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
         	return result;
         }
         else{
-        	String ecl = "";String field = "";String value = "";String[] norm = normList.split("-");String buck = "";
+        	String ecl = "";String field = "";String value = "";String[] norm = normList.split("-");String buck = "";String Uname = getName().replaceAll("\\s", "");
+        	String new_record = "";
         	String denorm = "";String myrec = "";String mytrans = "";
         	for(int i = 0; i<norm.length; i++){
         		String[] S = norm[i].split(",");
         		if(i!=norm.length-1){        			
         			field += "\'"+S[0]+"\',";
         			value += "LEFT."+S[0]+",";
-        			buck += S[1]+",";
+        			buck += S[1]+",";        			
         		}
         		else{
         			field += "\'"+S[0]+"\'";
         			value += "LEFT."+S[0];
-        			buck += S[1];
+        			buck += S[1];        			
         		}
-        		denorm += "REAL "+S[0]+"bucket;\n";
-        		myrec += "SELF."+S[0]+"bucket:=0;\n";
-        		mytrans += "SELF."+S[0]+":=IF(C="+(i+1)+",R.value,L."+S[0]+");\nSELF."+S[0]+"bucket:=IF(C="+(i+1)+",R.bucket,L."+S[0]+"bucket);\n";
+        		denorm += "REAL bucket;\n"; // needs to be changed when two or more variables are chosen for bucketing
+        		myrec += "SELF.bucket:=0;\n";// needs to be changed when two or more variables are chosen for bucketing
+        		mytrans += "SELF."+S[0]+":=IF(C="+(i+1)+",R.value,L."+S[0]+");\nSELF.bucket:=IF(C="+(i+1)+",R.bucket,L.bucket);\n";
         	}
         	
-        	ecl += "URec := RECORD\nUNSIGNED uid;\n"+this.getDatasetName()+";\nEND;\n";
-        	ecl += "URec Trans("+this.getDatasetName()+" L, INTEGER C) := TRANSFORM\nSELF.uid := C;\nSELF := L;\nEND;\n"; 
-        	ecl += "MyDS := PROJECT("+getDatasetName()+",Trans(LEFT,COUNTER));\n";
+        	ecl += Uname+"OutlierDS := "+this.getDatasetName()+"("+getRule()+");\n";
         	
-        	ecl += "NormRec:=RECORD\nINTEGER4 id;\nINTEGER4 number;\nSTRING field;\nREAL value;\nEND;\n";
-        	ecl += "OutDS:=NORMALIZE(MyDS,"+norm.length+",TRANSFORM(NormRec,SELF.id:=LEFT.uid;\nSELF.number:=COUNTER;SELF.field:=CHOOSE(COUNTER,"+field+");" +
+        	ecl += Uname+"URec := RECORD\nUNSIGNED uid;\n"+Uname+"OutlierDS;\nEND;\n";
+        	ecl += Uname+"URec "+Uname+"Trans("+Uname+"OutlierDS L, INTEGER C) := TRANSFORM\nSELF.uid := C;\nSELF := L;\nEND;\n"; 
+        	ecl += ""+Uname+"MyDS := PROJECT("+Uname+"OutlierDS,"+Uname+"Trans(LEFT,COUNTER));\n";
+        	
+        	ecl += ""+Uname+"NormRec:=RECORD\nINTEGER4 id;\nINTEGER4 number;\nSTRING field;\nREAL value;\nEND;\n";
+        	ecl += ""+Uname+"OutDS:=NORMALIZE("+Uname+"MyDS,"+norm.length+",TRANSFORM("+Uname+"NormRec,SELF.id:=LEFT.uid;\nSELF.number:=COUNTER;SELF.field:=CHOOSE(COUNTER,"+field+");" +
         			"SELF.value:=CHOOSE(COUNTER,"+value+")));\n";
         	
-        	ecl += "RankableField := RECORD\nOutDS;\nUNSIGNED pos:=0;\nEND;\n";
-        	ecl += "T:=TABLE(SORT(OutDS,number,field,value),RankableField);\n";
-        	ecl += "TYPEOF(T) add_rank(T le, UNSIGNED c):=TRANSFORM\nSELF.pos:=c;\nSELF:=le;\nEND;\n";
-        	ecl += "P:=PROJECT(T,add_rank(LEFT,COUNTER));\n";
-        	ecl += "RS:=RECORD\nSeq:=MIN(GROUP,P.pos);\nP.number;\nEND;\n";
-        	ecl += "Splits:= TABLE(P,RS,number,FEW);\n";
-        	ecl += "TYPEOF(T) to(P le, Splits ri):=TRANSFORM\nSELF.pos:=1+le.pos-ri.Seq;\nSELF:=le;\nEND;\n";
-        	ecl += "outfile:= JOIN(P,Splits,LEFT.number=RIGHT.number,to(LEFT,RIGHT),LOOKUP);\n";
+        	ecl += ""+Uname+"RankableField := RECORD\n"+Uname+"OutDS;\nUNSIGNED pos:=0;\nEND;\n";
+        	ecl += ""+Uname+"T:=TABLE(SORT("+Uname+"OutDS,number,field,value),"+Uname+"RankableField);\n";
+        	ecl += "TYPEOF("+Uname+"T) add_rank("+Uname+"T le, UNSIGNED c):=TRANSFORM\nSELF.pos:=c;\nSELF:=le;\nEND;\n";
+        	ecl += ""+Uname+"P:=PROJECT("+Uname+"T,add_rank(LEFT,COUNTER));\n";
+        	ecl += ""+Uname+"RS:=RECORD\nSeq:=MIN(GROUP,"+Uname+"P.pos);\n"+Uname+"P.number;\nEND;\n";
+        	ecl += ""+Uname+"Splits:= TABLE("+Uname+"P,"+Uname+"RS,number,FEW);\n";
+        	ecl += "TYPEOF("+Uname+"T) "+Uname+"to("+Uname+"P le, "+Uname+"Splits ri):=TRANSFORM\nSELF.pos:=1+le.pos-ri.Seq;\nSELF:=le;\nEND;\n";
+        	ecl += ""+Uname+"outfile:= JOIN("+Uname+"P,"+Uname+"Splits,LEFT.number=RIGHT.number,"+Uname+"to(LEFT,RIGHT),LOOKUP);\n";
         	
-        	ecl += "N:=COUNT(MyDS);\n";
+        	ecl += "N:=COUNT("+Uname+"MyDS);\n";
         	ecl += "SET OF INTEGER buckets := ["+buck+"];\n";
  
         	if(getTies().equals("HI")){
-        		ecl += "TYPEOF(outfile) tra(Outfile L, Outfile R) := TRANSFORM\nSELF.pos := R.pos;\nSELF := L;\nEND;\n";
-        		ecl += "newTab := ROLLUP(Outfile,LEFT.field = RIGHT.field AND LEFT.value = RIGHT.value,tra(LEFT,RIGHT));\n";
+        		ecl += "TYPEOF("+Uname+"outfile) "+Uname+"tra("+Uname+"Outfile L, "+Uname+"Outfile R) := TRANSFORM\nSELF.pos := R.pos;\nSELF := L;\nEND;\n";
+        		ecl += ""+Uname+"newTab := ROLLUP("+Uname+"Outfile,LEFT.field = RIGHT.field AND LEFT.value = RIGHT.value,"+Uname+"tra(LEFT,RIGHT));\n";
         	}
         	
         	else{
-        		ecl += "NewTab:=DEDUP(outfile, LEFT.field=RIGHT.field AND LEFT.value=RIGHT.value);\n";
+        		ecl += ""+Uname+"NewTab:=DEDUP("+Uname+"outfile, LEFT.field=RIGHT.field AND LEFT.value=RIGHT.value);\n";
         	}
         	
-        	ecl += "NewRec:=RECORD\nNewTab;\nREAL bucket;\nEND;\n";
-        	ecl += "NewRec Tr(NewTab L, INTEGER C) := TRANSFORM\nSELF.bucket := ROUNDUP(L.pos*buckets[L.number]/(N+1))-1;\nSELF := L;\nEND;\n";
-        	ecl += "Tab := PROJECT(NewTab,Tr(LEFT,COUNTER));\n";
-        	ecl += "Rec1 := RECORD\nTab.value;\nTab.bucket;\nTab.field;\nTab.number;\nEND;\n";
-        	ecl += "Tab1 := TABLE(Tab,Rec1);\n";
-        	ecl += "Tab2 := DEDUP(JOIN(Outfile,Tab1,LEFT.field = RIGHT.field AND LEFT.value = RIGHT.value),LEFT.field = RIGHT.field AND LEFT.pos = RIGHT.pos);\n";
-        	ecl += "Tab3 := SORT(Tab2,id,number);\n";
-        	ecl += "new_record:=RECORD\nMyDS;\n"+denorm+"END;\n";
-        	ecl += "new_record transfo(MyDS L, INTEGER C) := TRANSFORM\n" + myrec +
+        	ecl += ""+Uname+"NewRec:=RECORD\n"+Uname+"NewTab;\nREAL bucket;\nEND;\n";
+        	ecl += ""+Uname+"NewRec "+Uname+"Tr("+Uname+"NewTab L, INTEGER C) := TRANSFORM\nSELF.bucket := ROUNDUP(L.pos*buckets[L.number]/(N+1))-1;\nSELF := L;\nEND;\n";
+        	ecl += ""+Uname+"Tab := PROJECT("+Uname+"NewTab,"+Uname+"Tr(LEFT,COUNTER));\n";
+        	ecl += ""+Uname+"Rec1 := RECORD\n"+Uname+"Tab.value;\n"+Uname+"Tab.bucket;\n"+Uname+"Tab.field;\n"+Uname+"Tab.number;\nEND;\n";
+        	ecl += ""+Uname+"Tab1 := TABLE("+Uname+"Tab,"+Uname+"Rec1);\n";
+        	ecl += ""+Uname+"Tab2 := DEDUP(JOIN("+Uname+"Outfile,"+Uname+"Tab1,LEFT.field = RIGHT.field AND LEFT.value = RIGHT.value),LEFT.field = RIGHT.field AND LEFT.pos = RIGHT.pos);\n";
+        	ecl += ""+Uname+"Tab3 := SORT("+Uname+"Tab2,id,number);\n";
+        	ecl += ""+Uname+"new_record:=RECORD\n"+Uname+"MyDS;\n"+denorm+"END;\n";
+        	ecl += ""+Uname+"new_record "+Uname+"transfo("+Uname+"MyDS L, INTEGER C) := TRANSFORM\n" + myrec +
         			"SELF:=L;\nEND;\n";
         	
-        	ecl += "Orig := PROJECT(MyDS,transfo(LEFT,COUNTER));\n";
-        	ecl += "new_record denorm(Orig L, Tab3 R, INTEGER C):=TRANSFORM\n"+ mytrans;
+        	ecl += ""+Uname+"Orig := PROJECT("+Uname+"MyDS,"+Uname+"transfo(LEFT,COUNTER));\n";
+        	ecl += ""+Uname+"new_record "+Uname+"denorm("+Uname+"Orig L, "+Uname+"Tab3 R, INTEGER C):=TRANSFORM\n"+ mytrans;
         	ecl += "SELF := L;\nEND;\n";
         	
-            String out = "";
-            	
-            Iterator it = people.iterator();
-            boolean isFirst = true;
-            while(it.hasNext()){
-            	if(!isFirst){out+="_";}
-            	Player p = (Player) it.next();
-            	out +=  p.getFirstName();
-                   isFirst = false;
-            }
-            ecl += "Denormed:=DENORMALIZE(Orig,Tab3,LEFT.uid=RIGHT.id,denorm(LEFT,RIGHT,COUNTER));\n";
+            ecl += ""+Uname+"Denormed:=DENORMALIZE("+Uname+"Orig,"+Uname+"Tab3,LEFT.uid=RIGHT.id,"+Uname+"denorm(LEFT,RIGHT,COUNTER));\n";
             
-        	ecl += "OUTPUT(Denormed,THOR);\n";
-        	ecl += "Reco := RECORD\nTab2.Field;\nTab2.bucket;\nminval := MIN(GROUP,Tab3.value);\nmaxval := MAX(GROUP,Tab3.value);\nEND;\n";
-        	ecl += "TabRec := TABLE(Tab2,Reco,field,bucket);\n";
-        	for(int i = 0;i <norm.length; i++){
-        		String[] S = norm[i].split(",");
-        		if(persist.equalsIgnoreCase("true")){
-            		if(outputName != null && !(outputName.trim().equals(""))){
-            			ecl += "OUTPUT(TabRec(field='"+S[0]+"')"+",,'~eda::"+outputName+S[0]+"::percentileBuckets', __compressed__, overwrite,NAMED('PercentileBuckets_"+S[0]+"'))"+";\n";
-            		}else{
-            			ecl += "OUTPUT(TabRec(field='"+S[0]+"')"+",,'~eda::"+defJobName+S[0]+"::percentileBuckets', __compressed__, overwrite,NAMED('PercentileBuckets__"+S[0]+"'))"+";\n";
-            		}
-            	}
-            	else{
-            		ecl += "OUTPUT(TabRec(field='"+S[0]+"'),NAMED('PercentileBuckets__"+S[0]+"')"+");\n";
-            	}
-        		//ecl += "OUTPUT(TabRec(field='"+S[0]+"'),THOR);\n";
-        	}
+            ArrayList<RecordBO> ar = getRecordList().getRecords();
+            
+            for(int i = 0; i<ar.size();i++){
+            	RecordBO ob = ar.get(i);
+            	new_record += ob.getColumnName()+",";
+            }
+            
+        	ecl += ""+Uname+"Reco := RECORD\n"+Uname+"Tab2.bucket;\nminval := MIN(GROUP,"+Uname+"Tab3.value);\nmaxval := MAX(GROUP,"+Uname+"Tab3.value);\nEND;\n";
+        	ecl += ""+Uname+"TabRec := TABLE("+Uname+"Tab2,"+Uname+"Reco,bucket);\n";
+        	ecl += OutName+" := TABLE(JOIN("+Uname+"Denormed, "+Uname+"TabRec, LEFT.bucket = RIGHT.bucket),{"+new_record.substring(0, new_record.length()-1)+"});\n";  
+        	if(persist.equalsIgnoreCase("true")){
+        		if(outputName != null && !(outputName.trim().equals(""))){
+        			ecl += "OUTPUT("+OutName+",,'~"+outputName+"::percentileBuckets', __compressed__, overwrite,NAMED('BucketDataset'));\n";
+        		}
+        		else{
+        			ecl += "OUTPUT("+OutName+",,'~"+defJobName+"::percentileBuckets', __compressed__, overwrite,NAMED('BucketDataset'));\n";
+        		}
+            }
+            else{
+            	ecl += "OUTPUT("+OutName+",THOR);\n";
+            }
         	
         	
         	
@@ -269,6 +297,37 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
         }
     }
     
+    public String saveRecordList(){
+        String out = "";
+        ArrayList list = recordList.getRecords();
+        Iterator<RecordBO> itr = list.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
+    }
+    
+    public void openRecordList(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            recordList = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList.addRecordBO(rb);
+            }
+        }
+    }
+    
     @Override
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
         try {
@@ -299,6 +358,15 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
             
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")) != null)
                 setDefJobName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")));
+            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "rule")) != null)
+                setRule(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "rule")));
+            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "OutName")) != null)
+                setOutName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "OutName")));
+            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
+                openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
     
         } catch (Exception e) {
             throw new KettleXMLException("ECL Dataset Job Plugin Unable to read step info from XML node", e);
@@ -314,12 +382,14 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
         retval += "		<people><![CDATA[" + this.savePeople() + "]]></people>" + Const.CR;
         retval += "		<Ties><![CDATA[" + Ties + "]]></Ties>" + Const.CR;
         retval += "		<normList><![CDATA[" + this.getnormList() + "]]></normList>" + Const.CR;
-        retval += "		<dataset_name><![CDATA[" + DatasetName + "]]></dataset_name>" + Const.CR;
-        
+        retval += "		<dataset_name><![CDATA[" + DatasetName + "]]></dataset_name>" + Const.CR;        
         retval += "		<label><![CDATA[" + label + "]]></label>" + Const.CR;
         retval += "		<output_name><![CDATA[" + outputName + "]]></output_name>" + Const.CR;
         retval += "		<persist_Output_Checked><![CDATA[" + persist + "]]></persist_Output_Checked>" + Const.CR;
         retval += "		<defJobName><![CDATA[" + defJobName + "]]></defJobName>" + Const.CR;
+        retval += "		<rule><![CDATA[" + rule + "]]></rule>" + Const.CR;
+        retval += "		<OutName eclIsDef=\"true\" eclType=\"dataset\"><![CDATA[" + OutName + "]]></OutName>" + Const.CR;
+        retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
         
         return retval;
 
@@ -354,6 +424,15 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
             
             if(rep.getStepAttributeString(id_jobentry, "defJobName") != null)
             	defJobName = rep.getStepAttributeString(id_jobentry, "defJobName"); //$NON-NLS-1$
+            
+            if(rep.getStepAttributeString(id_jobentry, "rule") != null)
+                rule = rep.getStepAttributeString(id_jobentry, "rule"); //$NON-NLS-1$
+            
+            if(rep.getStepAttributeString(id_jobentry, "OutName") != null)
+                OutName = rep.getStepAttributeString(id_jobentry, "OutName"); //$NON-NLS-1$
+            
+            if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
+                this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
     
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -376,6 +455,9 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
         	rep.saveStepAttribute(id_job, getObjectId(), "label", label);
         	rep.saveStepAttribute(id_job, getObjectId(), "persist_Output_Checked", persist);
         	rep.saveStepAttribute(id_job, getObjectId(), "defJobName", defJobName);
+        	rep.saveStepAttribute(id_job, getObjectId(), "rule", rule); //$NON-NLS-1$
+        	rep.saveStepAttribute(id_job, getObjectId(), "OutName", OutName); //$NON-NLS-1$
+        	rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);
         }
