@@ -71,10 +71,11 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
 	
 	public static final String NAME = "Name";	
 	public static final String NUMBER = "Number";
+	public static final String RULE = "Rule";
   
-	public static final String[] PROP = { NAME, NUMBER};
+	public static final String[] PROP = { NAME, NUMBER, RULE};
 	
-		
+	private Shell shellFilter;
 	private String normlist = "";
     private ECLPercentile jobEntry;
     private Text jobEntryName;
@@ -90,7 +91,7 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
     private RecordList recordList;
 	ArrayList<String> Fieldfilter = new ArrayList<String>();
     java.util.List fields;
-   
+    private String[] outlierRules = null;   
     private Button wOK, wCancel;
     private boolean backupChanged;
     
@@ -114,7 +115,7 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
         final Display display = parentShell.getDisplay();
         
         String datasets[] = null;
-
+        String outlRules[] = null;
         final AutoPopulate ap = new AutoPopulate();
         try{
             datasets = ap.parseDatasetsRecordsets(this.jobMeta.getJobCopies());
@@ -124,7 +125,14 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
             System.out.println(e.toString());
             datasets = new String[]{""};
         }
-
+        try{
+        	outlRules = ap.parseOutlierRules(this.jobMeta.getJobCopies());
+        	//outlierRules = Arrays.asList(outlRules);
+        }catch (Exception e){
+            System.out.println("Error Parsing existing outlier rules");
+            System.out.println(e.toString());
+            outlRules = new String[]{""};
+        }
 
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
         
@@ -199,6 +207,14 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
 
         datasetName = buildCombo("Dataset Name :", jobEntryName, lsMod, middle, margin, fieldsGroup, datasets);
         outName = buildText("Output Name :", datasetName, lsMod, middle, margin, fieldsGroup);
+        
+        String rul = "";
+		for(int i=0; i<outlRules.length; i++){
+			rul += "|";
+			rul += outlRules[i];
+		}
+		outlierRules = rul.split("\\|");
+		
         //Begin
         
         Group perGroup = new Group(compForGrp, SWT.SHADOW_NONE);
@@ -334,6 +350,9 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
 	    final TableColumn tc1 = new TableColumn(table, SWT.LEFT);
 	    tc1.setText("Value (comma separated)");
 	    tc1.setWidth(150);
+	    TableColumn tc2 = new TableColumn(table, SWT.LEFT);
+	    tc2.setText("Outliers");
+	    tc2.setWidth(150);
 	    
 	    
 	    if(jobEntry.getFields() != null)
@@ -392,7 +411,7 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
 	    // Add a listener to change the tableviewer's input
 	    button.addSelectionListener(new SelectionAdapter() {
 	      public void widgetSelected(SelectionEvent event) {
-	    	    final Shell shellFilter = new Shell(display);
+	    	    shellFilter = new Shell(display);
 				FormLayout layoutFilter = new FormLayout();
 				layoutFilter.marginWidth = 25;
 				layoutFilter.marginHeight = 25;
@@ -609,6 +628,19 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
 								Cols p = new Cols();
 								p.setFirstName(S[0]);
 								p.setNumber(" ");
+								int idx = 0;
+								if(outlierRules != null){
+									for(int i = 0; i<outlierRules.length; i++){
+										if(outlierRules[i].toLowerCase().contains(S[0].toLowerCase())){
+											idx = i;
+											break;
+										}
+									}
+									p.setRule(outlierRules[idx]);
+								}
+								else{
+									p.setRule("");
+								}
 								fields.add(p);
 							}
 							
@@ -640,13 +672,14 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
 					if (!display.readAndDispatch())
 						display.sleep();
 				}
+				
 	      }
 	    });
 
-	    final CellEditor[] editors = new CellEditor[2];
+	    final CellEditor[] editors = new CellEditor[3];
 	    editors[0] = new TextCellEditor(table);
-	    
 	    editors[1] = new TextCellEditor(table);
+	    editors[2] = new TextCellEditor(table);
 	   
 	    tv.setColumnProperties(PROP);
 
@@ -695,9 +728,9 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
             	normlist = new String();
             	for(int i = 0; i<table.getItemCount(); i++){
             		if(i == table.getItemCount()-1)
-            			normlist += table.getItem(i).getText()+"-"+table.getItem(i).getText(1);
+            			normlist += table.getItem(i).getText()+"-"+table.getItem(i).getText(1)+"-"+table.getItem(i).getText(2).toLowerCase();
             		else
-            			normlist += table.getItem(i).getText()+"-"+table.getItem(i).getText(1)+"#";
+            			normlist += table.getItem(i).getText()+"-"+table.getItem(i).getText(1)+"-"+table.getItem(i).getText(2).toLowerCase()+"#";
             		//outTables[i] = table.getItem(i).getText()+"_"+jobEntryName.getText();
             	}
                 ok();
@@ -857,6 +890,7 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
     private void cancel() {
         jobEntry.setChanged(backupChanged);
         jobEntry = null;
+        shellFilter.dispose();
         dispose();
     }
     
@@ -865,7 +899,17 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
 class Cols {
 	  private String firstName;
 	  private String number;
-	  public String getFirstName() {
+	  private String Rule;
+	  
+	  public String getRule() {
+		return Rule;
+	}
+
+	public void setRule(String rule) {
+		Rule = rule;
+	}
+
+	public String getFirstName() {
 		  return firstName;
 	  }
 
@@ -902,6 +946,8 @@ class PersonCellModifier implements ICellModifier {
 	      return p.getFirstName();
 	    else if (ECLPercentileDialog.NUMBER.equals(property))
 		      return p.getNumber();
+	    else if (ECLPercentileDialog.RULE.equals(property))
+		      return p.getRule();
 	    else
 	      return null;
 	  }
@@ -915,6 +961,8 @@ class PersonCellModifier implements ICellModifier {
 	      p.setFirstName((String) value);
 	    else if (ECLPercentileDialog.NUMBER.equals(property))
 		      p.setNumber((String) value);
+	    else if (ECLPercentileDialog.RULE.equals(property))
+		      p.setRule((String) value);
 	    // Force the viewer to refresh
 	    viewer.refresh();
 	  }
@@ -944,6 +992,8 @@ class PlayerLabelProvider implements ITableLabelProvider {
 	  	  return values.getFirstName();//text = values[0];
 	  case 1:
 		  return values.getNumber();
+	  case 2:
+		  return values.getRule();
 	  }
 	  return null;
 	}

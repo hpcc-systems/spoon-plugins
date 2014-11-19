@@ -48,6 +48,8 @@ import org.eclipse.swt.widgets.Text;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.hpccsystems.ecljobentrybase.ECLJobEntryDialog;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryInterface;
@@ -63,8 +65,9 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	public static final String COLUMN = "Column"; 
 	public static final String OP = "Op";
 	public static final String PERCENT = "Percentage";
+	public static final String RULE = "Rule";
 	
-	public static final String[] PROP = { COLUMN, OP, PERCENT};
+	public static final String[] PROP = { COLUMN, OP, PERCENT, RULE};
 	
 	private ArrayList<String> Settings;
 	ArrayList<Player> fields;
@@ -75,7 +78,8 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
     private int number = 1;
     private String flag = "true";
 	String[] tables;
-	
+    private String[] outlierRules = null;
+    private Shell shellSettings;
     private ECLTabulate jobEntry;
     private Text jobEntryName;
     private Combo datasetName;
@@ -90,7 +94,7 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
     private String defJobName;
     
 	private SelectionAdapter lsDef;
-
+	private ArrayList<RecordList> recordList;
 	
     public ECLTabulateDialog(Shell parent, JobEntryInterface jobEntryInt,
 			Repository rep, JobMeta jobMeta) {
@@ -109,6 +113,7 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
         final Display display = parentShell.getDisplay();
         
         String datasets[] = null;
+        String outlRules[] = null;
         
         final AutoPopulate ap = new AutoPopulate();
         try{
@@ -120,6 +125,14 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
             System.out.println("Error Parsing existing Datasets");
             System.out.println(e.toString());
             datasets = new String[]{""};
+        }
+        try{
+        	outlRules = ap.parseOutlierRules(this.jobMeta.getJobCopies());
+        	//outlierRules = Arrays.asList(outlRules);
+        }catch (Exception e){
+            System.out.println("Error Parsing existing outlier rules");
+            System.out.println(e.toString());
+            outlRules = new String[]{""};
         }
 
 
@@ -196,6 +209,12 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 		
 		
         datasetName = buildCombo("Dataset Name :", jobEntryName, lsMod, middle-10, margin, datasetGroup, datasets);
+        String rul = "";
+		for(int i=0; i<outlRules.length; i++){
+			rul += "|";
+			rul += outlRules[i];
+		}
+		outlierRules = rul.split("\\|");
 
         final TableViewer tv = new TableViewer(datasetGroup,  SWT.CHECK | SWT.BORDER | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL);
 
@@ -208,6 +227,9 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	    tc0.setText("Columns");
 	    tc0.setWidth(150);
 	    TableColumn tvR2 = new TableColumn(table, SWT.LEFT);
+	    tvR2.setResizable(false);
+	    tvR2.setWidth(0);
+	    tvR2 = new TableColumn(table, SWT.LEFT);
 	    tvR2.setResizable(false);
 	    tvR2.setWidth(0);
 	    
@@ -242,6 +264,9 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	    final TableColumn tcR2 = new TableColumn(RowTable, SWT.LEFT);
 	    tcR2.setResizable(false);
 	    tcR2.setWidth(0);
+	    TableColumn tcR3 = new TableColumn(RowTable, SWT.LEFT);
+	    tcR3.setResizable(false);
+	    tcR3.setWidth(0);
 	    
 	    final TableViewer Columns = new TableViewer(datasetGroup, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 	    Columns.setContentProvider(new PlayerContentProvider());
@@ -255,8 +280,15 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	    tcC2.setResizable(true);
 	    tcC2.setWidth(100);
 	    tcC2.setText("Operators");
+	    TableColumn tcC3 = new TableColumn(ColumnTable, SWT.LEFT);
+	    tcC3.setResizable(false);
+	    tcC3.setWidth(0);
+	    //Columns.setInput(columns);
+	    tcC3 = new TableColumn(ColumnTable, SWT.LEFT);
+	    tcC3.setResizable(false);
+	    tcC3.setWidth(100);
+	    tcC3.setText("Rule");
 	    Columns.setInput(columns);
-	    
 	    
 	    
 	    
@@ -271,6 +303,9 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	    final TableColumn tcL2 = new TableColumn(LayerTable, SWT.LEFT);
 	    tcL2.setResizable(false);
 	    tcL2.setWidth(0);
+	    TableColumn tcL3 = new TableColumn(LayerTable, SWT.LEFT);
+	    tcL3.setResizable(false);
+	    tcL3.setWidth(0);
 	    
 	    
 	    FormData data = new FormData(150,280);
@@ -353,7 +388,7 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 					 
 					if(datasetName.getText() != null || !datasetName.getText().equals("")){
 						try {
-							items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+							items = ap.fieldsRecByDataset( datasetName.getText(),jobMeta.getJobCopies());
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -362,9 +397,9 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 						if(items != null){
 							for(int i = 0; i<items.length; i++){
 								Player obj = new Player();
-								obj.setFirstName(items[i]);
+								obj.setFirstName(items[i].split(",")[0]);
 								obj.setOP(0);
-								
+								obj.setType(items[i].split(",")[1]);
 								fields.add(obj);
 							}
 						}
@@ -382,8 +417,8 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	    				Player P = new Player();
 	    				P.setIndex(i);
 	    				P.setOP(0);
-	    				
-	    				P.setFirstName(table.getItem(i).getText());
+	    				P.setType(table.getItem(i).getText(2));
+	    				P.setFirstName(table.getItem(i).getText(0));
 	    				if(rows.isEmpty() && (!columns.contains(P)) &&(!layers.contains(P))){
 	    					rows.add(P);
 	    				}
@@ -426,8 +461,21 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	    				Player P = new Player();
 	    				P.setIndex(i);
 	    				P.setOP(Integer.valueOf("0"));
-	    				
+	    				P.setType(table.getItem(i).getText(2));
 	    				P.setFirstName(table.getItem(i).getText());
+	    				int idx = 0;
+						if(outlierRules != null){
+							for(int j = 0; j<outlierRules.length; j++){
+								if(outlierRules[i].toLowerCase().contains(table.getItem(i).getText(0).toLowerCase())){
+									idx = i;
+									break;
+								}
+							}
+							P.setRule(outlierRules[idx]);
+						}
+						else{
+							P.setRule("");
+						}
 	    				if(columns.isEmpty() && (!rows.contains(P)) &&(!layers.contains(P))){
 	    					columns.add(P);
 	    				}
@@ -470,7 +518,7 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	    				Player P = new Player();
 	    				P.setIndex(i);
 	    				P.setOP(0);
-	    				
+	    				P.setType(table.getItem(i).getText(2));
 	    				P.setFirstName(table.getItem(i).getText());
 	    				if(layers.isEmpty() && (!rows.contains(P)) && (!columns.contains(P))){
 	    					layers.add(P);
@@ -505,10 +553,11 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 			}
 	    });
 	    
-	    CellEditor[] editors = new CellEditor[2];
+	    CellEditor[] editors = new CellEditor[4];
 	    editors[0] = new TextCellEditor(Columns.getTable());
    	    editors[1] = new ComboBoxCellEditor(Columns.getTable(),  OperatorOption.INSTANCES, SWT.READ_ONLY);
-   	    
+   	    editors[2] = new TextCellEditor(Columns.getTable());
+   	    editors[3] = new TextCellEditor(Columns.getTable());
    	    
    	    Columns.setColumnProperties(PROP);
    	    Columns.setCellModifier(new PersonCellModifier(Columns));
@@ -596,7 +645,7 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
         wSettings.addListener(SWT.Selection, new Listener(){
 			@Override
 			public void handleEvent(Event arg0) {
-				final Shell shellSettings = new Shell(display);
+				shellSettings = new Shell(display);
 				shellSettings.setBackground(new Color(null,255,255,255));
 				FormLayout layoutSettings = new FormLayout();
 				layoutSettings.marginWidth = 25;
@@ -704,12 +753,89 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
             public void handleEvent(Event e) {
             	test = jobEntry.getName();
             	tables = new String[rows.size()];
+            	recordList = new ArrayList<RecordList>();
             	int cnt = 0;
             	for(Iterator<Player> it = rows.iterator(); it.hasNext();){
             		Player P = (Player) it.next();
-            		tables[cnt] = P.getFirstName()+"_"+number;
+            		tables[cnt] = "Tabulate_"+P.getFirstName()+"_"+number;
             		cnt++;
+            		RecordList rec = new RecordList();
+            		RecordBO ob = new RecordBO();        			
+            		if(layers != null){
+	            		for(Iterator<Player> it1 = layers.iterator(); it1.hasNext();){
+	            			Player PL = (Player) it1.next();
+	            			ob = new RecordBO();
+	            			ob.setColumnName(PL.getFirstName());
+	            			ob.setColumnType(PL.getType());
+	            			if(PL.getType().toLowerCase().contains("string"))
+	            				ob.setDefaultValue("");
+	            			else
+	            				ob.setDefaultValue("0");
+	            			rec.addRecordBO(ob);
+	            		}
+            		}
+            		ob = new RecordBO();
+            		ob.setColumnName(P.getFirstName());
+        			ob.setColumnType(P.getType());
+        			if(P.getType().toLowerCase().contains("string"))
+        				ob.setDefaultValue("");
+        			else
+        				ob.setDefaultValue("0");
+        			rec.addRecordBO(ob);
+            		for(Iterator<Player> it1 = columns.iterator(); it1.hasNext();){
+            			Player PC = (Player) it1.next();
+            			ob = new RecordBO();
+            			switch(PC.getOP()){
+            			case 0:
+            				ob.setColumnName("cnt_"+PC.getFirstName());
+            				break;
+            			case 1:
+            				ob.setColumnName("add_"+PC.getFirstName());
+            				break;
+            			case 2:
+            				ob.setColumnName("mean_"+PC.getFirstName());
+            				break;
+            			case 3:
+            				ob.setColumnName("var_"+PC.getFirstName());
+            				break;
+            			case 4:
+            				ob.setColumnName("sd_"+PC.getFirstName());
+            				break;
+            			case 5:
+            				ob.setColumnName("minval_"+PC.getFirstName());
+            				break;
+            			case 6:
+            				ob.setColumnName("maxval_"+PC.getFirstName());
+            				break;
+            			}
+            			
+            			ob.setColumnType(PC.getType());
+            			if(PC.getType().toLowerCase().contains("string"))
+            				ob.setDefaultValue("");
+            			else
+            				ob.setDefaultValue("0");
+            			rec.addRecordBO(ob);
+            			
+            			if(Settings.contains("parent")){
+                			ob = new RecordBO();
+                			ob.setColumnName(PC.getFirstName()+"_parent_percent"); 
+                			ob.setColumnType("REAL");
+                			ob.setDefaultValue("0");
+                			rec.addRecordBO(ob);
+                		}
+            			if(Settings.contains("total")){
+                			ob = new RecordBO();
+                			ob.setColumnName(PC.getFirstName()+"_total_percent"); 
+                			ob.setColumnType("REAL");
+                			ob.setDefaultValue("0");
+                			rec.addRecordBO(ob);
+                		}
+            		}
+            		
+            		
+            		recordList.add(rec);
             	}
+            	
 				ok();
             }
         };
@@ -774,6 +900,10 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
         
         if(jobEntry.getTables() != null){
         	tables = jobEntry.getTables();
+        }
+        
+        if(jobEntry.getRecordList() != null){
+        	recordList = jobEntry.getRecordList();
         }
         
         if (jobEntry.getPersistOutputChecked() != null && chkBox != null) {
@@ -849,6 +979,7 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
         jobEntry.setTables(this.tables);
         jobEntry.setNumber(Integer.toString(this.number));
         jobEntry.setDatasetName(this.datasetName.getText());
+        jobEntry.setRecordList(this.recordList);
         if(chkBox.getSelection() && outputName != null){
         	jobEntry.setOutputName(outputName.getText());
         }
@@ -869,6 +1000,7 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
     private void cancel() {
         jobEntry.setChanged(backupChanged);
         jobEntry = null;
+        shellSettings.dispose();
         dispose();
     }
     
@@ -891,7 +1023,8 @@ class PersonCellModifier implements ICellModifier {
 	      return p.getFirstName();
 	    else if (ECLTabulateDialog.OP.equals(property))
 	      return p.getOP();
-	    
+	    else if (ECLTabulateDialog.RULE.equals(property))
+		      return p.getRule();
 	    else
 	      return null;
 	  }
@@ -905,6 +1038,8 @@ class PersonCellModifier implements ICellModifier {
 	      p.setFirstName((String) value);
 	    else if (ECLTabulateDialog.OP.equals(property))
 	      p.setOP((Integer) value);
+	    else if (ECLTabulateDialog.RULE.equals(property))
+		      p.setRule((String) value);
 	    
 	    // Force the viewer to refresh
 	    viewer.refresh();
@@ -915,8 +1050,27 @@ class Player {
 	
 	  private String firstName;
 	  private Integer OP;
+	  private String Type;
+	  private String Rule;
 	  
-	  public Integer getOP() {
+	  
+	  public String getRule() {
+		return Rule;
+	}
+
+	public void setRule(String rule) {
+		Rule = rule;
+	}
+
+	public String getType() {
+		return Type;
+	}
+
+	public void setType(String type) {
+		Type = type;
+	}
+
+	public Integer getOP() {
 		return OP;
 	  }
 
@@ -1006,7 +1160,10 @@ class PlayerLabelProvider implements ITableLabelProvider {
 	  	  return values.getFirstName();//text = values[0];
 	  case 1:
 		  return OperatorOption.INSTANCES[values.getOP().intValue()];
-	  
+	  case 2:
+		  return values.getType();
+	  case 3:
+		  return values.getRule();
 	  }
 	  return null;
 	}

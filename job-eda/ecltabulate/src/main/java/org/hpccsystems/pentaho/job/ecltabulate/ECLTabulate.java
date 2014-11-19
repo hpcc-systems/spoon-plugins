@@ -21,6 +21,8 @@ import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
 import org.hpccsystems.ecljobentrybase.*;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 
 /**
  *
@@ -44,9 +46,17 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
 	private String persist = "";
 	private String defJobName = "";
 	public static int ct = 0;
+	private ArrayList<RecordList> recordList;
 	
 	
-	
+	public ArrayList<RecordList> getRecordList() {
+		return recordList;
+	}
+
+	public void setRecordList(ArrayList<RecordList> recordList) {
+		this.recordList = recordList;
+	}
+
 	public String getNumber() {
 		return number;
 	}
@@ -181,55 +191,77 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
         		for(Iterator<Player> itC = cols.iterator(); itC.hasNext();){
         			Player sc = (Player) itC.next();
         			String Sc = sc.getFirstName();
+        			String rule = sc.getRule().replace(Sc, getDatasetName()+"."+Sc);
         			int op = sc.getOP();
         			if(!settings.isEmpty())
         				percent = 1;
         			
         			switch(op){
         			case 0: 
-        				ecl += "cnt_"+Sc+" := COUNT(GROUP);\n";
+        				if(!rule.equals(""))
+        					ecl += "cnt_"+Sc+" := COUNT(GROUP,"+rule+");\n";
+        				else
+        					ecl += "cnt_"+Sc+" := COUNT(GROUP);\n";
         				if(parent)
         					ecl += "DECIMAL5_2 "+Sc+"_Parent_Percent := 0;\n";
         				if(total)
         					ecl += "DECIMAL5_2 "+Sc+"_Total_Percent := 0;\n";
         				break;
         			case 1:
-        				ecl += "add_"+Sc+" := SUM(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
+        				if(!rule.equals(""))
+        					ecl += "add_"+Sc+" := SUM(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+        				else
+        					ecl += "add_"+Sc+" := SUM(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
         				if(parent)
         					ecl += "DECIMAL5_2 "+Sc+"_Parent_Percent := 0;\n";
         				if(total)
         					ecl += "DECIMAL5_2 "+Sc+"_Total_Percent := 0;\n";
         				break;
         			case 2:
-        				ecl += "Mean_"+Sc+" := AVE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
+        				if(!rule.equals(""))
+        					ecl += "Mean_"+Sc+" := AVE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+        				else
+        					ecl += "Mean_"+Sc+" := AVE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
         				if(parent)
         					ecl += "DECIMAL5_2 "+Sc+"_Parent_Percent := 0;\n";
         				if(total)
         					ecl += "DECIMAL5_2 "+Sc+"_Total_Percent := 0;\n";
         				break;
         			case 3:
-        				ecl += "Var_"+Sc+" := VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
+        				if(!rule.equals(""))
+        					ecl += "Var_"+Sc+" := VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+        				else
+        					ecl += "Var_"+Sc+" := VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
         				if(parent)
         					ecl += "DECIMAL5_2 "+Sc+"_Parent_Percent := 0;\n";
         				if(total)
         					ecl += "DECIMAL5_2 "+Sc+"_Total_Percent := 0;\n";
         				break;
         			case 4:
-        				ecl += "Sd_"+Sc+" := SQRT(VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+"));\n";
+        				if(!rule.equals(""))
+        					ecl += "Sd_"+Sc+" := SQRT(VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+"));\n";
+        				else
+        					ecl += "Sd_"+Sc+" := SQRT(VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+"));\n";
         				if(parent)
         					ecl += "DECIMAL5_2 "+Sc+"_Parent_Percent := 0;\n";
         				if(total)
         					ecl += "DECIMAL5_2 "+Sc+"_Total_Percent := 0;\n";
         				break;
         			case 5:
-        				ecl += "maximum_"+Sc+":= MAX(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
+        				if(!rule.equals(""))
+        					ecl += "maximum_"+Sc+":= MAX(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+        				else
+        					ecl += "maximum_"+Sc+":= MAX(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
         				if(parent)
         					ecl += "DECIMAL5_2 "+Sc+"_Parent_Percent := 0;\n";
         				if(total)
         					ecl += "DECIMAL5_2 "+Sc+"_Total_Percent := 0;\n";
         				break;
         			case 6:
-        				ecl += "minimum_"+Sc+" := MIN(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
+        				if(!rule.equals(""))
+        					ecl += "minimum_"+Sc+" := MIN(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+        				else
+        					ecl += "minimum_"+Sc+" := MIN(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
         				if(parent)
         					ecl += "DECIMAL5_2 "+Sc+"_Parent_Percent := 0;\n";
         				if(total)
@@ -257,40 +289,62 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
             			for(Iterator<Player> itC = cols.iterator(); itC.hasNext();){
                 			Player sc = (Player) itC.next();
                 			String Sc = sc.getFirstName();
+                			String rule = sc.getRule().replace(Sc, getDatasetName()+"."+Sc);
                 			int op = sc.getOP();
                 			switch(op){
                 			case 0: 
-                				ecl += "cnt_layers_"+Sc+" := COUNT(GROUP);\n";
+                				if(rule.equals(""))
+                					ecl += "cnt_layers_"+Sc+" := COUNT(GROUP,"+rule+");\n";
+                				else
+                					ecl += "cnt_layers_"+Sc+" := COUNT(GROUP);\n";
                 				transform += "SELF."+Sc+"_Parent_Percent := (100*(L.cnt_"+Sc+"/L.cnt_layers_"+Sc+"));\n";
                 				joinT += "SELF."+Sc+"_Parent_Percent := R."+Sc+"_Parent_Percent;\n";
                 				break;
                 			case 1:
-                				ecl += "add_layers_"+Sc+" := SUM(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";    
+                				if(rule.equals(""))
+                					ecl += "add_layers_"+Sc+" := SUM(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+                				else
+                					ecl += "add_layers_"+Sc+" := SUM(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
                 				transform += "SELF."+Sc+"_Parent_Percent := (100*(L.add_"+Sc+"/L.add_layers_"+Sc+"));\n";
                 				joinT += "SELF."+Sc+"_Parent_Percent := R."+Sc+"_Parent_Percent;\n";
                 				break;
                 			case 2:
-                				ecl += "Mean_layers_"+Sc+" := AVE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";   
+                				if(rule.equals(""))
+                					ecl += "Mean_layers_"+Sc+" := AVE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+                				else
+                					ecl += "Mean_layers_"+Sc+" := AVE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
                 				transform += "SELF."+Sc+"_Parent_Percent := (100*(L.Mean_"+Sc+"/L.Mean_layers_"+Sc+"));\n";
                 				joinT += "SELF."+Sc+"_Parent_Percent := R."+Sc+"_Parent_Percent;\n";
                 				break;
                 			case 3:
-                				ecl += "Var_layers_"+Sc+" := VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";  
+                				if(rule.equals(""))
+                					ecl += "Var_layers_"+Sc+" := VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+                				else
+                					ecl += "Var_layers_"+Sc+" := VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
                 				transform += "SELF."+Sc+"_Parent_Percent := (100*(L.Var_"+Sc+"/L.Var_layers_"+Sc+"));\n";
                 				joinT += "SELF."+Sc+"_Parent_Percent := R."+Sc+"_Parent_Percent;\n";
                 				break;
                 			case 4:
-                				ecl += "Sd_layers_"+Sc+" := SQRT(VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+"));\n";  
+                				if(rule.equals(""))
+                					ecl += "Sd_layers_"+Sc+" := SQRT(VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+"));\n";
+                				else
+                					ecl += "Sd_layers_"+Sc+" := SQRT(VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+"));\n";
                 				transform += "SELF."+Sc+"_Parent_Percent := (100*(L.Sd_"+Sc+"/L.Sd_layers_"+Sc+"));\n";
                 				joinT += "SELF."+Sc+"_Parent_Percent := R."+Sc+"_Parent_Percent;\n";
                 				break;
                 			case 5:
-                				ecl += "maximum_layers_"+Sc+" := MAX(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";   
+                				if(rule.equals(""))
+                					ecl += "maximum_layers_"+Sc+" := MAX(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+                				else
+                					ecl += "maximum_layers_"+Sc+" := MAX(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
                 				transform += "SELF."+Sc+"_Parent_Percent := (100*(L.maximum_"+Sc+"/L.maximum_layers_"+Sc+"));\n";
                 				joinT += "SELF."+Sc+"_Parent_Percent := R."+Sc+"_Parent_Percent;\n";
                 				break;
                 			case 6:
-                				ecl += "minimum_layers_"+Sc+" := MIN(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";  
+                				if(rule.equals(""))
+                					ecl += "minimum_layers_"+Sc+" := MIN(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+                				else
+                					ecl += "minimum_layers_"+Sc+" := MIN(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
                 				transform += "SELF."+Sc+"_Parent_Percent := (100*(L.minimum_"+Sc+"/L.minimum_layers_"+Sc+"));\n";
                 				joinT += "SELF."+Sc+"_Parent_Percent := R."+Sc+"_Parent_Percent;\n";
                 				break;
@@ -315,34 +369,56 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
             			for(Iterator<Player> itC = cols.iterator(); itC.hasNext();){
                 			Player sc = (Player) itC.next();
                 			String Sc = sc.getFirstName();
+                			String rule = sc.getRule().replace(Sc, getDatasetName()+"."+Sc);
                 			int op = sc.getOP();
                 			switch(op){
                 			case 0: 
-                				ecl += "cnt_layers_"+Sc+" := COUNT(GROUP);\n";
+                				if(rule.equals(""))
+                					ecl += "cnt_layers_"+Sc+" := COUNT(GROUP,"+rule+");\n";
+                				else
+                					ecl += "cnt_layers_"+Sc+" := COUNT(GROUP);\n";
                 				transform += "SELF."+Sc+"_Total_Percent := (100*(L.cnt_"+Sc+"/L.cnt_layers_"+Sc+"));\n";
                 				break;
                 			case 1:
-                				ecl += "add_layers_"+Sc+" := SUM(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";    
+                				if(rule.equals(""))
+                					ecl += "add_layers_"+Sc+" := SUM(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+                				else
+                					ecl += "add_layers_"+Sc+" := SUM(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
                 				transform += "SELF."+Sc+"_Total_Percent := (100*(L.add_"+Sc+"/L.add_layers_"+Sc+"));\n";
                 				break;
                 			case 2:
-                				ecl += "Mean_layers_"+Sc+" := AVE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";   
+                				if(rule.equals(""))
+                					ecl += "Mean_layers_"+Sc+" := AVE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+                				else
+                					ecl += "Mean_layers_"+Sc+" := AVE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
                 				transform += "SELF."+Sc+"_Total_Percent := (100*(L.Mean_"+Sc+"/L.Mean_layers_"+Sc+"));\n";
                 				break;
                 			case 3:
-                				ecl += "Var_layers_"+Sc+" := VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";  
+                				if(rule.equals(""))
+                					ecl += "Var_layers_"+Sc+" := VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+                				else
+                					ecl += "Var_layers_"+Sc+" := VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
                 				transform += "SELF."+Sc+"_Total_Percent := (100*(L.Var_"+Sc+"/L.Var_layers_"+Sc+"));\n";
                 				break;
                 			case 4:
-                				ecl += "Sd_layers_"+Sc+" := SQRT(VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+"));\n";  
+                				if(rule.equals(""))
+                					ecl += "Sd_layers_"+Sc+" := SQRT(VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+"));\n";
+                				else
+                					ecl += "Sd_layers_"+Sc+" := SQRT(VARIANCE(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+"));\n";
                 				transform += "SELF."+Sc+"_Total_Percent := (100*(L.Sd_"+Sc+"/L.Sd_layers_"+Sc+"));\n";
                 				break;
                 			case 5:
-                				ecl += "maximum_layers_"+Sc+" := MAX(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";   
+                				if(rule.equals(""))
+                					ecl += "maximum_layers_"+Sc+" := MAX(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+                				else
+                					ecl += "maximum_layers_"+Sc+" := MAX(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
                 				transform += "SELF."+Sc+"_Total_Percent := (100*(L.maximum_"+Sc+"/L.maximum_layers_"+Sc+"));\n";
                 				break;
                 			case 6:
-                				ecl += "minimum_layers_"+Sc+" := MIN(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";  
+                				if(rule.equals(""))
+                					ecl += "minimum_layers_"+Sc+" := MIN(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+","+rule+");\n";
+                				else
+                					ecl += "minimum_layers_"+Sc+" := MIN(GROUP,(REAL)"+this.getDatasetName()+"."+Sc+");\n";
                 				transform += "SELF."+Sc+"_Total_Percent := (100*(L.minimum_"+Sc+"/L.minimum_layers_"+Sc+"));\n";         				
                 				break;
                 			}
@@ -362,27 +438,27 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
         						"	SELF := L;\n" +
         						"END;\n";
         				if(layer != ""){
-        					ecl += Sr+"_"+number+" := JOIN(TotalTab"+cnt+",ParentTab"+cnt+","+join+" AND LEFT."+Sr+" = RIGHT."+Sr+",Trans2"+cnt+"(LEFT,RIGHT));\n";
+        					ecl += "Tabulate_"+Sr+"_"+number+" := JOIN(TotalTab"+cnt+",ParentTab"+cnt+","+join+" AND LEFT."+Sr+" = RIGHT."+Sr+",Trans2"+cnt+"(LEFT,RIGHT));\n";
         				}
         				else{
-        					ecl += Sr+"_"+number+" := JOIN(TotalTab"+cnt+",ParentTab"+cnt+",LEFT."+Sr+" = RIGHT."+Sr+",Trans2"+cnt+"(LEFT,RIGHT));\n";
+        					ecl += "Tabulate_"+Sr+"_"+number+" := JOIN(TotalTab"+cnt+",ParentTab"+cnt+",LEFT."+Sr+" = RIGHT."+Sr+",Trans2"+cnt+"(LEFT,RIGHT));\n";
         				}
         					
         			}
         			if(parent && !total){
-        				ecl += Sr+"_"+number+" := ParentTab"+cnt+";\n";
+        				ecl += "Tabulate_"+Sr+"_"+number+" := ParentTab"+cnt+";\n";
         			}
         			if(total && !parent){
-        				ecl += Sr+"_"+number+" := TotalTab"+cnt+";\n";
+        				ecl += "Tabulate_"+Sr+"_"+number+" := TotalTab"+cnt+";\n";
         			}
         			if(persist.equalsIgnoreCase("true")){
     	        		if(outputName != null && !(outputName.trim().equals("")))    	        			
-    	        			ecl += "OUTPUT(("+Sr+"_"+number+")"+",,'~eda::"+outputName+"::tabulate', __compressed__, overwrite,NAMED('"+Sr+"_crossTab'))"+";\n";
+    	        			ecl += "OUTPUT(("+"Tabulate_"+Sr+"_"+number+")"+",,'~"+outputName+"::tabulate_"+Sr+"', __compressed__, overwrite,NAMED('"+Sr+"_crossTab'))"+";\n";
     	        		else    	        		
-    	        			ecl += "OUTPUT(("+Sr+"_"+number+")"+",,'~eda::"+defJobName+"::tabulate', __compressed__, overwrite,NAMED('"+Sr+"_crossTab'))"+";\n";    	        		
+    	        			ecl += "OUTPUT(("+"Tabulate_"+Sr+"_"+number+")"+",,'~"+defJobName+"::tabulate_"+Sr+"', __compressed__, overwrite,NAMED('"+Sr+"_crossTab'))"+";\n";    	        		
     	        	}
     	        	else    	        		
-    	        		ecl += "OUTPUT(("+Sr+"_"+number+"),NAMED('"+Sr+"_crossTab'));\n";
+    	        		ecl += "OUTPUT(("+"Tabulate_"+Sr+"_"+number+"),NAMED('"+Sr+"_crossTab'));\n";
     	        	
         		}
         		if(!settings.contains("parent") && !settings.contains("total")){
@@ -390,16 +466,16 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
         			//ecl += "OUTPUT(MyTab"+cnt+",NAMED('"+Sr+"_crossTab'));\n";
         			if(persist.equalsIgnoreCase("true")){
     	        		if(outputName != null && !(outputName.trim().equals(""))){
-    	        			ecl += Sr+"_"+number+" := MyTab"+cnt+";\n";
-    	        			ecl += "OUTPUT(("+Sr+"_"+number+")"+",,'~eda::"+outputName+"::tabulate', __compressed__, overwrite,NAMED('"+Sr+"_crossTab'))"+";\n";
+    	        			ecl += "Tabulate_"+Sr+"_"+number+" := MyTab"+cnt+";\n";
+    	        			ecl += "OUTPUT(("+"Tabulate_"+Sr+"_"+number+")"+",,'~"+outputName+"::tabulate_"+Sr+"', __compressed__, overwrite,NAMED('"+Sr+"_crossTab'))"+";\n";
     	        		}else{
-    	        			ecl += Sr+"_"+number+" := MyTab"+cnt+";\n";
-    	        			ecl += "OUTPUT(("+Sr+"_"+number+")"+",,'~eda::"+defJobName+"::tabulate', __compressed__, overwrite,NAMED('"+Sr+"_crossTab'))"+";\n";
+    	        			ecl += "Tabulate_"+Sr+"_"+number+" := MyTab"+cnt+";\n";
+    	        			ecl += "OUTPUT(("+"Tabulate_"+Sr+"_"+number+")"+",,'~"+defJobName+"::tabulate_"+Sr+"', __compressed__, overwrite,NAMED('"+Sr+"_crossTab'))"+";\n";
     	        		}
     	        	}
     	        	else{
-    	        		ecl += Sr+"_"+number+" := MyTab"+cnt+";\n";
-    	        		ecl += "OUTPUT(("+Sr+"_"+number+"),NAMED('"+Sr+"_crossTab'));\n";
+    	        		ecl += "Tabulate_"+Sr+"_"+number+" := MyTab"+cnt+";\n";
+    	        		ecl += "OUTPUT(("+"Tabulate_"+Sr+"_"+number+"),NAMED('"+Sr+"_crossTab'));\n";
     	        	}
         		}
         		cnt = cnt + 1;
@@ -453,7 +529,7 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
     	while(it.hasNext()){
     		if(!isFirst){out+="|";}
     		Player p = (Player) it.next();
-    		out +=  p.getFirstName()+","+p.getOP();
+    		out +=  p.getFirstName()+","+p.getOP()+","+p.getType();
             isFirst = false;
     	}
     	return out;
@@ -468,8 +544,10 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
         		String[] S = strLine[i].split(",");
         		Player P = new Player();
         		P.setFirstName(S[0]);
-        		
-        		P.setOP(0);
+        		if(S.length > 1)
+        			P.setOP(Integer.parseInt(S[1]));
+        		if(S.length > 2)
+        			P.setType(S[2]);
         		people.add(P);
         	}
         }
@@ -482,7 +560,7 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
     	while(it.hasNext()){
     		if(!isFirst){out+="|";}
     		Player p = (Player) it.next();
-    		out +=  p.getFirstName()+","+p.getOP();
+    		out +=  p.getFirstName()+","+p.getOP()+","+p.getType();
             isFirst = false;
     	}
     	return out;
@@ -498,7 +576,10 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
         		Player P = new Player();
         		P.setFirstName(S[0]);
         		P.setOP(0); 
-        		
+        		if(S.length == 3)
+        			P.setType(S[2]); 
+        		else
+        			P.setType("");
         		rows.add(P);
         	}
         }
@@ -511,7 +592,7 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
     	while(it.hasNext()){
     		if(!isFirst){out+="|";}
     		Player p = (Player) it.next();
-    		out +=  p.getFirstName()+","+p.getOP();
+    		out +=  p.getFirstName()+","+p.getOP()+","+p.getType()+","+p.getRule();
             isFirst = false;
     	}
     	return out;
@@ -527,7 +608,14 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
         		Player P = new Player();
         		P.setFirstName(S[0]);
         		P.setOP(Integer.parseInt(S[1]));
-        		
+        		if(S.length > 2)
+        			P.setType(S[2]); 
+        		else
+        			P.setType("");
+        		if(S.length > 3)
+        			P.setRule(S[3]); 
+        		else
+        			P.setRule("");
         		cols.add(P);
         	}
         }  
@@ -540,7 +628,7 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
     	while(it.hasNext()){
     		if(!isFirst){out+="|";}
     		Player p = (Player) it.next();
-    		out +=  p.getFirstName()+","+p.getOP();
+    		out +=  p.getFirstName()+","+p.getOP()+","+p.getType();
             isFirst = false;
     	}
     	return out;
@@ -556,10 +644,46 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
         		Player P = new Player();
         		P.setFirstName(S[0]);
         		P.setOP(0);
-        		
+        		if(S.length == 3)
+        			P.setType(S[2]); 
+        		else
+        			P.setType("");
         		layers.add(P);
         	}
         }
+    }
+    
+    public String saveRecordList(int idx){
+        String out = "";
+        RecordList list = recordList.get(idx);
+        ArrayList ar = list.getRecords();
+        Iterator<RecordBO> itr = ar.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
+    }
+    
+    public void openRecordList(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            RecordList rec = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                rec.addRecordBO(rb);
+            }
+            recordList.add(rec);
+        }        
     }
     
     @Override
@@ -579,6 +703,12 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
 	            		tabs[i] = XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "table"+i));
 	            }
 	            setTables(tabs);
+            }
+            if(getRecordList() != null){
+            	for(int i = 0; i<getRecordList().size(); i++){
+            		if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList_"+getRows().get(i).getFirstName())) != null)
+            			openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList_"+getRows().get(i).getFirstName())));
+            	}
             }
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "people")) != null)
                 openPeople(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "people")));
@@ -613,8 +743,13 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
         retval += "		<settings><![CDATA[" + this.saveSettings() + "]]></settings>" + Const.CR;
         if(getTables() != null){
 	        for(int i = 0; i<getTables().length; i++){
-	        	retval += "		<table"+i+" eclIsDef = \"true\" eclType = \"recordset\"><![CDATA[" + getTables()[i] + "]]></table"+i+">" + Const.CR;
+	        	retval += "		<table"+i+" eclIsDef = \"true\" eclType = \"dataset\"><![CDATA[" + getTables()[i] + "]]></table"+i+">" + Const.CR;
 	        }
+        }
+        if(getRecordList() != null){
+        	for(int i = 0; i<getRecordList().size(); i++){
+        		retval += "		<recordList_"+rows.get(i).getFirstName()+"><![CDATA[" + this.saveRecordList(i) + "]]></recordList_"+rows.get(i).getFirstName()+">" + Const.CR;
+        	}
         }
         retval += "		<people><![CDATA[" + this.savePeople() + "]]></people>" + Const.CR;
         retval += "		<rows><![CDATA[" + this.saveRows() + "]]></rows>" + Const.CR;
@@ -646,6 +781,12 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
         		setTables(tables);
         	}
         	
+        	if(getRecordList() != null){
+        		for(int i = 0; i<getRecordList().size(); i++){
+        			if(rep.getStepAttributeString(id_jobentry, "recordList_"+getRows().get(i).getFirstName()) != null)
+        				openRecordList(rep.getStepAttributeString(id_jobentry, "recordList_"+getRows().get(i).getFirstName()));
+        		}
+        	}
             
             if(rep.getStepAttributeString(id_jobentry, "people") != null)
                 this.openPeople(rep.getStepAttributeString(id_jobentry, "people")); //$NON-NLS-1$
@@ -680,6 +821,13 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
         		for(int i = 0; i<getTables().length; i++)
         			rep.saveStepAttribute(id_job, getObjectId(), "table"+i, getTables()[i]); //$NON-NLS-1$
         	}
+        	
+        	if(getRecordList() != null){
+        		for(int i = 0; i<getRecordList().size(); i++){
+        			rep.saveStepAttribute(id_job, getObjectId(), "recordList_"+getRows().get(i).getFirstName(), this.saveRecordList(i)); //$NON-NLS-1$
+        		}
+        	}
+        	
         	rep.saveStepAttribute(id_job, getObjectId(), "people", this.savePeople()); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "rows", this.saveRows()); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "cols", this.saveCols()); //$NON-NLS-1$

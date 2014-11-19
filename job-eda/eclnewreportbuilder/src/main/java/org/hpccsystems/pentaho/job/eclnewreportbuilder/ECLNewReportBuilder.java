@@ -35,10 +35,46 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
     private ArrayList<String> types = new ArrayList<String>();
     private java.util.List people = new ArrayList();
     private ArrayList<String> vars = new ArrayList<String>();
+    private String label ="";
+	private String outputName ="";
+	private String persist = "";	
+	private String defJobName = "";
     private String reportname = "";
 	private String rule = "";	
 	private RecordList recordList = new RecordList();
+
+	public String getDefJobName() {
+		return defJobName;
+	}
+
+	public void setDefJobName(String defJobName) {
+		this.defJobName = defJobName;
+	}
 	
+	public String getPersistOutputChecked() {
+		return persist;
+	}
+
+	public void setPersistOutputChecked(String persist) {
+		this.persist = persist;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
+	public String getOutputName() {
+		return outputName;
+	}
+
+	public void setOutputName(String outputName) {
+		this.outputName = outputName;
+	}
+
 	public RecordList getRecordList() {
 		return recordList;
 	}
@@ -431,7 +467,15 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
                 setRule(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "rule")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
                 openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
-            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "output_name")) != null)
+                setOutputName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "output_name")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "label")) != null)
+                setLabel(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "label")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "persist_Output_Checked")) != null)
+                setPersistOutputChecked(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "persist_Output_Checked")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")) != null)
+                setDefJobName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")));
+           
         } catch (Exception e) {
             throw new KettleXMLException("ECL Dataset Job Plugin Unable to read step info from XML node", e);
         }
@@ -448,6 +492,10 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         retval += "		<people><![CDATA[" + this.savePeople() + "]]></people>" + Const.CR;
         retval += "		<items><![CDATA[" + this.saveItems() + "]]></items>" + Const.CR;
         retval += "		<types><![CDATA[" + this.saveTypes() + "]]></types>" + Const.CR;
+        retval += "		<label><![CDATA[" + label + "]]></label>" + Const.CR;
+        retval += "		<output_name><![CDATA[" + outputName + "]]></output_name>" + Const.CR;
+        retval += "		<persist_Output_Checked><![CDATA[" + persist + "]]></persist_Output_Checked>" + Const.CR;
+        retval += "		<defJobName><![CDATA[" + defJobName + "]]></defJobName>" + Const.CR;
         retval += "		<rule><![CDATA[" + rule + "]]></rule>" + Const.CR;
         retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
         return retval;
@@ -465,6 +513,14 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
                 this.openItems(rep.getStepAttributeString(id_jobentry, "items")); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "types") != null)
                 this.openTypes(rep.getStepAttributeString(id_jobentry, "types")); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "outputName") != null)
+            	outputName = rep.getStepAttributeString(id_jobentry, "outputName"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "label") != null)
+            	label = rep.getStepAttributeString(id_jobentry, "label"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "persist_Output_Checked") != null)
+            	persist = rep.getStepAttributeString(id_jobentry, "persist_Output_Checked"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "defJobName") != null)
+            	defJobName = rep.getStepAttributeString(id_jobentry, "defJobName"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "people") != null)
                 this.openPeople(rep.getStepAttributeString(id_jobentry, "people")); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "rule") != null)
@@ -485,6 +541,10 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
             rep.saveStepAttribute(id_job, getObjectId(), "people", this.savePeople()); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "rule", rule); //$NON-NLS-1$
         	rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
+            rep.saveStepAttribute(id_job, getObjectId(), "outputName", outputName);
+        	rep.saveStepAttribute(id_job, getObjectId(), "label", label);
+        	rep.saveStepAttribute(id_job, getObjectId(), "persist_Output_Checked", persist);
+        	rep.saveStepAttribute(id_job, getObjectId(), "defJobName", defJobName);
             
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);

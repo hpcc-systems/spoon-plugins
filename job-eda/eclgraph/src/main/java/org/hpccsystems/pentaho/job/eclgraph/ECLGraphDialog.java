@@ -83,8 +83,8 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
     private ECLGraph jobEntry;
     private Text jobEntryName;
     private Combo datasetName;
-    private Combo datasetNameOriginal;
-
+    private Text GraphName;
+    private RecordList recordList;
     private Combo GraphType;
 
     private String[] group = null;
@@ -95,7 +95,6 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
     Group sizeGroup = null;
     ArrayList<String> Fieldfilter = new ArrayList<String>();
     
-    String checkList[] = null;
    
     private Button wOK, wCancel;
     private boolean backupChanged;
@@ -126,7 +125,6 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
         Shell parentShell = getParent();
         final Display display = parentShell.getDisplay();
         
-        String datasets[] = null;
         String datasets1[] = null;
          
         AutoPopulate ap = new AutoPopulate();
@@ -134,15 +132,12 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
             //Object[] jec = this.jobMeta.getJobCopies().toArray();
         	
             datasets1 = ap.parseDatasetsRecordsets(this.jobMeta.getJobCopies());
-            datasets = ap.parseGraphableDefinitions(this.jobMeta.getJobCopies());
-            checkList = ap.parseUnivariate(this.jobMeta.getJobCopies());
             filePath = ap.getGlobalVariable(this.jobMeta.getJobCopies(), "compileFlags"); 
             defJobName = ap.getGlobalVariable(this.jobMeta.getJobCopies(), "jobName");
             group = ap.parseGroupDefinitions(this.jobMeta.getJobCopies());
         }catch (Exception e){
             System.out.println("Error Parsing existing Datasets");
             System.out.println(e.toString());
-            datasets = new String[]{""};
             //System.out.println("Error Parsing existing Datasets");
             //System.out.println(e.toString());
             datasets1 = new String[]{""};
@@ -150,7 +145,7 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
 
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX );
         people = new ArrayList();
-        
+        recordList = new RecordList();
 
         TabFolder tab = new TabFolder(shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
         FormData datatab = new FormData();
@@ -230,10 +225,10 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
         datasetGroup.setLayoutData(datasetGroupFormat);
 		
 		
-        datasetNameOriginal = buildCombo("Original Dataset Name : ", jobEntryName, lsMod, middle, margin, datasetGroup, datasets1);
         
-        datasetName = buildCombo("Dataset Name :    ", datasetNameOriginal, lsMod, middle, margin, datasetGroup, datasets);
-        GraphType = buildCombo("Graph Type :", datasetName, lsMod, middle, margin*2, datasetGroup, new String[]{"PieChart", "LineChart","ScatterChart","BarChart"});
+        datasetName = buildCombo("Dataset Name :    ", jobEntryName, lsMod, middle, margin, datasetGroup, datasets1);
+        GraphName = buildText("Output :    ", datasetName, lsMod,middle, margin, datasetGroup);
+        GraphType = buildCombo("Graph Type :", GraphName, lsMod, middle, margin*2, datasetGroup, new String[]{"PieChart", "LineChart","ScatterChart","BarChart"});
         
         Size = buildCombo("Set Size :", GraphType, lsMod, middle, margin*2, datasetGroup, new String[]{"YES","NO"});
         
@@ -518,118 +513,32 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
 	      public void widgetSelected(SelectionEvent event) {
 	    	  AutoPopulate ap = new AutoPopulate();
 	    	  AddColumnsDialog obj = new AddColumnsDialog(display);
-	    	  RecordList rec = null;
+	    	  
 	    	  String[] items = null;
+	    	  String[] objects = null;
 	    	  String[] types = null;  
 	    	 
               try{          		
-                  //String[] items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
-                  rec = ap.rawFieldsByDataset( datasetNameOriginal.getText(),jobMeta.getJobCopies());
+                  items = ap.fieldsRecByDataset( datasetName.getText(),jobMeta.getJobCopies());
                   
+
+                  //rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+                  //rec = ap.buildMyRecordList(items);
                   //obj.setItems(items);
               }catch (Exception ex){
                   System.out.println("failed to load record definitions");
                   System.out.println(ex.toString());
                   ex.printStackTrace();
               }
-              if(!datasetNameOriginal.getText().equals("") && datasetName.getText().equals("")){
-            	  try {
-					items = ap.fieldsByDataset( datasetNameOriginal.getText(),jobMeta.getJobCopies());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-            	  int i = 0;types = new String[items.length];
-            	  if(rec!=null){
-            	  for(Iterator<RecordBO> I = rec.getRecords().iterator();I.hasNext();){
-						RecordBO ob = (RecordBO) I.next();						
-						types[i] = ob.getColumnType();
-						i++;
-            	  }	
-				}
+              int k = 0;
+              objects = new String[items.length];
+              types = new String[items.length];
+              for(String S : items){
+            	  objects[k] = S.split(",")[0];
+            	  types[k] = S.split(",")[1];
+            	  k++;
               }
-              else{//(datasetName.getText() != null){
-		    	  if(datasetName.getText().split("_")[1].equalsIgnoreCase("Percentile")){
-		    		  items = new String[]{"field","percentile","value"};
-		    		  types = new String[]{"STRING","REAL","REAL"};
-		    	  }
-		    	  else if(datasetName.getText().split("_")[1].startsWith("Frequency")){
-		    		  String type = "";
-		    		  for(Iterator<RecordBO> I = rec.getRecords().iterator();I.hasNext();){
-							RecordBO ob = (RecordBO) I.next();
-							if(ob.getColumnName().equalsIgnoreCase(datasetName.getText().split("_")[0])){
-								type = ob.getColumnType();
-								break;
-							}
-						}
-		    		  items = new String[]{datasetName.getText().split("_")[0],"frequency","percent"};
-		    		  types = new String[]{type,"REAL","REAL"};
-		    	  }
-		    	  else if(datasetName.getText().split("_")[1].startsWith("Univariate")){
-		    		  
-		    		 if(datasetName.getText().split("_")[0].equalsIgnoreCase("UniStats")){
-		    			 String[] stats = new String[]{"Mean","Median","Mode","Sd","Maxval","Minval"};
-		    			 int num = Integer.parseInt(datasetName.getText().split("_")[1].substring(10)); 
-		    			 
-		    			 
-		    			 String[] check = checkList[num-1].split(",");
-		    			 String[] items1 = new String[group.length+check.length];
-		    			 String[] types1 = new String[group.length+check.length];
-		    			 for(int i = 0; i<group.length; i++){
-		    				 items1[i] = group[i].split(",")[0];
-		    				 types1[i] = group[i].split(",")[1];
-		    			 }
-		    			 items1[group.length] = "field"; types1[group.length] = "STRING";int j = group.length+1;
-		    			 for(int i = 0; i<check.length; i++){
-		    				 if(check[i].equalsIgnoreCase("true") && i != 2)
-		    					 {
-		    					 	items1[j] = stats[i];
-		    					 	types1[j] = "REAL";
-		    					 	j++;
-		    					 }	    				 
-		    			 }
-		    			 
-		    			 items = new String[j];
-		    			 types = new String[j];
-		    			 for(int i = 0; i<j; i++){
-		    				 items[i] = items1[i];
-		    				 types[i] = types1[i];
-		    			 }
-					}
-		    		 else if(datasetName.getText().split("_")[0].equalsIgnoreCase("ModeTable")){
-		    			 items = new String[]{"field","mode","cnt"};
-		    			 types = new String[]{"STRING","REAL","UNSIGNED"};
-		    		 }
-		    	  }
-		    	  else if(datasetName.getText().split("_")[2].equalsIgnoreCase("random")){
-		    		  
-		    		  try {
-						String[] item = ap.fieldsByDataset( datasetNameOriginal.getText(),jobMeta.getJobCopies());
-						items = new String[item.length+1];
-						types = new String[item.length];
-						for(int i = 0; i<item.length+1; i++){
-							if(i == 0)
-								items[i] = "rand";
-							else
-								items[i] = item[i-1];
-						} 
-						int i = 0;
-						types[i] = "UNSIGNED DECIMAL8_8";
-						i++;
-						if(rec!=null){
-						for(Iterator<RecordBO> I = rec.getRecords().iterator();I.hasNext();){
-							RecordBO ob = (RecordBO) I.next();
-							types[i] = ob.getColumnType();
-							i++;
-						}
-					  }	
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-		    		  
-		    	  }
-	          }
-	    	  obj.setItems(items);
+	    	  obj.setItems(objects);
               obj.setSelectedColumns(null);
               obj.run();
               ArrayList<String> check = new ArrayList<String>();
@@ -648,8 +557,8 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
 						}
 					}*/
 					int idx = 0;
-					for(int i = 0; i<items.length; i++){
-						if(S.equalsIgnoreCase(items[i]))
+					for(int i = 0; i<objects.length; i++){
+						if(S.equalsIgnoreCase(objects[i]))
 							{idx = i;break;}
 					}
 					if(!check.contains(S)){
@@ -730,6 +639,7 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
 
             public void handleEvent(Event e) {
             	Boolean chart = false;
+            	recordList = new RecordList();
             	if(GraphType.getText().equalsIgnoreCase("PieChart"))
             		chart = true;
             	normlist = new String();cnt = 0;flag = true;Scatterflag = true;Lineflag = true;Barflag = true;Pieflag1 = true;Pieflag2=true;    	
@@ -740,7 +650,14 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
 						cnt += 1;
 					}
 					
-					
+					RecordBO ob = new RecordBO();
+					ob.setColumnName(table.getItem(i).getText(0));
+					ob.setColumnType(table.getItem(i).getText(2));
+					if(table.getItem(i).getText(2).toLowerCase().contains("string"))
+						ob.setDefaultValue("");
+					else
+						ob.setDefaultValue("0");
+					recordList.addRecordBO(ob);
 					
 					normlist += s1;					
 				}	
@@ -830,16 +747,20 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
             datasetName.setText(jobEntry.getDatasetName());
         }
 
-        if (jobEntry.getDatasetNameOriginal() != null) {
-            datasetNameOriginal.setText(jobEntry.getDatasetNameOriginal());
-        }
-
         if (jobEntry.getnormList() != null) {
         	normlist = jobEntry.getnormList();
         }
         
         if (jobEntry.getTyp() != null) {
         	GraphType.setText(jobEntry.getTyp());
+        }
+        
+        if (jobEntry.getGraphName() != null) {
+        	GraphName.setText(jobEntry.getGraphName());
+        }
+        
+        if (jobEntry.getRecordList() != null) {
+        	recordList = jobEntry.getRecordList();
         }
         
         if(jobEntry.getPeople() != null){
@@ -952,13 +873,17 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
     		isValid = false;
     		errors += "\"Job Entry Name\" is a required field!\r\n";
     	}
-   		if(this.datasetNameOriginal.getText().equals("")){
+   		if(this.datasetName.getText().equals("")){
    			isValid = false;
-       		errors += "\"Original Dataset Name\" is a required field!\r\n";
+       		errors += "\"Dataset Name\" is a required field!\r\n";
    		}
    		if(this.GraphType.getText().equals("")){
    			isValid = false;
        		errors += "\"Graph Type\" is a required field!\r\n";
+   		}
+   		if(this.GraphName.getText().equals("")){
+   			isValid = false;
+       		errors += "\"Graph Name\" is a required field!\r\n";
    		}
    		if(this.normlist.equals("")){
    			isValid = false;
@@ -983,10 +908,11 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
     	}
         jobEntry.setName(jobEntryName.getText());
         jobEntry.setDatasetName(this.datasetName.getText());
-        jobEntry.setDatasetNameOriginal(this.datasetNameOriginal.getText());
         jobEntry.setnormList(this.normlist);
         jobEntry.setTyp(this.GraphType.getText());
+        jobEntry.setGraphName(this.GraphName.getText());
         jobEntry.setPeople(this.people);
+        jobEntry.setRecordList(this.recordList);
         jobEntry.setFilePath(this.filePath);
         if(Size.getText().equals("NO") || Size.getText().trim().equals("")){
         	jobEntry.setWidth("");
@@ -998,8 +924,6 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
         }
         	
         jobEntry.setSize(Size.getText());
-        if(checkList.length>0)
-        	jobEntry.setTest(this.checkList[0]);// Only when one needs to plot Univariate statistics
         
         if(chkBox.getSelection() && outputName != null){
         	jobEntry.setOutputName(outputName.getText());

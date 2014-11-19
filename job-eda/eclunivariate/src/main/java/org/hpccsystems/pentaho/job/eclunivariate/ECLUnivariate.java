@@ -20,6 +20,8 @@ import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
 import org.hpccsystems.ecljobentrybase.*;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 
 
 
@@ -37,14 +39,30 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
     private String fieldList = "";
     private String single = "";
     private String mode = "";
-    private String flag = "";
-    private String Number = "";
     private String label ="";
    	private String outputName ="";
    	private String persist = "";
    	private String defJobName = "";
-   	
-   	public String getDefJobName() {
+	private RecordList recordList_unistats = new RecordList();
+	private RecordList recordList_mode = new RecordList();
+   		
+   	public RecordList getRecordList_unistats() {
+		return recordList_unistats;
+	}
+
+	public void setRecordList_unistats(RecordList recordList_unistats) {
+		this.recordList_unistats = recordList_unistats;
+	}
+
+	public RecordList getRecordList_mode() {
+		return recordList_mode;
+	}
+
+	public void setRecordList_mode(RecordList recordList_mode) {
+		this.recordList_mode = recordList_mode;
+	}
+
+	public String getDefJobName() {
    		return defJobName;
    	}
 
@@ -108,22 +126,6 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
         this.single = single;
     }
 
-    public String getNumber() {
-        return Number;
-    }
-
-    public void setNumber(String Number) {
-        this.Number = Number;
-    }
-
-    public String getflag() {
-        return flag;
-    }
-
-    public void setflag(String flag) {
-        this.flag = flag;
-    }
-
     public String getMode() {
         return mode;
     }
@@ -163,21 +165,26 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
         	return result;
         }
         else{
-        	logBasic(Number);
         	String[] check = getCheckList().split(",");
-        	String[] fieldNames = fieldList.split(",");
+        	String[] fieldNames = fieldList.split("[|]");
         	String normlist = "";int cnt = 0;
-        	String List = "";
+        	String List = "";String filter = "(";
         	for(int i = 0; i<fieldNames.length; i++){
+        		String[] sf = fieldNames[i].split(",");
         		if(i!=fieldNames.length-1){
-        			normlist += "LEFT."+fieldNames[i]+",";
-        			List += "\'"+fieldNames[i]+"\',";
+        			normlist += "LEFT."+sf[0]+",";
+        			List += "\'"+sf[0]+"\',";
+        			if(sf.length == 2)
+        				filter += "(field = '"+sf[0]+"' AND "+sf[1].replace(sf[0], "value")+") OR ";        			
         		}
         		else{
-        			normlist += "LEFT."+fieldNames[i];
-        			List += "\'"+fieldNames[i]+"\'";
+        			normlist += "LEFT."+sf[0];
+        			List += "\'"+sf[0]+"\'";
+        			if(sf.length == 2)
+        				filter += "(field = '"+sf[0]+"' AND "+sf[1].replace(sf[0], "value")+")";        			
         		}
         	}
+        	filter += ")";
         	
         	String dataList = "";String col = "";String out = "";String grp = "";String forP = "";String join = "";String outfile = "";
         	for(Iterator it = group.iterator(); it.hasNext();){
@@ -197,13 +204,24 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
         	ecl += "MyDS := PROJECT("+datasetName+",Trans(LEFT,COUNTER));\n";
         	
         	ecl += "NumField := RECORD\nUNSIGNED id;\n"+dataList+"STRING field;\nREAL8 value;\nEND;\n";
-        	ecl += "OutDS := NORMALIZE(MyDS,"+fieldNames.length+", TRANSFORM(NumField,SELF.id:=LEFT.uid,"+col+"SELF.field:=CHOOSE(COUNTER,"+List+");SELF.value:=CHOOSE" +
-        			"(COUNTER,"+normlist+")));\n";
+        	if(filter.length() == 2)
+        		ecl += "OutDS := NORMALIZE(MyDS,"+fieldNames.length+", TRANSFORM(NumField,SELF.id:=LEFT.uid,"+col+"SELF.field:=CHOOSE(COUNTER,"+List+");SELF.value:=CHOOSE" +
+        				"(COUNTER,"+normlist+")));\n";
+        	else{
+        		ecl += "OutDS1 := NORMALIZE(MyDS,"+fieldNames.length+", TRANSFORM(NumField,SELF.id:=LEFT.uid,"+col+"SELF.field:=CHOOSE(COUNTER,"+List+");SELF.value:=CHOOSE" +
+        				"(COUNTER,"+normlist+")));\n";
+        		ecl += "OutDS := OutDS1("+filter+");\n";
+        	}
         	ecl += "SingleField := RECORD\n"+out+"\nOutDS.field;\n";
         	if(check[0].equals("true"))
-        		{ecl += "mean:=AVE(GROUP,OutDS.value);\n";cnt++;}
+        		{
+        			ecl += "mean:=AVE(GROUP,OutDS.value);\n";cnt++;
+        		}
         	if(check[3].equals("true"))
-        		{ecl += "Sd:=SQRT(VARIANCE(GROUP,OutDS.value));\n";cnt++;}
+        		{        			
+        			ecl += "Sd:=SQRT(VARIANCE(GROUP,OutDS.value));\n";cnt++;
+        		}
+        	
         	if(check[4].equals("true"))
         		{ecl += "Maxval:=MAX(GROUP,OutDS.value);\n";cnt++;}
         	if(check[5].equals("true"))
@@ -216,7 +234,7 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
         	if(check[1].equals("true") || check[2].equals("true")){
         	// this can be reused        		
 	        	ecl += "RankableField := RECORD\nOutDS;\nUNSIGNED pos:=0;\nEND;\n";
-	        	ecl += "T:=TABLE(SORT(OutDS,"+grp+"field,Value),RankableField);\n";
+	        	ecl += "T:=TABLE(SORT(OutDS,"+grp+"field,Value),RankableField);\n";	        	
 	        	ecl += "TYPEOF(T) add_rank(T le, UNSIGNED c):=TRANSFORM\nSELF.pos:=c;\nSELF:=le;\nEND;\n";
 	        	ecl += "P:=PROJECT(T,add_rank(LEFT,COUNTER));\n";
 	        	ecl += "RS:=RECORD\nSeq:=MIN(GROUP,P.pos);\n"+forP+"P.field;\nEND;\n";
@@ -235,9 +253,9 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
 	        			//ecl += "OUTPUT("+getSingle()+",NAMED('UnivariateStats'));\n";
 	        			if(persist.equalsIgnoreCase("true")){
 	    	        		if(outputName != null && !(outputName.trim().equals(""))){
-	    	        			ecl += "OUTPUT("+getSingle()+",,'~eda::"+outputName+"::univariate_stats', __compressed__, overwrite,NAMED('UnivariateStats'))"+";\n";
+	    	        			ecl += "OUTPUT("+getSingle()+",,'~"+outputName+"::"+getSingle()+"', __compressed__, overwrite,NAMED('UnivariateStats'))"+";\n";
 	    	        		}else{
-	    	        			ecl += "OUTPUT("+getSingle()+",,'~eda::"+defJobName+"::univariate_stats', __compressed__, overwrite,NAMED('UnivariateStats'))"+";\n";
+	    	        			ecl += "OUTPUT("+getSingle()+",,'~"+defJobName+"::"+getSingle()+"', __compressed__, overwrite,NAMED('UnivariateStats'))"+";\n";
 	    	        		}
 	    	        	}
 	    	        	else{
@@ -249,9 +267,9 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
 	        			//ecl += "OUTPUT("+getSingle()+",NAMED('UniVariate'));\n";
 	        			if(persist.equalsIgnoreCase("true")){
 	    	        		if(outputName != null && !(outputName.trim().equals(""))){
-	    	        			ecl += "OUTPUT("+getSingle()+",,'~eda::"+outputName+"::univariate_stats', __compressed__, overwrite,NAMED('UnivariateStats'))"+";\n";
+	    	        			ecl += "OUTPUT("+getSingle()+",,'~"+outputName+"::"+getSingle()+"', __compressed__, overwrite,NAMED('UnivariateStats'))"+";\n";
 	    	        		}else{
-	    	        			ecl += "OUTPUT("+getSingle()+",,'~eda::"+defJobName+"::univariate_stats', __compressed__, overwrite,NAMED('UnivariateStats'))"+";\n";
+	    	        			ecl += "OUTPUT("+getSingle()+",,'~"+defJobName+"::"+getSingle()+"', __compressed__, overwrite,NAMED('UnivariateStats'))"+";\n";
 	    	        		}
 	    	        	}
 	    	        	else{
@@ -268,9 +286,9 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
 	        		//ecl += "OUTPUT("+getMode()+",NAMED('UniVariate_Mode'));\n";
 	        		if(persist.equalsIgnoreCase("true")){
     	        		if(outputName != null && !(outputName.trim().equals(""))){
-    	        			ecl += "OUTPUT("+getMode()+",,'~eda::"+outputName+"::univariate_mode', __compressed__, overwrite,NAMED('Univariate_Mode'))"+";\n";
+    	        			ecl += "OUTPUT("+getMode()+",,'~"+outputName+"::"+getMode()+"', __compressed__, overwrite,NAMED('Univariate_Mode'))"+";\n";
     	        		}else{
-    	        			ecl += "OUTPUT("+getMode()+",,'~eda::"+defJobName+"::univariate_mode', __compressed__, overwrite,NAMED('Univariate_Mode'))"+";\n";
+    	        			ecl += "OUTPUT("+getMode()+",,'~"+defJobName+"::"+getMode()+"', __compressed__, overwrite,NAMED('Univariate_Mode'))"+";\n";
     	        		}
     	        	}
     	        	else{
@@ -284,9 +302,9 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
         		//ecl += "OUTPUT("+getSingle()+",NAMED('Univariate'));\n";
         		if(persist.equalsIgnoreCase("true")){
 	        		if(outputName != null && !(outputName.trim().equals(""))){
-	        			ecl += "OUTPUT("+getSingle()+",,'~eda::"+outputName+"::univariate', __compressed__, overwrite,NAMED('Univariate'))"+";\n";
+	        			ecl += "OUTPUT("+getSingle()+",,'~"+outputName+"::"+getSingle()+"', __compressed__, overwrite,NAMED('Univariate'))"+";\n";
 	        		}else{
-	        			ecl += "OUTPUT("+getSingle()+",,'~eda::"+defJobName+"::univariate', __compressed__, overwrite,NAMED('Univariate'))"+";\n";
+	        			ecl += "OUTPUT("+getSingle()+",,'~"+defJobName+"::"+getSingle()+"', __compressed__, overwrite,NAMED('Univariate'))"+";\n";
 	        		}
 	        	}
 	        	else{
@@ -318,7 +336,7 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
     	while(it.hasNext()){
     		if(!isFirst){out+="|";}
     		Cols p = (Cols) it.next();
-    		out +=  p.getFirstName()+","+p.getType();
+    		out +=  p.getFirstName()+","+p.getType()+","+p.getRule();
             isFirst = false;
     	}
     	return out;
@@ -334,6 +352,10 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
         		Cols P = new Cols();
         		P.setFirstName(S[0]);
         		P.setType(S[1]);
+        		if(S.length == 3)
+        			P.setRule(S[2]);
+        		else
+        			P.setRule("");
         		people.add(P);
         	}
         }
@@ -368,6 +390,67 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
         }
     }
 
+    public String saveRecordList_unistats(){
+        String out = "";
+        ArrayList list = recordList_unistats.getRecords();
+        Iterator<RecordBO> itr = list.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
+    }
+    
+    public void openRecordList_unistats(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            recordList_unistats = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList_unistats.addRecordBO(rb);
+            }
+        }
+    }
+
+    public String saveRecordList_mode(){
+        String out = "";
+        ArrayList list = recordList_mode.getRecords();
+        Iterator<RecordBO> itr = list.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
+    }
+    
+    public void openRecordList_mode(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            recordList_mode = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList_mode.addRecordBO(rb);
+            }
+        }
+    }
     
     @Override
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
@@ -376,10 +459,6 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
             
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dataset_name")) != null)
                 setDatasetName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dataset_name")));
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "flag")) != null)
-                setflag(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "flag")));
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "Number")) != null)
-                setNumber(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "Number")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "checklist")) != null)
                 setCheckList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "checklist")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "logical_file_name")) != null)
@@ -407,6 +486,10 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
                 
            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")) != null)
                 setDefJobName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")));	
+           if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList_unistats")) != null)
+               openRecordList_unistats(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList_unistats")));
+           if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList_mode")) != null)
+               openRecordList_mode(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList_mode")));
             
         } catch (Exception e) {
             throw new KettleXMLException("ECL Dataset Job Plugin Unable to read step info from XML node", e);
@@ -421,20 +504,24 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
         retval += "		<people><![CDATA[" + this.savePeople() + "]]></people>" + Const.CR;
         retval += "     <group eclIsGroup=\"true\"><![CDATA[" + this.saveGroup() + "]]></group>" + Const.CR;
         retval += "		<fieldList><![CDATA[" + fieldList + "]]></fieldList>" + Const.CR;
-        retval += "		<flag><![CDATA[" + flag + "]]></flag>" + Const.CR;
-        retval += "		<Number><![CDATA[" + Number + "]]></Number>" + Const.CR;
         retval += "		<logical_file_name><![CDATA[" + logicalFileName + "]]></logical_file_name>" + Const.CR;
         retval += "		<checklist eclIsUniv=\"true\"><![CDATA[" + checkList + "]]></checklist>" + Const.CR;
-        retval += "		<dataset_name><![CDATA[" + datasetName + "]]></dataset_name>" + Const.CR;		
-        retval += "		<single eclIsGraphable=\"true\" eclIsDef=\"true\" eclType=\"recordset\" eclInception=\"true\"><![CDATA[" + single + "]]></single>" + Const.CR;
+        retval += "		<dataset_name><![CDATA[" + datasetName + "]]></dataset_name>" + Const.CR;	
+        if(getCheckList().length() > 0){
+        	String[] s = getCheckList().split(",");
+        	if(s[0].equals("true") || s[1].equals("true") || s[3].equals("true") || s[4].equals("true") || s[5].equals("true"))
+        		retval += "		<single eclIsGraphable=\"true\" eclIsDef=\"true\" eclType=\"dataset\" eclInception=\"true\"><![CDATA[" + single + "]]></single>" + Const.CR;
+        }
         if(getCheckList().length() > 0){
         	if(getCheckList().split(",")[2].equals("true"))
-        		retval += "		<mode eclIsGraphable=\"true\" eclIsDef=\"true\" eclType=\"recordset\" eclInception=\"true\"><![CDATA[" + mode + "]]></mode>" + Const.CR;
+        		retval += "		<mode eclIsGraphable=\"true\" eclIsDef=\"true\" eclType=\"dataset\" eclInception=\"true\"><![CDATA[" + mode + "]]></mode>" + Const.CR;
         }
         retval += "		<label><![CDATA[" + label + "]]></label>" + Const.CR;
         retval += "		<output_name><![CDATA[" + outputName + "]]></output_name>" + Const.CR;
         retval += "		<persist_Output_Checked><![CDATA[" + persist + "]]></persist_Output_Checked>" + Const.CR;
         retval += "		<defJobName><![CDATA[" + defJobName + "]]></defJobName>" + Const.CR;
+        retval += "		<recordList_unistats><![CDATA[" + this.saveRecordList_unistats() + "]]></recordList_unistats>" + Const.CR;
+        retval += "		<recordList_mode><![CDATA[" + this.saveRecordList_mode() + "]]></recordList_mode>" + Const.CR;
         return retval;
 
     }
@@ -444,10 +531,6 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
         try {
             if(rep.getStepAttributeString(id_jobentry, "datasetName") != null)
                 datasetName = rep.getStepAttributeString(id_jobentry, "datasetName"); //$NON-NLS-1$
-            if(rep.getStepAttributeString(id_jobentry, "flag") != null)
-            	flag = rep.getStepAttributeString(id_jobentry, "flag"); //$NON-NLS-1$
-            if(rep.getStepAttributeString(id_jobentry, "Number") != null)
-            	Number = rep.getStepAttributeString(id_jobentry, "Number"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "checklist") != null)
                 checkList = rep.getStepAttributeString(id_jobentry, "checklist"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "logicalFileName") != null)
@@ -470,6 +553,11 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
             	persist = rep.getStepAttributeString(id_jobentry, "persist_Output_Checked"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "defJobName") != null)
             	defJobName = rep.getStepAttributeString(id_jobentry, "defJobName"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "recordList_unistats") != null)
+                this.openRecordList_unistats(rep.getStepAttributeString(id_jobentry, "recordList_unistats")); //$NON-NLS-1$
+            
+            if(rep.getStepAttributeString(id_jobentry, "recordList_mode") != null)
+                this.openRecordList_mode(rep.getStepAttributeString(id_jobentry, "recordList_mode")); //$NON-NLS-1$
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
         }
@@ -485,12 +573,12 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
             rep.saveStepAttribute(id_job, getObjectId(), "fieldList", fieldList); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "single", single); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "mode", mode); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "flag", flag); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "Number", Number); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "outputName", outputName);
         	rep.saveStepAttribute(id_job, getObjectId(), "label", label);
         	rep.saveStepAttribute(id_job, getObjectId(), "persist_Output_Checked", persist);
         	rep.saveStepAttribute(id_job, getObjectId(), "defJobName", defJobName);
+        	rep.saveStepAttribute(id_job, getObjectId(), "recordList_unistats", this.saveRecordList_unistats()); //$NON-NLS-1$
+        	rep.saveStepAttribute(id_job, getObjectId(), "recordList_mode", this.saveRecordList_mode()); //$NON-NLS-1$
             
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);

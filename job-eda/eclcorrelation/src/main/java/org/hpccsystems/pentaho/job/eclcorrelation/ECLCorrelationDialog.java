@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.hpccsystems.ecljobentrybase.ECLJobEntryDialog;
+import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.recordlayout.RecordLabels;
 import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.core.Const;
@@ -87,9 +88,9 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
     private String persist;
     private Composite composite;
     private String defJobName;
-    
-    String outlierRules[] = null;
-    //private List outlierRules  = new ArrayList();
+    private Text OutName;
+    private String outlierRules[] = null;
+    private RecordList recordList;
     
     public ECLCorrelationDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
         super(parent, jobEntryInt, rep, jobMeta);
@@ -128,7 +129,7 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
 
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
         fields = new ArrayList();
-        
+        recordList = new RecordList();
         TabFolder tab = new TabFolder(shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
         FormData datatab = new FormData();
         
@@ -195,7 +196,7 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
         FormData fieldsGroupFormat = new FormData();
         fieldsGroupFormat.top = new FormAttachment(generalGroup, margin);
         fieldsGroupFormat.width = 340;
-        fieldsGroupFormat.height = 100;
+        fieldsGroupFormat.height = 110;
         fieldsGroupFormat.left = new FormAttachment(middle, 0);
         fieldsGroupFormat.right = new FormAttachment(100, 0);
         fieldsGroup.setLayoutData(fieldsGroupFormat);
@@ -215,6 +216,7 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
         
         Method = buildCombo("Method:", jobEntryName, lsMod, middle, margin, fieldsGroup, new String[]{"Pearson", "Spearman"});
         datasetName = buildCombo("Dataset Name:", Method, lsMod, middle, margin, fieldsGroup, datasets);
+        OutName = buildText("Output Dataset:", datasetName, lsMod, middle, margin, fieldsGroup);
         
 		String rul = "";
 		for(int i=0; i<outlRules.length; i++){
@@ -508,19 +510,21 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
 					AutoPopulate ap = new AutoPopulate();
 	          try{
 	      		
-	              //String[] items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
-	              RecordList rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+	              String[] items = ap.fieldsRecByDataset( datasetName.getText(),jobMeta.getJobCopies());
+	              //RecordList rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+                  RecordList rec = ap.buildMyRecordList(items);
                   
                   for(int i = 0; i < rec.getRecords().size(); i++){
                       TreeItem item = new TreeItem(tab, SWT.NONE);
-                      item.setText(0, rec.getRecords().get(i).getColumnName().toLowerCase());
+                      RecordBO ob = rec.getRecords().get(i);
+                      item.setText(0, ob.getColumnName().toLowerCase());
                       String type = "String";
                       String width = "";
                       try{
-                             type = rec.getRecords().get(i).getColumnType();
-                             width = rec.getRecords().get(i).getColumnWidth();
+                             type = ob.getColumnType();
+                             width = ob.getColumnWidth();
                              item.setText(1,type+width);
-                             if(rec.getRecords().get(i).getColumnType().startsWith("String")){
+                             if(ob.getColumnType().toLowerCase().contains("string")){
                             	 item.setBackground(0, new Color(null,211,211,211));
                              }
                       }catch (Exception e){
@@ -713,6 +717,22 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
         Listener okListener = new Listener() {
 
             public void handleEvent(Event e) {
+            	recordList = new RecordList();
+            	RecordBO ob = new RecordBO();
+            	ob.setColumnName("Fields");
+            	ob.setColumnType("STRING");
+            	ob.setDefaultValue("");
+            	recordList.addRecordBO(ob);
+            	ob = new RecordBO();
+            	ob.setColumnName("Val");
+            	ob.setColumnType("REAL");
+            	ob.setDefaultValue("0");
+            	recordList.addRecordBO(ob);
+            	ob = new RecordBO();
+            	ob.setColumnName("Recs_used");
+            	ob.setColumnType("INTEGER");
+            	ob.setDefaultValue("0");
+            	recordList.addRecordBO(ob);
                 ok();
             }
         };
@@ -745,6 +765,10 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
             datasetName.setText(jobEntry.getDatasetName());
         }
         
+        if (jobEntry.getOutName() != null) {
+            OutName.setText(jobEntry.getOutName());
+        }
+        
         if (jobEntry.getMethod() != null) {
             Method.setText(jobEntry.getMethod());
         }
@@ -757,7 +781,11 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
         if(jobEntry.getRule() != null){
         	Rule.setText(jobEntry.getRule());
         }
-        
+
+        if (jobEntry.getRecordList() != null) {
+        	recordList = jobEntry.getRecordList();
+        }
+
         if (jobEntry.getPersistOutputChecked() != null && chkBox != null) {
         	chkBox.setSelection(jobEntry.getPersistOutputChecked().equals("true")?true:false);
         }
@@ -811,6 +839,11 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
     		errors += "\"Dataset Name\" is a required field!\r\n";
     	}
     	
+    	if(this.OutName.getText().equals("")){
+    		isValid = false;
+    		errors += "\"Output Name\" is a required field!\r\n";
+    	}
+    	
     	if(!isValid){
     		ErrorNotices en = new ErrorNotices();
     		errors += "\r\n";
@@ -831,6 +864,8 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
         jobEntry.setMethod(this.Method.getText());
         jobEntry.setFields(fields);
         jobEntry.setRule(this.Rule.getText());
+        jobEntry.setRecordList(recordList);
+        jobEntry.setOutName(OutName.getText());
         
         if(chkBox.getSelection() && outputName != null){
         	jobEntry.setOutputName(outputName.getText());

@@ -70,10 +70,10 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
 	
 	public static final String NAME = "Name";
 	public static final String BUCKETS = "Buckets";
-	
+	public static final String RULE = "Rule";
 	
   
-	public static final String[] PROP = { NAME, BUCKETS};
+	public static final String[] PROP = { NAME, BUCKETS, RULE};
 	
 	java.util.List people;
 	private String normlist = "";
@@ -84,7 +84,7 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
     ArrayList<String> Fieldfilter = new ArrayList<String>();
     private Text OutName;
     private RecordList recordList;
-   
+    
     private Button wOK, wCancel;
     private boolean backupChanged;
     
@@ -97,8 +97,8 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
     
 	private SelectionAdapter lsDef;
 	
-	private Combo Rule;
-	String outlierRules[] = null;
+
+	private String outlierRules[] = null;
 
 	
     public ECLPercentileBucketsDialog(Shell parent, JobEntryInterface jobEntryInt,
@@ -218,18 +218,6 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
                
         OutName = buildText("Output :    ", TiesBreak, lsMod, middle, margin, datasetGroup);
         
-        Group ruleGroup = new Group(compForGrp, SWT.SHADOW_NONE);
-        props.setLook(ruleGroup);
-        ruleGroup.setText("Outlier Rule");
-        ruleGroup.setLayout(groupLayout);
-        FormData ruleFormData = new FormData();
-        ruleFormData.top = new FormAttachment(datasetGroup, margin);
-        ruleFormData.width = 340;
-        ruleFormData.height = 65;
-        ruleFormData.left = new FormAttachment(middle, 0);
-        ruleFormData.right = new FormAttachment(100, 0);
-        ruleGroup.setLayoutData(ruleFormData);
-        
         String rul = "";
 		for(int i=0; i<outlRules.length; i++){
 			rul += "|";
@@ -237,8 +225,7 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
 		}
 		outlierRules = rul.split("\\|");
 		
-	        Rule = buildCombo("Rule:", OutName, lsMod, middle, margin, ruleGroup, outlierRules );
-		    Rule.setItems(outlierRules);
+	        
 			
         
  //Begin
@@ -248,7 +235,7 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
         perGroup.setText("Persist");
         perGroup.setLayout(groupLayout);
         FormData perGroupFormat = new FormData();
-        perGroupFormat.top = new FormAttachment(ruleGroup, margin);
+        perGroupFormat.top = new FormAttachment(datasetGroup, margin);
         perGroupFormat.width = 400;
         perGroupFormat.height = 80;
         perGroupFormat.left = new FormAttachment(middle, 0);
@@ -380,6 +367,9 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
 	    final TableColumn tc = new TableColumn(table, SWT.CENTER);
 	    tc.setText("Buckets");
 	    tc.setWidth(150);
+	    TableColumn tc1 = new TableColumn(table, SWT.CENTER);
+	    tc1.setText("Outlier(s)");
+	    tc1.setWidth(150);
 	    
 
 	    if(jobEntry.getPeople() != null)
@@ -664,6 +654,19 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
 								Player p = new Player();
 								p.setFirstName(S[0]);
 								p.setBuckets("");
+								int idx = 0;
+								if(outlierRules != null){
+									for(int i = 0; i<outlierRules.length; i++){
+										if(outlierRules[i].toLowerCase().contains(S[0].toLowerCase())){
+											idx = i;
+											break;
+										}
+									}
+									p.setRule(outlierRules[idx]);
+								}
+								else{
+									p.setRule("");
+								}
 								people.add(p);
 								
 								
@@ -714,9 +717,10 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
             }
         });
 
-	    final CellEditor[] editors = new CellEditor[2];
+	    final CellEditor[] editors = new CellEditor[3];
 	    editors[0] = new TextCellEditor(table);
 	    editors[1] = new TextCellEditor(table);
+	    editors[2] = new TextCellEditor(table);
 	    // Set the editors, cell modifier, and column properties
 	    tv.setColumnProperties(PROP);
 	    tv.setCellModifier(new PersonCellModifier(tv));
@@ -749,7 +753,7 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
                 
             	normlist = new String();
 				for(int i = 0; i<table.getItemCount(); i++){
-					String s1 = table.getItem(i).getText(0)+","+table.getItem(i).getText(1)+"-"; 
+					String s1 = table.getItem(i).getText(0)+","+table.getItem(i).getText(1)+","+table.getItem(i).getText(2)+"-"; 
 					normlist += s1;
 				}
 				ok();
@@ -790,10 +794,6 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
         	normlist = jobEntry.getnormList();
         }
         
-        if(jobEntry.getRule() != null){
-        	Rule.setText(jobEntry.getRule());
-        }
-
         if (jobEntry.getOutName() != null) {
         	OutName.setText(jobEntry.getOutName());
         }
@@ -899,7 +899,6 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
         jobEntry.setnormList(this.normlist);
         jobEntry.setPeople(this.people);
         jobEntry.setTies(this.TiesBreak.getText());
-        jobEntry.setRule(this.Rule.getText());
         jobEntry.setOutName(this.OutName.getText());
         jobEntry.setRecordList(recordList);
         
@@ -947,7 +946,8 @@ class PersonCellModifier implements ICellModifier {
 	      return p.getFirstName();
 	    else if (ECLPercentileBucketsDialog.BUCKETS.equals(property))
 	      return p.getBuckets();
-	    
+	    else if (ECLPercentileBucketsDialog.RULE.equals(property))
+		      return p.getRule();
 	    else
 	      return null;
 	  }
@@ -960,7 +960,9 @@ class PersonCellModifier implements ICellModifier {
 	    if (ECLPercentileBucketsDialog.NAME.equals(property))
 	      p.setFirstName((String) value);
 	    else if (ECLPercentileBucketsDialog.BUCKETS.equals(property))
-	      p.setBuckets((String) value);	    
+	      p.setBuckets((String) value);
+	    else if (ECLPercentileBucketsDialog.RULE.equals(property))
+		      p.setRule((String) value);
 	    // Force the viewer to refresh
 	    viewer.refresh();
 	  }
@@ -970,8 +972,17 @@ class PersonCellModifier implements ICellModifier {
 class Player {
 	  private String firstName;
 	  private String buckets;
+	  private String Rule;
+	  
+      public String getRule() {
+		return Rule;
+	}
 
-      public String getFirstName() {
+	public void setRule(String rule) {
+		Rule = rule;
+	}
+
+	public String getFirstName() {
 		  return firstName;
 	  }
 
@@ -1016,6 +1027,8 @@ class PlayerLabelProvider implements ITableLabelProvider {
 	  	//break;
 	  case 1:
 		  return values.getBuckets();//text = values[1];
+	  case 2:
+		  return values.getRule();
 	  	//break;
 	  }
 	  return null;

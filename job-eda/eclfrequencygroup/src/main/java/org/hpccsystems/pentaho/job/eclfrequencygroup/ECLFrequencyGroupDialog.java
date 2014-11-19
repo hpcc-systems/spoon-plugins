@@ -79,10 +79,12 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
 	public static final String COLUMN = "Column";
 	public static final String TYPE = "Type";
 	public static final String SORTNUM = "Sort as Numeric";
+	public static final String RULE = "Rule";
   
-	public static final String[] PROP = { NAME, OPTION, COLUMN, TYPE, SORTNUM};
+	public static final String[] PROP = { NAME, OPTION, COLUMN, TYPE, SORTNUM, RULE};
 	
 	java.util.List people;
+    private String[] outlierRules = null;
 	
 	private String normlist = "";
 	private String data_type = "";
@@ -91,17 +93,15 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
     private Text TableName;
     private Combo datasetName;
     private Combo sort;
-    private String outTables[] = null;
     ArrayList<String> Fieldfilter = new ArrayList<String>();
-    private String test = "";
-    private int number = 1;
-    private static String flag = "true";
     private ArrayList<String[]> GroupBy = new ArrayList<String[]>();
-   
+    private ArrayList<String> ds_num, ds_string;   
     private Button wOK, wCancel;
     private boolean backupChanged;
     Map<String, String[]> mapDataSets = null;
     
+    private RecordList recordList_number;
+    private RecordList recordList_string;    
     
 	private SelectionAdapter lsDef;
 
@@ -129,6 +129,7 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
         final Display display = parentShell.getDisplay();
         
         String datasets[] = null;
+        String outlRules[] = null;
         
         AutoPopulate ap = new AutoPopulate();
         try{
@@ -142,21 +143,28 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
             System.out.println(e.toString());
             datasets = new String[]{""};
         }
+        try{
+        	outlRules = ap.parseOutlierRules(this.jobMeta.getJobCopies());
+        	//outlierRules = Arrays.asList(outlRules);
+        }catch (Exception e){
+            System.out.println("Error Parsing existing outlier rules");
+            System.out.println(e.toString());
+            outlRules = new String[]{""};
+        }
         
 
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
         people = new ArrayList();
-        test = jobEntry.getName().substring(jobEntry.getName().length()-1); 
-        if(Character.isDigit(test.toCharArray()[0]) && flag.equals("true")){
-        	number = Integer.parseInt(test);
-        	number = number - 1;
-        	flag = "false";
-        }
+        recordList_number = new RecordList();
+        recordList_string = new RecordList();
+        ds_num = new ArrayList<String>();
+        ds_string = new ArrayList<String>();
+
         TabFolder tab = new TabFolder(shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
         FormData datatab = new FormData();
         
-        datatab.height = 400;
-        datatab.width = 650;
+        datatab.height = 500;
+        datatab.width = 800;
         tab.setLayoutData(datatab);
         
         Composite compForGrp = new Composite(tab, SWT.NONE);
@@ -221,6 +229,12 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
         datasetName = buildCombo("Dataset Name :    ", jobEntryName, lsMod, middle, margin, datasetGroup, datasets);
 		
         sort = buildCombo("Sort :    ", datasetName, lsMod, middle, margin, datasetGroup, new String[]{"NO", "YES"});
+        String rul = "";
+		for(int i=0; i<outlRules.length; i++){
+			rul += "|";
+			rul += outlRules[i];
+		}
+		outlierRules = rul.split("\\|");
         
         //Begin
         
@@ -498,6 +512,10 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
 	    tc3.setWidth(0);
 	    tc3.setResizable(false);
 	    
+	    TableColumn tc4 = new TableColumn(table, SWT.LEFT);
+	    tc4.setText("Outlier(s)");
+	    tc4.setWidth(150);
+	    
 	    if(jobEntry.getPeople() != null)
             people = jobEntry.getPeople();
 	    tv.setInput(people);
@@ -569,7 +587,7 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
             }
         });
 
-	    final CellEditor[] editors = new CellEditor[5];
+	    final CellEditor[] editors = new CellEditor[6];
 	    editors[0] = new TextCellEditor(table);
 	    
 	    editors[1] = new ComboBoxCellEditor(table, SortOption.INSTANCES, SWT.READ_ONLY);
@@ -577,6 +595,7 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
 	    editors[2] = new ComboBoxCellEditor(table, ColOption.INSTANCES1, SWT.READ_ONLY);
 	    editors[3] = new TextCellEditor(table);
 	    editors[4] = new ComboBoxCellEditor(table, SortAsNumeric.INSTANCES, SWT.READ_ONLY);
+	    editors[5] = new TextCellEditor(table);
 	    // Set the editors, cell modifier, and column properties
 	    tv.setColumnProperties(PROP);
 	    tv.setCellModifier(new PersonCellModifier(tv));
@@ -628,15 +647,57 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
         Listener okListener = new Listener() {
 
             public void handleEvent(Event e) {
-            	outTables = new String[table.getItemCount()];
+            	recordList_number = new RecordList();
+            	recordList_string = new RecordList();
             	normlist = new String();
             	data_type = new String();
+            	ds_string = new ArrayList<String>();
+            	ds_num = new ArrayList<String>();
 				for(int i = 0; i<table.getItemCount(); i++){
-					String s1 = table.getItem(i).getText(0)+","+table.getItem(i).getText(1)+","+table.getItem(i).getText(2)+","+table.getItem(i).getText(4)+"-"; 
+					String s1 = table.getItem(i).getText(0)+","+table.getItem(i).getText(1)+","+table.getItem(i).getText(2)+","+table.getItem(i).getText(4)+","+table.getItem(i).getText(5).toLowerCase()+"-"; 
 					normlist += s1;
 					data_type += table.getItem(i).getText(3)+",";
-					outTables[i] = table.getItem(i).getText(0)+"_"+jobEntryName.getText();
+					if(table.getItem(i).getText(3).toLowerCase().contains("string"))
+						ds_string.add(table.getItem(i).getText(0)+"_Frequency");
+					else
+						ds_num.add(table.getItem(i).getText(0)+"_Frequency");
 				}
+				
+				for(String[] S : GroupBy){
+					RecordBO ob = new RecordBO();
+					ob.setColumnName(S[0]);
+					ob.setColumnType(S[1]);
+					if(S[1].toLowerCase().contains("string"))
+						ob.setDefaultValue("");
+					else
+						ob.setDefaultValue("0");
+					recordList_number.addRecordBO(ob);
+					recordList_string.addRecordBO(ob);					
+				}
+				
+				RecordBO ob = new RecordBO();
+				ob.setColumnName("Value");
+				ob.setColumnType("String");
+				ob.setDefaultValue("");
+				recordList_string.addRecordBO(ob);
+				ob = new RecordBO();
+				ob.setColumnName("Value");
+				ob.setColumnType("REAL");
+				ob.setDefaultValue("");
+				recordList_number.addRecordBO(ob);
+				ob = new RecordBO();
+				ob.setColumnName("Frequency");
+				ob.setColumnType("INTEGER");
+				ob.setDefaultValue("0");
+				recordList_string.addRecordBO(ob);
+				recordList_number.addRecordBO(ob);
+				ob = new RecordBO();
+				ob.setColumnName("Percent");
+				ob.setColumnType("REAL");
+				ob.setDefaultValue("0");
+				recordList_string.addRecordBO(ob);
+				recordList_number.addRecordBO(ob);
+				
 				ok();
             }
         };
@@ -683,12 +744,25 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
         	data_type = jobEntry.getDataType();
         }
         
+        if (jobEntry.getDs_num() != null) {
+        	ds_num = jobEntry.getDs_num();
+        }
+        
+        if (jobEntry.getDs_string() != null) {
+        	ds_string = jobEntry.getDs_string();
+        }
+        
+        if (jobEntry.getRecordList_number() != null) {
+        	recordList_number = jobEntry.getRecordList_number();
+        }
+
+        if (jobEntry.getRecordList_string() != null) {
+        	recordList_string = jobEntry.getRecordList_string();
+        }
+
         if(jobEntry.getPeople() != null){
         	people = jobEntry.getPeople();
         	tv.setInput(people);
-        }
-        if(jobEntry.getflag()!= null){
-        	flag = jobEntry.getflag();
         }
         
         if(jobEntry.getGroupBy()!= null){
@@ -706,9 +780,6 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
         	gp.setText(s);
         }
         
-        if(jobEntry.getNumber().length()>=1){
-        	number = Integer.parseInt(jobEntry.getNumber());
-        }
         
         if (jobEntry.getPersistOutputChecked() != null && chkBox != null) {
         	chkBox.setSelection(jobEntry.getPersistOutputChecked().equals("true")?true:false);
@@ -758,7 +829,7 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
    			isValid = false;
        		errors += "\"Sort\" is a required field!\r\n";
    		}
-   		if(this.normlist.equals("") || this.outTables == null){
+   		if(this.normlist.equals("")){
    			isValid = false;
    			errors += "You need to select  a field to compute Frequency";
    		}
@@ -784,10 +855,11 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
         jobEntry.setSort(this.sort.getText());
         jobEntry.setPeople(this.people);
         jobEntry.setDataType(this.data_type);
-        jobEntry.setoutTables(outTables);
-        jobEntry.setflag(flag);
         jobEntry.setGroupBy(GroupBy);
-        jobEntry.setNumber(Integer.toString(number));
+        jobEntry.setRecordList_number(recordList_number);
+        jobEntry.setRecordList_string(recordList_string);
+        jobEntry.setDs_num(ds_num);
+        jobEntry.setDs_string(ds_string);
         if(chkBox.getSelection() && outputName != null){
         	jobEntry.setOutputName(outputName.getText());
         }
@@ -911,9 +983,10 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
     	String[] types = null;
       try{
   		
-          //items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+          items = ap.fieldsRecByDataset( datasetName.getText(),jobMeta.getJobCopies());
           //mapDataSets = ap.parseDefExpressionBuilder(jobMeta.getJobCopies(), datasetName.getText());
-          rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+          //rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+          rec = ap.buildMyRecordList(items);
           
           for(int i = 0; i < rec.getRecords().size(); i++){
               TreeItem item = new TreeItem(tab, SWT.NONE);
@@ -1028,6 +1101,19 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
 							p.setColumns(Integer.valueOf("0"));
 							p.setType(S[2]);
 							p.setSortNumeric(Integer.valueOf("0"));
+							int idx = 0;
+							if(outlierRules != null){
+								for(int i = 0; i<outlierRules.length; i++){
+									if(outlierRules[i].toLowerCase().contains(S[0].toLowerCase())){
+										idx = i;
+										break;
+									}
+								}
+								p.setRule(outlierRules[idx]);
+							}
+							else{
+								p.setRule("");
+							}
 							people.add(p);
 							
 							
@@ -1118,7 +1204,9 @@ class PersonCellModifier implements ICellModifier {
 	    if (ECLFrequencyGroupDialog.TYPE.equals(property))
 		      return p.getType();
 	    else if (ECLFrequencyGroupDialog.SORTNUM.equals(property))
-		      return p.getSortNumeric();	    
+		      return p.getSortNumeric();
+	    else if (ECLFrequencyGroupDialog.RULE.equals(property))
+		      return p.getRule();
 	    else
 	      return null;
 	  }
@@ -1138,6 +1226,8 @@ class PersonCellModifier implements ICellModifier {
 		      p.setType((String) value);
 	    else if (ECLFrequencyGroupDialog.SORTNUM.equals(property))
 		      p.setSortNumeric((Integer) value);
+	    else if (ECLFrequencyGroupDialog.RULE.equals(property))
+		      p.setRule((String) value);
 	    // Force the viewer to refresh
 	    viewer.refresh();
 	  }
@@ -1150,8 +1240,18 @@ class Player {
 	  private Integer Column;
 	  private String type;
 	  private Integer SortNumeric;
+	  private String Rule;
+	  
 
-	  public String getFirstName() {
+	  public String getRule() {
+		return Rule;
+	}
+
+	public void setRule(String rule) {
+		Rule = rule;
+	}
+
+	public String getFirstName() {
 		  return firstName;
 	  }
 
@@ -1225,6 +1325,8 @@ class PlayerLabelProvider implements ITableLabelProvider {
 		  return values.getType();
 	  case 4:
 		  return SortAsNumeric.INSTANCES[values.getSortNumeric().intValue()];
+	  case 5:
+		  return values.getRule();
 	  	//break;
 	  }
 	  return null;
