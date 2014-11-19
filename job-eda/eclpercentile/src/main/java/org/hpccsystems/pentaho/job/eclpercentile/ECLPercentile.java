@@ -153,7 +153,7 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
         }
         else{
 	        String percentile = "";String[] norm = this.normList.split("#");String value = "";String field = "";String normString = "SET OF INTEGER buckets:=[";
-	        String percents = "";String normalize = "";int high = 0;
+	        String percents = "";String normalize = "";int high = 0;String filter = "(";String name = getName().replaceAll("\\s","");
 	        for(int i = 0; i<norm.length; i++){
 	        	String[] S = norm[i].split("-");
 	        	if(high < S[1].split(",").length)
@@ -162,11 +162,15 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
         			value += "LEFT."+S[0]+",";
         			field += "\'"+S[0]+"\',";
         			normalize += "IF(SELF.field='"+S[0]+"',"+S[0]+"P[COUNTER],";
+        			if(S.length == 3)
+        				filter += "(field = '"+S[0]+"' AND "+S[2].replace(S[0], "value")+") OR ";  
         		}
         		else{
         			value += "LEFT."+S[0];
         			field += "\'"+S[0]+"\'";        			
         			normalize += S[0]+"P[COUNTER]";
+        			if(S.length == 3)
+        				filter += "(field = '"+S[0]+"' AND "+S[2].replace(S[0], "value")+")";
         		}
 	        	percents += "SET OF INTEGER "+S[0]+"P := [0,1,5,10,25,50,75,90,95,99,100";
     			if(!S[1].equals(" "))
@@ -177,18 +181,25 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
 	        for(int i = 0; i<norm.length-1; i++){
 	        	normalize += ")";
 	        }
-	        percentile += "NormRec:=RECORD\nINTEGER4 number;\nSTRING field;\nREAL value;\nEND;\n";
-	        percentile += "OutDS:=NORMALIZE("+this.getDatasetName()+","+norm.length+",TRANSFORM(NormRec,SELF.number:=COUNTER,SELF.field:=CHOOSE(COUNTER,"+field+")" +
-	        		",SELF.value:=CHOOSE(COUNTER,"+value+")));\n";
-	        percentile += "RankableField := RECORD\nOutDS;\nUNSIGNED pos:=0;\nEND;\n";
-	        percentile += "T:=TABLE(SORT(OutDS,field,Value),RankableField);\n";
-	        percentile += "TYPEOF(T) add_rank(T le, UNSIGNED c):=TRANSFORM\nSELF.pos:=c;\nSELF:=le;\nEND;\n";
-	        percentile += "P:=PROJECT(T,add_rank(LEFT,COUNTER));\n";
-	        percentile += "RS:=RECORD\nSeq:=MIN(GROUP,P.pos);\nP.field;\nEND;\n";
-	        percentile += "Splits := TABLE(P,RS,field,FEW);\n";
-	        percentile += "TYPEOF(T) to(P le, Splits ri):=TRANSFORM\nSELF.pos:=1+le.pos-ri.Seq;\nSELF:=le;\nEND;\n";
-	        percentile += "outfile := JOIN(P,Splits,LEFT.field=RIGHT.field, to(LEFT,RIGHT),LOOKUP);\n";
-	        percentile += "N:=COUNT("+this.getDatasetName()+");\n";
+	        filter += ")";
+	        percentile += "NormRec"+name+":=RECORD\nINTEGER4 number;\nSTRING field;\nREAL value;\nEND;\n";
+	        if(filter.length() == 2)
+	        	percentile += "OutDS"+name+":=NORMALIZE("+this.getDatasetName()+","+norm.length+",TRANSFORM(NormRec"+name+",SELF.number:=COUNTER,SELF.field:=CHOOSE(COUNTER,"+field+")" +
+	        			",SELF.value:=CHOOSE(COUNTER,"+value+")));\n";
+	        else{
+	        	percentile += "OutDS1"+name+":=NORMALIZE("+this.getDatasetName()+","+norm.length+",TRANSFORM(NormRec"+name+",SELF.number:=COUNTER,SELF.field:=CHOOSE(COUNTER,"+field+")" +
+	        			",SELF.value:=CHOOSE(COUNTER,"+value+")));\n";
+	        	percentile += "OutDS"+name+" := OutDS1"+name+"("+filter+");\n";
+	        }
+	        percentile += "RankableField"+name+" := RECORD\nOutDS"+name+";\nUNSIGNED pos:=0;\nEND;\n";
+	        percentile += "T"+name+":=TABLE(SORT(OutDS"+name+",field,Value),RankableField"+name+");\n";
+	        percentile += "TYPEOF(T"+name+") add_rank"+name+"(T"+name+" le, UNSIGNED c):=TRANSFORM\nSELF.pos:=c;\nSELF:=le;\nEND;\n";
+	        percentile += "P"+name+":=PROJECT(T"+name+",add_rank"+name+"(LEFT,COUNTER));\n";
+	        percentile += "RS"+name+":=RECORD\nSeq:=MIN(GROUP,P"+name+".pos);\nP"+name+".field;\nEND;\n";
+	        percentile += "Splits"+name+" := TABLE(P"+name+",RS"+name+",field,FEW);\n";
+	        percentile += "TYPEOF(T"+name+") to"+name+"(P"+name+" le, Splits"+name+" ri):=TRANSFORM\nSELF.pos:=1+le.pos-ri.Seq;\nSELF:=le;\nEND;\n";
+	        percentile += "outfile"+name+" := JOIN(P"+name+",Splits"+name+",LEFT.field=RIGHT.field, to"+name+"(LEFT,RIGHT),LOOKUP);\n";
+	        //percentile += "N"+name+":=COUNT("+this.getDatasetName()+");\n";
 	        	       
 /*	        for(Iterator<String[]> it = percentileSettings.iterator(); it.hasNext();)
 	        {
@@ -202,42 +213,48 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
 	        percentile += "Split:=ROLLUP(T, LEFT.field = RIGHT.field, roll(LEFT,RIGHT));\n";*/
 	        
 	        percentile += percents;
-	        percentile += "Rec1:=RECORD\nSTRING field;\nINTEGER4 percentiles;\nEND;\n";
+	        percentile += "CntRec"+name+":=RECORD\nOutfile"+name+".field;\ncnt:=COUNT(GROUP);\nEND;\n";
+	        percentile += "Cnt"+name+" := TABLE(Outfile"+name+",CntRec"+name+",field,FEW);\n";
+	        		
+
+
+	        percentile += "Rec1"+name+":=RECORD\nSTRING field;\nINTEGER4 percentiles;\nEND;\n";
 	        
-	        //percentile += "MyTab:=NORMALIZE(Split,maximum+1,TRANSFORM(Rec1,SELF.field:=LEFT.field,SELF.Percentiles:=IF(buckets[LEFT.number]>=COUNTER-1," +
-	        	//	"IF(ROUNDUP(100/buckets[LEFT.number])=100/buckets[LEFT.number],(COUNTER-1)*(100/buckets[LEFT.number]),(COUNTER-1)*(ROUNDUP(100/buckets[LEFT.number])-1)),-1)));\n";
 	        
-	        percentile += "MyTab:=NORMALIZE(Splits,"+(11+high)+",TRANSFORM(Rec1,SELF.field:=LEFT.field,SELF.percentiles:="+normalize+"));\n";
-	        
-	        percentile += "PerRec:=RECORD\nMyTab;\nREAL rank:=IF(mytab.percentiles = -1,0," +
-																"IF(mytab.percentiles = 0,1,"+
-																   "IF(ROUND(mytab.percentiles*(N+1)/100)>=N,N,"+
-																	  "mytab.percentiles*(N+1)/100)));\nEND;\n";
-	        percentile += "valuestab := TABLE(mytab,perRec);\n";
-	        percentile += "rankRec := RECORD\nSTRING field := valuestab.field;\nREAL rank := valuestab.rank;\nINTEGER4 intranks;\nREAL decranks;\nINTEGER4 plusOneranks;\n"+
-								"valuestab.percentiles;\nEND;\n";
-	        percentile += "rankRec tr(valuestab L, INTEGER C) := TRANSFORM\n"+
+	        percentile += "MyTab1"+name+":=NORMALIZE(Splits"+name+","+(11+high)+",TRANSFORM(Rec1"+name+",SELF.field:=LEFT.field,SELF.percentiles:="+normalize+"));\n";
+	        percentile += "MyTab"+name+" := JOIN(MyTab1"+name+",Cnt"+name+",LEFT.field=RIGHT.field);\n";
+	        percentile += "PerRec"+name+":=RECORD\nMyTab"+name+";\nREAL rank:=IF(mytab"+name+".percentiles = -1,0," +
+																"IF(mytab"+name+".percentiles = 0,1,"+
+																   "IF(ROUND(mytab"+name+".percentiles*(myTab"+name+".cnt+1)/100)>=myTab"+name+".cnt,myTab"+name+".cnt,"+
+																	  "mytab"+name+".percentiles*(myTab"+name+".cnt+1)/100)));\nEND;\n";
+	        percentile += "valuestab"+name+" := TABLE(mytab"+name+",perRec"+name+");\n";
+	        percentile += "rankRec"+name+" := RECORD\nSTRING field := valuestab"+name+".field;\nREAL rank := valuestab"+name+".rank;\nINTEGER4 intranks;\n" +
+	        				"REAL decranks;\nINTEGER4 plusOneranks;\n"+
+								"valuestab"+name+".percentiles;\nEND;\n";
+	        percentile += "rankRec"+name+" tr"+name+"(valuestab"+name+" L, INTEGER C) := TRANSFORM\n"+
 					      "SELF.decranks := IF(L.rank - (ROUNDUP(L.rank) - 1) = 1,0,L.rank - (ROUNDUP(L.rank) - 1));\n"+						  
 						  "SELF.intranks := IF(ROUNDUP(L.rank) = L.rank,L.rank,(ROUNDUP(L.rank) - 1));\n"+
 						  "SELF.plusOneranks := SELF.intranks + 1;\n"+
 						  "SELF := L;\n"+
 						  "END;\n";
-	        percentile += "ranksTab := PROJECT(valuestab,tr(LEFT,COUNTER));\n";
-	        percentile += "ranksRec := RECORD\nSTRING field;\nranksTab.decranks;\nranksTab.percentiles;\nINTEGER4 ranks;\nEND;\n";
-	        percentile += "rankTab := NORMALIZE(ranksTab,2,TRANSFORM(ranksRec,SELF.field := LEFT.field; SELF.ranks := CHOOSE(COUNTER,LEFT.intranks,LEFT.plusOneranks),SELF := LEFT));\n";
-	        percentile += "MTable:=SORT(JOIN(rankTab, outfile, LEFT.field = RIGHT.field AND LEFT.ranks = RIGHT.pos),field,percentiles,ranks);\n";
-	        percentile += "MyTable := DEDUP(MTable, LEFT.percentiles = RIGHT.percentiles AND LEFT.ranks = RIGHT.ranks AND LEFT.field = RIGHT.field);\n";
-	        percentile += "MyTable RollThem(MyTable L, MyTable R) := TRANSFORM\n"+
+	        percentile += "ranksTab"+name+" := PROJECT(valuestab"+name+",tr"+name+"(LEFT,COUNTER));\n";
+	        percentile += "ranksRec"+name+" := RECORD\nSTRING field;\nranksTab"+name+".decranks;\nranksTab"+name+".percentiles;\nINTEGER4 ranks;\nEND;\n";
+	        percentile += "rankTab"+name+" := NORMALIZE(ranksTab"+name+",2,TRANSFORM(ranksRec"+name+",SELF.field := LEFT.field; " +
+	        												"SELF.ranks := CHOOSE(COUNTER,LEFT.intranks,LEFT.plusOneranks),SELF := LEFT));\n";
+	        percentile += "MTable"+name+":=SORT(JOIN(rankTab"+name+", outfile"+name+", LEFT.field = RIGHT.field AND LEFT.ranks = RIGHT.pos)" +
+	        		",field,percentiles,ranks);\n";
+	        percentile += "MyTable"+name+" := DEDUP(MTable"+name+", LEFT.percentiles = RIGHT.percentiles AND LEFT.ranks = RIGHT.ranks AND LEFT.field = RIGHT.field);\n";
+	        percentile += "MyTable"+name+" RollThem"+name+"(MyTable"+name+" L, MyTable"+name+" R) := TRANSFORM\n"+
    						  "SELF.value := L.value + L.decranks*(R.value - L.value);\n"+
 						  "SELF := L;\n"+
 						  "END;\n";
-	        percentile += "percentileTab := ROLLUP(MyTable, LEFT.percentiles = RIGHT.percentiles AND LEFT.field=RIGHT.field, RollThem(LEFT,RIGHT));\n";
-	        percentile += getOutName()+":=TABLE(percentileTab,{field,percentiles,value});\n";
+	        percentile += "percentileTab"+name+" := ROLLUP(MyTable"+name+", LEFT.percentiles = RIGHT.percentiles AND LEFT.field=RIGHT.field, RollThem"+name+"(LEFT,RIGHT));\n";
+	        percentile += getOutName()+":=TABLE(percentileTab"+name+",{field,percentiles,value});\n";
 	        if(persist.equalsIgnoreCase("true")){
         		if(outputName != null && !(outputName.trim().equals(""))){
-        			percentile += "OUTPUT("+getOutName()+",,'~eda::"+outputName+"::percentile', __compressed__, overwrite,NAMED('Percentile'))"+";\n";
+        			percentile += "OUTPUT("+getOutName()+",,'~"+outputName+"::"+OutName+"', __compressed__, overwrite,NAMED('Percentile'))"+";\n";
         		}else{
-        			percentile += "OUTPUT("+getOutName()+",,'~eda::"+defJobName+"::percentile', __compressed__, overwrite,NAMED('Percentile'))"+";\n";
+        			percentile += "OUTPUT("+getOutName()+",,'~"+defJobName+"::"+OutName+"', __compressed__, overwrite,NAMED('Percentile'))"+";\n";
         		}
         	}
         	else{
@@ -245,18 +262,18 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
         	}
 	        /*for(int i = 0, j=norm.length; i<norm.length; i++,j++){
 	        	String[] S = norm[i].split("-");
-	        	percentile += S[0]+"_"+getName()+":=TABLE(percentileTab(field='"+S[0]+"'),{field,percentiles,value});\n";	        	
+	        	percentile += S[0]+"_"+name+":=TABLE(percentileTab(field='"+S[0]+"'),{field,percentiles,value});\n";	        	
 	        	if(persist.equalsIgnoreCase("true")){
 	        		if(outputName != null && !(outputName.trim().equals(""))){
-	        			percentile += "OUTPUT("+S[0]+"_"+getName()+",,'~eda::"+outputName+S[0]+"::percentile', __compressed__, overwrite,NAMED('Percentile_"+S[0]+"'))"+";\n";
+	        			percentile += "OUTPUT("+S[0]+"_"+name+",,'~eda::"+outputName+S[0]+"::percentile', __compressed__, overwrite,NAMED('Percentile_"+S[0]+"'))"+";\n";
 	        		}else{
-	        			percentile += "OUTPUT("+S[0]+"_"+getName()+",,'~eda::"+defJobName+S[0]+"::percentile', __compressed__, overwrite,NAMED('Percentile_"+S[0]+"'))"+";\n";
+	        			percentile += "OUTPUT("+S[0]+"_"+name+",,'~eda::"+defJobName+S[0]+"::percentile', __compressed__, overwrite,NAMED('Percentile_"+S[0]+"'))"+";\n";
 	        		}
 	        	}
 	        	else{
-	        		percentile += "OUTPUT("+S[0]+"_"+getName()+",NAMED('Percentile_"+S[0]+"'));\n";
+	        		percentile += "OUTPUT("+S[0]+"_"+name+",NAMED('Percentile_"+S[0]+"'));\n";
 	        	}
-	        	//percentile += "OUTPUT("+S[0]+"_"+getName()+",THOR);\n";
+	        	//percentile += "OUTPUT("+S[0]+"_"+name+",THOR);\n";
 	        }*/
         	
 	        RowMetaAndData data = new RowMetaAndData();
@@ -280,7 +297,7 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
     	while(it.hasNext()){
     		if(!isFirst){out+="|";}
     		Cols p = (Cols) it.next();
-    		out +=  p.getFirstName()+"-"+p.getNumber();
+    		out +=  p.getFirstName()+"-"+p.getNumber()+"-"+p.getRule();
             isFirst = false;
     	}
     	return out;
@@ -294,13 +311,12 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
         	for(int i = 0; i<len; i++){
         		String[] S = strLine[i].split("-");
         		Cols P = new Cols();
-        		if(S.length == 1){
-        			P.setFirstName(S[0]);
-        		}
-        		else if(S.length ==2){
-        			P.setFirstName(S[0]);
-        			P.setNumber(S[1]);
-        		}
+        		P.setFirstName(S[0]);
+        		if(S.length > 1)
+        			P.setNumber(S[1]);        		
+        		if(S.length > 2)
+        			P.setRule(S[2]); 
+        		
         		fields.add(P);
         	}
         }

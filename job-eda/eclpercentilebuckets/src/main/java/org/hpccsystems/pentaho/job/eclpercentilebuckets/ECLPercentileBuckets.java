@@ -39,11 +39,8 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
 	private String outputName ="";
 	private String persist = "";
 	private String defJobName = "";
-	private String rule = "";	
 	private String OutName = "";		
 	private RecordList recordList = new RecordList();
-	
-			
 
 	public RecordList getRecordList() {
 		return recordList;
@@ -59,14 +56,6 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
 
 	public void setOutName(String outName) {
 		OutName = outName;
-	}
-
-	public String getRule() {
-		return rule;
-	}
-
-	public void setRule(String rule) {
-		this.rule = rule;
 	}
 
 	public String getDefJobName() {
@@ -152,26 +141,30 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
         }
         else{
         	String ecl = "";String field = "";String value = "";String[] norm = normList.split("-");String buck = "";String Uname = getName().replaceAll("\\s", "");
-        	String new_record = "";
+        	String new_record = "";String rule = "";
         	String denorm = "";String myrec = "";String mytrans = "";
         	for(int i = 0; i<norm.length; i++){
         		String[] S = norm[i].split(",");
         		if(i!=norm.length-1){        			
         			field += "\'"+S[0]+"\',";
         			value += "LEFT."+S[0]+",";
-        			buck += S[1]+",";        			
+        			buck += S[1]+",";        		
+        			if(S.length == 3)
+        				rule += S[2]+" OR ";
         		}
         		else{
         			field += "\'"+S[0]+"\'";
         			value += "LEFT."+S[0];
-        			buck += S[1];        			
+        			buck += S[1];        	
+        			if(S.length == 3)
+        				rule += S[2];
         		}
         		denorm += "REAL bucket;\n"; // needs to be changed when two or more variables are chosen for bucketing
         		myrec += "SELF.bucket:=0;\n";// needs to be changed when two or more variables are chosen for bucketing
         		mytrans += "SELF."+S[0]+":=IF(C="+(i+1)+",R.value,L."+S[0]+");\nSELF.bucket:=IF(C="+(i+1)+",R.bucket,L.bucket);\n";
         	}
-        	
-        	ecl += Uname+"OutlierDS := "+this.getDatasetName()+"("+getRule()+");\n";
+        	ecl += Uname+"RejectDS := "+this.getDatasetName()+"(~("+rule+"));\n";;
+        	ecl += Uname+"OutlierDS := "+this.getDatasetName()+"("+rule+");\n";
         	
         	ecl += Uname+"URec := RECORD\nUNSIGNED uid;\n"+Uname+"OutlierDS;\nEND;\n";
         	ecl += Uname+"URec "+Uname+"Trans("+Uname+"OutlierDS L, INTEGER C) := TRANSFORM\nSELF.uid := C;\nSELF := L;\nEND;\n"; 
@@ -228,13 +221,21 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
             
         	ecl += ""+Uname+"Reco := RECORD\n"+Uname+"Tab2.bucket;\nminval := MIN(GROUP,"+Uname+"Tab3.value);\nmaxval := MAX(GROUP,"+Uname+"Tab3.value);\nEND;\n";
         	ecl += ""+Uname+"TabRec := TABLE("+Uname+"Tab2,"+Uname+"Reco,bucket);\n";
-        	ecl += OutName+" := TABLE(JOIN("+Uname+"Denormed, "+Uname+"TabRec, LEFT.bucket = RIGHT.bucket),{"+new_record.substring(0, new_record.length()-1)+"});\n";  
+        	ecl += Uname+"Intermediate := TABLE(JOIN("+Uname+"Denormed, "+Uname+"TabRec, LEFT.bucket = RIGHT.bucket),{"+new_record.substring(0, new_record.length()-1)+"});\n";
+        	ecl += "TYPEOF("+Uname+"Intermediate) "+Uname+"RejectTrans("+Uname+"RejectDS L) := TRANSFORM\n" +
+        			"	SELF.bucket := -1;\n" +
+        			"	SELF.minval := -1;\n" +
+        			"	SELF.maxval := -1;\n" +
+        			"	SELF := L;\n" +
+        			"END;\n";
+        	ecl += Uname+"Reject := PROJECT("+Uname+"RejectDS,"+Uname+"RejectTrans(LEFT));\n";
+        	ecl += OutName+" := "+Uname+"Intermediate&"+Uname+"Reject;\n";
         	if(persist.equalsIgnoreCase("true")){
         		if(outputName != null && !(outputName.trim().equals(""))){
-        			ecl += "OUTPUT("+OutName+",,'~"+outputName+"::percentileBuckets', __compressed__, overwrite,NAMED('BucketDataset'));\n";
+        			ecl += "OUTPUT("+OutName+",,'~"+outputName+"::"+OutName+"', __compressed__, overwrite,NAMED('BucketDataset'));\n";
         		}
         		else{
-        			ecl += "OUTPUT("+OutName+",,'~"+defJobName+"::percentileBuckets', __compressed__, overwrite,NAMED('BucketDataset'));\n";
+        			ecl += "OUTPUT("+OutName+",,'~"+defJobName+"::"+OutName+"', __compressed__, overwrite,NAMED('BucketDataset'));\n";
         		}
             }
             else{
@@ -269,7 +270,7 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
     	while(it.hasNext()){
     		if(!isFirst){out+="|";}
     		Player p = (Player) it.next();
-    		out +=  p.getFirstName()+"-"+p.getBuckets();
+    		out +=  p.getFirstName()+"-"+p.getBuckets()+"-"+p.getRule();
             isFirst = false;
     	}
     	return out;
@@ -285,10 +286,18 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
         		Player P = new Player();
         		if(S.length == 1){
         			P.setFirstName(S[0]);
+        			P.setBuckets("");
+        			P.setRule("");
         		}
         		else if(S.length ==2){
         			P.setFirstName(S[0]);
-        			P.setBuckets(S[1]);  
+        			P.setBuckets(S[1]);
+        			P.setRule("");
+        		}
+        		else if(S.length == 3){
+        			P.setFirstName(S[0]);
+        			P.setBuckets(S[1]);
+        			P.setRule(S[2]);
         		}
         		/*P.setFirstName(S[0]);
         		P.setBuckets(S[1]);*/
@@ -358,10 +367,7 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
             
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")) != null)
                 setDefJobName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")));
-            
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "rule")) != null)
-                setRule(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "rule")));
-            
+                        
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "OutName")) != null)
                 setOutName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "OutName")));
             
@@ -387,7 +393,6 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
         retval += "		<output_name><![CDATA[" + outputName + "]]></output_name>" + Const.CR;
         retval += "		<persist_Output_Checked><![CDATA[" + persist + "]]></persist_Output_Checked>" + Const.CR;
         retval += "		<defJobName><![CDATA[" + defJobName + "]]></defJobName>" + Const.CR;
-        retval += "		<rule><![CDATA[" + rule + "]]></rule>" + Const.CR;
         retval += "		<OutName eclIsDef=\"true\" eclType=\"dataset\"><![CDATA[" + OutName + "]]></OutName>" + Const.CR;
         retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
         
@@ -425,9 +430,6 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
             if(rep.getStepAttributeString(id_jobentry, "defJobName") != null)
             	defJobName = rep.getStepAttributeString(id_jobentry, "defJobName"); //$NON-NLS-1$
             
-            if(rep.getStepAttributeString(id_jobentry, "rule") != null)
-                rule = rep.getStepAttributeString(id_jobentry, "rule"); //$NON-NLS-1$
-            
             if(rep.getStepAttributeString(id_jobentry, "OutName") != null)
                 OutName = rep.getStepAttributeString(id_jobentry, "OutName"); //$NON-NLS-1$
             
@@ -455,7 +457,6 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
         	rep.saveStepAttribute(id_job, getObjectId(), "label", label);
         	rep.saveStepAttribute(id_job, getObjectId(), "persist_Output_Checked", persist);
         	rep.saveStepAttribute(id_job, getObjectId(), "defJobName", defJobName);
-        	rep.saveStepAttribute(id_job, getObjectId(), "rule", rule); //$NON-NLS-1$
         	rep.saveStepAttribute(id_job, getObjectId(), "OutName", OutName); //$NON-NLS-1$
         	rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
         } catch (Exception e) {

@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.hpccsystems.javaecl.Table;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.compatibility.Value;
 import org.pentaho.di.core.Const;
@@ -34,17 +36,49 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
 	private String normList = "";
 	private String data_type = "";
 	private java.util.List people = new ArrayList();
-	private String outTables[] = null;
-	private String flag = "";
-    private String Number = "";
     private String label ="";
 	private String outputName ="";
 	private String persist = "";
 	private String defJobName = "";
 	private ArrayList<String[]> GroupBy = new ArrayList<String[]>();
 	
+	private RecordList recordList_number = new RecordList();
+	private RecordList recordList_string = new RecordList();
+	private ArrayList<String> ds_num;
+	private ArrayList<String> ds_string;
 	
-	
+
+	public ArrayList<String> getDs_num() {
+		return ds_num;
+	}
+
+	public void setDs_num(ArrayList<String> ds_num) {
+		this.ds_num = ds_num;
+	}
+
+	public ArrayList<String> getDs_string() {
+		return ds_string;
+	}
+
+	public void setDs_string(ArrayList<String> ds_string) {
+		this.ds_string = ds_string;
+	}
+
+	public RecordList getRecordList_number() {
+		return recordList_number;
+	}
+
+	public void setRecordList_number(RecordList recordList_number) {
+		this.recordList_number = recordList_number;
+	}
+
+	public RecordList getRecordList_string() {
+		return recordList_string;
+	}
+
+	public void setRecordList_string(RecordList recordList_string) {
+		this.recordList_string = recordList_string;
+	}
 	
 	public ArrayList<String[]> getGroupBy() {
 		return GroupBy;
@@ -93,34 +127,11 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
 	public java.util.List getPeople(){
 		return people;
 	}
-
-	public void setoutTables(String[] outTables){
-		this.outTables = outTables;
-	}
-	
-	public String[] getoutTables(){
-		return outTables;
-	}
 	
 	public String getName(){
 		return Name;
 	}
-    
-	public String getNumber() {
-        return Number;
-    }
 
-    public void setNumber(String Number) {
-        this.Number = Number;
-    }
-
-    public String getflag() {
-        return flag;
-    }
-
-    public void setflag(String flag) {
-        this.flag = flag;
-    }
 	public void setName(String Name){
 		this.Name = Name;
 	}
@@ -170,7 +181,7 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
         else{
         	//String sort = Sort;
 	        String fieldStr = ""; String frequency = "";String[] norm = this.normList.split("-");String valueStr = "";String[] dataT = data_type.toLowerCase().split(",");
-	        String fieldNum = "";String valueNum = "";int str = 0;int notstr = 0;outTables = new String[norm.length];
+	        String fieldNum = "";String valueNum = "";int str = 0;int notstr = 0;String name = getName().replaceAll("\\s", "");
 	        for(int i = 0; i < norm.length; i++){
 	        	String[] cols = norm[i].split(",");
 	        	if(dataT[i].startsWith("integer") || dataT[i].startsWith("decimal") || dataT[i].startsWith("real") || dataT[i].startsWith("unicode")){ 
@@ -189,8 +200,8 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
 	        for(String[] S : GroupBy){
 	        	dataList += S[1] + " " +S[0]+";\n";
 	        	col += "SELF."+S[0]+":=LEFT."+S[0]+",";
-	        	outstr += "OutDSStr."+S[0]+";\n";
-	        	outnum += "OutDSNum."+S[0]+";\n";
+	        	outstr += "OutDSStr"+name+"."+S[0]+";\n";
+	        	outnum += "OutDSNum"+name+"."+S[0]+";\n";
 	        	group += S[0]+",";
 	        }
 	        
@@ -199,25 +210,25 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
 	        if(valueStr.length()>0){
 	        	valueStr = valueStr.substring(0, valueStr.length()-1);
 	        	fieldStr = fieldStr.substring(0, fieldStr.length()-1);
-	        	frequency += "NumFieldStr:=RECORD\n"+dataList+"STRING field;\nSTRING value;\nEND;\n";
-	        	frequency += "OutDSStr := NORMALIZE("+this.getDatasetName()+","+str+", TRANSFORM(NumFieldStr,"+col+"SELF.field:=CHOOSE(COUNTER,"+fieldStr+");SELF.value:=CHOOSE" +
+	        	frequency += "NumFieldStr"+name+":=RECORD\n"+dataList+"STRING field;\nSTRING value;\nEND;\n";
+	        	frequency += "OutDSStr"+name+" := NORMALIZE("+this.getDatasetName()+","+str+", TRANSFORM(NumFieldStr"+name+","+col+"SELF.field:=CHOOSE(COUNTER,"+fieldStr+");SELF.value:=CHOOSE" +
 	        			"(COUNTER,"+valueStr+")));\n";
-	        	 frequency += "FreqRecStr:=RECORD\n"+outstr+"OutDSStr.field;\nOutDSStr.value;\nINTEGER frequency:=COUNT(GROUP);\n" +
+	        	 frequency += "FreqRecStr"+name+":=RECORD\n"+outstr+"OutDSStr"+name+".field;\nOutDSStr"+name+".value;\nINTEGER frequency:=COUNT(GROUP);\n" +
 	        		     "REAL8 Percent:=(COUNT(GROUP)/COUNT("+this.DatasetName+"))*100;\n" +
 	        		     "END;\n";
 	        	 
-	        	 frequency += "Frequency1 := TABLE(OutDSStr,FreqRecStr,"+group+"field,value,MERGE);\n";
+	        	 frequency += "Frequency1"+name+" := TABLE(OutDSStr"+name+",FreqRecStr"+name+","+group+"field,value,MERGE);\n";
 	        }
 	        if(valueNum.length()>0){
 	        	valueNum = valueNum.substring(0, valueNum.length()-1);		        
 		        fieldNum = fieldNum.substring(0, fieldNum.length()-1);
-		        frequency += "NumField:=RECORD\n"+dataList+"STRING field;\nREAL value;\nEND;\n";
-		        frequency += "OutDSNum := NORMALIZE("+this.getDatasetName()+","+notstr+", TRANSFORM(NumField,"+col+"SELF.field:=CHOOSE(COUNTER,"+fieldNum+");SELF.value:=CHOOSE" +
+		        frequency += "NumField"+name+":=RECORD\n"+dataList+"STRING field;\nREAL value;\nEND;\n";
+		        frequency += "OutDSNum"+name+" := NORMALIZE("+this.getDatasetName()+","+notstr+", TRANSFORM(NumField"+name+","+col+"SELF.field:=CHOOSE(COUNTER,"+fieldNum+");SELF.value:=CHOOSE" +
 	        			"(COUNTER,"+valueNum+")));\n";
-		        frequency += "FreqRecNum:=RECORD\n"+outnum+"OutDSNum.field;\nOutDSNum.value;\nINTEGER frequency:=COUNT(GROUP);\n" +
+		        frequency += "FreqRecNum"+name+":=RECORD\n"+outnum+"OutDSNum"+name+".field;\nOutDSNum"+name+".value;\nINTEGER frequency:=COUNT(GROUP);\n" +
 	       		     "REAL8 Percent:=(COUNT(GROUP)/COUNT("+this.DatasetName+"))*100;\n" +
 	       		     "END;\n";
-		        frequency += "Frequency2 := TABLE(OutDSNum,FreqRecNum,"+group+"field,value,MERGE);\n";
+		        frequency += "Frequency2"+name+" := TABLE(OutDSNum"+name+",FreqRecNum"+name+","+group+"field,value,MERGE);\n";
 
 	        }
 	        
@@ -226,32 +237,37 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
 	        	String[] cols = norm[j].split(",");
 	        	if(getSort().equals("NO") || getSort().equals("")){
 	        		if(dataT[j].startsWith("string")) {
-	        			frequency += cols[0]+"_Frequency"+getNumber()+":= TABLE(Frequency1(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent});\n";
+	        			if(cols.length == 5)
+	        				frequency += cols[0]+"_FrequencyGroup := TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent});\n";
+	        			else
+	        				frequency += cols[0]+"_FrequencyGroup := TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent});\n";
 	        			//frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",THOR);\n";
 	        			if(persist.equalsIgnoreCase("true")){
 	        	    		if(outputName != null && !(outputName.trim().equals(""))){
-	        	    			frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",,'~"+outputName+cols[0]+"::frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
+	        	    			frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,,'~"+outputName+"::"+cols[0]+"_Frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
 	        	    		}else{
-	        	    			frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",,'~"+defJobName+cols[0]+"::frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
+	        	    			frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,,'~"+defJobName+"::"+cols[0]+"_Frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
 	        	    		}
 	        	    	}
 	        	    	else{
-	        	    		frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",NAMED('Frequency_"+cols[0]+"'));\n";
+	        	    		frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,NAMED('Frequency_"+cols[0]+"'));\n";
 	        	    	}
 	        			
 	        		}
 	        		else{
-	        			frequency += cols[0]+"_Frequency"+getNumber()+":=TABLE(Frequency2(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent});\n";
-	        			//frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",THOR);\n";
+	        			if(cols.length == 5)
+	        				frequency += cols[0]+"_FrequencyGroup :=TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent});\n";
+	        			else
+	        				frequency += cols[0]+"_FrequencyGroup :=TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent});\n";
 	        			if(persist.equalsIgnoreCase("true")){
 	        	    		if(outputName != null && !(outputName.trim().equals(""))){
-	        	    			frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",,'~"+outputName+cols[0]+"::frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
+	        	    			frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,,'~"+outputName+"::"+cols[0]+"_Frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
 	        	    		}else{
-	        	    			frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",,'~"+defJobName+cols[0]+"::frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
+	        	    			frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,,'~"+defJobName+"::"+cols[0]+"_Frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
 	        	    		}
 	        	    	}
 	        	    	else{
-	        	    		frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",NAMED('Frequency_"+cols[0]+"'));\n";
+	        	    		frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,NAMED('Frequency_"+cols[0]+"'));\n";
 	        	    	}
 	        			
 	        		}
@@ -260,46 +276,66 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
 	        		if(cols[1].equals("ASC")){
 	        			if(cols[2].equals("NAME")){
 	        				if(cols[3].equals("YES")){
-	        					if(dataT[j].startsWith("string"))
-	        						frequency += cols[0]+"_Frequency"+getNumber()+":=SORT(TABLE(Frequency1(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent}),(REAL)"+cols[0]+");\n";
-	        					else	        						
-	        						frequency += cols[0]+"_Frequency"+getNumber()+":=SORT(TABLE(Frequency2(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent}),(REAL)"+cols[0]+");\n";
+	        					if(dataT[j].startsWith("string")){
+	        						if(cols.length == 5)
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent}),(REAL) value);\n";
+	        						else
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent}),(REAL) value);\n";
+	        					}else{
+	        						if(cols.length == 5)
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent}),(REAL) value);\n";
+	        						else
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent}),(REAL) value);\n";
+	        					}
 	        				}
 	        				else{
-	        					if(dataT[j].startsWith("string"))
-	        						frequency += cols[0]+"_Frequency"+getNumber()+":=SORT(TABLE(Frequency1(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent}),"+cols[0]+");\n";
-	        					else
-	        						frequency += cols[0]+"_Frequency"+getNumber()+":=SORT(TABLE(Frequency2(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent}),"+cols[0]+");\n";
+	        					if(dataT[j].startsWith("string")){
+	        						if(cols.length == 5)
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent}),value);\n";
+	        						else
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent}),value);\n";
+	        					}else{
+	        						if(cols.length == 5)
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent}),value);\n";
+	        						else
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent}),value);\n";
+	        					}
 	        				}
 	        					
 	        				//frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",THOR);\n";
 	        				if(persist.equalsIgnoreCase("true")){
 		        	    		if(outputName != null && !(outputName.trim().equals(""))){
-		        	    			frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",,'~"+outputName+cols[0]+"::frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
+		        	    			frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,,'~"+outputName+"::"+cols[0]+"_Frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
 		        	    		}else{
-		        	    			frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",,'~"+defJobName+cols[0]+"::frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
+		        	    			frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,,'~"+defJobName+"::"+cols[0]+"_Frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
 		        	    		}
 		        	    	}
 		        	    	else{
-		        	    		frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",NAMED('Frequency_"+cols[0]+"'));\n";
+		        	    		frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,NAMED('Frequency_"+cols[0]+"'));\n";
 		        	    	}
 	        				
 	        			}
 	        			else{
-	        				if(dataT[j].startsWith("string"))
-	        					frequency += cols[0]+"_Frequency"+getNumber()+":=SORT(TABLE(Frequency1(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent}),frequency);\n";
-	        				else
-	        					frequency += cols[0]+"_Frequency"+getNumber()+":=SORT(TABLE(Frequency2(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent}),frequency);\n";
-	        				//frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",THOR);\n";
+	        				if(dataT[j].startsWith("string")){
+	        					if(cols.length == 5)
+	        						frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent}),frequency);\n";
+	        					else
+	        						frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent}),frequency);\n";
+	        				}else{
+	        					if(cols.length == 5)
+	        						frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent}),frequency);\n";
+	        					else
+	        						frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent}),frequency);\n";
+	        				}
 	        				if(persist.equalsIgnoreCase("true")){
 		        	    		if(outputName != null && !(outputName.trim().equals(""))){
-		        	    			frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",,'~"+outputName+cols[0]+"::frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
+		        	    			frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,,'~"+outputName+"::"+cols[0]+"_Frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
 		        	    		}else{
-		        	    			frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",,'~"+defJobName+cols[0]+"::frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
+		        	    			frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,,'~"+defJobName+"::"+cols[0]+"_Frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
 		        	    		}
 		        	    	}
 		        	    	else{
-		        	    		frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",NAMED('Frequency_"+cols[0]+"'));\n";
+		        	    		frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,NAMED('Frequency_"+cols[0]+"'));\n";
 		        	    	}
 
 
@@ -308,45 +344,65 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
 	        		else if(cols[1].equals("DESC")){
 	        			if(cols[2].equals("NAME")){
 	        				if(cols[3].equals("YES")){
-	        					if(dataT[j].startsWith("string"))
-	        						frequency += cols[0]+"_Frequency"+getNumber()+":=SORT(TABLE(Frequency1(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent}),-(REAL)"+cols[0]+");\n";
-	        					else
-	        						frequency += cols[0]+"_Frequency"+getNumber()+":=SORT(TABLE(Frequency2(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent}),-(REAL)"+cols[0]+");\n";
+	        					if(dataT[j].startsWith("string")){
+	        						if(cols.length == 5)
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent}),-(REAL) value);\n";
+	        						else
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent}),-(REAL) value);\n";
+	        					}else{
+	        						if(cols.length == 5)
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent}),-(REAL) value);\n";
+	        						else
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent}),-(REAL) value);\n";
+	        					}
 	        				}
 	        				else{
-	        					if(dataT[j].startsWith("string"))
-	        						frequency += cols[0]+"_Frequency"+getNumber()+":=SORT(TABLE(Frequency1(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent}),-"+cols[0]+");\n";
-	        					else
-	        						frequency += cols[0]+"_Frequency"+getNumber()+":=SORT(TABLE(Frequency2(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent}),-"+cols[0]+");\n";
+	        					if(dataT[j].startsWith("string")){
+	        						if(cols.length == 5)
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent}),-value);\n";
+	        						else
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent}),-value);\n";
+	        					}else{
+	        						if(cols.length == 5)
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent}),-value);\n";
+	        						else
+	        							frequency += cols[0]+"_FrequencyGroup :=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent}),-value);\n";
+	        					}
 	        				}
-	        				//frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",THOR);\n";
+	        				
 	        				if(persist.equalsIgnoreCase("true")){
 		        	    		if(outputName != null && !(outputName.trim().equals(""))){
-		        	    			frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",,'~"+outputName+cols[0]+"::frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
+		        	    			frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,,'~"+outputName+"::"+cols[0]+"_Frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
 		        	    		}else{
-		        	    			frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",,'~"+defJobName+cols[0]+"::frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
+		        	    			frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,,'~"+defJobName+"::"+cols[0]+"_Frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
 		        	    		}
 		        	    	}
 		        	    	else{
-		        	    		frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",NAMED('Frequency_"+cols[0]+"'));\n";
+		        	    		frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,NAMED('Frequency_"+cols[0]+"'));\n";
 		        	    	}
 	        				
 	        			}
 	        			else{
-	        				if(dataT[j].startsWith("string"))
-	        					frequency += cols[0]+"_Frequency"+getNumber()+":=SORT(TABLE(Frequency1(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent}),-frequency);\n";
-	        				else
-	        					frequency += cols[0]+"_Frequency"+getNumber()+":=SORT(TABLE(Frequency2(field = \'"+cols[0]+"\'),{"+group+""+dataT[j]+" "+cols[0]+":=value;frequency;Percent}),-frequency);\n";
-	        				//frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",THOR);\n";
+	        				if(dataT[j].startsWith("string")){
+	        					if(cols.length == 5)
+	        						frequency += cols[0]+"_FrequencyGroup:=SORT(TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent}),-frequency);\n";
+	        					else
+	        						frequency += cols[0]+"_FrequencyGroup:=SORT(TABLE(Frequency1"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent}),-frequency);\n";
+	        				}else{
+	        					if(cols.length == 5)
+	        						frequency += cols[0]+"_FrequencyGroup:=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\' AND "+cols[4].replace(cols[0], "value")+"),{"+group+""+"value;frequency;Percent}),-frequency);\n";
+	        					else
+	        						frequency += cols[0]+"_FrequencyGroup:=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\'),{"+group+""+"value;frequency;Percent}),-frequency);\n";
+	        				}
 	        				if(persist.equalsIgnoreCase("true")){
 		        	    		if(outputName != null && !(outputName.trim().equals(""))){
-		        	    			frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",,'~"+outputName+cols[0]+"::frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
+		        	    			frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,,'~"+outputName+"::"+cols[0]+"_Frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
 		        	    		}else{
-		        	    			frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",,'~"+defJobName+cols[0]+"::frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
+		        	    			frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,,'~"+defJobName+"::"+cols[0]+"_Frequency', __compressed__, overwrite,NAMED('Frequency_"+cols[0]+"'))"+";\n";
 		        	    		}
 		        	    	}
 		        	    	else{
-		        	    		frequency += "OUTPUT("+cols[0]+"_Frequency"+getNumber()+",NAMED('Frequency_"+cols[0]+"'));\n";
+		        	    		frequency += "OUTPUT("+cols[0]+"_FrequencyGroup,NAMED('Frequency_"+cols[0]+"'));\n";
 		        	    	}
 	        				
 	        			}
@@ -355,7 +411,7 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
 	        	
 	        }
 	
-	        logBasic("Frequency Job =" + frequency);//{Dataset Job} 
+	        logBasic("FrequencyGroup Job =" + frequency);//{Dataset Job} 
 	        
 	        result.setResult(true);
 	        
@@ -430,48 +486,78 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
         }
     }
     
-    public String saveOutTables(){
-    	String out = "";int i = 0;    	
-    	boolean isFirst = true;
-    	if(outTables!=null){
-	    	while(i < outTables.length){
-	    		if(!isFirst){out+="|";}
-	    		
-	    		out +=  outTables[i];
-	    		i++;
-	            isFirst = false;
-	    	}
-    	}
-    	return out;
-    }
-
-    public void openOutTables(String in){
-    	String[] strLine = in.split("[|]");
-    	int len = strLine.length;
-    	if(len>0){
-    		outTables = new String[len];
-    		for(int i = 0; i<len; i++){
-    			outTables[i] = strLine[i];
-    		}
-    	}
+    public String saveRecordList_number(){
+        String out = "";
+        ArrayList list = recordList_number.getRecords();
+        Iterator<RecordBO> itr = list.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
     }
     
+    public void openRecordList_number(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            recordList_number = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList_number.addRecordBO(rb);
+            }
+        }
+    }
+
+    public String saveRecordList_string(){
+        String out = "";
+        ArrayList list = recordList_string.getRecords();
+        Iterator<RecordBO> itr = list.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
+    }
+    
+    public void openRecordList_string(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            recordList_string = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList_string.addRecordBO(rb);
+            }
+        }
+    }
+
     @Override
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
         try {
             super.loadXML(node, list, list1);
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "name")) != null)
                 setDatasetName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "name")));
-            
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "flag")) != null)
-                setflag(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "flag")));
-            
+                        
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "GroupBy")) != null)
                 openGroupBy(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "GroupBy")));
-            
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "Number")) != null)
-                setNumber(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "Number")));
-            
+                        
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dataset_name")) != null)
                 setDatasetName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dataset_name")));
 
@@ -498,13 +584,21 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
               //  openOutTables(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "outTables")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")) != null)
                 setDefJobName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList_number")) != null)
+                openRecordList_number(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList_number")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList_string")) != null)
+                openRecordList_string(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList_string")));
+            
             String[] S = normList.split("-");
-        	this.outTables = new String[S.length];        	
+            ds_string = new ArrayList<String>();
+            ds_num = new ArrayList<String>();
         	for(int i = 0; i<S.length; i++){
         		String[] s = S[i].split(",");
-        		this.outTables[i] = s[0]+"_Frequency"+getNumber();
+        		if(data_type.toLowerCase().split(",")[i].contains("string"))
+        			ds_string.add(s[0]+"_Frequency");        			        		
+        		else
+        			ds_num.add(s[0]+"_Frequency");
         	}
-
             
         } catch (Exception e) {
             throw new KettleXMLException("ECL Dataset Job Plugin Unable to read step info from XML node", e);
@@ -518,20 +612,25 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
         retval += super.getXML();
         retval += "		<name><![CDATA[" + Name + "]]></name>" + Const.CR;
         retval += "		<people><![CDATA[" + this.savePeople() + "]]></people>" + Const.CR;
-        for(int i = 0; i<saveOutTables().split("[|]").length; i++){
-        	retval += "		<outTables eclIsGraphable=\"true\"><![CDATA[" + saveOutTables().split("[|]")[i] + "]]></outTables>" + Const.CR;
-        }
         retval += "		<data_type><![CDATA[" + data_type + "]]></data_type>" + Const.CR;
         retval += "		<Sort ><![CDATA[" + Sort + "]]></Sort>" + Const.CR;
         retval += "		<normList><![CDATA[" + this.getnormList() + "]]></normList>" + Const.CR;
         retval += "		<dataset_name><![CDATA[" + DatasetName + "]]></dataset_name>" + Const.CR;
-        retval += "		<flag><![CDATA[" + flag + "]]></flag>" + Const.CR;
         retval += "		<GroupBy eclIsGroup=\"true\"><![CDATA[" + this.saveGroupBy() + "]]></GroupBy>" + Const.CR;
-        retval += "		<Number><![CDATA[" + Number + "]]></Number>" + Const.CR;
         retval += "		<label><![CDATA[" + label + "]]></label>" + Const.CR;
         retval += "		<output_name><![CDATA[" + outputName + "]]></output_name>" + Const.CR;
         retval += "		<persist_Output_Checked><![CDATA[" + persist + "]]></persist_Output_Checked>" + Const.CR;
         retval += "		<defJobName><![CDATA[" + defJobName + "]]></defJobName>" + Const.CR;
+        retval += "		<recordList_number><![CDATA[" + this.saveRecordList_number() + "]]></recordList_number>" + Const.CR;
+        retval += "		<recordList_string><![CDATA[" + this.saveRecordList_string() + "]]></recordList_string>" + Const.CR;
+        if(getDs_num() != null){
+        	for(String S : getDs_num())
+        		retval += "		<output_number eclIsDef=\"true\" eclType=\"dataset\"><![CDATA[" + S + "]]></output_number>" + Const.CR;
+        }
+        if(getDs_string() != null){
+        	for(String S : getDs_string())
+        		retval += "		<output_string eclIsDef=\"true\" eclType=\"dataset\"><![CDATA[" + S + "]]></output_string>" + Const.CR;
+        }
         return retval;
 
     }
@@ -545,15 +644,9 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
         	if(rep.getStepAttributeString(id_jobentry, "datasetName") != null)
                 DatasetName = rep.getStepAttributeString(id_jobentry, "datasetName"); //$NON-NLS-1$
 
-        	if(rep.getStepAttributeString(id_jobentry, "flag") != null)
-            	flag = rep.getStepAttributeString(id_jobentry, "flag"); //$NON-NLS-1$
-        	
         	if(rep.getStepAttributeString(id_jobentry, "GroupBy") != null)
             	this.openGroupBy(rep.getStepAttributeString(id_jobentry, "GroupBy")); //$NON-NLS-1$
         	
-            if(rep.getStepAttributeString(id_jobentry, "Number") != null)
-            	Number = rep.getStepAttributeString(id_jobentry, "Number"); //$NON-NLS-1$
-            
             if(rep.getStepAttributeString(id_jobentry, "Sort") != null)
             	Sort = rep.getStepAttributeString(id_jobentry, "Sort"); //$NON-NLS-1$
             
@@ -577,6 +670,11 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
             
             if(rep.getStepAttributeString(id_jobentry, "defJobName") != null)
             	defJobName = rep.getStepAttributeString(id_jobentry, "defJobName"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "recordList_number") != null)
+                this.openRecordList_number(rep.getStepAttributeString(id_jobentry, "recordList_number")); //$NON-NLS-1$
+            
+            if(rep.getStepAttributeString(id_jobentry, "recordList_string") != null)
+                this.openRecordList_string(rep.getStepAttributeString(id_jobentry, "recordList_string")); //$NON-NLS-1$
             
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -596,14 +694,13 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
             rep.saveStepAttribute(id_job, getObjectId(), "people", this.savePeople()); //$NON-NLS-1$
             
             rep.saveStepAttribute(id_job, getObjectId(), "data_type", data_type); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "outTables", this.saveOutTables()); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "flag", flag); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "GroupBy", this.saveGroupBy()); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "Number", Number); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "outputName", outputName);
         	rep.saveStepAttribute(id_job, getObjectId(), "label", label);
         	rep.saveStepAttribute(id_job, getObjectId(), "persist_Output_Checked", persist);
         	rep.saveStepAttribute(id_job, getObjectId(), "defJobName", defJobName);
+        	rep.saveStepAttribute(id_job, getObjectId(), "recordList_number", this.saveRecordList_number()); //$NON-NLS-1$
+        	rep.saveStepAttribute(id_job, getObjectId(), "recordList_string", this.saveRecordList_string()); //$NON-NLS-1$
             
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);

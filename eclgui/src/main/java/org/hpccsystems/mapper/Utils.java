@@ -294,7 +294,7 @@ public class Utils {
 				}
 				for (int i = 0; i < value.length; i++) {
 					TreeItem child = new TreeItem(item, SWT.NONE);				
-					child.setText(append + value[i]);
+					child.setText(append + value[i].split(",")[0]); 
 					if(dataType != null){
 						if(dataType[i].toLowerCase().contains("string"))
 							child.setBackground(new Color(null,211,211,211));

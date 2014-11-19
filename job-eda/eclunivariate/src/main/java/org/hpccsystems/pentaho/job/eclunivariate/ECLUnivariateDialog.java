@@ -57,6 +57,7 @@ import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.hpccsystems.ecljobentrybase.*;
 
+import org.hpccsystems.recordlayout.RecordBO;
 import org.hpccsystems.recordlayout.RecordLabels;
 import org.hpccsystems.recordlayout.RecordList;
 
@@ -68,7 +69,8 @@ import org.hpccsystems.recordlayout.RecordList;
 public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDialog implements JobEntryDialogInterface {
 
 	public static final String NAME = "Name";
-	public static final String[] PROP = { NAME };
+	public static final String RULE = "Rule";
+	public static final String[] PROP = { NAME, RULE };
 	
 	private String[] flags = new String[]{"false","false","false","false","false","false"};
 	java.util.List people;
@@ -80,9 +82,7 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
     //private String single = "";
     private Button wOK, wCancel;
     private boolean backupChanged;
-    private String test = "";
-    private int number = 1;
-    private String flag = "true";
+    private String[] outlierRules = null;
     
 	private SelectionAdapter lsDef;
 	public Button chkBox;
@@ -91,6 +91,8 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
     private String persist;
     private Composite composite;
     private String defJobName;
+    private RecordList recordList_unistats;
+    private RecordList recordList_mode;    
 	
     public ECLUnivariateDialog(Shell parent, JobEntryInterface jobEntryInt,
 			Repository rep, JobMeta jobMeta) {
@@ -109,6 +111,7 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
         final Display display = parentShell.getDisplay();
         
         String datasets[] = null;
+        String outlRules[] = null;
     
         final AutoPopulate ap = new AutoPopulate();
         try{
@@ -120,22 +123,27 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
             System.out.println(e.toString());
             datasets = new String[]{""};
         }
+        try{
+        	outlRules = ap.parseOutlierRules(this.jobMeta.getJobCopies());
+        	//outlierRules = Arrays.asList(outlRules);
+        }catch (Exception e){
+            System.out.println("Error Parsing existing outlier rules");
+            System.out.println(e.toString());
+            outlRules = new String[]{""};
+        }
 
 
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
         people = new ArrayList();
         Group = new ArrayList();
-        test = jobEntry.getName().substring(jobEntry.getName().length()-1); 
-        if(Character.isDigit(test.toCharArray()[0]) && flag.equals("true")){
-        	number = Integer.parseInt(test);        	
-        	flag = "false";
-        }
+        recordList_unistats = new RecordList();
+        recordList_mode = new RecordList();    
         
         TabFolder tab = new TabFolder(shell, SWT.FILL | SWT.RESIZE | SWT.MIN | SWT.MAX);
         FormData datatab = new FormData();
         
         datatab.height = 400;
-        datatab.width = 500;
+        datatab.width = 650;
         tab.setLayoutData(datatab);
         
         Composite compForGrp = new Composite(tab, SWT.NONE);
@@ -179,7 +187,7 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
         generalGroupFormat.top = new FormAttachment(0, margin);
         generalGroupFormat.width = 400;
         generalGroupFormat.height = 65;
-        generalGroupFormat.left = new FormAttachment(middle-20, 0);
+        generalGroupFormat.left = new FormAttachment(middle, 0);
         generalGroup.setLayoutData(generalGroupFormat);
 		
 		jobEntryName = buildText("Job Name :", null, lsMod, middle, margin, generalGroup);
@@ -192,11 +200,17 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
         datasetGroupFormat.top = new FormAttachment(generalGroup, margin);
         datasetGroupFormat.width = 400;
         datasetGroupFormat.height = 140;
-        datasetGroupFormat.left = new FormAttachment(middle-20, 0);
+        datasetGroupFormat.left = new FormAttachment(middle, 0);
         datasetGroup.setLayoutData(datasetGroupFormat);
 		
         datasetName = buildCombo("Dataset :", jobEntryName, lsMod, middle, margin, datasetGroup, datasets);
         
+        String rul = "";
+		for(int i=0; i<outlRules.length; i++){
+			rul += "|";
+			rul += outlRules[i];
+		}
+		outlierRules = rul.split("\\|");
 
 	    final Button Mean = new Button(datasetGroup, SWT.CHECK);
 	    Mean.setText("Mean");
@@ -330,7 +344,7 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
         perGroupFormat.top = new FormAttachment(datasetGroup, margin);
         perGroupFormat.width = 400;
         perGroupFormat.height = 80;
-        perGroupFormat.left = new FormAttachment(middle-20, 0);
+        perGroupFormat.left = new FormAttachment(middle, 0);
         //perGroupFormat.right = new FormAttachment(100, 0);
         perGroup.setLayoutData(perGroupFormat);
         
@@ -456,6 +470,13 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
 		        table.redraw();
 		    } 
 		});
+	    TableColumn tc1 = new TableColumn(table, SWT.LEFT);
+	    tc1.setText("Type");
+	    tc1.setWidth(0);
+	    tc1.setResizable(false);
+	    tc1 = new TableColumn(table, SWT.LEFT);
+	    tc1.setText("Outliers");
+	    tc1.setWidth(150);
 	    
 	    if(jobEntry.getPeople() != null)
             people = jobEntry.getPeople();
@@ -507,6 +528,10 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
 		        tableGrp.redraw();
 		    } 
 		});
+	    TableColumn tc1Grp = new TableColumn(tableGrp, SWT.LEFT);
+	    tc1Grp.setText("Outliers");
+	    tc1Grp.setWidth(0);
+	    tc1Grp.setResizable(false);
 	    
 	    if(jobEntry.getGroup() != null)
             Group = jobEntry.getGroup();
@@ -628,10 +653,91 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
         Listener okListener = new Listener() {
 
             public void handleEvent(Event e) {
+                recordList_unistats = new RecordList();
+                recordList_mode = new RecordList();    
             	fieldList = new String();
             	for(int i = 0; i<table.getItemCount(); i++){            		
-            		fieldList += table.getItem(i).getText()+","; 
+            		fieldList += table.getItem(i).getText(0)+","+table.getItem(i).getText(2).toLowerCase()+"|"; 
             	}
+            	for(Iterator it = Group.iterator(); it.hasNext();){
+        			Cols p = (Cols) it.next();
+        			RecordBO ob = new RecordBO();
+        			ob.setColumnName(p.getFirstName());
+        			ob.setColumnType(p.getType());
+        			if(p.getType().toLowerCase().contains("string"))
+        				ob.setDefaultValue("");
+        			else
+        				ob.setDefaultValue("0");
+        			if(flags[2].equalsIgnoreCase("true"))
+        				recordList_mode.addRecordBO(ob);
+        			if(flags[0].equals("true") || flags[1].equals("true") || flags[3].equals("true") || flags[4].equals("true") || flags[5].equals("true"))
+        				recordList_unistats.addRecordBO(ob);
+        		}            	
+        		
+            	if(flags[2].equalsIgnoreCase("true")){
+            		RecordBO ob = new RecordBO();
+            		ob.setColumnName("Field");
+            		ob.setColumnType("STRING");
+            		ob.setDefaultValue("");
+            		recordList_mode.addRecordBO(ob);
+            		
+            		ob = new RecordBO();
+            		ob.setColumnName("Mode");
+            		ob.setColumnType("REAL");
+            		ob.setDefaultValue("0");
+            		recordList_mode.addRecordBO(ob);
+            		ob = new RecordBO();
+            		ob.setColumnName("Cnt");
+            		ob.setColumnType("INTEGER");
+            		ob.setDefaultValue("0");
+            		recordList_mode.addRecordBO(ob);
+            	}
+            	
+            	if(flags[0].equals("true") || flags[1].equals("true") || flags[3].equals("true") || flags[4].equals("true") || flags[5].equals("true")){
+            		RecordBO ob = new RecordBO();
+            		ob.setColumnName("Field");
+            		ob.setColumnType("STRING");
+            		ob.setDefaultValue("");
+            		recordList_unistats.addRecordBO(ob);
+            		
+            		if(flags[0].equalsIgnoreCase("true")){
+            			ob = new RecordBO();
+                		ob.setColumnName("Mean");
+                		ob.setColumnType("REAL");
+                		ob.setDefaultValue("0");
+                		recordList_unistats.addRecordBO(ob);
+            		}            		
+            		if(flags[3].equalsIgnoreCase("true")){
+            			ob = new RecordBO();
+                		ob.setColumnName("SD");
+                		ob.setColumnType("REAL");
+                		ob.setDefaultValue("0");
+                		recordList_unistats.addRecordBO(ob);
+            		}
+            		if(flags[4].equalsIgnoreCase("true")){
+            			ob = new RecordBO();
+                		ob.setColumnName("Maxval");
+                		ob.setColumnType("REAL");
+                		ob.setDefaultValue("0");
+                		recordList_unistats.addRecordBO(ob);
+            		}
+            		if(flags[5].equalsIgnoreCase("true")){
+            			ob = new RecordBO();
+                		ob.setColumnName("Minval");
+                		ob.setColumnType("REAL");
+                		ob.setDefaultValue("0");
+                		recordList_unistats.addRecordBO(ob);
+            		}
+            		if(flags[1].equalsIgnoreCase("true")){
+            			ob = new RecordBO();
+                		ob.setColumnName("Median");
+                		ob.setColumnType("REAL");
+                		ob.setDefaultValue("0");
+                		recordList_unistats.addRecordBO(ob);
+            		}
+            		
+            	}
+            	
 				ok();
             }
         };
@@ -666,6 +772,14 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
             datasetName.setText(jobEntry.getDatasetName());
         }
         
+        if (jobEntry.getRecordList_unistats() != null) {
+        	recordList_unistats = jobEntry.getRecordList_unistats();
+        }
+
+        if (jobEntry.getRecordList_mode() != null) {
+        	recordList_mode = jobEntry.getRecordList_mode();
+        }
+
         if(jobEntry.getCheckList().length()>0){
         	flags = jobEntry.getCheckList().split(",");
         	
@@ -709,14 +823,6 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
         if(jobEntry.getGroup() != null){
         	Group = jobEntry.getGroup();
         	tvGrp.setInput(Group);
-        }
-        
-        if(jobEntry.getflag()!= null){
-        	flag = jobEntry.getflag();
-        }
-        
-        if(jobEntry.getNumber().length()>=1){
-        	number = Integer.parseInt(jobEntry.getNumber());
         }
         
         if (jobEntry.getPersistOutputChecked() != null && chkBox != null) {
@@ -794,10 +900,10 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
         jobEntry.setGroup(Group);
         jobEntry.setCheckList(flags[0]+","+flags[1]+","+flags[2]+","+flags[3]+","+flags[4]+","+flags[5]);
         jobEntry.setFieldList(this.fieldList);
-        jobEntry.setflag(flag);
-        jobEntry.setNumber(Integer.toString(number));
-       	jobEntry.setSingle("UniStats_"+"Univariate"+number);
-        jobEntry.setMode("ModeTable_"+"Univariate"+number);
+       	jobEntry.setSingle("UniStats_"+"Univariate");
+        jobEntry.setRecordList_unistats(recordList_unistats);
+        jobEntry.setRecordList_mode(recordList_mode);
+        jobEntry.setMode("ModeTable_"+"Univariate");
         if(chkBox.getSelection() && outputName != null){
         	jobEntry.setOutputName(outputName.getText());
         }
@@ -1038,6 +1144,19 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
 						Cols p = new Cols();
 						p.setFirstName(S[0]);
 						p.setType(S[2]);
+						int idx = 0;
+						if(outlierRules != null){
+							for(int i = 0; i<outlierRules.length; i++){
+								if(outlierRules[i].toLowerCase().contains(S[0].toLowerCase())){
+									idx = i;
+									break;
+								}
+							}
+							p.setRule(outlierRules[idx]);
+						}
+						else{
+							p.setRule("");
+						}
  						if(!flag.equals("group"))
 							people.add(p);
 						else
@@ -1083,10 +1202,18 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
 class Cols {
 	  private String firstName;
 	  private String type;
-	  
+	  private String Rule;
 	  
 
-	  public String getType() {
+	  public String getRule() {
+		return Rule;
+	}
+
+	public void setRule(String rule) {
+		Rule = rule;
+	}
+
+	public String getType() {
 		return type;
 	}
 
@@ -1131,6 +1258,8 @@ class PlayerLabelProvider implements ITableLabelProvider {
 	  	  return values.getFirstName();//text = values[0];
 	  case 1:
 	  	  return values.getType();//text = values[0];
+	  case 2:
+		  return values.getRule();
 	  }
 	  return null;
 	}

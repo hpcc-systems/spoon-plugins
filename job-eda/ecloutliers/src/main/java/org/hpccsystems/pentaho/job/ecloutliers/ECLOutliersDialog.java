@@ -265,8 +265,7 @@ public class ECLOutliersDialog extends ECLJobEntryDialog {
 
 		Map<String, String[]> mapDataSets = null;
 		try {
-			mapDataSets = ap.parseDefExpressionBuilder(this.jobMeta
-					.getJobCopies());
+			mapDataSets = ap.parseDefEDAExpressionBuilder(this.jobMeta.getJobCopies());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -309,8 +308,10 @@ public class ECLOutliersDialog extends ECLJobEntryDialog {
 			public void modifyText(ModifyEvent arg0) {
 				// AutoPopulate ap = new AutoPopulate();
 				try {
-					RecordList fields = ap.rawFieldsByDataset(
-							datasetName.getText(), jobMeta.getJobCopies());
+					String[] items = ap.fieldsRecByDataset( datasetName.getText(),jobMeta.getJobCopies());
+		              //rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+					RecordList fields = ap.buildMyRecordList(items);
+					//RecordList fields = ap.rawFieldsByDataset(datasetName.getText(), jobMeta.getJobCopies());
 					dataType = new String[fields.getRecords().size()];
 					for (int i = 0; i < fields.getRecords().size(); i++) {
 						try {
@@ -363,8 +364,7 @@ public class ECLOutliersDialog extends ECLJobEntryDialog {
 					file.createNewFile();
 					FileWriter fw = new FileWriter(file.getAbsoluteFile());
 					BufferedWriter bw = new BufferedWriter(fw);
-					for (Iterator<String> it = tblMapper.getRulesList()
-							.iterator(); it.hasNext();) {
+					for (Iterator<String> it = tblMapper.getRulesList().iterator(); it.hasNext();) {
 						String rule = (String) it.next();
 						bw.write(rule.trim() + "\n");
 					}
@@ -470,7 +470,7 @@ public class ECLOutliersDialog extends ECLJobEntryDialog {
 		AutoPopulate ap = new AutoPopulate();
 		Map<String, String[]> mapDataSets = null;
 		try {
-			mapDataSets = ap.parseDefExpressionBuilder(this.jobMeta.getJobCopies(), datasetName.getText());
+			mapDataSets = ap.parseDefEDAExpressionBuilder(this.jobMeta.getJobCopies(), datasetName.getText());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

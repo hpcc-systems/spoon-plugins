@@ -38,6 +38,8 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 import org.hpccsystems.eclguifeatures.AutoPopulate;
 import org.hpccsystems.eclguifeatures.ErrorNotices;
 import org.hpccsystems.ecljobentrybase.*;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 /**
  *
  * @author KeshavS
@@ -60,6 +62,7 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
     private String persist;
     private Composite composite;
     private String defJobName;
+    private RecordList recordList;
     
     public ECLRandomDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
         super(parent, jobEntryInt, rep, jobMeta);
@@ -236,7 +239,22 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
 			@Override
 			public void modifyText(ModifyEvent arg0) {
 				if(datasetName.getText()!=null || !datasetName.getText().equals("")){
-					ResultDataset.setText(datasetName.getText()+"_with_random");					
+					ResultDataset.setText(datasetName.getText()+"_with_random");	
+					AutoPopulate ap = new AutoPopulate();
+					recordList = new RecordList();
+					try {
+						String[] items = ap.fieldsRecByDataset(datasetName.getText(),jobMeta.getJobCopies());
+						recordList = ap.buildMyRecordList(items);
+						RecordBO ob = new RecordBO();
+						ob.setColumnName("rand");
+						ob.setColumnType("UNSIGNED DECIMAL8_8");
+						ob.setDefaultValue("0");
+						recordList.addRecord(0, ob);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
 				}
 				
 			}
@@ -284,6 +302,10 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
         
         if (jobEntry.getDatasetName() != null) {
             datasetName.setText(jobEntry.getDatasetName());
+        }
+
+        if (jobEntry.getRecordList() != null) {
+        	recordList = jobEntry.getRecordList();
         }
         
         if (jobEntry.getresultDatasetName() != null) {
@@ -356,6 +378,7 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
         jobEntry.setName(jobEntryName.getText());
         jobEntry.setDatasetName(datasetName.getText());      
         jobEntry.setresultDatasetName(this.ResultDataset.getText());
+        jobEntry.setRecordList(recordList);
         if(chkBox.getSelection() && outputName != null){
         	jobEntry.setOutputName(outputName.getText());
         }

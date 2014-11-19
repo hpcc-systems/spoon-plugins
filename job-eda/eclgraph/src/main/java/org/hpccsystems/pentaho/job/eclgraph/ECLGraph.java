@@ -39,6 +39,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.hpccsystems.ecljobentrybase.*;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
 
 /**
  *
@@ -50,19 +52,35 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
 	private String Typ = "";
 	private String DatasetName = "";  
 	private String normList = "";
-	private String DatasetNameOriginal = "";
 	private java.util.List people = new ArrayList();
 	private String Test = "";
 	private String FilePath;
 	private String height = "";
 	private String width = "";
 	private String size = "";
-	
+	private String GraphName = "";
 	private String label ="";
 	private String outputName ="";
 	private String persist = "";
 	private String defJobName = "";
+	private RecordList recordList = new RecordList();
+
+	public RecordList getRecordList() {
+		return recordList;
+	}
+
+	public void setRecordList(RecordList recordList) {
+		this.recordList = recordList;
+	}
 	
+	public String getGraphName() {
+		return GraphName;
+	}
+
+	public void setGraphName(String graphName) {
+		GraphName = graphName;
+	}
+
 	public String getDefJobName() {
 		return defJobName;
 	}
@@ -168,14 +186,6 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
 		this.DatasetName = DatasetName;
 	}
 
-	public String getDatasetNameOriginal(){
-		return DatasetNameOriginal;
-	}
-    
-	public void setDatasetNameOriginal(String DatasetNameOriginal){
-		this.DatasetNameOriginal = DatasetNameOriginal;
-	}
-
 	public String getnormList(){
 		return normList;
 	}
@@ -193,8 +203,8 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
         	return result;
         }
         else{        		
-        		
-        		String[] path = FilePath.split("\"");
+        		logBasic(FilePath);
+        		String[] path = FilePath.split("\"");String pname = getName().replaceAll("\\s", "");
         		logBasic(path[1].replaceAll("manifest.xml", "")); 
         		Player axis = new Player();
         		String haxis = "";//tooltip: { textStyle: { fontName: 'Arial', fontSize: 18, bold:false }},hAxis: {title: '
@@ -222,10 +232,7 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
 	        		}
 	        		for(int i = 0; i<norm.length; i++){
 	        			String[] S = norm[i].split(",");
-	        			if(this.getDatasetName().equals(""))	        				
-	        				fields += this.getDatasetNameOriginal()+"."+S[0]+";\n";
-	        			else
-	        				fields += this.getDatasetName()+"."+S[0]+";\n";
+	        			fields += this.getDatasetName()+"."+S[0]+";\n";
 	        		}
 	        	}
 	        	else{
@@ -241,10 +248,7 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
 		        	for(Iterator it = people.iterator(); it.hasNext();){
 		        		if(f){
 		        			Player p = (Player) it.next();
-		        			if(this.getDatasetName().equals(""))
-		        				fields += this.getDatasetNameOriginal()+"."+p.getFirstName()+";\n";
-		        			else
-		        				fields += this.getDatasetName()+"."+p.getFirstName()+";\n";
+		        			fields += this.getDatasetName()+"."+p.getFirstName()+";\n";
 		        			i++;
 		        			f = false;
 		        			//haxis += p.getFirstName().toUpperCase()+"', titleTextStyle:{color: 'Red', fontName:'Arial', fontSize:18, italic:0}},";
@@ -252,10 +256,7 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
 		        			continue;
 		        		}
 		        		Player P = (Player) it.next();
-		        		if(this.getDatasetName().equals(""))
-	        				fields += this.getDatasetNameOriginal()+"."+P.getFirstName()+";\n";
-	        			else
-	        				fields += this.getDatasetName()+"."+P.getFirstName()+";\n";
+		        		fields += this.getDatasetName()+"."+P.getFirstName()+";\n";
 		        		if(i != people.size() - 1)
 		        			Colours += "\""+ColorOption.INSTANCES[P.getColor()]+"\",";
 		        		else
@@ -274,25 +275,18 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
 		        	
 	        	}
         	
-	        	graph += "MyRec:=RECORD\n"+fields+"END;\n";
-	        	if(this.getDatasetName().equals(""))
-	        		graph += "MyTable:=TABLE("+getDatasetNameOriginal()+",MyRec)";
-	        	else
-	        		graph += "MyTable:=TABLE("+getDatasetName()+",MyRec)";
+	        	graph += pname+"Rec:=RECORD\n"+fields+"END;\n";
+	        	graph += getGraphName()+":=TABLE("+getDatasetName()+","+pname+"Rec);\n";
 	        	
 	        	
 	        	if(persist.equalsIgnoreCase("true")){
-	        		if(outputName != null && !(outputName.trim().equals(""))){
-	        			graph += " : PERSIST('~eda::"+outputName+"::graph');\n";
-	        			graph += "OUTPUT(MyTable"+",NAMED(\'"+this.getTyp()+"_MyChart\'))"+";\n";
-	        		}else{
-	        			graph += " : PERSIST('~eda::"+defJobName+"::graph');\n";
-	        			graph += "OUTPUT(MyTable"+",NAMED(\'"+this.getTyp()+"_MyChart\'))"+";\n";
-	        		}
+	        		if(outputName != null && !(outputName.trim().equals("")))	        			
+	        			graph += "OUTPUT("+getGraphName()+",,'~"+outputName+"::"+GraphName+"', __compressed__, overwrite,NAMED('"+this.getTyp()+"_"+getGraphName()+"'))"+";\n";
+	        		else
+	        			graph += "OUTPUT("+getGraphName()+",,'~"+defJobName+"::"+GraphName+"', __compressed__, overwrite,NAMED('"+this.getTyp()+"_"+getGraphName()+"'))"+";\n";	        	
 	        	}
-	        	else{
-	        		graph += ";\n";
-	        		graph += "OUTPUT(MyTable,NAMED(\'"+this.getTyp()+"_MyChart\'));\n";
+	        	else{	        		
+	        		graph += "OUTPUT("+getGraphName()+",NAMED('"+this.getTyp()+"_"+getGraphName()+"'));\n";
 	        	}
 	        	
 		        logBasic("graph Job =" + graph);//{Dataset Job} 
@@ -342,6 +336,37 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
         }
     }
 
+    public String saveRecordList(){
+        String out = "";
+        ArrayList list = recordList.getRecords();
+        Iterator<RecordBO> itr = list.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
+    }
+    
+    public void openRecordList(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            recordList = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList.addRecordBO(rb);
+            }
+        }
+    }
+
     
     @Override
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
@@ -365,8 +390,8 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dataset_name")) != null)
                 setDatasetName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dataset_name")));
             
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dataset_name_original")) != null)
-                setDatasetNameOriginal(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dataset_name_original")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "GraphName")) != null)
+                setGraphName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "GraphName")));
 
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "Typ")) != null)
                 setTyp(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "Typ")));
@@ -388,7 +413,10 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
             
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")) != null)
                 setDefJobName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")));
-            
+    
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
+                openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
+
         } catch (Exception e) {
             throw new KettleXMLException("ECL Dataset Job Plugin Unable to read step info from XML node", e);
         }
@@ -409,11 +437,12 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
         retval += "		<FilePath><![CDATA[" + FilePath + "]]></FilePath>" + Const.CR;
         retval += "		<normList><![CDATA[" + this.getnormList() + "]]></normList>" + Const.CR;
         retval += "		<dataset_name><![CDATA[" + DatasetName + "]]></dataset_name>" + Const.CR;
-        retval += "		<dataset_name_original><![CDATA[" + DatasetNameOriginal + "]]></dataset_name_original>" + Const.CR;
+        retval += "		<GraphName eclIsDef=\"true\" eclType=\"dataset\"><![CDATA[" + GraphName + "]]></GraphName>" + Const.CR;
         retval += "		<label><![CDATA[" + label + "]]></label>" + Const.CR;
         retval += "		<output_name><![CDATA[" + outputName + "]]></output_name>" + Const.CR;
         retval += "		<persist_Output_Checked><![CDATA[" + persist + "]]></persist_Output_Checked>" + Const.CR;
         retval += "		<defJobName><![CDATA[" + defJobName + "]]></defJobName>" + Const.CR;
+        retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
         
         return retval;
 
@@ -443,8 +472,8 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
         	if(rep.getStepAttributeString(id_jobentry, "datasetName") != null)
                 DatasetName = rep.getStepAttributeString(id_jobentry, "datasetName"); //$NON-NLS-1$
         	
-        	if(rep.getStepAttributeString(id_jobentry, "datasetNameOriginal") != null)
-                DatasetNameOriginal = rep.getStepAttributeString(id_jobentry, "datasetNameOriginal"); //$NON-NLS-1$
+        	if(rep.getStepAttributeString(id_jobentry, "GraphName") != null)
+        		GraphName = rep.getStepAttributeString(id_jobentry, "GraphName"); //$NON-NLS-1$
 
             if(rep.getStepAttributeString(id_jobentry, "Typ") != null)
             	Typ = rep.getStepAttributeString(id_jobentry, "Typ"); //$NON-NLS-1$
@@ -470,6 +499,8 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
             if(rep.getStepAttributeString(id_jobentry, "defJobName") != null)
             	defJobName = rep.getStepAttributeString(id_jobentry, "defJobName"); //$NON-NLS-1$
             
+            if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
+                this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
             
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -480,7 +511,7 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
         try {
         	rep.saveStepAttribute(id_job, getObjectId(), "datasetName", DatasetName); //$NON-NLS-1$
         	
-        	rep.saveStepAttribute(id_job, getObjectId(), "datasetNameOriginal", DatasetNameOriginal); //$NON-NLS-1$
+        	rep.saveStepAttribute(id_job, getObjectId(), "GraphName", GraphName); //$NON-NLS-1$
         	
         	rep.saveStepAttribute(id_job, getObjectId(), "Typ", Typ); //$NON-NLS-1$
         	
@@ -507,7 +538,9 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
         	rep.saveStepAttribute(id_job, getObjectId(), "persist_Output_Checked", persist);
             
         	rep.saveStepAttribute(id_job, getObjectId(), "defJobName", defJobName);
-            
+
+        	rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
+
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);
         }

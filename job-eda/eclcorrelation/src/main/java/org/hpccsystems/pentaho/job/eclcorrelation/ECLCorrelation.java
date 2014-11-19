@@ -21,6 +21,8 @@ import org.pentaho.di.repository.Repository;
 import org.w3c.dom.Node;
 import org.hpccsystems.ecljobentrybase.*;
 import org.hpccsystems.javaecl.Filter;
+import org.hpccsystems.recordlayout.RecordBO;
+import org.hpccsystems.recordlayout.RecordList;
  
 /**
  *
@@ -30,15 +32,31 @@ public class ECLCorrelation extends ECLJobEntry{//extends JobEntryBase implement
     
     private String datasetName = "";
     private ArrayList<Player> fields = new ArrayList<Player>();
-    private String method = "";
-   
+    private String method = "";   
     private String rule = "";
     private String label ="";
 	private String outputName ="";
-	private String persist = "";
-	
+	private String persist = "";	
 	private String defJobName = "";
+	private String OutName = "";
+	private RecordList recordList = new RecordList();
+
+	public RecordList getRecordList() {
+		return recordList;
+	}
+
+	public void setRecordList(RecordList recordList) {
+		this.recordList = recordList;
+	}
 	
+	public String getOutName() {
+		return OutName;
+	}
+
+	public void setOutName(String outName) {
+		OutName = outName;
+	}
+
 	public String getDefJobName() {
 		return defJobName;
 	}
@@ -111,7 +129,8 @@ public class ECLCorrelation extends ECLJobEntry{//extends JobEntryBase implement
         	return result;
         }
         else{	
-        	String ecl = "";int idx = 1;String Rec = "";String choose = "";String valChoose = "";int cnt = 0;
+        	String ecl = "";int idx = 1;String Rec = "";String choose = "";String valChoose = "";String recChoose = "";int cnt = 0;
+        	String name = getName().replaceAll("\\s","");
         	for(Iterator<Player> it = fields.iterator(); it.hasNext();){
         		Player P = (Player) it.next();
         		String S = P.getFirstName();
@@ -144,8 +163,9 @@ public class ECLCorrelation extends ECLJobEntry{//extends JobEntryBase implement
 	            			Rec += S+"_"+S1+"_CORR := CORRELATION(GROUP,"+S+","+S1+"),\n";
 	            			Rec += S+"_"+S1+"_RECS_USED := COUNT(GROUP),\n";
 	            		}
-	            		choose += "'"+S+"_"+S1+"_CORR','"+S+"_"+S1+"_RECS_USED',";
-	            		valChoose += "LEFT."+S+"_"+S1+"_CORR,LEFT."+S+"_"+S1+"_RECS_USED,";
+	            		choose += "'"+S+"_"+S1+"',";
+	            		valChoose += "LEFT."+S+"_"+S1+"_CORR,";
+	            		recChoose += "LEFT."+S+"_"+S1+"_RECS_USED,";
 	            		cnt++;            		
         			}
         		}
@@ -156,11 +176,23 @@ public class ECLCorrelation extends ECLJobEntry{//extends JobEntryBase implement
         	Rec = Rec.substring(0,Rec.length()-2);
         	choose = choose.substring(0,choose.length()-1);
         	valChoose = valChoose.substring(0,valChoose.length()-1);
+        	recChoose = recChoose.substring(0,recChoose.length()-1);
         	
-        	ecl += "Tbl := TABLE("+getDatasetName()+",{"+Rec+"});\n";
-        	ecl += "MyRec := RECORD\n	STRING Fields;\n	REAL Val;\nEND;\n";
-        	ecl += "MyCorr := NORMALIZE(Tbl,"+cnt*2+",TRANSFORM(MyRec,SELF.Fields:=CHOOSE(counter,"+choose+"),SELF.Val:=CHOOSE(counter,"+valChoose+")));\n";
-        	ecl += "OUTPUT(MyCorr,NAMED('Correlation'));\n";
+        	ecl += name+"Tbl := TABLE("+getDatasetName()+",{"+Rec+"});\n";
+        	ecl += name+"MyRec := RECORD\n	STRING Fields;\n	REAL Val;\n	INTEGER Recs_used;\nEND;\n";
+        	ecl += OutName+" := NORMALIZE("+name+"Tbl,"+cnt+",TRANSFORM("+name+"MyRec,SELF.Fields:=CHOOSE(counter,"+choose+"),SELF.Val:=CHOOSE(counter,"+valChoose+")" +
+        			",SELF.Recs_used:=CHOOSE(counter,"+recChoose+")));\n";
+        	//ecl += "OUTPUT("+OutName+",NAMED('Correlation'));\n";
+        	if(persist.equalsIgnoreCase("true")){
+	    		if(outputName != null && !(outputName.trim().equals(""))){
+	    			ecl += "OUTPUT("+OutName+",,'~"+outputName+"::"+OutName+"', __compressed__, overwrite,NAMED('Correlation'))"+";\n";
+	    		}else{
+	    			ecl += "OUTPUT("+OutName+",,'~"+defJobName+"::"+OutName+"', __compressed__, overwrite,NAMED('Correlation'))"+";\n";
+	    		}
+	    	}
+	    	else{
+	    		ecl += "OUTPUT("+OutName+",NAMED('Correlation'));\n";
+	    	}
         	
         	logBasic(ecl);
         	
@@ -211,6 +243,36 @@ public class ECLCorrelation extends ECLJobEntry{//extends JobEntryBase implement
         }
     }
 
+    public String saveRecordList(){
+        String out = "";
+        ArrayList list = recordList.getRecords();
+        Iterator<RecordBO> itr = list.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
+    }
+    
+    public void openRecordList(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            recordList = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList.addRecordBO(rb);
+            }
+        }
+    }
     
     
     
@@ -236,6 +298,10 @@ public class ECLCorrelation extends ECLJobEntry{//extends JobEntryBase implement
                 setPersistOutputChecked(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "persist_Output_Checked")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")) != null)
                 setDefJobName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "OutName")) != null)
+                setOutName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "OutName")));
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
+                openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
             
         } catch (Exception e) {
             throw new KettleXMLException("ECL Dataset Job Plugin Unable to read step info from XML node", e);
@@ -256,6 +322,8 @@ public class ECLCorrelation extends ECLJobEntry{//extends JobEntryBase implement
         retval += "		<output_name><![CDATA[" + outputName + "]]></output_name>" + Const.CR;
         retval += "		<persist_Output_Checked><![CDATA[" + persist + "]]></persist_Output_Checked>" + Const.CR;
         retval += "		<defJobName><![CDATA[" + defJobName + "]]></defJobName>" + Const.CR;
+        retval += "		<OutName eclIsDef=\"true\" eclType=\"dataset\"><![CDATA[" + OutName + "]]></OutName>" + Const.CR;
+        retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
         
         return retval;
 
@@ -280,6 +348,10 @@ public class ECLCorrelation extends ECLJobEntry{//extends JobEntryBase implement
             	persist = rep.getStepAttributeString(id_jobentry, "persist_Output_Checked"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "defJobName") != null)
             	defJobName = rep.getStepAttributeString(id_jobentry, "defJobName"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "OutName") != null)
+            	OutName = rep.getStepAttributeString(id_jobentry, "OutName"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
+                this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
 
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -296,6 +368,8 @@ public class ECLCorrelation extends ECLJobEntry{//extends JobEntryBase implement
         	rep.saveStepAttribute(id_job, getObjectId(), "label", label);
         	rep.saveStepAttribute(id_job, getObjectId(), "persist_Output_Checked", persist);
         	rep.saveStepAttribute(id_job, getObjectId(), "defJobName", defJobName);
+        	rep.saveStepAttribute(id_job, getObjectId(), "OutName", OutName);
+        	rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);
         }

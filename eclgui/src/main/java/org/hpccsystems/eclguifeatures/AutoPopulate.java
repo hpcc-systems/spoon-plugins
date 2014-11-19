@@ -33,6 +33,7 @@ public class AutoPopulate {
     private Node datasetNode = null;//used internally to store the node in the load record list functions
     public String mytype;
     public String edatype;
+    public String datasetnode;
     
     private RecordList datasetFields = new RecordList();
 
@@ -62,6 +63,9 @@ public class AutoPopulate {
     
     public HashMap parseDefExpressionBuilder(List<JobEntryCopy> jobs) throws Exception{
     	return parseDefExpressionBuilder(jobs,"");
+    }
+    public HashMap parseDefEDAExpressionBuilder(List<JobEntryCopy> jobs) throws Exception{
+    	return parseDefEDAExpressionBuilder(jobs,"");
     }
     public HashMap parseDefExpressionBuilder(List<JobEntryCopy> jobs, String datasetName) throws Exception{
 
@@ -127,6 +131,72 @@ public class AutoPopulate {
         }
         return ds;
     }
+    
+    public HashMap parseDefEDAExpressionBuilder(List<JobEntryCopy> jobs, String datasetName) throws Exception{
+
+        HashMap ds = new HashMap();
+        String attributeName = "eclIsDef";
+        String attributeValue = "true";
+        
+        Object[] jec = jobs.toArray();
+        int k = 0;
+        for(int j = 0; j<jec.length; j++){
+            if(!((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("START") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("OUTPUT") && !((JobEntryCopy)jec[j]).getName().equalsIgnoreCase("SUCCESS")){
+            	
+            	
+	               //System.out.println("----Loading Dataset: " + ((JobEntryCopy)jec[j]).getName());
+            	   String xml = ((JobEntryCopy)jec[j]).getXML();
+	               NodeList nl = (XMLHandler.loadXMLString(xml)).getChildNodes(); 
+	               for (int temp = 0; temp < nl.getLength(); temp++){
+	                   Node nNode = nl.item(temp);
+	                   
+	                   
+	                   NodeList children;
+	                   Node childnode;
+	                   String defValue = null;
+	                   String type = null;
+	                  
+	                   children=nNode.getChildNodes();
+	                   
+	                   for (int i=0;i<children.getLength();i++)
+	                   {
+	                	   try{
+		                	  
+		                	   childnode=children.item(i);
+		                	   if(childnode != null){
+		                		   if(childnode.getAttributes() != null){
+					                   Node attribute = childnode.getAttributes().getNamedItem(attributeName);
+					                   if (attribute!=null && attributeValue.equals(attribute.getTextContent())){
+					                	   
+					                	   defValue = XMLHandler.getNodeValue(childnode);
+					                	  
+					                	   if(defValue != null && !defValue.equalsIgnoreCase("null")){
+					                		  
+					                		   if(datasetName.equals("") || defValue.equalsIgnoreCase(datasetName)){
+					                			   //System.out.println("NODE_VALUE: " + defValue);
+					                			   ds.put(defValue, fieldsRecByDataset(defValue, jobs));
+					                		   }
+					                		   k++;
+					                	   }else{
+					                		   //System.out.println("NODE_VALUE: IS NULL");
+					                	   }
+					                   }
+		                		   }
+		                	   }
+	                	   }catch (Exception exc){
+	                		   System.out.println("Failed to Read XML");
+	                		   //System.out.println(exc);
+	                		   //exc.printStackTrace();
+	                	   }
+	
+	                   }
+	               }
+            	
+            }
+        }
+        return ds;
+    }
+
     
     
     public String[] parseDefinitions(List<JobEntryCopy> jobs, String attributeName, String attributeValue) throws Exception{
@@ -353,6 +423,7 @@ public class AutoPopulate {
 				                		   if(defValue.equals(datasetValue)){
 				                			   //System.out.println("Verify that " + defValue + " = " + datasetValue);
 				                			   //System.out.println("-------------Yes----------" + tType);
+				                			   datasetnode = childnode.getNodeName();
 				                    		   type = tType;
 				                    		   this.datasetNode = nNode;
 				                    		   nodeIndex = i;
@@ -444,7 +515,7 @@ public class AutoPopulate {
     		 buildRecordList(columns);
     		// System.out.println("Len: " + len);
              for(int i =0; i<len; i++){
-            	 //get just the name
+            	 //get the entire recordlist
             	 adDS.add(colArr[i]);            	             	 
              }
     	 }
@@ -578,7 +649,7 @@ public class AutoPopulate {
         
         edatype = getType(jobs, datasetName);
         //datasetNode is set in getType
-        node = datasetNode;
+        node = datasetNode;        
         //place any outliers above the else will catch all that has a single parent with filed name recordset
         if(edatype != null && edatype.equalsIgnoreCase("ECLProject")){
         	if(node != null){
@@ -598,6 +669,60 @@ public class AutoPopulate {
         }else if(edatype != null && edatype.equalsIgnoreCase("ECLAggregate")){
         	if(node != null){
         		//System.out.println("We have Node");
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLNewReportBuilder")){
+        	if(node != null){
+        		//System.out.println("We have Node");
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLRandom")){
+        	if(node != null){
+        		//System.out.println("We have Node");        		
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLFrequency")){
+        	if(node != null){
+        		//System.out.println("We have Node");              		        	
+        		if(datasetnode.equalsIgnoreCase("output_string"))
+        			getRecordListFromNode(node, adDS, datasetName,jobs,"recordList_string");
+        		else
+        			getRecordListFromNode(node, adDS, datasetName,jobs,"recordList_number");
+        	}
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLFrequencyGroup")){
+        	if(node != null){
+        		//System.out.println("We have Node");              		        	
+        		if(datasetnode.equalsIgnoreCase("output_string"))
+        			getRecordListFromNode(node, adDS, datasetName,jobs,"recordList_string");
+        		else
+        			getRecordListFromNode(node, adDS, datasetName,jobs,"recordList_number");
+        	}
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLTabulate")){
+        	if(node != null){
+        		//System.out.println("We have Node");              		        	
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList_"+datasetName.split("_")[1]);
+        	}
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLTabulateBuckets")){
+        	if(node != null){
+        		//System.out.println("We have Node");              		        	
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLUnivariate")){
+        	if(node != null){
+        		//System.out.println("We have Node");              		        	
+        		if(datasetnode.equalsIgnoreCase("single"))
+        			getRecordListFromNode(node, adDS, datasetName,jobs,"recordList_unistats");
+        		else
+        			getRecordListFromNode(node, adDS, datasetName,jobs,"recordList_mode");
+        	}
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLCorrelation")){
+        	if(node != null){
+        		//System.out.println("We have Node");
+        		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
+        	}
+        }else if(edatype != null && edatype.equalsIgnoreCase("ECLGraph")){
+        	if(node != null){
+        		//System.out.println("We have Node");              		        	
         		getRecordListFromNode(node, adDS, datasetName,jobs,"recordList");
         	}
         }else if(edatype != null && edatype.equalsIgnoreCase("ECLDataset")){

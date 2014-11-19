@@ -40,13 +40,21 @@ public class ECLRandom extends ECLJobEntry{//extends JobEntryBase implements Clo
     private String datasetName = "";
     private String outrecordName = "";
     private String transform = "";
-    private String resultDataset = "";
-    
+    private String resultDataset = "";    
     private String label ="";
 	private String outputName ="";
 	private String persist = "";
 	private String defJobName = "";
-	
+	private RecordList recordList = new RecordList();
+
+	public RecordList getRecordList() {
+		return recordList;
+	}
+
+	public void setRecordList(RecordList recordList) {
+		this.recordList = recordList;
+	}
+
 	public String getDefJobName() {
 		return defJobName;
 	}
@@ -130,9 +138,9 @@ public class ECLRandom extends ECLJobEntry{//extends JobEntryBase implements Clo
             project = sb.toString();
             if(persist.equalsIgnoreCase("true")){
         		if(outputName != null && !(outputName.trim().equals(""))){
-        			project += "OUTPUT("+this.getDatasetName()+"_with_random"+",,'~eda::"+outputName+"::random', __compressed__, overwrite,NAMED('Random'))"+";\n";
+        			project += "OUTPUT("+this.getDatasetName()+"_with_random"+",,'~"+outputName+"::"+resultDataset+"', __compressed__, overwrite,NAMED('Random'))"+";\n";
         		}else{
-        			project += "OUTPUT("+this.getDatasetName()+"_with_random"+",,'~eda::"+defJobName+"::random', __compressed__, overwrite,NAMED('Random'))"+";\n";
+        			project += "OUTPUT("+this.getDatasetName()+"_with_random"+",,'~"+defJobName+"::"+resultDataset+"', __compressed__, overwrite,NAMED('Random'))"+";\n";
         		}
         	}
         	else{
@@ -154,10 +162,40 @@ public class ECLRandom extends ECLJobEntry{//extends JobEntryBase implements Clo
 	        result.setRows(list);
 	        result.setLogText("ECLRandom executed, ECL code added");
 	        return result;
-        }
-        
-        
+        }             
     }
+
+    public String saveRecordList(){
+        String out = "";
+        ArrayList list = recordList.getRecords();
+        Iterator<RecordBO> itr = list.iterator();
+        boolean isFirst = true;
+        while(itr.hasNext()){
+            if(!isFirst){out+="|";}
+            
+            out += itr.next().toCSV();
+            isFirst = false;
+        }
+        return out;
+    }
+    
+    public void openRecordList(String in){
+        String[] strLine = in.split("[|]");
+        
+        int len = strLine.length;
+        if(len>0){
+            recordList = new RecordList();
+            //System.out.println("Open Record List");
+            for(int i =0; i<len; i++){
+                //System.out.println("++++++++++++" + strLine[i]);
+                //this.recordDef.addRecord(new RecordBO(strLine[i]));
+                RecordBO rb = new RecordBO(strLine[i]);
+                //System.out.println(rb.getColumnName());
+                recordList.addRecordBO(rb);
+            }
+        }
+    }
+
     @Override
     public void loadXML(Node node, List<DatabaseMeta> list, List<SlaveServer> list1, Repository rpstr) throws KettleXMLException {
         try {
@@ -175,7 +213,9 @@ public class ECLRandom extends ECLJobEntry{//extends JobEntryBase implements Clo
                 setPersistOutputChecked(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "persist_Output_Checked")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")) != null)
                 setDefJobName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "defJobName")));
-            
+            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")) != null)
+                openRecordList(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "recordList")));
+        
         } catch (Exception e) {
             throw new KettleXMLException("ECL Dataset Job Plugin Unable to read step info from XML node", e);
         }
@@ -188,11 +228,12 @@ public class ECLRandom extends ECLJobEntry{//extends JobEntryBase implements Clo
         retval += super.getXML();
       
         retval += "		<dataset_name ><![CDATA[" + datasetName + "]]></dataset_name>" + Const.CR;
-        retval += "		<resultdataset eclIsGraphable=\"true\"><![CDATA[" + resultDataset + "]]></resultdataset>" + Const.CR;
+        retval += "		<resultdataset eclIsGraphable=\"true\" eclIsDef=\"true\" eclType=\"dataset\"><![CDATA[" + resultDataset + "]]></resultdataset>" + Const.CR;
         retval += "		<label><![CDATA[" + label + "]]></label>" + Const.CR;
         retval += "		<output_name><![CDATA[" + outputName + "]]></output_name>" + Const.CR;
         retval += "		<persist_Output_Checked><![CDATA[" + persist + "]]></persist_Output_Checked>" + Const.CR;
         retval += "		<defJobName><![CDATA[" + defJobName + "]]></defJobName>" + Const.CR;
+        retval += "		<recordList><![CDATA[" + this.saveRecordList() + "]]></recordList>" + Const.CR;
         
         return retval;
 
@@ -213,6 +254,8 @@ public class ECLRandom extends ECLJobEntry{//extends JobEntryBase implements Clo
             	persist = rep.getStepAttributeString(id_jobentry, "persist_Output_Checked"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "defJobName") != null)
             	defJobName = rep.getStepAttributeString(id_jobentry, "defJobName"); //$NON-NLS-1$
+            if(rep.getStepAttributeString(id_jobentry, "recordList") != null)
+                this.openRecordList(rep.getStepAttributeString(id_jobentry, "recordList")); //$NON-NLS-1$
 
         } catch (Exception e) {
             throw new KettleException("Unexpected Exception", e);
@@ -227,6 +270,7 @@ public class ECLRandom extends ECLJobEntry{//extends JobEntryBase implements Clo
         	rep.saveStepAttribute(id_job, getObjectId(), "label", label);
         	rep.saveStepAttribute(id_job, getObjectId(), "persist_Output_Checked", persist);
         	rep.saveStepAttribute(id_job, getObjectId(), "defJobName", defJobName);
+        	rep.saveStepAttribute(id_job, getObjectId(), "recordList", this.saveRecordList()); //$NON-NLS-1$
             
         } catch (Exception e) {
             throw new KettleException("Unable to save info into repository" + id_job, e);
