@@ -86,9 +86,9 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
     private Text GraphName;
     private RecordList recordList;
     private Combo GraphType;
-
+    private boolean shellFilter = false;
     private String[] group = null;
-
+    private AddColumnsDialog obj;
     private Text GHeight;
     private Text GWidth;
     private Combo Size;
@@ -182,7 +182,7 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
             }
         };
         backupChanged = jobEntry.hasChanged();
-        
+        shellFilter = false;
         FormLayout layout = new FormLayout();
 		layout.marginWidth = Const.FORM_MARGIN;
 		layout.marginHeight = Const.FORM_MARGIN;
@@ -511,8 +511,9 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
 	    // Add a listener to change the tableviewer's input
 	    button.addSelectionListener(new SelectionAdapter() {
 	      public void widgetSelected(SelectionEvent event) {
+	    	  
 	    	  AutoPopulate ap = new AutoPopulate();
-	    	  AddColumnsDialog obj = new AddColumnsDialog(display);
+	    	  obj = new AddColumnsDialog(display);
 	    	  
 	    	  String[] items = null;
 	    	  String[] objects = null;
@@ -571,6 +572,7 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
 						
 					}
               }
+              shellFilter = true;
               tv.setInput(people);
               table.setRedraw(true);
 	      }
@@ -632,7 +634,7 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
         Listener cancelListener = new Listener() {
 
             public void handleEvent(Event e) {
-                cancel();
+                cancel("main");
             }
         };
         Listener okListener = new Listener() {
@@ -735,7 +737,7 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
         shell.addShellListener(new ShellAdapter() {
 
             public void shellClosed(ShellEvent e) {
-                cancel();
+                cancel("main");
             }
         });
 
@@ -944,10 +946,14 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
         dispose();
     }
 
-    private void cancel() {
-        jobEntry.setChanged(backupChanged);
-        jobEntry = null;
-        dispose();
+    private void cancel(String main) {
+    	if(main.equalsIgnoreCase("main")){
+    		jobEntry.setChanged(backupChanged);
+    		jobEntry = null;
+    		if(shellFilter)
+    			this.obj.cancel();
+    		dispose();
+    	}
     }
     
 }

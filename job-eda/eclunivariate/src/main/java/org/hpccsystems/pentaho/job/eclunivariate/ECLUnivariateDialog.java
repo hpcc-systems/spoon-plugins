@@ -83,7 +83,7 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
     private Button wOK, wCancel;
     private boolean backupChanged;
     private String[] outlierRules = null;
-    
+    private Shell shellFilter = null;
 	private SelectionAdapter lsDef;
 	public Button chkBox;
     public static Text outputName;
@@ -647,7 +647,7 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
         Listener cancelListener = new Listener() {
 
             public void handleEvent(Event e) {
-                cancel();
+                cancel("main");
             }
         };
         Listener okListener = new Listener() {
@@ -760,7 +760,7 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
         shell.addShellListener(new ShellAdapter() {
 
             public void shellClosed(ShellEvent e) {
-                cancel();
+                cancel("main");
             }
         });
 
@@ -923,14 +923,20 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
         dispose();
     }
 
-    private void cancel() {
-        jobEntry.setChanged(backupChanged);
-        jobEntry = null;
-        dispose();
+    private void cancel(String main) {
+    	if(main.equalsIgnoreCase("main")){
+	        jobEntry.setChanged(backupChanged);
+	        jobEntry = null;
+	        if(shellFilter != null)
+	        	shellFilter.dispose();
+	        dispose();
+    	}
+    	else
+    		shellFilter.dispose();
     }
     
     private void createTableDialog(Display display, final Table table, final TableViewer tv, final String flag){
-    	final Shell shellFilter = new Shell(display); 
+    	shellFilter = new Shell(display); 
 		FormLayout layoutFilter = new FormLayout();
 		layoutFilter.marginWidth = 25;
 		layoutFilter.marginHeight = 25;
@@ -1180,7 +1186,7 @@ public class ECLUnivariateDialog extends ECLJobEntryDialog{//extends JobEntryDia
 
 			@Override
 			public void handleEvent(Event arg0) {
-				shellFilter.dispose();
+				cancel("filter");
 				
 			}
         	

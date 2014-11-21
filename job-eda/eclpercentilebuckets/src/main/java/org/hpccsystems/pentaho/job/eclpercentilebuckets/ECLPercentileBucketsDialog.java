@@ -84,7 +84,7 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
     ArrayList<String> Fieldfilter = new ArrayList<String>();
     private Text OutName;
     private RecordList recordList;
-    
+    private Shell shellFilter = null;
     private Button wOK, wCancel;
     private boolean backupChanged;
     
@@ -420,7 +420,7 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
 	    // Add a listener to change the tableviewer's input
 	    button.addSelectionListener(new SelectionAdapter() {
 	      public void widgetSelected(SelectionEvent event) {
-	    	    final Shell shellFilter = new Shell(display);
+	    	    shellFilter = new Shell(display);
 				FormLayout layoutFilter = new FormLayout();
 				layoutFilter.marginWidth = 25;
 				layoutFilter.marginHeight = 25;
@@ -687,7 +687,7 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
 
 					@Override
 					public void handleEvent(Event arg0) {
-						shellFilter.dispose();
+						cancel("filter");
 						
 					}
 		        	
@@ -743,7 +743,7 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
         Listener cancelListener = new Listener() {
 
             public void handleEvent(Event e) {
-                cancel();
+                cancel("main");
             }
         };
         Listener okListener = new Listener() {
@@ -778,7 +778,7 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
         shell.addShellListener(new ShellAdapter() {
 
             public void shellClosed(ShellEvent e) {
-                cancel();
+                cancel("main");
             }
         });
 
@@ -921,10 +921,16 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
         dispose();
     }
 
-    private void cancel() {
-        jobEntry.setChanged(backupChanged);
-        jobEntry = null;
-        dispose();
+    private void cancel(String main) {
+    	if(main.equalsIgnoreCase("main")){
+	        jobEntry.setChanged(backupChanged);
+	        jobEntry = null;
+	        if(shellFilter != null)
+	        	shellFilter.dispose();
+	        dispose();	        
+    	}
+    	else
+    		shellFilter.dispose();
     }
     
 }

@@ -81,7 +81,7 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
 	private SelectionAdapter lsDef;
     ArrayList<Player> fields;
     private Combo Rule;
-    
+    private Shell shellFilter = null;
     public Button chkBox;
     public static Text outputName;
     public static Label label;
@@ -416,7 +416,7 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
 	    // Add a listener to change the tableviewer's input
 	    button.addSelectionListener(new SelectionAdapter() {
 		      public void widgetSelected(SelectionEvent event) {
-		    	    final Shell shellFilter = new Shell(display);
+		    	    shellFilter = new Shell(display);
 					FormLayout layoutFilter = new FormLayout();
 					layoutFilter.marginWidth = 25;
 					layoutFilter.marginHeight = 25;
@@ -662,7 +662,7 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
 
 						@Override
 						public void handleEvent(Event arg0) {
-							shellFilter.dispose();
+							cancel("filter");
 							
 						}
 			        	
@@ -711,7 +711,7 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
         Listener cancelListener = new Listener() {
 
             public void handleEvent(Event e) {
-                cancel();
+                cancel("main");
             }
         };
         Listener okListener = new Listener() {
@@ -753,7 +753,7 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
         shell.addShellListener(new ShellAdapter() {
 
             public void shellClosed(ShellEvent e) {
-                cancel();
+                cancel("main");
             }
         });
 
@@ -884,10 +884,17 @@ public class ECLCorrelationDialog extends ECLJobEntryDialog{//extends JobEntryDi
         dispose();
     }
 
-    private void cancel() {
-        jobEntry.setChanged(backupChanged);
-        jobEntry = null;
-        dispose();
+    private void cancel(String main) {
+    	if(main.equalsIgnoreCase("main")){
+    		jobEntry.setChanged(backupChanged);
+    		jobEntry = null;
+    		if(shellFilter != null)
+    			shellFilter.dispose();
+    		dispose();
+    	}
+    	else{
+    		shellFilter.dispose();
+    	}
     }
 
 }

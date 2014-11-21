@@ -75,7 +75,7 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
   
 	public static final String[] PROP = { NAME, NUMBER, RULE};
 	
-	private Shell shellFilter;
+	private Shell shellFilter = null;
 	private String normlist = "";
     private ECLPercentile jobEntry;
     private Text jobEntryName;
@@ -659,7 +659,7 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
 
 					@Override
 					public void handleEvent(Event arg0) {
-						shellFilter.dispose();
+						cancel("addcols");
 						
 					}
 		        	
@@ -699,7 +699,7 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
         Listener cancelListener = new Listener() {
 
             public void handleEvent(Event e) {
-                cancel();
+                cancel("main");
             }
         };
         Listener okListener = new Listener() {
@@ -753,7 +753,7 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
         shell.addShellListener(new ShellAdapter() {
 
             public void shellClosed(ShellEvent e) {
-                cancel();
+                cancel("main");
             }
         });
 
@@ -887,11 +887,17 @@ public class ECLPercentileDialog extends ECLJobEntryDialog{
         dispose();
     }
 
-    private void cancel() {
-        jobEntry.setChanged(backupChanged);
-        jobEntry = null;
-        shellFilter.dispose();
-        dispose();
+    private void cancel(String main) {
+    	if(main.equalsIgnoreCase("main")){
+    		jobEntry.setChanged(backupChanged);
+    		jobEntry = null;
+    		if(shellFilter != null)
+    			shellFilter.dispose();
+    		dispose();
+    	}
+    	else{
+    		shellFilter.dispose();
+    	}
     }
     
 }
