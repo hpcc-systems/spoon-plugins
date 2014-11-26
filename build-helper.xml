@@ -157,6 +157,10 @@
 		<zipfileset dir="${basedir}/job-eda/eclunivariate/target" includes="eclunivariate.jar" prefix="jobentries/eclunivariate" />
 		<zipfileset dir="${basedir}/job-eda/eclunivariate/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclunivariate" />
 		
+		<zipfileset dir="${basedir}/job-eda/eclnewreportbuilder/target" includes="eclnewreportbuilder.jar" prefix="jobentries/eclnewreportbuilder" />
+		<zipfileset dir="${basedir}/job-eda/eclnewreportbuilder/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclnewreportbuilder" />
+		<zipfileset dir="${basedir}/job-eda/eclaggregate/target" includes="eclaggregate.jar" prefix="jobentries/eclaggregate" />
+		<zipfileset dir="${basedir}/job-eda/eclaggregate/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclaggregate" />
 		</zip>
 	</target>
 	<target name="create-distribution-eda" >
