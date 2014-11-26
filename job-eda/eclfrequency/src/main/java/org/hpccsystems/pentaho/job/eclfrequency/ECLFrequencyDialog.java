@@ -90,7 +90,7 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
     private Combo sort;
     ArrayList<String> Fieldfilter = new ArrayList<String>();
     private static String flag = "true";
-   
+    private Shell shellFilter = null;
     private Button wOK, wCancel;
     private boolean backupChanged;
     Map<String, String[]> mapDataSets = null;
@@ -545,7 +545,7 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
 	    // Add a listener to change the tableviewer's input
 	    button.addSelectionListener(new SelectionAdapter() {
 	      public void widgetSelected(SelectionEvent event) {
-				final Shell shellFilter = new Shell(display);
+				shellFilter = new Shell(display);
 				FormLayout layoutFilter = new FormLayout();
 				layoutFilter.marginWidth = 25;
 				layoutFilter.marginHeight = 25;
@@ -793,7 +793,7 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
 
 					@Override
 					public void handleEvent(Event arg0) {
-						shellFilter.dispose();
+						cancel("filter");
 						
 					}
 		        	
@@ -877,7 +877,7 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
         Listener cancelListener = new Listener() {
 
             public void handleEvent(Event e) {
-                cancel();
+                cancel("main");
             }
         };
         Listener okListener = new Listener() {
@@ -944,7 +944,7 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
         shell.addShellListener(new ShellAdapter() {
 
             public void shellClosed(ShellEvent e) {
-                cancel();
+                cancel("main");
             }
         });
 
@@ -1091,10 +1091,16 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
         dispose();
     }
 
-    private void cancel() {
-        jobEntry.setChanged(backupChanged);
-        jobEntry = null;
-        dispose();
+    private void cancel(String main) {
+    	if(main.equalsIgnoreCase("main")){
+    		jobEntry.setChanged(backupChanged);
+    		jobEntry = null;
+    		if(shellFilter != null)
+    			shellFilter.dispose();
+    		dispose();
+    	}
+    	else
+    		shellFilter.dispose();
     }
     
 }

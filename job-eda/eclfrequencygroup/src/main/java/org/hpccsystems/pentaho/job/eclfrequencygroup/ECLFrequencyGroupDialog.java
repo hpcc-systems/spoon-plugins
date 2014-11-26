@@ -85,7 +85,7 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
 	
 	java.util.List people;
     private String[] outlierRules = null;
-	
+    private Shell shellFilter = null;
 	private String normlist = "";
 	private String data_type = "";
     private ECLFrequencyGroup jobEntry;
@@ -641,7 +641,7 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
         Listener cancelListener = new Listener() {
 
             public void handleEvent(Event e) {
-                cancel();
+                cancel("main");
             }
         };
         Listener okListener = new Listener() {
@@ -720,7 +720,7 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
         shell.addShellListener(new ShellAdapter() {
 
             public void shellClosed(ShellEvent e) {
-                cancel();
+                cancel("main");
             }
         });
 
@@ -879,14 +879,20 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
         dispose();
     }
 
-    private void cancel() {
-        jobEntry.setChanged(backupChanged);
-        jobEntry = null;
-        dispose();
+    private void cancel(String main) {
+    	if(main.equalsIgnoreCase("main")){
+    		jobEntry.setChanged(backupChanged);
+    		jobEntry = null;
+    		if(shellFilter != null)
+    			shellFilter.dispose();
+    		dispose();
+    	}
+    	else
+    		shellFilter.dispose();
     }
     
     private void createDialog(Display display, final Table table, final TableViewer tv, final String flag, final Text Grp){
-		final Shell shellFilter = new Shell(display);
+		shellFilter = new Shell(display);
 		FormLayout layoutFilter = new FormLayout();
 		layoutFilter.marginWidth = 25;
 		layoutFilter.marginHeight = 25;
@@ -1163,7 +1169,7 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
 
 			@Override
 			public void handleEvent(Event arg0) {
-				shellFilter.dispose();
+				cancel("filter");
 				
 			}
         	

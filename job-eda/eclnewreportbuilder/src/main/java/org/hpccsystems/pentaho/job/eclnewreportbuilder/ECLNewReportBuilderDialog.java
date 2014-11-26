@@ -489,7 +489,13 @@ public class ECLNewReportBuilderDialog extends ECLJobEntryDialog{//extends JobEn
 
 			@Override
 			public void modifyText(ModifyEvent arg0) {
-				tbl.setItemCount(0);				
+				tbl.setItemCount(0);
+				people = new ArrayList<Person>();
+				tv.refresh();
+				tv.setInput(people);
+				Items = new ArrayList<String>();
+				Types = new ArrayList<String>();
+				recordList = new RecordList();
 			}
         	
         });

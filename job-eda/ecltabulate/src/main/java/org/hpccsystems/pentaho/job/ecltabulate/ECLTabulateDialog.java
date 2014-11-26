@@ -79,7 +79,7 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
     private String flag = "true";
 	String[] tables;
     private String[] outlierRules = null;
-    private Shell shellSettings;
+    private Shell shellSettings = null;
     private ECLTabulate jobEntry;
     private Text jobEntryName;
     private Combo datasetName;
@@ -1000,7 +1000,8 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
     private void cancel() {
         jobEntry.setChanged(backupChanged);
         jobEntry = null;
-        shellSettings.dispose();
+        if(shellSettings != null)
+        	shellSettings.dispose();
         dispose();
     }
     

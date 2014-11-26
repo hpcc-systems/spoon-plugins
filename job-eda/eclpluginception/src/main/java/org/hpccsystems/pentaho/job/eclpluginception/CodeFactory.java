@@ -441,7 +441,7 @@ public class CodeFactory {
             
             
             
-            jCodeModel.build(new File(Path+"\\job\\ecl"+PluginName.toLowerCase()+"\\src\\main\\java"));//D:\\Users\\703119704\\Documents\\spoon-plugins\\spoon-plugins
+            jCodeModel.build(new File(Path+"\\job-eda\\ecl"+PluginName.toLowerCase()+"\\src\\main\\java"));//D:\\Users\\703119704\\Documents\\spoon-plugins\\spoon-plugins
 
         } catch (Exception ex) {
             //logger.log(Level.SEVERE, "Other Exception which in not caught:" + ex);

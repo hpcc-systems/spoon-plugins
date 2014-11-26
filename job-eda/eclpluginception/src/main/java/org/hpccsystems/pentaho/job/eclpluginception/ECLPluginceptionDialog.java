@@ -70,10 +70,9 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
     private Text plugins_dir;
     private Text t;
     private Combo datasetName;
-    private Combo Derived;
     private Button wOK, wCancel;
     private boolean backupChanged;
-    String[] checkList = null;
+    private Shell shellDialog;
     ArrayList<String> Items;
     ArrayList<String> Types;
     @SuppressWarnings("unused")
@@ -94,18 +93,15 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
         final Display display = parentShell.getDisplay();
         
         String datasets[] = null;
-        String derivedDatasets[] = null;        
+                
         AutoPopulate ap = new AutoPopulate();
         try{
             //Object[] jec = this.jobMeta.getJobCopies().toArray();
-        	derivedDatasets = ap.parseGraphableDefinitions(this.jobMeta.getJobCopies());
-            checkList = ap.parseUnivariate(this.jobMeta.getJobCopies());
-            datasets = ap.parseDatasetsRecordsets(this.jobMeta.getJobCopies());
+        	datasets = ap.parseDatasetsRecordsets(this.jobMeta.getJobCopies());
         }catch (Exception e){
             System.out.println("Error Parsing existing Datasets");
             System.out.println(e.toString());
             datasets = new String[]{""};
-            derivedDatasets = new String[]{""};
         }
 
         
@@ -190,9 +186,7 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
 		
         datasetName = buildCombo("Original Dataset :", jobEntryName, lsMod, middle, margin, datasetGroup, datasets);
         
-        Derived = buildCombo("Derived Dataset :", datasetName, lsMod, middle, margin, datasetGroup, derivedDatasets);
-        
-        PluginName = buildText("Plugin Name:", Derived, lsMod, middle, margin, datasetGroup);
+        PluginName = buildText("Plugin Name:", datasetName, lsMod, middle, margin, datasetGroup);
         
         plugins_dir = buildText("Plugin Dir:", PluginName, lsMod, middle, margin, datasetGroup);
         
@@ -248,14 +242,6 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
         	
         });
         
-        Derived.addModifyListener(new ModifyListener(){
-
-			@Override
-			public void modifyText(ModifyEvent arg0) {
-				tbl.setItemCount(0);				
-			}
-        	
-        });
         
         
         
@@ -281,109 +267,36 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
 		    	String[] items = null;
 		    	String[] types = null;
 		    	 
-				try{          			                  
-	                  rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());	                  	                 
-	              }catch (Exception ex){
-	                  System.out.println("failed to load record definitions");
-	                  System.out.println(ex.toString());
-	                  ex.printStackTrace();
-	              }
-	              if(!datasetName.getText().equals("") && Derived.getText().equals("")){
+		    	if(!datasetName.getText().equals("")){
+	            	  
+	                  //RecordList rec = ap.rawFieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+	                  
+	                  
 	            	  try {
-						items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
+	            		  items = ap.fieldsRecByDataset( datasetName.getText(),jobMeta.getJobCopies());
+						//items = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
+						
 						e.printStackTrace();
 					}
+	            	  rec = ap.buildMyRecordList(items);
+	                  
+	                  
 	            	  int i = 0;types = new String[items.length];
 	            	  for(Iterator<RecordBO> I = rec.getRecords().iterator();I.hasNext();){
-							RecordBO ob = (RecordBO) I.next();						
-							types[i] = ob.getColumnType();
+							RecordBO ob = (RecordBO) I.next();							
+							types[i] = ob.getColumnType()+ob.getColumnWidth();
 							i++;
 							
-						}
+						}	            	  
 	              }
-	              else{
-			    	  if(Derived.getText().split("_")[1].equalsIgnoreCase("Percentile")){
-			    		  items = new String[]{"field","percentile","value"};
-			    		  types = new String[]{"STRING","REAL","REAL"};
-			    	  }
-			    	  else if(Derived.getText().split("_")[1].equalsIgnoreCase("Frequency")){
-			    		  String type = "";
-			    		  for(Iterator<RecordBO> I = rec.getRecords().iterator();I.hasNext();){
-								RecordBO ob = (RecordBO) I.next();
-								if(ob.getColumnName().equalsIgnoreCase(Derived.getText().split("_")[0])){
-									type = ob.getColumnType();
-									break;
-								}
-							}
-			    		  items = new String[]{Derived.getText().split("_")[0],"frequency","percent"};
-			    		  types = new String[]{type,"REAL","REAL"};
-			    	  }
-			    	  else if(Derived.getText().split("_")[1].startsWith("Univariate")){
-			    		  
-			    		 if(Derived.getText().split("_")[0].equalsIgnoreCase("UniStats")){
-			    			 String[] stats = new String[]{"Mean","Median","Mode","Sd","Maxval","Minval"};
-			    			 int num = Integer.parseInt(Derived.getText().split("_")[1].substring(10)); 
-			    			 
-			    			 
-			    			 String[] check = checkList[num-1].split(",");
-			    			 String[] items1 = new String[check.length];
-			    			 String[] types1 = new String[check.length];
-			    			 items1[0] = "field"; types1[0] = "STRING";int j = 1;
-			    			 for(int i = 0; i<check.length; i++){
-			    				 if(check[i].equalsIgnoreCase("true") && i != 2)
-			    					 {
-			    					 	items1[j] = stats[i];
-			    					 	types1[j] = "REAL";
-			    					 	j++;
-			    					 }	    				 
-			    			 }
-			    			 
-			    			 items = new String[j];
-			    			 types = new String[j];
-			    			 for(int i = 0; i<j; i++){
-			    				 items[i] = items1[i];
-			    				 types[i] = types1[i];
-			    			 }
-						}
-			    		 else if(Derived.getText().split("_")[0].equalsIgnoreCase("ModeTable")){
-			    			 items = new String[]{"field","mode","cnt"};
-			    			 types = new String[]{"STRING","REAL","UNSIGNED"};
-			    		 }
-			    	  }
-			    	  else if(Derived.getText().split("_")[2].equalsIgnoreCase("random")){
-			    		  
-			    		  try {
-							String[] item = ap.fieldsByDataset( datasetName.getText(),jobMeta.getJobCopies());
-							items = new String[item.length+1];
-							types = new String[item.length];
-							for(int i = 0; i<item.length+1; i++){
-								if(i == 0)
-									items[i] = "rand";
-								else
-									items[i] = item[i-1];
-							} 
-							int i = 0;
-							types[i] = "UNSIGNED DECIMAL8_8";
-							i++;
-							for(Iterator<RecordBO> I = rec.getRecords().iterator();I.hasNext();){
-								RecordBO ob = (RecordBO) I.next();
-								types[i] = ob.getColumnType();
-								i++;
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-			    		  
-			    	  }
-		          }
 				pouplateTable(tbl,items,types);
-				for(int i = 0; i<items.length; i++){
-					Items.add(items[i]);
-					Types.add(types[i]);
+				if(items != null){
+					for(int i = 0; i<items.length; i++){
+						Items.add(items[i].split(",")[0]);
+						Types.add(types[i]);
+					}
 				}
-				
 			}
         	
         });
@@ -448,10 +361,6 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
             plugins_dir.setText(jobEntry.getDir());
         }
         
-        if (jobEntry.getDerived() != null) {
-            Derived.setText(jobEntry.getDerived());
-        }
-
         if (jobEntry.getItems() != null || jobEntry.getTypes() != null) {
             Items = jobEntry.getItems();
             Types = jobEntry.getTypes();
@@ -477,19 +386,24 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
                 display.sleep();
             }
         }
+        if(shell.isDisposed()){
+        	shellDialog.dispose();
+        }
 
         return jobEntry;
 
     }
     
     private void pouplateTable(Table tbl, String[] items, String[] types){
-    	for(int i = 0; i<items.length; i++){
-    		TableItem it = new TableItem(tbl, SWT.NONE);
-    		it.setText(0, items[i]);
-    		if(types.length > 0)
-    			it.setText(1, types[i]);
-    		else
-    			it.setText(1, "");
+    	if(items != null){
+    		for(int i = 0; i<items.length; i++){
+    			TableItem it = new TableItem(tbl, SWT.NONE);
+    			it.setText(0, items[i].split(",")[0]);
+    			if(types.length > 0)
+    				it.setText(1, types[i]);
+    			else
+    				it.setText(1, "");
+    	}
     	}
     }
 
@@ -504,10 +418,7 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
     		errors += "\"Job Entry Name\" is a required field!\r\n";
     	}
     	
-    	if(this.datasetName.getText().equals("")){
-    		isValid = false;
-    		errors += "\"Dataset Name\" is a required field!\r\n";
-    	}
+    	
     	
     	if(this.plugins_dir.getText().equals("")){
     		isValid = false;
@@ -535,10 +446,7 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
         jobEntry.setText(this.t.getText());
         jobEntry.setItems(Items);
         jobEntry.setTypes(Types);
-        jobEntry.setDerived(Derived.getText());
         jobEntry.setDir(plugins_dir.getText());
-        if(checkList.length>0)
-        	jobEntry.setTest(this.checkList[0]);
         try {
         				
         	create_plugin(code,display,plugins_dir.getText());
@@ -568,6 +476,7 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
     private void cancel() {
         jobEntry.setChanged(backupChanged);
         jobEntry = null;
+        shellDialog.dispose();
         dispose();
     }
     
@@ -576,8 +485,8 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
     	// path is the path to your spoon plugins folder where the spoon jobs files reside
     	//path = path.replaceAll("\\", "\\"+"\\"); 
     	
-    	File src = new File(path+"\\job\\pluginhelper");//D:\\Users\\703119704\\Documents\\spoon-plugins\\spoon-plugins
-    	File dest = new File(path+"\\job\\ecl"+PluginName.getText().toLowerCase());//D:\\Users\\703119704\\Documents\\spoon-plugins\\spoon-plugins
+    	File src = new File(path+"\\job-eda\\pluginhelper");//D:\\Users\\703119704\\Documents\\spoon-plugins\\spoon-plugins
+    	File dest = new File(path+"\\job-eda\\ecl"+PluginName.getText().toLowerCase());//D:\\Users\\703119704\\Documents\\spoon-plugins\\spoon-plugins
     	CopyFolder obj = new CopyFolder();
     	obj.copy(src, dest);
     	
@@ -592,21 +501,21 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
     	
     	chn.change_plugin(PluginName,path);
     	
-    	Shell shell = new Shell(display);
+    	shellDialog = new Shell(display);
     	//String PluginName = "pluginception";
-		shell.setLayout(new GridLayout(1,false));
-		shell.setBackground(new Color(null,255,255,255));
-		shell.setSize(400, 400);     
-		shell.setText("Compile Dialog");
+    	shellDialog.setLayout(new GridLayout(1,false));
+    	shellDialog.setBackground(new Color(null,255,255,255));
+    	shellDialog.setSize(400, 400);     
+    	shellDialog.setText("Compile Dialog");
     	
-    	Text box = new Text(shell, SWT.NONE | SWT.V_SCROLL | SWT.WRAP);
+    	Text box = new Text(shellDialog, SWT.NONE | SWT.V_SCROLL | SWT.WRAP);
     	
     	box.setLayoutData(new GridData(GridData.FILL_BOTH));
     	box.setText("Compiling...");
-        shell.open();
+    	shellDialog.open();
         
         
-        ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "cd \"job\\ecl"+PluginName.getText().toLowerCase()+"\" && mvn -s ..\\..\\settings.xml install");
+        ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "cd \"job-eda\\ecl"+PluginName.getText().toLowerCase()+"\" && mvn -s ..\\..\\settings.xml install");
         builder = builder.directory(new File(path));
         //spoon-plugins\\spoon-plugins\\job\\ecl"+PluginName+"
         //mvn -s ..\\..\\settings.xml install
@@ -621,7 +530,7 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
         } 
         
         
-        while (!shell.isDisposed()) {
+        while (!shellDialog.isDisposed()) {
             if (!display.readAndDispatch()) {
                 display.sleep();
             }

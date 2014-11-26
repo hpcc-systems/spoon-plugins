@@ -30,9 +30,7 @@ public class ECLPluginception extends ECLJobEntry{//extends JobEntryBase impleme
     private ArrayList<String> types = new ArrayList<String>();
     
     private String Text = "";
-    private String derived = "";
     private String resultDataset = "";
-    private String test = "";
     private String dir = "";
     
     public String getDatasetName() {
@@ -59,14 +57,6 @@ public class ECLPluginception extends ECLJobEntry{//extends JobEntryBase impleme
         this.dir = dir;
     }
 
-    public String getTest() {
-        return test;
-    }
-
-    public void setTest(String test) {
-        this.test = test;
-    }
-
     public ArrayList<String> getItems() {
         return items;
     }
@@ -91,14 +81,6 @@ public class ECLPluginception extends ECLJobEntry{//extends JobEntryBase impleme
         this.resultDataset = resultDataset;
     }
 
-    public String getDerived() {
-        return derived;
-    }
-
-    public void setDerived(String derived) {
-        this.derived = derived;
-    }
-    
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {    	  
           return null;
@@ -164,12 +146,8 @@ public class ECLPluginception extends ECLJobEntry{//extends JobEntryBase impleme
                 setDatasetName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dataset_name")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "resultDataset")) != null)
                 setresultDatasetName(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "resultDataset")));
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "Derived")) != null)
-                setDerived(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "Derived")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "text")) != null)
                 setText(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "text")));
-            if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "test")) != null)
-                setTest(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "test")));
             if(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dir")) != null)
                 setDir(XMLHandler.getNodeValue(XMLHandler.getSubNode(node, "dir")));
             //if(items != null){
@@ -194,9 +172,7 @@ public class ECLPluginception extends ECLJobEntry{//extends JobEntryBase impleme
       
         retval += "		<dataset_name ><![CDATA[" + datasetName + "]]></dataset_name>" + Const.CR;
         retval += "		<resultdataset eclIsGraphable=\"true\"><![CDATA[" + resultDataset + "]]></resultdataset>" + Const.CR;
-        retval += "		<Derived><![CDATA[" + derived + "]]></Derived>" + Const.CR;
         retval += "		<text><![CDATA[" + Text + "]]></text>" + Const.CR;
-        retval += "		<test><![CDATA[" + test + "]]></test>" + Const.CR;
         retval += "		<dir><![CDATA[" + dir + "]]></dir>" + Const.CR;
         retval += "		<items><![CDATA[" + this.saveItems() + "]]></items>" + Const.CR;
         retval += "		<types><![CDATA[" + this.saveTypes() + "]]></types>" + Const.CR;
@@ -211,12 +187,8 @@ public class ECLPluginception extends ECLJobEntry{//extends JobEntryBase impleme
                 datasetName = rep.getStepAttributeString(id_jobentry, "datasetName"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "resultdataset") != null)
                 resultDataset = rep.getStepAttributeString(id_jobentry, "resultdataset"); //$NON-NLS-1$
-            if(rep.getStepAttributeString(id_jobentry, "Derived") != null)
-                derived = rep.getStepAttributeString(id_jobentry, "Derived"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "text") != null)
                 Text = rep.getStepAttributeString(id_jobentry, "text"); //$NON-NLS-1$
-            if(rep.getStepAttributeString(id_jobentry, "test") != null)
-                test = rep.getStepAttributeString(id_jobentry, "test"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "dir") != null)
                 dir = rep.getStepAttributeString(id_jobentry, "dir"); //$NON-NLS-1$
             if(rep.getStepAttributeString(id_jobentry, "items") != null)
@@ -233,9 +205,7 @@ public class ECLPluginception extends ECLJobEntry{//extends JobEntryBase impleme
         try {
             rep.saveStepAttribute(id_job, getObjectId(), "datasetName", datasetName); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "resultdataset", resultDataset); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "Derived", derived); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "text", Text); //$NON-NLS-1$
-            rep.saveStepAttribute(id_job, getObjectId(), "test", test); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "dir", dir); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "items", this.saveItems()); //$NON-NLS-1$
             rep.saveStepAttribute(id_job, getObjectId(), "types", this.saveTypes()); //$NON-NLS-1$

@@ -25,7 +25,7 @@ import org.xml.sax.SAXException;
 
 public class Change {
     public void change_plugin(Text PluginName, String Path) throws ParserConfigurationException, SAXException, IOException, TransformerFactoryConfigurationError, TransformerException{
-    	File file = new File(Path+"\\job\\ecl"+PluginName.getText().toLowerCase()+"\\src\\main\\resources\\plugin\\plugin.xml");//D:\\Users\\703119704\\Documents\\spoon-plugins\\spoon-plugins
+    	File file = new File(Path+"\\job-eda\\ecl"+PluginName.getText().toLowerCase()+"\\src\\main\\resources\\plugin\\plugin.xml");//D:\\Users\\703119704\\Documents\\spoon-plugins\\spoon-plugins
     	System.out.println(file.exists());
     	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -61,7 +61,7 @@ public class Change {
     
     public void write_pom(Text PluginName,String Path)throws ParserConfigurationException, SAXException, IOException, TransformerFactoryConfigurationError, TransformerException{
     	//D:\\Users\\703119704\\Documents\\spoon-plugins\\spoon-plugins
-    	PrintWriter writer = new PrintWriter(Path+"\\job\\ecl"+PluginName.getText().toLowerCase()+"\\pom.xml", "UTF-8");
+    	PrintWriter writer = new PrintWriter(Path+"\\job-eda\\ecl"+PluginName.getText().toLowerCase()+"\\pom.xml", "UTF-8");
     	String S = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n"+
     			   "	<modelVersion>4.0.0</modelVersion>\n"+
     			   "	<groupId>org.hpccsystems.pentaho.job</groupId>\n"+
@@ -120,7 +120,7 @@ public class Change {
     
     public void change_project(Text PluginName,String Path) throws ParserConfigurationException, SAXException, IOException, TransformerFactoryConfigurationError, TransformerException{
     	//D:\\Users\\703119704\\Documents\\spoon-plugins\\spoon-plugins
-    	File file = new File(Path+"\\job\\ecl"+PluginName.getText().toLowerCase()+"\\.project");
+    	File file = new File(Path+"\\job-eda\\ecl"+PluginName.getText().toLowerCase()+"\\.project");
     	System.out.println(file.exists());
     	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();

@@ -147,8 +147,9 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         	return result;
         }
         else{
-        	String report = "RepDS := "+getDatasetName()+"("+getRule()+");\n";
-        	report += getName().replaceAll("\\s", "")+"Rec := RECORD\nRepDS;\n";boolean flag = false;
+        	String name = getName().replaceAll("\\s", "");
+        	String report = "";//"RepDS := "+getDatasetName()+"("+getRule()+");\n";        	
+        	report += name+"Rec := RECORD\n"+getDatasetName()+";\n";boolean flag = false;
         	for(Iterator it = people.iterator(); it.hasNext();){
         		Person P = (Person) it.next();
         		String varName = P.getVariableName().trim();
@@ -156,7 +157,7 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         		report += "	REAL8 "+varName+";\n";        		
         	}
         	report += "END;\n";
-        	report += getName().replaceAll("\\s", "")+"Rec "+getName().replaceAll("\\s", "")+"Trans(RepDS L, INTEGER C) := TRANSFORM\n";
+        	report += name+"Rec "+name+"Trans("+getDatasetName()+" L, INTEGER C) := TRANSFORM\n";
 
         	for(Iterator it = people.iterator(); it.hasNext();){
         		String S1 = "";String[] S = new String[]{};
@@ -176,7 +177,7 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         				{
         					if(s.contains("(") && s.contains(")")){
         						if(!s.toLowerCase().startsWith("count"))
-        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, "RepDS,RepDS.").toString()+"/";
+        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, getDatasetName()+","+getDatasetName()+".").toString()+"/";
         						else{
         							S1 += "COUNT(RepDS)+"; 
         						}
@@ -199,7 +200,7 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         				{
         					if(s.contains("(") && s.contains(")")){
         						if(!s.toLowerCase().startsWith("count"))
-        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, "RepDS,RepDS.").toString()+"/";
+        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, ""+getDatasetName()+","+getDatasetName()+".").toString()+"/";
         						else{
         							S1 += "COUNT(RepDS)-"; 
         						}
@@ -221,7 +222,7 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         				if(!vars.contains(s.toLowerCase())){
         					if(s.contains("(") && s.contains(")")){
         						if(!s.toLowerCase().startsWith("count"))
-        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, "RepDs,RepDS.").toString()+"/";
+        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, ""+getDatasetName()+","+getDatasetName()+".").toString()+"/";
         						else{
         							S1 += "COUNT(RepDS)*"; 
         						}
@@ -244,7 +245,7 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         				if(!vars.contains(s.toLowerCase())){
         					if(s.contains("(") && s.contains(")")){
         						if(!s.toLowerCase().startsWith("count"))
-        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, "RepDS,RepDS.").toString()+"/";
+        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, ""+getDatasetName()+","+getDatasetName()+".").toString()+"/";
         						else{
         							S1 += "COUNT(RepDS)/"; 
         						}
@@ -267,7 +268,7 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         				if(!vars.contains(s.toLowerCase())){
         					if(s.contains("(") && s.contains(")")){
         						if(!s.toLowerCase().startsWith("count"))
-        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, "RepDS,RepDS.").toString()+"/";
+        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, ""+getDatasetName()+","+getDatasetName()+".").toString()+"/";
         						else{
         							S1 += "COUNT(RepDS)%"; 
         						}
@@ -289,7 +290,7 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         				if(!vars.contains(s.toLowerCase())){
         					if(s.contains("(") && s.contains(")")){
         						if(!s.toLowerCase().startsWith("count"))
-        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, "RepDS,RepDS.").toString()+"/";
+        							S1 += new StringBuilder(s).insert(s.indexOf("(")+1, ""+getDatasetName()+","+getDatasetName()+".").toString()+"/";
         						else{
         							S1 += "COUNT(RepDS)/"; 
         						}
@@ -312,7 +313,8 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
         	}
         	
         	report += "SELF := L;\nEND;\n";
-        	report += reportname+" := PROJECT(RepDS,"+getName().replaceAll("\\s", "")+"Trans(LEFT,COUNTER));\n";
+        	report += name+"Report := PROJECT("+getDatasetName()+","+getName().replaceAll("\\s", "")+"Trans(LEFT,COUNTER));\n";
+        	report += reportname+" := "+name+"Report("+rule+");\n";
         	report += "OUTPUT("+reportname+",NAMED('Report_"+reportname+"'));\n";
         	//report += "OUTPUT(My"+getName()+"DS,NAMED('Report2'));\n";
         	

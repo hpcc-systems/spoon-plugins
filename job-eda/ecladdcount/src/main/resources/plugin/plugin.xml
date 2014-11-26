@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin category="HPCC EDA"
+        classname="org.hpccsystems.pentaho.job.ecladdcount.ECLAddCount"
+        description="AddCount"
+        iconfile="myplugin.png"
+        id="ECLAddCount"
+        tooltip="AddCount">
+   <libraries>
+      <library name="../../hpcc-common/javaecl-0.1.0.jar"/>
+      <library name="../../hpcc-common/eclgui.jar"/>
+      <library name="ecladdcount.jar"/>
+   </libraries>
+</plugin>

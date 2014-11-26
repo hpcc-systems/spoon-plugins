@@ -55,6 +55,7 @@ public class AddColumnsDialog {
 	private String datasetName = "";
 	private ArrayList<String> selectedColumns = null;
 	private Display display = null;
+	private Shell shellFilter = null;
 	String[] items = null;//ap.fieldsByDataset( datasetName,jobMeta.getJobCopies());
 	
 	public AddColumnsDialog(Display display){
@@ -123,7 +124,7 @@ public class AddColumnsDialog {
 
 			// Need to preserve checked status
 
-			final Shell shellFilter = new Shell(display);
+			shellFilter = new Shell(display);
 			FormLayout layoutFilter = new FormLayout();
 			layoutFilter.marginWidth = 25;
 			layoutFilter.marginHeight = 25;
@@ -317,7 +318,7 @@ public class AddColumnsDialog {
 
 				@Override
 				public void handleEvent(Event arg0) {
-					shellFilter.dispose();
+					cancel();
 					
 				}
 	        	
@@ -334,7 +335,9 @@ public class AddColumnsDialog {
 
 		}
     	
-    
+    public void cancel(){
+    	shellFilter.dispose();
+    }
 	
 
 }
