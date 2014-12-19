@@ -877,7 +877,12 @@ public class ECLPercentileBucketsDialog extends ECLJobEntryDialog{
    					break;
    				}
    			}
+   			if(this.people.size()>1){
+   				isValid = false;
+				errors += "You can Select only one Field for Bucketing!\r\n";					
+   			}
    		}
+   		
     	if(!isValid){
     		ErrorNotices en = new ErrorNotices();
     		errors += "\r\n";

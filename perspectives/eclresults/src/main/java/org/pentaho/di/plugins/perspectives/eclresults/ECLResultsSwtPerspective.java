@@ -270,7 +270,8 @@ public class ECLResultsSwtPerspective implements SpoonPerspective {
 				  }else if(resType.equalsIgnoreCase("Dataprofiling_OptimizedLayout")){
 					  buildOptimizedLayoutTab(filePath,resType,subfolder);
 				  }else if(resType.toLowerCase().startsWith("PieChart".toLowerCase()) || resType.toLowerCase().startsWith("LineChart".toLowerCase()) ||
-						   resType.toLowerCase().startsWith("BarChart".toLowerCase()) || resType.toLowerCase().startsWith("ScatterChart".toLowerCase())){
+						   resType.toLowerCase().startsWith("BarChart".toLowerCase()) || resType.toLowerCase().startsWith("ScatterChart".toLowerCase()) ||
+						   resType.toLowerCase().startsWith("ColumnChart".toLowerCase())){
 					  buildTab(filePath,resType,subfolder);
 					  buildBrowser(resType, subfolder, thisServerAddress, thisWuid);
 				  }else{//CleanedData

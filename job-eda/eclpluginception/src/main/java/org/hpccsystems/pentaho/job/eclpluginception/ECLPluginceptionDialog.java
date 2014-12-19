@@ -386,11 +386,7 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
                 display.sleep();
             }
         }
-        if(shell.isDisposed()){
-        	shellDialog.dispose();
-        }
-
-        return jobEntry;
+                return jobEntry;
 
     }
     
@@ -476,7 +472,8 @@ public class ECLPluginceptionDialog extends ECLJobEntryDialog{//extends JobEntry
     private void cancel() {
         jobEntry.setChanged(backupChanged);
         jobEntry = null;
-        shellDialog.dispose();
+        if(shellDialog != null)
+        	shellDialog.dispose();
         dispose();
     }
     

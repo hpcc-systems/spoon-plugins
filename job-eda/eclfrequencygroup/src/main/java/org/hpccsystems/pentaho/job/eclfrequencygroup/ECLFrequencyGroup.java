@@ -436,7 +436,7 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
     	while(it.hasNext()){
     		if(!isFirst){out+="|";}
     		Player p = (Player) it.next();
-    		out +=  p.getFirstName()+","+p.getSort().toString()+","+p.getColumns().toString()+","+p.getType()+","+p.getSortNumeric().toString();
+    		out +=  p.getFirstName()+","+p.getSort().toString()+","+p.getColumns().toString()+","+p.getType()+","+p.getSortNumeric().toString()+","+p.getRule();
             isFirst = false;
     	}
     	return out;
@@ -455,6 +455,10 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
         		P.setColumns(Integer.parseInt(S[2]));
         		P.setType(S[3]);
         		P.setSortNumeric(Integer.parseInt(S[4]));
+        		if(S.length > 5)
+        			P.setRule(S[5]);
+        		else
+        			P.setRule("");
         		people.add(P);
         	}
         }

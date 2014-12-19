@@ -86,12 +86,14 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
     private Text GraphName;
     private RecordList recordList;
     private Combo GraphType;
-    private boolean shellFilter = false;
+    private Shell shellFilter = null;
     private String[] group = null;
     private AddColumnsDialog obj;
     private Text GHeight;
     private Text GWidth;
     private Combo Size;
+    String[] objects = null;
+	String[] types = null;
     Group sizeGroup = null;
     ArrayList<String> Fieldfilter = new ArrayList<String>();
     
@@ -182,7 +184,7 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
             }
         };
         backupChanged = jobEntry.hasChanged();
-        shellFilter = false;
+        //shellFilter = false;
         FormLayout layout = new FormLayout();
 		layout.marginWidth = Const.FORM_MARGIN;
 		layout.marginHeight = Const.FORM_MARGIN;
@@ -228,7 +230,7 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
         
         datasetName = buildCombo("Dataset Name :    ", jobEntryName, lsMod, middle, margin, datasetGroup, datasets1);
         GraphName = buildText("Output :    ", datasetName, lsMod,middle, margin, datasetGroup);
-        GraphType = buildCombo("Graph Type :", GraphName, lsMod, middle, margin*2, datasetGroup, new String[]{"PieChart", "LineChart","ScatterChart","BarChart"});
+        GraphType = buildCombo("Graph Type :", GraphName, lsMod, middle, margin*2, datasetGroup, new String[]{"PieChart", "LineChart","ScatterChart","BarChart","ColumnChart"});
         
         Size = buildCombo("Set Size :", GraphType, lsMod, middle, margin*2, datasetGroup, new String[]{"YES","NO"});
         
@@ -514,10 +516,10 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
 	    	  
 	    	  AutoPopulate ap = new AutoPopulate();
 	    	  obj = new AddColumnsDialog(display);
-	    	  
+	    	  shellFilter = new Shell(display);
+	    	  obj.setShellFilter(shellFilter);
 	    	  String[] items = null;
-	    	  String[] objects = null;
-	    	  String[] types = null;  
+	    	    
 	    	 
               try{          		
                   items = ap.fieldsRecByDataset( datasetName.getText(),jobMeta.getJobCopies());
@@ -549,34 +551,36 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
             	  }
               }
               for(Iterator<String> it = obj.getSelectedColumns().iterator(); it.hasNext();){
-					String S = it.next();
-					/*for(Iterator<RecordBO> I = rec.getRecords().iterator();I.hasNext();){
-						RecordBO ob = (RecordBO) I.next();
-						if(ob.getColumnName().equalsIgnoreCase(S)){
-							type = ob.getColumnType();
-							break;
-						}
-					}*/
-					int idx = 0;
-					for(int i = 0; i<objects.length; i++){
-						if(S.equalsIgnoreCase(objects[i]))
-							{idx = i;break;}
-					}
-					if(!check.contains(S)){
-						Player p = new Player();
-						p.setFirstName(S);
-						p.setTy(types[idx]);
-						p.setColor(Integer.valueOf("0"));
-						people.add(p);
-						
-						
-					}
+      				String S = it.next();
+      				/*for(Iterator<RecordBO> I = rec.getRecords().iterator();I.hasNext();){
+      					RecordBO ob = (RecordBO) I.next();
+      					if(ob.getColumnName().equalsIgnoreCase(S)){
+      						type = ob.getColumnType();
+      						break;
+      					}
+      				}*/
+      				int idx = 0;
+      				for(int i = 0; i<objects.length; i++){
+      					if(S.equalsIgnoreCase(objects[i]))
+      						{idx = i;break;}
+      				}
+      				if(!check.contains(S)){
+      					Player p = new Player();
+      					p.setFirstName(S);
+      					p.setTy(types[idx]);
+      					p.setColor(Integer.valueOf("0"));
+      					people.add(p);
+      					
+      					
+      				}
               }
-              shellFilter = true;
+              
               tv.setInput(people);
               table.setRedraw(true);
+      	      //obj.listeners();              
 	      }
 	    });
+	    
 	    
 	    table.setHeaderVisible(true);
 	    table.setLinesVisible(true);
@@ -950,10 +954,16 @@ public class ECLGraphDialog extends ECLJobEntryDialog{
     	if(main.equalsIgnoreCase("main")){
     		jobEntry.setChanged(backupChanged);
     		jobEntry = null;
-    		if(shellFilter)
-    			this.obj.cancel();
+    		if(shellFilter != null)
+    			shellFilter.dispose();
+    		//	this.obj.cancel();
     		dispose();
     	}
+    	else{
+    		if(shellFilter != null)
+    			shellFilter.dispose();
+    	}
+    		
     }
     
 }

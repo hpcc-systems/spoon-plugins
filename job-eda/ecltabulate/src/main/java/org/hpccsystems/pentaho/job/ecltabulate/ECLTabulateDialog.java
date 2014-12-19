@@ -267,6 +267,10 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	    TableColumn tcR3 = new TableColumn(RowTable, SWT.LEFT);
 	    tcR3.setResizable(false);
 	    tcR3.setWidth(0);
+	    tcR3 = new TableColumn(RowTable, SWT.LEFT);
+	    tcR3.setWidth(100);
+	    tcR3.setResizable(false);
+	    tcR3.setText("Rule");
 	    
 	    final TableViewer Columns = new TableViewer(datasetGroup, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 	    Columns.setContentProvider(new PlayerContentProvider());
@@ -306,6 +310,11 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	    TableColumn tcL3 = new TableColumn(LayerTable, SWT.LEFT);
 	    tcL3.setResizable(false);
 	    tcL3.setWidth(0);
+	    tcL3 = new TableColumn(LayerTable, SWT.LEFT);
+	    tcL3.setResizable(false);
+	    tcL3.setWidth(100);
+	    tcL3.setText("Rule");
+	    
 	    
 	    
 	    FormData data = new FormData(150,280);
@@ -400,6 +409,19 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 								obj.setFirstName(items[i].split(",")[0]);
 								obj.setOP(0);
 								obj.setType(items[i].split(",")[1]);
+								int idx = 0;
+								if(outlierRules != null){
+									for(int j = 0; j<outlierRules.length; j++){
+										if(outlierRules[j].toLowerCase().contains(items[i].split(",")[0].toLowerCase())){
+											idx = j;
+											break;
+										}
+									}
+									obj.setRule(outlierRules[idx]);
+								}
+								else{
+									obj.setRule("");
+								}
 								fields.add(obj);
 							}
 						}
@@ -419,6 +441,19 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	    				P.setOP(0);
 	    				P.setType(table.getItem(i).getText(2));
 	    				P.setFirstName(table.getItem(i).getText(0));
+	    				int idx = 0;
+						if(outlierRules != null){
+							for(int j = 0; j<outlierRules.length; j++){
+								if(outlierRules[j].toLowerCase().contains(table.getItem(i).getText(0).toLowerCase())){
+									idx = j;
+									break;
+								}
+							}
+							P.setRule(outlierRules[idx]);
+						}
+						else{
+							P.setRule("");
+						}
 	    				if(rows.isEmpty() && (!columns.contains(P)) &&(!layers.contains(P))){
 	    					rows.add(P);
 	    				}
@@ -466,8 +501,8 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	    				int idx = 0;
 						if(outlierRules != null){
 							for(int j = 0; j<outlierRules.length; j++){
-								if(outlierRules[i].toLowerCase().contains(table.getItem(i).getText(0).toLowerCase())){
-									idx = i;
+								if(outlierRules[j].toLowerCase().contains(table.getItem(i).getText(0).toLowerCase())){
+									idx = j;
 									break;
 								}
 							}
@@ -520,6 +555,19 @@ public class ECLTabulateDialog extends ECLJobEntryDialog{
 	    				P.setOP(0);
 	    				P.setType(table.getItem(i).getText(2));
 	    				P.setFirstName(table.getItem(i).getText());
+	    				int idx = 0;
+						if(outlierRules != null){
+							for(int j = 0; j<outlierRules.length; j++){
+								if(outlierRules[j].toLowerCase().contains(table.getItem(i).getText(0).toLowerCase())){
+									idx = j;
+									break;
+								}
+							}
+							P.setRule(outlierRules[idx]);
+						}
+						else{
+							P.setRule("");
+						}
 	    				if(layers.isEmpty() && (!rows.contains(P)) && (!columns.contains(P))){
 	    					layers.add(P);
 	    				}

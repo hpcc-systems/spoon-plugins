@@ -1,54 +1,25 @@
 package org.hpccsystems.recordlayout;
+
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
-import org.pentaho.di.core.Const;
-import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.di.repository.Repository;
-import org.pentaho.di.ui.job.dialog.JobDialog;
-import org.pentaho.di.ui.trans.step.BaseStepDialog;
-
 import org.hpccsystems.eclguifeatures.AutoPopulate;
-import org.hpccsystems.eclguifeatures.ErrorNotices;
-import org.hpccsystems.recordlayout.CreateTable;
-import org.hpccsystems.recordlayout.RecordBO;
-import org.hpccsystems.recordlayout.RecordLabels;
-import org.hpccsystems.recordlayout.RecordList;
-import org.hpccsystems.ecljobentrybase.*;
 
 public class AddColumnsDialog {
 	
@@ -56,8 +27,21 @@ public class AddColumnsDialog {
 	private ArrayList<String> selectedColumns = null;
 	private Display display = null;
 	private Shell shellFilter = null;
+	private Button okFilter;
+	private Button CancelFilter;
+	private Tree tab;
 	String[] items = null;//ap.fieldsByDataset( datasetName,jobMeta.getJobCopies());
 	
+	public Shell getShellFilter() {
+		return shellFilter;
+	}
+
+
+	public void setShellFilter(Shell shellFilter) {
+		this.shellFilter = shellFilter;
+	}
+
+
 	public AddColumnsDialog(Display display){
 		this.display=display;
 		selectedColumns = new ArrayList<String>();
@@ -123,8 +107,8 @@ public class AddColumnsDialog {
 	public void run(){
 
 			// Need to preserve checked status
-
-			shellFilter = new Shell(display);
+			if(shellFilter ==null)
+				shellFilter = new Shell(display);
 			FormLayout layoutFilter = new FormLayout();
 			layoutFilter.marginWidth = 25;
 			layoutFilter.marginHeight = 25;
@@ -136,7 +120,7 @@ public class AddColumnsDialog {
 			final Text NameFilter = new Text(shellFilter, SWT.SINGLE | SWT.BORDER);
 			
 			final ArrayList<String[]> field = new ArrayList<String[]>();
-			final Tree tab = new Tree(shellFilter, SWT.CHECK | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+			tab = new Tree(shellFilter, SWT.CHECK | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 			tab.setHeaderVisible(true);
 			tab.setLinesVisible(true);
 			
@@ -187,9 +171,9 @@ public class AddColumnsDialog {
 			    } 
 			});
 		    
-		    Button okFilter = new Button(shellFilter, SWT.PUSH);
+		    okFilter = new Button(shellFilter, SWT.PUSH);
 			okFilter.setText("     OK     ");
-			Button CancelFilter = new Button(shellFilter, SWT.PUSH);
+			CancelFilter = new Button(shellFilter, SWT.PUSH);
 			CancelFilter.setText("   Cancel   ");
 		    				
 			AutoPopulate ap = new AutoPopulate();
@@ -287,10 +271,10 @@ public class AddColumnsDialog {
 	            	//}
 					
 	            	for(int i = 0; i<tab.getItemCount(); i++){		            		
-            			if(tab.getItem(i).getChecked()){
-            				boolean flag = true;
-            				selectedColumns.add(tab.getItem(i).getText());
-            				/*recordlist = ct.getRecordList();
+	        			if(tab.getItem(i).getChecked()){
+	        				boolean flag = true;
+	        				selectedColumns.add(tab.getItem(i).getText());
+	        				/*recordlist = ct.getRecordList();
 	    	 				if(recordlist.getRecords() != null && recordlist.getRecords().size() > 0) {
 	    	 					for(Iterator<RecordBO> iterator = recordlist.getRecords().iterator(); iterator.hasNext();){
 	    	 						if(tab.getItem(i).getText().equals(iterator.next().getColumnName()))
@@ -301,7 +285,7 @@ public class AddColumnsDialog {
 	    	 					String[] S = {tab.getItem(i).getText(),"STRING",""};
 	    	 					Str.add(S);
 	    	 				}
-            			}	            				            		
+	        			}	            				            		
 	            	}
 	            		            	
 	            	//ct.setRecordList(jobEntry.ArrayListToRecordList(Str));
@@ -313,7 +297,7 @@ public class AddColumnsDialog {
 	        	
 	        };
 	        okFilter.addListener(SWT.Selection, okfilter);
-
+	        
 	        Listener cancelfilter = new Listener(){
 
 				@Override
@@ -325,10 +309,11 @@ public class AddColumnsDialog {
 	        };
 	        
 	        CancelFilter.addListener(SWT.Selection, cancelfilter);
-
-			shellFilter.pack();
+	        
+	        
+	        shellFilter.pack();
 	        shellFilter.open();
-			while (!shellFilter.isDisposed()) {
+	        while (!shellFilter.isDisposed()) {
 				if (!display.readAndDispatch())
 					display.sleep();
 			}
@@ -336,8 +321,7 @@ public class AddColumnsDialog {
 		}
     	
     public void cancel(){
-    	shellFilter.dispose();
-    }
-	
+		shellFilter.dispose();
+	}
 
 }

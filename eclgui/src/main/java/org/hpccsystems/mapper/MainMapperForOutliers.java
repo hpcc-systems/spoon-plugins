@@ -62,7 +62,7 @@ public class MainMapperForOutliers {
 	
 	private Button btnSaveExpression;
 	private Button btnAddExpression;
-	
+
 	private String[] functionList = null;
 	private String[] operatorList = null;
 	private String[] booleanList = null;
@@ -824,14 +824,15 @@ public class MainMapperForOutliers {
 		
 		String rul = "";
 		for(int i=0; i<outlRules.length; i++){
-			rul = outlRules[i];
+			rul += "|";
+			rul += outlRules[i];
 		}
 		outlierRules = rul.split("\\|");
 		if(outlierRules != null && outlierRules.length > 0){
 			for (int i = (outlierRules.length-1) ; i >= 0 ; i--) {
 				TableItem item = new TableItem(ruleTable, SWT.NONE, 0);
-				if(!outlierRules[i].isEmpty()){
-					item.setText(outlierRules[i]);
+				if(!outlierRules[i].isEmpty()){					
+					item.setText(outlierRules[i]);				
 				}
 			}
 		}
@@ -874,27 +875,29 @@ public class MainMapperForOutliers {
 		        String[] filterExt = { "*.txt", "*.doc", ".rtf", "*.*" };
 		        fd.setFilterExtensions(filterExt);
 		        String selected = fd.open();
-		        System.out.println(selected);
-		        File file = new File(selected);
-		        BufferedReader reader = null; 
-				try {
-					reader = new BufferedReader(new FileReader(file));
-				} catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-		        String line = null;
-		        try {
-		        	ruleTable.setItemCount(0);
-					while ((line = reader.readLine()) != null) {
-						TableItem item = new TableItem(ruleTable, SWT.NONE, 0);
-			      		item.setText(line);
-			      		rulesList.add(line);			      		
+		        if(selected != null){
+			        System.out.println(selected);
+			        File file = new File(selected);
+			        BufferedReader reader = null; 
+					try {
+						reader = new BufferedReader(new FileReader(file));
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
 					}
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+			        String line = null;
+			        try {
+			        	ruleTable.setItemCount(0);
+						while ((line = reader.readLine()) != null) {
+							TableItem item = new TableItem(ruleTable, SWT.NONE, 0);
+				      		item.setText(line);
+				      		rulesList.add(line);			      		
+						}
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+		        }
 		        setRulesList(rulesList);
 		        shell.dispose();
 		        

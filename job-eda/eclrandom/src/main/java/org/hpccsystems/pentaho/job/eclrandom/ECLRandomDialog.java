@@ -28,18 +28,15 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hpccsystems.eclguifeatures.AutoPopulate;
+import org.hpccsystems.eclguifeatures.ErrorNotices;
+import org.hpccsystems.ecljobentrybase.ECLJobEntryDialog;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.ui.job.dialog.JobDialog;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
-
-import org.hpccsystems.eclguifeatures.AutoPopulate;
-import org.hpccsystems.eclguifeatures.ErrorNotices;
-import org.hpccsystems.ecljobentrybase.*;
-import org.hpccsystems.recordlayout.RecordBO;
-import org.hpccsystems.recordlayout.RecordList;
 /**
  *
  * @author KeshavS
@@ -52,6 +49,8 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
     private Text ResultDataset;
     //private Combo InRec;
     private Combo datasetName;
+    private Combo seedtype;
+    private Combo seed;
     private Button wOK, wCancel;
     private boolean backupChanged;
     @SuppressWarnings("unused")
@@ -62,7 +61,6 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
     private String persist;
     private Composite composite;
     private String defJobName;
-    private RecordList recordList;
     
     public ECLRandomDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
         super(parent, jobEntryInt, rep, jobMeta);
@@ -76,6 +74,8 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
         Shell parentShell = getParent();
         Display display = parentShell.getDisplay();
         
+        String randomtypes[] = {"Seed", "TimeStamp"};
+        String seedValues[] = {"1","2","3","4","5","6","7","8","9","10"};
         String datasets[] = null;
         AutoPopulate ap = new AutoPopulate();
         try{
@@ -149,7 +149,7 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
         FormData datasetGroupFormat = new FormData();
         datasetGroupFormat.top = new FormAttachment(generalGroup, margin);
         datasetGroupFormat.width = 340;
-        datasetGroupFormat.height = 75;
+        datasetGroupFormat.height = 125;
         datasetGroupFormat.left = new FormAttachment(middle, 0);
         datasetGroupFormat.right = new FormAttachment(100, 0);
         datasetGroup.setLayoutData(datasetGroupFormat);
@@ -157,7 +157,14 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
 		
         datasetName = buildCombo("Dataset Name :", jobEntryName, lsMod, middle, margin, datasetGroup, datasets);
         
-        ResultDataset = buildText("Result Dataset Name :", datasetName, lsMod, middle, margin, datasetGroup);
+        ResultDataset = buildText("Result Dataset :", datasetName, lsMod, middle, margin, datasetGroup);
+        
+        seedtype = buildCombo("Select Type :", ResultDataset, lsMod, middle, margin, datasetGroup, randomtypes);
+        
+        
+        seed = buildCombo("Seed Value :", seedtype, lsMod, middle, margin, datasetGroup, seedValues);
+        
+        seed.setEnabled(false);
         
         Group perGroup = new Group(shell, SWT.SHADOW_NONE);
         props.setLook(perGroup);
@@ -239,22 +246,22 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
 			@Override
 			public void modifyText(ModifyEvent arg0) {
 				if(datasetName.getText()!=null || !datasetName.getText().equals("")){
-					ResultDataset.setText(datasetName.getText()+"_with_random");	
-					AutoPopulate ap = new AutoPopulate();
-					recordList = new RecordList();
-					try {
-						String[] items = ap.fieldsRecByDataset(datasetName.getText(),jobMeta.getJobCopies());
-						recordList = ap.buildMyRecordList(items);
-						RecordBO ob = new RecordBO();
-						ob.setColumnName("rand");
-						ob.setColumnType("UNSIGNED DECIMAL8_8");
-						ob.setDefaultValue("0");
-						recordList.addRecord(0, ob);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
+					ResultDataset.setText(datasetName.getText()+"_with_random");					
+				}
+				
+			}
+        	
+        });
+        
+        seedtype.addModifyListener(new ModifyListener (){
+			@Override
+			public void modifyText(ModifyEvent arg0) {
+				if(seedtype.getText().equalsIgnoreCase("seed")){
+					seed.setEnabled(true);				
+				}
+				else{
+					seed.setText("0");
+					seed.setEnabled(false);	
 				}
 				
 			}
@@ -303,11 +310,16 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
         if (jobEntry.getDatasetName() != null) {
             datasetName.setText(jobEntry.getDatasetName());
         }
-
-        if (jobEntry.getRecordList() != null) {
-        	recordList = jobEntry.getRecordList();
+    
+        
+        if (jobEntry.getType() != null) {
+        	seedtype.setText(jobEntry.getType());
         }
         
+        if (jobEntry.getSeed() != null) {
+            seed.setText(jobEntry.getSeed());
+        }
+                
         if (jobEntry.getresultDatasetName() != null) {
             ResultDataset.setText(jobEntry.getresultDatasetName());
         }
@@ -360,6 +372,21 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
     		errors += "\"Dataset Name\" is a required field!\r\n";
     	}
     	
+    	if(this.seedtype.getText().equals("")){
+    		isValid = false;
+    		errors += "\"type \" is a required field!\r\n";
+    	}
+    	
+    	if(this.seedtype.getText().equalsIgnoreCase("seed") && this.seed.getText().equalsIgnoreCase("0")){
+    		isValid = false;
+    		errors += "\"seed \" should be a value between 1-10!\r\n";
+    	}
+    	
+    	if(this.seed.getText().equals("")){
+    		isValid = false;
+    		errors += "\"seed value\" is a required field!\r\n";
+    	}
+    	
     	if(!isValid){
     		ErrorNotices en = new ErrorNotices();
     		errors += "\r\n";
@@ -377,8 +404,9 @@ public class ECLRandomDialog extends ECLJobEntryDialog{//extends JobEntryDialog 
     	
         jobEntry.setName(jobEntryName.getText());
         jobEntry.setDatasetName(datasetName.getText());      
+        jobEntry.setType(seedtype.getText());   
+        jobEntry.setSeed(seed.getText());   
         jobEntry.setresultDatasetName(this.ResultDataset.getText());
-        jobEntry.setRecordList(recordList);
         if(chkBox.getSelection() && outputName != null){
         	jobEntry.setOutputName(outputName.getText());
         }

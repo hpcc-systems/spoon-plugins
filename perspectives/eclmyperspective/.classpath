@@ -33,5 +33,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/eclexecute"/>
 	<classpathentry kind="lib" path="D:/Users/703119704/Downloads/swt charts/plugins/org.swtchart_0.9.0.v20140219.jar"/>
 	<classpathentry kind="lib" path="D:/Users/703119704/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="D:/Users/703119704/Downloads/swt-win32-3.7.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

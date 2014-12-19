@@ -1,84 +1,96 @@
 package org.pentaho.di.plugins.perspectives.eclmyperspective;
 
+
+
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.swtchart.Chart;
-import org.swtchart.IAxis;
-import org.swtchart.ILineSeries;
-import org.swtchart.IAxis.Position;
+import org.swtchart.IBarSeries;
 import org.swtchart.ISeries.SeriesType;
 
 /**
- * An example for multiple axes.
+ * An example for bar chart.
  */
 public class BarChartDemo1 {
-	private static final double[] ySeries1 = { 0.0, 0.38, 0.71, 0.92, 1.0,
-			0.92, 0.71, 0.38, 0.0, -0.38, -0.71, -0.92, -1.0, -0.92, -0.71,
-			-0.38 };
-	private static final double[] ySeries2 = { 2, 11, 19, 23, 18, 15, 18, 26,
-			29, 32, 47, 32, 31, 35, 30, 29 };
+	static Chart chart;
+    private static final double[] ySeries = { 0.2, 1.1, 1.9, 2.3, 1.8, 1.5,
+            1.8, 2.6, 2.9, 3.2 };
 
-	/**
-	 * The main method.
-	 * 
-	 * @param args
-	 *            the arguments
-	 */
-	public static void main(String[] args) {
-		Display display = new Display();
-		Shell shell = new Shell(display);
-		shell.setText("Multiple Axes");
-		shell.setSize(500, 400);
-		shell.setLayout(new FillLayout());
-		createChart(shell);
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				display.sleep();
-			}
-		}
-		display.dispose();
-	}
+    /**
+     * The main method.
+     * 
+     * @param args
+     *            the arguments
+     */
+    public static void main(String[] args) {
+        Display display = new Display();
+        Shell shell = new Shell(display);
+        shell.setText("Bar Chart");
+        shell.setSize(500, 400);
+        shell.setLayout(new FillLayout());
+        chart = new Chart(shell, SWT.NONE);
+        createChart(shell);
+        
+        System.out.println("Now Save");
+        
+        Image image = new Image(display, shell.getBounds().width, shell.getBounds().height);
+        GC gc=new GC(image);
+        gc.drawImage(image, shell.getBounds().width, shell.getBounds().height);
+        
+        shell.setImage(image);
+        ImageData data = image.getImageData();
+        System.out.println(data.getRGBs());
+        //System.out.println(image); 
+        ImageLoader loader = new ImageLoader();
+        loader.data = new ImageData[] { data };
+        loader.save("D:/Users/703119704/Desktop/fotu.jpg", SWT.IMAGE_JPEG);
+        //image.dispose();
 
-	/**
-	 * create the chart.
-	 * 
-	 * @param parent
-	 *            The parent composite
-	 * @return The created chart
-	 */
-	static public Chart createChart(Composite parent) {
-		// create a chart
-		Chart chart = new Chart(parent, SWT.NONE);
-		// set titles
-		chart.getTitle().setText("Multiple Axes");
-		chart.getAxisSet().getXAxis(0).getTitle().setText("Data Points");
-		chart.getAxisSet().getYAxis(0).getTitle().setText("line series 1");
-		// create second Y axis
-		int axisId = chart.getAxisSet().createYAxis();
-		// set the properties of second Y axis
-		IAxis yAxis2 = chart.getAxisSet().getYAxis(axisId);
-		yAxis2.setPosition(Position.Secondary);
-		final Color RED = Display.getDefault().getSystemColor(SWT.COLOR_RED);
-		yAxis2.getTick().setForeground(RED);
-		yAxis2.getTitle().setForeground(RED);
-		yAxis2.getTitle().setText("line series 2");
-		// create line series
-		ILineSeries lineSeries1 = (ILineSeries) chart.getSeriesSet()
-				.createSeries(SeriesType.LINE, "1");
-		lineSeries1.setYSeries(ySeries1);
-		ILineSeries lineSeries2 = (ILineSeries) chart.getSeriesSet()
-				.createSeries(SeriesType.LINE, "2");
-		lineSeries2.setYSeries(ySeries2);
-		lineSeries2.setLineColor(RED);
-		// assign series to second Y axis
-		lineSeries2.setYAxisId(axisId);
-		// adjust the axis range
-		chart.getAxisSet().adjustRange();
-		return chart;
-	}
+        shell.open();
+        //shell.pack();
+        while (!shell.isDisposed()) {
+            if (!display.readAndDispatch()) {
+                display.sleep();
+            }
+        }
+        display.dispose();
+    }
+
+    /**
+     * create the chart.
+     * 
+     * @param parent
+     *            The parent composite
+     * @return The created chart
+     */
+    static public Chart createChart(Composite parent) {
+
+        // create a chart
+        
+
+        // set titles
+        chart.getTitle().setText("Bar Chart");
+        chart.getAxisSet().getXAxis(0).getTitle().setText("Data Points");
+        chart.getAxisSet().getYAxis(0).getTitle().setText("Amplitude");
+
+        // create bar series
+        IBarSeries barSeries = (IBarSeries) chart.getSeriesSet().createSeries(
+                SeriesType.BAR, "bar series");
+        barSeries.setYSeries(ySeries);
+
+        // adjust the axis range
+        chart.getAxisSet().adjustRange();
+        
+        
+        
+        
+        return chart;
+    }
 }

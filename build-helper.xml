@@ -128,19 +128,58 @@
 	</target>
 	<target name="create-eda">
 		<zip destfile="${basedir}/target/spoon-plugins-eda.zip">
+		<zipfileset dir="${basedir}/job-eda/eclaggregate/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclaggregate" />
+		<zipfileset dir="${basedir}/job/eclaggregate/target" includes="eclaggregate.jar" prefix="jobentries/eclaggregate" />
+
+		<zipfileset dir="${basedir}/job-eda/eclcorrelation/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclcorrelation" />
 		<zipfileset dir="${basedir}/job-eda/eclcorrelation/target" includes="eclcorrelation.jar" prefix="jobentries/eclcorrelation" />
+		
+		<zipfileset dir="${basedir}/job-eda/eclfrequency/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclfrequency" />
+		<zipfileset dir="${basedir}/job-eda/eclfrequency/target" includes="eclfrequency.jar" prefix="jobentries/eclfrequency" />
+		
+		<zipfileset dir="${basedir}/job-eda/eclfrequencygroup/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclfrequencygroup" />
 		<zipfileset dir="${basedir}/job-eda/eclfrequencygroup/target" includes="eclfrequencygroup.jar" prefix="jobentries/eclfrequencygroup" />
+		
+		<zipfileset dir="${basedir}/job-eda/eclgraph/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclgraph" />
 		<zipfileset dir="${basedir}/job-eda/eclgraph/target" includes="eclgraph.jar" prefix="jobentries/eclgraph" />
+		
+		<zipfileset dir="${basedir}/job-eda/ecllibrarybuilder/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecllibrarybuilder" />
 		<zipfileset dir="${basedir}/job-eda/ecllibrarybuilder/target" includes="ecllibrarybuilder.jar" prefix="jobentries/ecllibrarybuilder" />
+		
+		<zipfileset dir="${basedir}/job-eda/eclnaivebayes/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclnaivebayes" />
+		<zipfileset dir="${basedir}/job-eda/eclnaivebayes/target" includes="eclnaivebayes.jar" prefix="jobentries/eclnaivebayes" />
+		
+		<zipfileset dir="${basedir}/job-eda/eclnewreportbuilder/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclnewreportbuilder" />
 		<zipfileset dir="${basedir}/job-eda/eclnewreportbuilder/target" includes="eclnewreportbuilder.jar" prefix="jobentries/eclnewreportbuilder" />
+		
+		<zipfileset dir="${basedir}/job-eda/ecloutliers/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecloutliers" />
 		<zipfileset dir="${basedir}/job-eda/ecloutliers/target" includes="ecloutliers.jar" prefix="jobentries/ecloutliers" />
+		
+		<zipfileset dir="${basedir}/job-eda/eclpercentile/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclpercentile" />
 		<zipfileset dir="${basedir}/job-eda/eclpercentile/target" includes="eclpercentile.jar" prefix="jobentries/eclpercentile" />
+		
+		<zipfileset dir="${basedir}/job-eda/eclpercentilebuckets/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclpercentilebuckets" />
 		<zipfileset dir="${basedir}/job-eda/eclpercentilebuckets/target" includes="eclpercentilebuckets.jar" prefix="jobentries/eclpercentilebuckets" />
+		
+		<zipfileset dir="${basedir}/job-eda/eclpluginception/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclpluginception" />
 		<zipfileset dir="${basedir}/job-eda/eclpluginception/target" includes="eclpluginception.jar" prefix="jobentries/eclpluginception" />
+		
+		<zipfileset dir="${basedir}/job-eda/eclrandom/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclrandom" />
 		<zipfileset dir="${basedir}/job-eda/eclrandom/target" includes="eclrandom.jar" prefix="jobentries/eclrandom" />
+		
+		<zipfileset dir="${basedir}/job-eda/eclregression/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclregression" />
 		<zipfileset dir="${basedir}/job-eda/eclregression/target" includes="eclregression.jar" prefix="jobentries/eclregression" />
+		
+		<zipfileset dir="${basedir}/job-eda/ecltabulate/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecltabulate" />
 		<zipfileset dir="${basedir}/job-eda/ecltabulate/target" includes="ecltabulate.jar" prefix="jobentries/ecltabulate" />
+		
+		<zipfileset dir="${basedir}/job-eda/ecltabulatebuckets/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecltabulatebuckets" />
 		<zipfileset dir="${basedir}/job-eda/ecltabulatebuckets/target" includes="ecltabulatebuckets.jar" prefix="jobentries/ecltabulatebuckets" />
+		
+		<zipfileset dir="${basedir}/job-eda/ecltstat/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/ecltstat" />
+		<zipfileset dir="${basedir}/job-eda/ecltstat/target" includes="ecltstat.jar" prefix="jobentries/ecltstat" />
+		
+		<zipfileset dir="${basedir}/job-eda/eclunivariate/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclunivariate" />
 		<zipfileset dir="${basedir}/job-eda/eclunivariate/target" includes="eclunivariate.jar" prefix="jobentries/eclunivariate" />
 
 		
