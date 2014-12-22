@@ -80,6 +80,7 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
 	public static final String[] PROP = { NAME, OPTION, COLUMN, TYPE, SORTNUM, RULE};
 	
 	java.util.List people;
+	private String filePath;
     private String[] outlierRules = null;
 	private String normlist = "";
 	private String data_type = "";
@@ -88,6 +89,8 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
     private Text TableName;
     private Combo datasetName;
     private Combo sort;
+    private Combo histogram;
+    private Combo Cumulative;
     ArrayList<String> Fieldfilter = new ArrayList<String>();
     private static String flag = "true";
     private Shell shellFilter = null;
@@ -131,8 +134,8 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
             //Object[] jec = this.jobMeta.getJobCopies().toArray();
         	
             datasets = ap.parseDatasetsRecordsets(this.jobMeta.getJobCopies());
-            defJobName = ap.getGlobalVariable(this.jobMeta.getJobCopies(), "jobName");
-            
+            filePath = ap.getGlobalVariable(this.jobMeta.getJobCopies(), "compileFlags");
+            defJobName = ap.getGlobalVariable(this.jobMeta.getJobCopies(), "jobName");                        
         }catch (Exception e){
             System.out.println("Error Parsing existing Datasets");
             System.out.println(e.toString());
@@ -215,13 +218,18 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
         FormData datasetGroupFormat = new FormData();
         datasetGroupFormat.top = new FormAttachment(generalGroup, margin);
         datasetGroupFormat.width = 400;
-        datasetGroupFormat.height = 100;
+        datasetGroupFormat.height = 130;
         datasetGroupFormat.left = new FormAttachment(middle, 0);
         datasetGroup.setLayoutData(datasetGroupFormat);
         
         datasetName = buildCombo("Dataset Name :    ", jobEntryName, lsMod, middle, margin, datasetGroup, datasets);
 		
         sort = buildCombo("Sort :    ", datasetName, lsMod, middle, margin, datasetGroup, new String[]{"NO", "YES"});
+        
+        histogram = buildCombo("Chart :    ", sort, lsMod, middle, margin, datasetGroup, new String[]{"NO", "YES"});
+
+        Cumulative = buildCombo("Cumulative :    ", histogram, lsMod, middle, margin, datasetGroup, new String[]{"NO", "YES"});
+        
         String rul = "";
 		for(int i=0; i<outlRules.length; i++){
 			rul += "|";
@@ -767,7 +775,10 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
 											break;
 										}
 									}
-									p.setRule(outlierRules[idx]);
+									if(!outlierRules[idx].equals("") || outlierRules[idx] != null)
+										p.setRule(outlierRules[idx]);
+									else
+										p.setRule("");
 								}
 								else{
 									p.setRule("");
@@ -890,7 +901,11 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
             	ds_string = new ArrayList<String>();
             	ds_num = new ArrayList<String>();
 				for(int i = 0; i<table.getItemCount(); i++){
-					String s1 = table.getItem(i).getText(0)+","+table.getItem(i).getText(1)+","+table.getItem(i).getText(2)+","+table.getItem(i).getText(4)+","+table.getItem(i).getText(5).toLowerCase()+"-"; 
+					String s1 = "";
+					if(!table.getItem(i).getText(5).toLowerCase().equals(""))
+						s1 = table.getItem(i).getText(0)+","+table.getItem(i).getText(1)+","+table.getItem(i).getText(2)+","+table.getItem(i).getText(4)+","+table.getItem(i).getText(5).toLowerCase()+"-";
+					else
+						s1 = table.getItem(i).getText(0)+","+table.getItem(i).getText(1)+","+table.getItem(i).getText(2)+","+table.getItem(i).getText(4)+"-";
 					normlist += s1;
 					data_type += table.getItem(i).getText(3)+",";
 					if(table.getItem(i).getText(3).toLowerCase().contains("string"))
@@ -964,6 +979,14 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
         	sort.setText(jobEntry.getSort());
         }
         
+        if (jobEntry.getHistogram() != null) {
+        	histogram.setText(jobEntry.getHistogram());
+        }
+        
+        if (jobEntry.getCumulative() != null) {
+        	Cumulative.setText(jobEntry.getCumulative());
+        }
+        
         if (jobEntry.getDs_num() != null) {
         	ds_num = jobEntry.getDs_num();
         }
@@ -992,6 +1015,9 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
         	flag = jobEntry.getflag();
         }
         
+        if(jobEntry.getFilePath()!= null){
+        	filePath = jobEntry.getFilePath();
+        }
         
         if (jobEntry.getPersistOutputChecked() != null && chkBox != null) {
         	chkBox.setSelection(jobEntry.getPersistOutputChecked().equals("true")?true:false);
@@ -1041,6 +1067,15 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
    			isValid = false;
        		errors += "\"Sort\" is a required field!\r\n";
    		}
+   		if(this.histogram.getText().equals("")){
+   			isValid = false;
+       		errors += "\"Chart\" is a required field!\r\n";
+   		}
+   		
+   		if(this.Cumulative.getText().equals("")){
+   			isValid = false;
+       		errors += "\"Cumulative\" is a required field!\r\n";
+   		}
    		if(this.normlist.equals("")){
    			isValid = false;
    			errors += "You need to select  a field to compute Frequency";
@@ -1065,6 +1100,9 @@ public class ECLFrequencyDialog extends ECLJobEntryDialog{
         jobEntry.setDatasetName(this.datasetName.getText());
         jobEntry.setnormList(this.normlist);
         jobEntry.setSort(this.sort.getText());
+        jobEntry.setHistogram(this.histogram.getText());
+        jobEntry.setCumulative(this.Cumulative.getText());
+        jobEntry.setFilePath(this.filePath);
         jobEntry.setPeople(this.people);
         jobEntry.setDataType(this.data_type);
         jobEntry.setflag(flag);

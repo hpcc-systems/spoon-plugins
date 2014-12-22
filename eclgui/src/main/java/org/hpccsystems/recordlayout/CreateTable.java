@@ -110,7 +110,13 @@ public class CreateTable {
 	
 	private boolean includeCopyParent = false;
 	private boolean selectColumns = false;
+	
+	
+	//*******gagan
 	private boolean isAddButton = true;
+	private boolean btn_dwn = true;
+	private boolean btn_up = true;
+	//*******gagan
 	
 	private String[] filedNameArr = null;
 
@@ -149,6 +155,25 @@ public class CreateTable {
 	public void setIncludeCopyParent(boolean includeCopyParent) {
 		this.includeCopyParent = includeCopyParent;
 	}
+	
+	//***************Gagan
+	public boolean isBtnDwn() {
+		return btn_dwn;
+	}
+	public void setBtnDwn(boolean btn_dwn) {
+		this.btn_dwn = btn_dwn;
+	}
+	
+	public boolean isBtnUp() {
+		return btn_up;
+	}
+	public void setBtnUp(boolean btn_up) {
+		this.btn_up = btn_up;
+	}
+	
+	//************Gagan
+	
+	
 	public TabItem buildDefTab(String tabName, TabFolder tabFolder) {
 		this.tabFolder = tabFolder;
 		TabItem tabItem = new TabItem(tabFolder, SWT.NULL);
@@ -1098,6 +1123,11 @@ public class CreateTable {
 		});
 		}
 		//Create and configure the "Move Up" button
+		
+		//************Gagan
+		if(this.btn_up){
+			
+		
 		Button btnRowUp = new Button(parent, SWT.PUSH | SWT.CENTER);
 		btnRowUp.setImage(RecordLabels.getImage("upArrow"));
 		btnRowUp.setText("Move Up");
@@ -1132,8 +1162,15 @@ public class CreateTable {
                                 table.redraw();
 			}
 		});
-		
+		}
 		///Create and configure the "Move Down" button
+		
+		//***********Gagan
+		
+		if(this.btn_dwn){
+			
+			
+		
 		Button btnRowDown = new Button(parent, SWT.PUSH | SWT.CENTER);
 		btnRowDown.setImage(RecordLabels.getImage("downArrow"));
 		btnRowDown.setText("Move Down");
@@ -1169,7 +1206,7 @@ public class CreateTable {
                                 table.redraw();
 			}
 		});
-		
+		//}
 		//	Create and configure the "Close" button
 		//closeButton = new Button(parent, SWT.PUSH | SWT.CENTER);
 		//closeButton.setText("Close");
@@ -1205,7 +1242,7 @@ public class CreateTable {
 				  	}
 			  }
 		} );
-		
+		}
 	}
 	
 	/**

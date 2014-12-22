@@ -153,6 +153,8 @@ public class ECLOutliers extends ECLJobEntry{//extends JobEntryBase implements C
         
         Filter filter = new Filter();
         filter.setName(this.getName());
+        
+        logBasic(getRulesList().get(0)); 
 
         filter.setInRecordName(this.getDatasetName());
        

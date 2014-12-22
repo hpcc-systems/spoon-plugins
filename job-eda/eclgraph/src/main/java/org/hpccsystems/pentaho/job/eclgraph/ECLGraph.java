@@ -248,7 +248,7 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
 		        	for(Iterator it = people.iterator(); it.hasNext();){
 		        		if(f){
 		        			Player p = (Player) it.next();
-		        			fields += this.getDatasetName()+"."+p.getFirstName()+";\n";
+		        			fields += "STRING Xaxis := (STRING)"+this.getDatasetName()+"."+p.getFirstName()+";\n";
 		        			i++;
 		        			f = false;
 		        			//haxis += p.getFirstName().toUpperCase()+"', titleTextStyle:{color: 'Red', fontName:'Arial', fontSize:18, italic:0}},";

@@ -654,7 +654,11 @@ public class ECLFrequencyGroupDialog extends ECLJobEntryDialog{
             	ds_string = new ArrayList<String>();
             	ds_num = new ArrayList<String>();
 				for(int i = 0; i<table.getItemCount(); i++){
-					String s1 = table.getItem(i).getText(0)+","+table.getItem(i).getText(1)+","+table.getItem(i).getText(2)+","+table.getItem(i).getText(4)+","+table.getItem(i).getText(5).toLowerCase()+"-"; 
+					String s1 = "";
+					if(!table.getItem(i).getText(5).toLowerCase().equals(""))
+						s1 = table.getItem(i).getText(0)+","+table.getItem(i).getText(1)+","+table.getItem(i).getText(2)+","+table.getItem(i).getText(4)+","+table.getItem(i).getText(5).toLowerCase()+"-";
+					else
+						s1 = table.getItem(i).getText(0)+","+table.getItem(i).getText(1)+","+table.getItem(i).getText(2)+","+table.getItem(i).getText(4)+"-";
 					normlist += s1;
 					data_type += table.getItem(i).getText(3)+",";
 					if(table.getItem(i).getText(3).toLowerCase().contains("string"))

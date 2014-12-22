@@ -4,6 +4,7 @@ package org.pentaho.di.plugins.perspectives.eclmyperspective;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -37,16 +38,21 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
@@ -54,8 +60,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -65,6 +69,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
@@ -88,6 +93,7 @@ import org.pentaho.ui.xul.impl.DefaultXulOverlay;
 import org.pentaho.ui.xul.impl.XulEventHandler;
 import org.swtchart.Chart;
 import org.swtchart.IBarSeries;
+import org.swtchart.ILegend;
 import org.swtchart.ISeries.SeriesType;
 import org.w3c.dom.Document;
 
@@ -101,13 +107,16 @@ public class ECLMySwtPerspective implements SpoonPerspective {
   private Display display;
   private String fileName;
   private CTabFolder folder;
-  private XYDataset dataset;
+  //private XYDataset dataset;
   private Shell parentShell;
   private String fileName1 = "";
   private Label lbl;
   private boolean isActive;
   private boolean numeric;
   CTabItem ite;
+  private File file;
+  private JFreeChart chart, piechart, scchart;// barChart; 
+  private Chart barchart;
 private String[] filePath; 
   
   public void setFileName(String fn){
@@ -218,13 +227,13 @@ private String[] filePath;
 		t1.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		t1.setBackground(three.getBackground());
 		
-		Label tL = new Label(t1, SWT.NONE);
+		final Label tL = new Label(t1, SWT.NONE);
 		tL.setText("Unsaved Report");
 		tL.setFont(new Font(display,"Arial", 18, SWT.BOLD ));
 		tL.setBackground(three.getBackground());
 		
 		Label tl2 = new Label(t1, SWT.NONE);
-		tl2.setText("									");
+		tl2.setText("												");
 		tl2.setBackground(three.getBackground());
 		tl2.setLayoutData(new GridData(GridData.FILL));
 		
@@ -232,18 +241,10 @@ private String[] filePath;
 	    tc.setBackground(t1.getBackground());	    
 		tc.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		ToolItem item = new ToolItem(tc, SWT.PUSH);
-	    item.setToolTipText("Print PDF");
+		ToolItem itemPdf = new ToolItem(tc, SWT.PUSH);
+	    itemPdf.setToolTipText("Print PDF");
 	    Image icon = new Image(display, "./ui/images/print.png");//src/main/resources/plugin/
-	    item.setImage(icon);
-	    item = new ToolItem(tc, SWT.PUSH);
-	    item.setToolTipText("Save");
-	    icon = new Image(display, "./ui/images/save.png");//src/main/resources/plugin/
-	    item.setImage(icon);
-	    item = new ToolItem(tc, SWT.PUSH);
-	    item.setToolTipText("Save As");
-	    icon = new Image(display, "./ui/images/saveas.png");//src/main/resources/plugin/
-	    item.setImage(icon);
+	    itemPdf.setImage(icon);
 	    
 		/*Composite Graph = new Composite(three, SWT.NONE | SWT.BORDER);
 		Graph.setLayout(new GridLayout(1,false));
@@ -570,6 +571,11 @@ private String[] filePath;
 						cnt = cnt + 1;
 					}
 				}
+				String items[] = new String[tab1.getItemCount()];
+		          for(int i = 0; i<tab1.getItemCount(); i++){
+		        	  items[i] = tab1.getItem(i).getText();
+		          }
+		          cx1.setItems(items);
 			}
 	    	
 	    });
@@ -599,8 +605,8 @@ private String[] filePath;
 			@Override
 			public void handleEvent(Event arg0) {
 				ite = new CTabItem(tabFolder, SWT.NONE);
-			    ite.setText("Graph");
-			    ite.setToolTipText("Graph");
+			    ite.setText("GraphTab");
+			    ite.setToolTipText("GraphTab");
 			    final Composite graphmain = new Composite(tabFolder, SWT.NONE);
 			    graphmain.setLayout(new GridLayout(1,false));
 			    graphmain.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));	    
@@ -658,6 +664,7 @@ private String[] filePath;
 		            }
 		            else{
 		            	ArrayList<ArrayList<Double>> yaxes = new ArrayList<ArrayList<Double>>();
+		            	ArrayList<String> names = new ArrayList<String>();
 		            	for(int i = 0; i<columns.size()-1; i++){
 		            		yaxes.add(new ArrayList<Double>());
 		            	}
@@ -666,18 +673,22 @@ private String[] filePath;
 		            	
 		            	XYSeries[] series = new XYSeries[columns.size()];
 		            	XYSeries[] scSeries = new XYSeries[columns.size()];
+		            	XYSeries[] barSeries = new XYSeries[columns.size()];
 		            	int srcnt = 0;
 		            	for(Iterator<String[]> it = columns.iterator(); it.hasNext();){
 		            		String[] S = (String[]) it.next();
 		            		if(!S[0].equalsIgnoreCase(cx1.getText())){
-		            			series[srcnt] = new XYSeries(S[0]);
-		            			scSeries[srcnt] = new XYSeries(S[0]);
+		            			series[srcnt] = new XYSeries("");
+		            			scSeries[srcnt] = new XYSeries("");
+		            			barSeries[srcnt] = new XYSeries(S[0]);
 		            			srcnt++;		            			
 		            		}
 		            	}
 		            	XYSeriesCollection data = new XYSeriesCollection();
 		            	XYSeriesCollection scdata = new XYSeriesCollection();
+		            	XYSeriesCollection bardata = new XYSeriesCollection();
 		            	DefaultCategoryDataset Catdataset = new DefaultCategoryDataset();
+		            	//DefaultCategoryDataset BarCatdataset = new DefaultCategoryDataset();
 		            	DefaultPieDataset piedataset = new DefaultPieDataset();
 			            //Read File Line By Line
 			            try {       
@@ -758,6 +769,7 @@ private String[] filePath;
 					                        			  	break;
 					                        			  case 1:
 					                        				  if(isNumeric(strLineArr[cnt])){
+					                        					  series[fir].setKey(S[0]);
 					                        					  numeric = true;
 						                        				  series[fir].add(Double.parseDouble(strLineArr[cnt]), Double.parseDouble(strLineArr[i]));
 					                        				  }
@@ -768,6 +780,8 @@ private String[] filePath;
 					                        			  	  
 					                        			  case 2:
 					                        				  yaxes.get(fir).add(Double.parseDouble(strLineArr[i]));
+					                        				  if(!names.contains(S[0]))
+						                        				  names.add(fir, S[0]); 
 						                        			  //fir++;
 						                        			  if(isNumeric(strLineArr[cnt])){
 						                        				  x_axis.add(Double.parseDouble(strLineArr[cnt]));
@@ -775,9 +789,16 @@ private String[] filePath;
 						                        			  }
 						                        			  else
 						                        				  category.add(strLineArr[cnt]);
+					                        				  /*if(isNumeric(strLineArr[cnt])){
+					                        					  numeric = true;
+						                        				  barSeries[fir].add(Double.parseDouble(strLineArr[cnt]), Double.parseDouble(strLineArr[i]));
+					                        				  }
+					                        				  else
+					                        					  BarCatdataset.addValue(Double.parseDouble(strLineArr[i]), vars[i], strLineArr[cnt]);*/
 					                        				  break;
 					                        			  case 3:
 					                        				  if(isNumeric(strLineArr[cnt])){
+					                        					  scSeries[fir].setKey(S[0]);
 					                        					  numeric = true;
 						                        				  scSeries[fir].add(Double.parseDouble(strLineArr[cnt]), Double.parseDouble(strLineArr[i]));
 					                        				  }
@@ -802,10 +823,13 @@ private String[] filePath;
 							for(int l = 0;l<columns.size()-1;l++){
 								data.addSeries(series[l]);
 								scdata.addSeries(scSeries[l]);
+								bardata.addSeries(barSeries[l]);
 							}
 							XYDataset dataset = data;
 							XYDataset scDataset = scdata;
+							//IntervalXYDataset BarDataset = bardata;
 							CategoryDataset datasetcat = Catdataset;
+							//CategoryDataset bardatasetcat = BarCatdataset;
 							
 							System.out.println("dataset "+dataset);  
 							
@@ -818,7 +842,8 @@ private String[] filePath;
 							switch(choice){
 							
 							case 1:
-								JFreeChart chart;
+								
+								//JFreeChart chart;
 								if(numeric){
 								chart = ChartFactory.createXYLineChart(
 						            chartName,      // chart title
@@ -864,6 +889,23 @@ private String[] filePath;
 								    graph.setLayout(new GridLayout(1,false));
 								    graph.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));	
 								    ite.setControl(graph);
+								    
+								    ToolBar tc = new ToolBar(graph,  SWT.FLAT | SWT.WRAP | SWT.RIGHT);
+								    tc.setBackground(graph.getBackground());	    
+									tc.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+									
+									ToolItem itemSave = new ToolItem(tc, SWT.PUSH);
+								    itemSave.setToolTipText("Save");
+								    Image icon = new Image(display, "./ui/images/save.png");//src/main/resources/plugin/
+								    itemSave.setImage(icon);								    
+									ToolItem itemSaveAs = new ToolItem(tc, SWT.PUSH);
+								    itemSaveAs.setToolTipText("Save As");
+								    icon = new Image(display, "./ui/images/saveas.png");//src/main/resources/plugin/
+								    itemSaveAs.setImage(icon);
+								    
+								    saveas(itemSaveAs, chart, null, ite);
+								    save(itemSave, chart, null, ite);
+								    
 							        ChartComposite composite = new ChartComposite(graph, SWT.NONE,chart,true);
 									composite.setLayout(new FillLayout(SWT.FILL));
 									composite.setLayoutData(new GridData(GridData.FILL_BOTH));//SWT.FILL, SWT.FILL, true, true
@@ -883,6 +925,23 @@ private String[] filePath;
 								    graph.setLayout(new GridLayout(1,false));
 								    graph.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));	
 								    ite.setControl(graph);
+								    ToolBar tc = new ToolBar(graph,  SWT.FLAT | SWT.WRAP | SWT.RIGHT);
+								    tc.setBackground(graph.getBackground());	    
+									tc.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+									
+									
+								    ToolItem itemSave = new ToolItem(tc, SWT.PUSH);
+								    itemSave.setToolTipText("Save");
+								    Image icon = new Image(display, "./ui/images/save.png");//src/main/resources/plugin/
+								    itemSave.setImage(icon);								    
+									ToolItem itemSaveAs = new ToolItem(tc, SWT.PUSH);
+								    itemSaveAs.setToolTipText("Save As");
+								    icon = new Image(display, "./ui/images/saveas.png");//src/main/resources/plugin/
+								    itemSaveAs.setImage(icon);
+								    				  
+								    saveas(itemSaveAs, chart, null, ite);
+								    save(itemSave, chart, null, ite);
+								    
 							        ChartComposite composite = new ChartComposite(graph, SWT.NONE,chart,true);
 									composite.setLayout(new FillLayout(SWT.FILL));
 									composite.setLayoutData(new GridData(GridData.FILL_BOTH));//SWT.FILL, SWT.FILL, true, true
@@ -891,22 +950,42 @@ private String[] filePath;
 									break;
 		
 								}
-							case 0: JFreeChart piechart = ChartFactory.createPieChart(chartName, piedataset, true, true, false);
+							case 0: piechart = ChartFactory.createPieChart(chartName, piedataset, true, true, false);
 									PiePlot plotpi = (PiePlot) piechart.getPlot();
 									plotpi.setCircular(true);
 									final Composite pigraph = new Composite(tabFolder, SWT.NONE);
 								    pigraph.setLayout(new GridLayout(1,false));
 								    pigraph.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));	
 								    ite.setControl(pigraph);
+								    ToolBar tc = new ToolBar(pigraph,  SWT.FLAT | SWT.WRAP | SWT.RIGHT);
+								    tc.setBackground(pigraph.getBackground());	    
+									tc.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+									
+								    
+								    ToolItem itemSave = new ToolItem(tc, SWT.PUSH);
+								    itemSave.setToolTipText("Save");
+								    Image icon = new Image(display, "./ui/images/save.png");//src/main/resources/plugin/
+								    itemSave.setImage(icon);								    
+									ToolItem itemSaveAs = new ToolItem(tc, SWT.PUSH);
+								    itemSaveAs.setToolTipText("Save As");
+								    icon = new Image(display, "./ui/images/saveas.png");//src/main/resources/plugin/
+								    itemSaveAs.setImage(icon);
+								    
+								    saveas(itemSaveAs, piechart, null, ite);
+								    save(itemSave, piechart, null, ite);
+								    
 							        ChartComposite picomposite = new ChartComposite(pigraph, SWT.NONE,piechart,true);
 									picomposite.setLayout(new FillLayout(SWT.FILL));
 									picomposite.setLayoutData(new GridData(GridData.FILL_BOTH));//SWT.FILL, SWT.FILL, true, true
 									picomposite.setBackground(new Color(null,255,0,0));
 									picomposite.setChart(piechart);
+									
+									
+									
 									break;
 									
-							case 3: 
-								JFreeChart scchart = ChartFactory.createScatterPlot(
+							case 3: {
+								scchart = ChartFactory.createScatterPlot(
 							            chartName,      // chart title
 							            cx1.getText(),                      // x axis label
 							            "Y",                      // y axis label
@@ -927,25 +1006,59 @@ private String[] filePath;
 							    graph.setLayout(new GridLayout(1,false));
 							    graph.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));	
 							    ite.setControl(graph);
+							    
+							    tc = new ToolBar(graph,  SWT.FLAT | SWT.WRAP | SWT.RIGHT);
+							    tc.setBackground(graph.getBackground());	    
+								tc.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+								
+							    
+							    itemSave = new ToolItem(tc, SWT.PUSH);
+							    itemSave.setToolTipText("Save");
+							    icon = new Image(display, "./ui/images/save.png");//src/main/resources/plugin/
+							    itemSave.setImage(icon);								    
+								itemSaveAs = new ToolItem(tc, SWT.PUSH);
+							    itemSaveAs.setToolTipText("Save As");
+							    icon = new Image(display, "./ui/images/saveas.png");//src/main/resources/plugin/
+							    itemSaveAs.setImage(icon);
+							    
+							    saveas(itemSaveAs, scchart, null, ite);
+							    save(itemSave, scchart, null, ite);
+							    
 						        ChartComposite composite = new ChartComposite(graph, SWT.NONE,scchart,true);
 								composite.setLayout(new FillLayout(SWT.FILL));
 								composite.setLayoutData(new GridData(GridData.FILL_BOTH));//SWT.FILL, SWT.FILL, true, true
 								composite.setBackground(new Color(null,255,0,0));
 								composite.setChart(scchart);
 								break;
-								
+							}
 							case 2:
+								
 								final Composite bargraph = new Composite(tabFolder, SWT.NONE);
 							    bargraph.setLayout(new GridLayout(1,false));
 							    bargraph.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));	
 							    ite.setControl(bargraph);
+							    						
+							    
+							    
+							    tc = new ToolBar(bargraph,  SWT.FLAT | SWT.WRAP | SWT.RIGHT);
+							    tc.setBackground(bargraph.getBackground());	    
+								tc.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+								
+							    itemSave = new ToolItem(tc, SWT.PUSH);
+							    itemSave.setToolTipText("Save");
+							    icon = new Image(display, "./ui/images/save.png");//src/main/resources/plugin/
+							    itemSave.setImage(icon);								    
+								itemSaveAs = new ToolItem(tc, SWT.PUSH);
+							    itemSaveAs.setToolTipText("Save As");
+							    icon = new Image(display, "./ui/images/saveas.png");//src/main/resources/plugin/
+							    itemSaveAs.setImage(icon);
 							    
 							    Composite barcomposite = new Composite(bargraph, SWT.NONE);
 								barcomposite.setLayout(new FillLayout(SWT.FILL));
 								barcomposite.setLayoutData(new GridData(GridData.FILL_BOTH));//SWT.FILL, SWT.FILL, true, true
-								barcomposite.setBackground(new Color(null,255,0,0));
+								barcomposite.setBackground(new Color(null,255,255,255));
 								IBarSeries[] BarSeries1 = new IBarSeries[columns.size() - 1];
-								Chart barchart = new Chart(barcomposite, SWT.NONE);												
+								barchart = new Chart(barcomposite, SWT.NONE);												
 								
 								String barchartName = "MyChart";
 								if(cx2.getText().equals(""))
@@ -954,9 +1067,13 @@ private String[] filePath;
 									barchartName = cx2.getText();
 								barchart.getTitle().setText(barchartName);
 								barchart.getTitle().setForeground(new Color(null,0,0,0));
-								barchart.setBackground(new Color(null,211,211,211));
+								barchart.setBackground(new Color(null,255,255,255));
+								barchart.setBackgroundInPlotArea(new Color(null,205,205,205));
 								
-								Random rand = new Random();
+								ILegend legend = barchart.getLegend();
+								legend.setPosition(SWT.BOTTOM);
+								
+								//Random rand = new Random();
 								
 								for(int k = 0; k<columns.size()-1; k++){
 									ArrayList<Double> temp = yaxes.get(k);
@@ -971,7 +1088,7 @@ private String[] filePath;
 										barchart.getAxisSet().getYAxis(0).getTitle().setText("Y");
 										barchart.getAxisSet().getYAxis(0).getTitle().setForeground(new Color(null,0,0,0));
 										
-										BarSeries1[k] = (IBarSeries) barchart.getSeriesSet().createSeries(SeriesType.BAR, columns.get(k)[0]); 
+										BarSeries1[k] = (IBarSeries) barchart.getSeriesSet().createSeries(SeriesType.BAR, names.get(k)); 
 										
 										BarSeries1[k].setXSeries(ArrayUtils.toPrimitive(axis)); 
 										BarSeries1[k].setYSeries(ArrayUtils.toPrimitive(yaxis));
@@ -1002,7 +1119,8 @@ private String[] filePath;
 										barchart.getAxisSet().getXAxis(0).enableCategory(true);
 										barchart.getAxisSet().getXAxis(0).setCategorySeries(cat);
 										// create scatter series
-										BarSeries1[k] = (IBarSeries) barchart.getSeriesSet().createSeries(SeriesType.BAR, columns.get(k)[0]);  
+										BarSeries1[k] = (IBarSeries) barchart.getSeriesSet().createSeries(SeriesType.BAR, names.get(k));
+										
 										//BarSeries1[k].setLineStyle(LineStyle.NONE);
 										//scatterSeries1[k].setXSeries(cat); 
 										BarSeries1[k].setYSeries(ArrayUtils.toPrimitive(yaxis));
@@ -1015,10 +1133,12 @@ private String[] filePath;
 										barchart.getAxisSet().adjustRange();
 									}
 								}
+								saveas(itemSaveAs, null, barchart, ite);
+								save(itemSave, null, barchart, ite);
 								break;
 							}
 								
-								//chart = null;
+							//chart = null;
 						} 
 			            catch (IOException e1) {
 							e1.printStackTrace();
@@ -1049,11 +1169,196 @@ private String[] filePath;
 			
 	    	
 	    });
+	    	    		
+	    itemPdf.addSelectionListener(new SelectionListener(){
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				
+			}
+	    	
+	    });
 	    
-		
-		
 	    wuidTab.setControl(tabHolder);
   }
+  
+  public void save(ToolItem itemSave, final JFreeChart chart, final Chart barchart, final CTabItem ite){
+	  itemSave.addSelectionListener(new SelectionListener(){
+
+		@Override
+		public void widgetDefaultSelected(SelectionEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void widgetSelected(SelectionEvent arg0) {
+			if(file != null){
+				file.delete();
+				try {
+					file.createNewFile();
+					if(chart != null){	
+						if(file.getName().endsWith("png"))
+							ChartUtilities.saveChartAsPNG(file, chart, 800, 600);
+						else if(file.getName().endsWith("jpg") || file.getName().endsWith("jpeg"))
+							ChartUtilities.saveChartAsJPEG(file, chart, 800, 600);
+					}
+					else if(barchart != null){
+						Point size = barchart.getSize();
+				        //
+						GC gc = new GC(barchart);
+				        final Image image = new Image(display, size.x, size.y);
+				        gc.copyArea(image, 0, 0);
+				        gc.dispose();
+
+				        ImageData data = image.getImageData();
+				        //System.out.println(image); 
+				        ImageLoader loader = new ImageLoader();
+				        loader.data = new ImageData[] { data };
+				        if(file.getName().endsWith("png"))
+				        	loader.save(file.getAbsolutePath(), SWT.IMAGE_PNG);
+				        else if(file.getName().endsWith("jpg") || file.getName().endsWith("jpeg"))
+				        	loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
+				        image.dispose();
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			
+			
+			}
+			else{
+				try {
+					FileDialog fd = new FileDialog(parentShell, SWT.SAVE);
+					fd.setText("Save As");
+					fd.setFilterPath(".");
+					String[] filterExt = { "*.png", "*.jpeg", ".jpg", "*.*" };
+					fd.setFilterExtensions(filterExt);
+					String selected = fd.open();
+					if(selected != null){
+						
+						file = new File(selected);
+						if(file.getName() != null)
+							ite.setText(file.getName());
+						else
+							ite.setText("GraphTab");
+						if (file.exists()) {
+							file.delete();
+						}
+						
+						file.createNewFile();
+						if(chart != null){	
+							if(file.getName().endsWith("png"))
+								ChartUtilities.saveChartAsPNG(file, chart, 800, 600);
+							else if(file.getName().endsWith("jpg") || file.getName().endsWith("jpeg"))
+								ChartUtilities.saveChartAsJPEG(file, chart, 800, 600);
+						}
+						else if(barchart != null){
+							Point size = barchart.getSize();
+					        //
+							GC gc = new GC(barchart);
+					        final Image image = new Image(display, size.x, size.y);
+					        gc.copyArea(image, 0, 0);
+					        gc.dispose();					        					        
+
+					        ImageData data = image.getImageData();
+					        //System.out.println(image); 
+					        ImageLoader loader = new ImageLoader();
+					        loader.data = new ImageData[] { data };
+					        if(file.getName().endsWith("png"))
+					        	loader.save(file.getAbsolutePath(), SWT.IMAGE_PNG);
+					        else if(file.getName().endsWith("jpg") || file.getName().endsWith("jpeg"))
+					        	loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
+					        image.dispose();
+						}
+					}
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		  
+	  });
+	  
+	  
+  }
+  
+  public void saveas(ToolItem itemSaveAs, final JFreeChart chart, final Chart barchart, final CTabItem ite){
+	  itemSaveAs.addSelectionListener(new SelectionListener(){
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				try {
+					FileDialog fd = new FileDialog(parentShell, SWT.SAVE);
+					fd.setText("Save As");
+					fd.setFilterPath(".");
+					String[] filterExt = { "*.png", "*.jpeg", ".jpg", "*.*" };
+					fd.setFilterExtensions(filterExt);
+					String selected = fd.open();
+					if(selected != null){
+						
+						file = new File(selected);
+						if(file.getName() != null)
+							ite.setText(file.getName());
+						else
+							ite.setText("GraphTab");
+						if (file.exists()) {
+							file.delete();
+						}
+						
+						file.createNewFile();
+						if(chart != null){	
+							if(file.getName().endsWith("png"))
+								ChartUtilities.saveChartAsPNG(file, chart, 800, 600);
+							else if(file.getName().endsWith("jpg") || file.getName().endsWith("jpeg"))
+								ChartUtilities.saveChartAsJPEG(file, chart, 800, 600);
+							
+						}	
+						else if(barchart != null){
+							Point size = barchart.getSize();
+					        //
+							GC gc = new GC(barchart);
+					        final Image image = new Image(display, size.x, size.y);
+					        gc.copyArea(image, 0, 0);
+					        gc.dispose();
+
+					        ImageData data = image.getImageData();
+					        //System.out.println(image); 
+					        ImageLoader loader = new ImageLoader();
+					        loader.data = new ImageData[] { data };
+					        if(file.getName().endsWith("png"))
+					        	loader.save(file.getAbsolutePath(), SWT.IMAGE_PNG);
+					        else if(file.getName().endsWith("jpg") || file.getName().endsWith("jpeg"))
+					        	loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
+					        image.dispose();
+						}
+					}
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+	    	
+	    });	  
+  }
+  
   public boolean isNumeric(String str)  
   {  
     try  
@@ -1221,7 +1526,7 @@ private String[] filePath;
   private String buildFileDialog() {
 	    
       //file field
-      FileDialog fd = new FileDialog(parentShell, SWT.SAVE);
+      FileDialog fd = new FileDialog(parentShell, SWT.OPEN);
 
       fd.setText("Open");
       fd.setFilterPath("C:/");

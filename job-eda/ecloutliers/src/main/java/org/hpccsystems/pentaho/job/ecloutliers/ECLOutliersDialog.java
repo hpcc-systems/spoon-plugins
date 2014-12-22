@@ -273,8 +273,8 @@ public class ECLOutliersDialog extends ECLJobEntryDialog {
 		final List<JobEntryCopy> jobs = this.jobMeta.getJobCopies();
 		// Create a Mapper
 		String[] cmbValues = { "" };
-		tblMapper = new MainMapperForOutliers(display, compForGrp2,
-				mapDataSets, cmbValues, "outliers", jobs, getDataType());
+		tblMapper = new MainMapperForOutliers(display, compForGrp2,mapDataSets, cmbValues, "outliers", jobs, getDataType());
+		
 		if (jobEntry.getFilterStatement() != null) {
 			tblMapper.setFilterStatement(jobEntry.getFilterStatement());// populate
 																		// current

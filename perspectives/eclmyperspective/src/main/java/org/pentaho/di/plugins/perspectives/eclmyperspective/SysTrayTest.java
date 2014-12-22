@@ -35,9 +35,15 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -72,12 +78,15 @@ import org.jfree.chart.renderer.category.StackedBarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.experimental.chart.swt.ChartComposite;
 import org.swtchart.Chart;
 import org.swtchart.IBarSeries;
+import org.swtchart.IBarSeries.BarWidthStyle;
+import org.swtchart.ILegend;
 import org.swtchart.ILineSeries;
 import org.swtchart.LineStyle;
 import org.swtchart.ISeries.SeriesType;
@@ -93,10 +102,13 @@ public class SysTrayTest {
 	static CTabItem ite;
 	static int choice;
 	static boolean numeric;
+	static Display display;
+	static Shell shell;
+	static JFreeChart chart;
 	public static void main(String[] args) throws Exception{
 		 
-		final Display display = new Display();
-		Shell shell = new Shell(display);
+		display = new Display();
+		shell = new Shell(display);
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 1;
 		shell.setLayout(gridLayout);
@@ -137,18 +149,18 @@ public class SysTrayTest {
 	    tc.setBackground(t1.getBackground());	    
 		tc.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		ToolItem item = new ToolItem(tc, SWT.PUSH);
-	    item.setToolTipText("Print PDF");
+		ToolItem itemPdf = new ToolItem(tc, SWT.PUSH);
+	    itemPdf.setToolTipText("Print PDF");
 	    Image icon = new Image(display, "D:\\Users\\703119704\\Downloads\\Flow-flow\\assembly\\package-res\\ui\\images\\print.png");
-	    item.setImage(icon);
-	    item = new ToolItem(tc, SWT.PUSH);
-	    item.setToolTipText("Save");
+	    itemPdf.setImage(icon);
+	    ToolItem itemSave = new ToolItem(tc, SWT.PUSH);
+	    itemSave.setToolTipText("Save");
 	    icon = new Image(display, "D:\\Users\\703119704\\Downloads\\Flow-flow\\assembly\\package-res\\ui\\images\\save.png");
-	    item.setImage(icon);
-	    item = new ToolItem(tc, SWT.PUSH);
-	    item.setToolTipText("Save As");
+	    itemSave.setImage(icon);
+	    final ToolItem itemSaveAs = new ToolItem(tc, SWT.PUSH);
+	    itemSaveAs.setToolTipText("Save As");
 	    icon = new Image(display, "D:\\Users\\703119704\\Downloads\\Flow-flow\\assembly\\package-res\\ui\\images\\saveas.png");
-	    item.setImage(icon);
+	    itemSaveAs.setImage(icon);
 
 				Composite three1 = new Composite(comp2, SWT.NONE | SWT.BORDER);	
 				three1.setLayout(new GridLayout(1,false));
@@ -299,7 +311,7 @@ public class SysTrayTest {
             	System.out.println(fileName); 
             	tree.setItemCount(0);
             	try {
-					readFile(fileName, true, null, tree, null,null,null,null);
+					readFile(fileName, true, null, tree, null,null,null,null,itemSaveAs);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -474,7 +486,7 @@ public class SysTrayTest {
 			    ite.setText("Graph");
 			    ite.setToolTipText("Graph");
 				try {
-					readFile(fileName,false,table,null,tabFolder,ite,ax,tab1);
+					readFile(fileName,false,table,null,tabFolder,ite,ax,tab1,itemSaveAs);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -501,7 +513,7 @@ public class SysTrayTest {
 			
 	    	
 	    });
-
+	    
         
 		shell.open();
 		while (!shell.isDisposed()) {
@@ -517,7 +529,7 @@ public class SysTrayTest {
 	
 	
 	
-	public static void readFile(String filename, boolean header, Table table, Tree tree, CTabFolder tabFolder, CTabItem ite, Combo ax, Tree tab1) throws IOException{
+	public static void readFile(String filename, boolean header, Table table, Tree tree, final CTabFolder tabFolder, final CTabItem ite, Combo ax, Tree tab1, ToolItem SaveAs) throws IOException{
 		if(table != null){
 			System.out.println(columns.size()); 
 			table.setItemCount(0);
@@ -572,8 +584,9 @@ public class SysTrayTest {
             
             else{
             	ArrayList<ArrayList<Double>> yaxes = new ArrayList<ArrayList<Double>>();
+            	ArrayList<String> names = new ArrayList<String>();
             	for(int i = 0; i<columns.size()-1; i++){
-            		yaxes.add(new ArrayList<Double>());
+            		yaxes.add(new ArrayList<Double>());            		
             	}
             	ArrayList<String> category = new ArrayList<String>();
             	ArrayList<Double> x_axis = new ArrayList<Double>();
@@ -586,7 +599,7 @@ public class SysTrayTest {
             	for(Iterator<String[]> it = columns.iterator(); it.hasNext();){
             		String[] S = (String[]) it.next();
             		if(!S[0].equalsIgnoreCase(ax.getText())){
-            			series[srcnt] = new XYSeries(S[0]);
+            			series[srcnt] = new XYSeries("");
             			scatterSeries[srcnt] = new XYSeries(S[0]);
             			bars[srcnt] = S[0];
             			srcnt++;
@@ -672,19 +685,22 @@ public class SysTrayTest {
 			                        		  String[] S = it.next();			                        		  
 			                        		  if(i == Integer.parseInt(S[1]) &&i!=cnt){
 			                        			  
-			                        			  yaxes.get(fir).add(Double.parseDouble(strLineArr[i]));
+			                        			  /*yaxes.get(fir).add(Double.parseDouble(strLineArr[i]));
+			                        			  if(!names.contains(S[0]))
+			                        				  names.add(fir, S[0]); 
 			                        			  fir++;
 			                        			  if(isNumeric(strLineArr[cnt])){
 			                        				  x_axis.add(Double.parseDouble(strLineArr[cnt]));
 			                        				  numeric = true;
 			                        			  }
 			                        			  else
-			                        				  category.add(strLineArr[cnt]);
-			                        			  /*switch(choice){
+			                        				  category.add(strLineArr[cnt]);*/
+			                        			  switch(choice){
 			                        			  case 0: piedataset.setValue(strLineArr[cnt], Double.parseDouble(strLineArr[i]));
 			                        			  	break;
 			                        			  case 1:
 			                        				  if(isNumeric(strLineArr[cnt])){
+			                        					  series[fir].setKey(S[0]); 
 			                        					  numeric = true;
 			                        					  series[fir].add(Double.parseDouble(strLineArr[cnt]), Double.parseDouble(strLineArr[i]));//Double.parseDouble(strLineArr[cnt])
 			                        					   
@@ -702,8 +718,8 @@ public class SysTrayTest {
 			                        				  }
 			                        			  default: 
 			                        			  }
-			                        			  System.out.println(vars[i] + " " +strLineArr[i]); 
-			                        			  fir++;*/
+			                        			  //System.out.println(vars[i] + " " +strLineArr[i]); 
+			                        			  fir++;
 			                        		  }
 			                        		  
 			                        	  }
@@ -712,71 +728,139 @@ public class SysTrayTest {
 			                      }			                      
 			                  }				                  
 			                  //data.addSeries(series);
+			                  System.out.println("firs are" +fir);
 			              }
 			              first = false;
 			              strLineArr = reader.readNext();
 			              
 					}			
 					
+					for(int l = 0;l<columns.size()-1;l++){
+						for(int i = 0; i<series[l].getItemCount(); i++){
+							System.out.println(series[l].getDataItem(i).getYValue()); 
+						}
+						data.addSeries(series[l]);
+						//scdata.addSeries(scSeries[l]);
+						//bardata.addSeries(barSeries[l]);
+					}
+					XYDataset dataset = data;
+					//XYDataset scDataset = scdata;
+					//IntervalXYDataset BarDataset = bardata;
+					CategoryDataset datasetcat = Catdataset;
+					//CategoryDataset bardatasetcat = BarCatdataset;
+					
+					
+					
+					for(String S : names){
+						System.out.println(S + "Muhahahahaha"); 
+					}
+					
+					
+					
 					System.out.println("Number of fields for y axis is: "+ columns.size()); 
 					final Composite graph = new Composite(tabFolder, SWT.NONE);
 				    graph.setLayout(new GridLayout(1,false));
-				    graph.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));	
+				    graph.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				    graph.setBackground(new Color(null,255,255,255));
 				    ite.setControl(graph);
 				    
-				    Composite composite = new Composite(graph, SWT.NONE);
+				    ToolBar tc = new ToolBar(graph,  SWT.FLAT | SWT.WRAP | SWT.RIGHT);
+				    tc.setBackground(graph.getBackground());	    
+					tc.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+					
+					ToolItem itemSaveAs = new ToolItem(tc, SWT.PUSH);
+				    itemSaveAs.setToolTipText("Print PDF");
+				    Image icon = new Image(display, "D:\\Users\\703119704\\Downloads\\Flow-flow\\assembly\\package-res\\ui\\images\\saveas.png");//src/main/resources/plugin/
+				    itemSaveAs.setImage(icon);
+				    
+				    
+				    final Composite composite = new Composite(graph, SWT.NONE);
 					composite.setLayout(new FillLayout(SWT.FILL));
 					composite.setLayoutData(new GridData(GridData.FILL_BOTH));//SWT.FILL, SWT.FILL, true, true
-					composite.setBackground(new Color(null,255,0,0));
+					composite.setBackground(new Color(Display.getCurrent(),255,255,255));
 					switch(choice){
 					case 1:
-						ILineSeries[] lineSeries1 = new ILineSeries[columns.size() - 1];
-						Chart linechart = new Chart(composite, SWT.NONE);												
-						
-						linechart.getTitle().setText("Line Chart");
-						
-						
-						
-						for(int k = 0; k<columns.size()-1; k++){
-							ArrayList<Double> temp = yaxes.get(k);
-							Double[] yaxis = new Double[temp.size()];
-							//Double[] axis = new Double[x_axis.size()];
-							//String[] cat = new String[category.size()];
-							yaxis = temp.toArray(yaxis);
-							
-							//axis = x_axis.toArray(axis);
-								
-							/*System.out.println("xaxis:");
-							for(Double S : axis){
-								System.out.println(S);
-							}*/ 
-							
-							System.out.println("yaxis:");
-							for(Double D : temp){
-								System.out.println(D); 
+						if(numeric){
+							chart = ChartFactory.createXYLineChart(
+					            "hahahaha",      // chart title
+					            "X",                      // x axis label
+					            "Y",                      // y axis label
+					            dataset,                  // data
+					            PlotOrientation.VERTICAL,
+					            true,                     // include legend
+					            true,                     // tooltips
+					            false                     // urls
+					        );}
+							else{
+							chart = ChartFactory.createLineChart(
+						            "hahahaha",      // chart title
+						            "X",             // x axis label
+						            "Y",                      // y axis label
+						            datasetcat,                  // data
+						            PlotOrientation.VERTICAL, // orientation
+						            true,                     // include legend
+						            true,                     // tooltips
+						            false                     // urls
+						        );
 							}
-							linechart.getAxisSet().getXAxis(0).getTitle().setText("Data Points");
-							linechart.getAxisSet().getYAxis(0).getTitle().setText("Series 2");
-							// create scatter series
-							lineSeries1[k] = (ILineSeries) linechart.getSeriesSet().createSeries(SeriesType.LINE, "line series"+Integer.toString(k)); 
-							//lineSeries1[k].setLineStyle(LineStyle.NONE);
-							//lineSeries1[k].setXSeries(ArrayUtils.toPrimitive(axis)); 
-							lineSeries1[k].setYSeries(ArrayUtils.toPrimitive(yaxis));
-							lineSeries1[k].setSymbolColor(new Color(null,255,255*k,0)); 
-							linechart.getAxisSet().adjustRange();																						
-						}
-						break;
-					
+					        /*final XYPlot plot = chart.getXYPlot();
+					        final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+					        renderer.setSeriesLinesVisible(0, false);
+					        renderer.setSeriesShapesVisible(1, false);
+					        plot.setRenderer(renderer);
+					        final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+					        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+					        //ChartPanel chartPanel = new ChartPanel(chart);											
+					        */
+							
+							
+							if(!numeric){
+								final CategoryPlot plot = (CategoryPlot) chart.getPlot();
+						        final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+						        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+						        rangeAxis.setAutoRangeIncludesZero(true);
+								
+								
+						        
+						        ChartComposite composite1 = new ChartComposite(graph, SWT.NONE,chart,true);
+								composite1.setLayout(new FillLayout(SWT.FILL));
+								composite1.setLayoutData(new GridData(GridData.FILL_BOTH));//SWT.FILL, SWT.FILL, true, true
+								composite1.setBackground(new Color(null,255,0,0));
+								composite1.setChart(chart);
+								break;
+	
+							}
+							else{
+								final XYPlot plot =  chart.getXYPlot();
+						        final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+						        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+						        rangeAxis.setAutoRangeIncludesZero(true);
+								
+								
+																							   
+							    
+						        ChartComposite composite1 = new ChartComposite(graph, SWT.NONE,chart,true);
+								composite1.setLayout(new FillLayout(SWT.FILL));
+								composite1.setLayoutData(new GridData(GridData.FILL_BOTH));//SWT.FILL, SWT.FILL, true, true
+								composite1.setBackground(new Color(null,255,0,0));
+								composite1.setChart(chart);
+								break;
+	
+							}
+	
 					case 3:
 						
 						
 						IBarSeries[] BarSeries1 = new IBarSeries[columns.size() - 1];
-						Chart barchart = new Chart(composite, SWT.NONE);												
+						final Chart barchart = new Chart(composite, SWT.NONE);												
 						
 						barchart.getTitle().setText("Bar Chart");
 						barchart.getTitle().setForeground(new Color(null,0,0,0));
-						barchart.setBackground(new Color(null,211,211,211));
+						barchart.setBackground(new Color(null,255,255,255));
+						barchart.setBackgroundInPlotArea(new Color(Display.getDefault(),200,200,200));
 						
+						ILegend legend = barchart.getLegend();
+						legend.setPosition(SWT.BOTTOM);
 						
 						Random rand = new Random();
 						for(int k = 0; k<columns.size()-1; k++){
@@ -801,9 +885,13 @@ public class SysTrayTest {
 								barchart.getAxisSet().getXAxis(0).getTitle().setForeground(new Color(null,0,0,0));  
 								barchart.getAxisSet().getYAxis(0).getTitle().setText("Series 2");
 								barchart.getAxisSet().getYAxis(0).getTitle().setForeground(new Color(null,0,0,0));
+								 
+								
 								// create scatter series
-								BarSeries1[k] = (IBarSeries) barchart.getSeriesSet().createSeries(SeriesType.BAR, columns.get(k)[0]); 
-								//BarSeries1[k].setLineStyle(LineStyle.NONE);
+								System.out.println(names.get(k) + "WTF");
+								BarSeries1[k] = (IBarSeries) barchart.getSeriesSet().createSeries(SeriesType.BAR, names.get(k)); 
+								BarSeries1[k].setVisibleInLegend(true); 
+								 
 								BarSeries1[k].setXSeries(ArrayUtils.toPrimitive(axis)); 
 								BarSeries1[k].setYSeries(ArrayUtils.toPrimitive(yaxis));
 								int R = (int)(Math.random()*256);
@@ -832,7 +920,7 @@ public class SysTrayTest {
 								barchart.getAxisSet().getXAxis(0).enableCategory(true);
 								barchart.getAxisSet().getXAxis(0).setCategorySeries(cat);
 								// create scatter series
-								BarSeries1[k] = (IBarSeries) barchart.getSeriesSet().createSeries(SeriesType.BAR, columns.get(k)[0]);  
+								BarSeries1[k] = (IBarSeries) barchart.getSeriesSet().createSeries(SeriesType.BAR, names.get(k));  
 								//BarSeries1[k].setLineStyle(LineStyle.NONE);
 								//scatterSeries1[k].setXSeries(cat); 
 								BarSeries1[k].setYSeries(ArrayUtils.toPrimitive(yaxis));
@@ -845,6 +933,35 @@ public class SysTrayTest {
 								barchart.getAxisSet().adjustRange();
 							}
 						}
+						SaveAs.addSelectionListener(new SelectionListener(){
+
+							@Override
+							public void widgetDefaultSelected(SelectionEvent arg0) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void widgetSelected(SelectionEvent arg0) {
+
+								//barchart.save("D:/Users/703119704/Desktop/fotu.jpg", SWT.IMAGE_JPEG);
+								Point size = barchart.getSize();
+						        //
+								GC gc = new GC(barchart);
+						        final Image image = new Image(display, size.x, size.y);
+						        gc.copyArea(image, 0, 0);
+						        gc.dispose();
+
+						        ImageData data = image.getImageData();
+						        //System.out.println(image); 
+						        ImageLoader loader = new ImageLoader();
+						        loader.data = new ImageData[] { data };
+						        
+						        loader.save("D:/Users/703119704/Desktop/fotu.jpg", SWT.IMAGE_PNG);
+						        image.dispose();
+							}
+					    	
+					    });
 						
 						break;
 					
