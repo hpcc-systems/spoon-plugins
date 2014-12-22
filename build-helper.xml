@@ -128,8 +128,14 @@
 	</target>
 	<target name="create-eda">
 		<zip destfile="${basedir}/target/spoon-plugins-eda.zip">
+		
+		<zipfileset dir="${basedir}/job-eda/eclaggregate/target" includes="eclaggregate.jar" prefix="jobentries/eclaggregate" />
+		<zipfileset dir="${basedir}/job-eda/eclaggregate/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclaggregate" />
+		
 		<zipfileset dir="${basedir}/job-eda/eclcorrelation/target" includes="eclcorrelation.jar" prefix="jobentries/eclcorrelation" />
 		<zipfileset dir="${basedir}/job-eda/eclcorrelation/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclcorrelation" />
+		<zipfileset dir="${basedir}/job-eda/eclfrequency/target" includes="eclfrequency.jar" prefix="jobentries/eclfrequency" />
+		<zipfileset dir="${basedir}/job-eda/eclfrequency/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclfrequency" />
 		<zipfileset dir="${basedir}/job-eda/eclfrequencygroup/target" includes="eclfrequencygroup.jar" prefix="jobentries/eclfrequencygroup" />
 		<zipfileset dir="${basedir}/job-eda/eclfrequencygroup/src/main/resources/plugin" includes="plugin.xml,*.png" prefix="jobentries/eclfrequencygroup" />
 		<zipfileset dir="${basedir}/job-eda/eclgraph/target" includes="eclgraph.jar" prefix="jobentries/eclgraph" />
