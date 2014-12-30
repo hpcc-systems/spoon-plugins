@@ -69,10 +69,11 @@ public class ECLNaiveBayes extends ECLJobEntry{//extends JobEntryBase implements
 
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
-    	Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         if(result.isStopped()){
-        	return result;
-        }
+        return result;
+       }
+
         else{	
         	String frequency = "IMPORT ML;\n";boolean flag = true;String record = "";int cnt = 1;String dep_num = "";
         	String indep_num = "";String dep = "";

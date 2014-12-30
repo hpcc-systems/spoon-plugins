@@ -95,10 +95,11 @@ public class ECLLibraryBuilder extends ECLJobEntry{//extends JobEntryBase implem
 
         @Override
     public Result execute(Result prevResult, int k) throws KettleException {
-    	Result result = prevResult;
-        if(result.isStopped()){
-        	return result;
-        }
+        	Result result = modifyResults(prevResult);
+            if(result.isStopped()){
+            return result;
+           }
+
         else{
         	
         	String Library = "";

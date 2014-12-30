@@ -142,10 +142,11 @@ public class ECLNewReportBuilder extends ECLJobEntry{//extends JobEntryBase impl
 
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {    	  
-    	Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         if(result.isStopped()){
-        	return result;
-        }
+        return result;
+       }
+
         else{
         	String name = getName().replaceAll("\\s", "");
         	String report = "";//"RepDS := "+getDatasetName()+"("+getRule()+");\n";        	

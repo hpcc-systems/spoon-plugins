@@ -160,10 +160,10 @@ public class ECLUnivariate extends ECLJobEntry{//extends JobEntryBase implements
     
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
-    	Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         if(result.isStopped()){
-        	return result;
-        }
+        return result;
+       }
         else{
         	String[] check = getCheckList().split(",");
         	String[] fieldNames = fieldList.split("[|]");

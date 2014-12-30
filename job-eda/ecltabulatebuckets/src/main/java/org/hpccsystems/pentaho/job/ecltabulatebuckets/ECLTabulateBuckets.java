@@ -129,10 +129,10 @@ public class ECLTabulateBuckets extends ECLJobEntry{//extends JobEntryBase imple
     public Result execute(Result prevResult, int k) throws KettleException {
     	
     	
-        Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         if(result.isStopped()){
-        	return result;
-        }
+        return result;
+       }
         else{
         	String ecl = "";int cnt = 0;String layer = "    ";String smoking = " ";String group = "";String layerRec = "";
         	String field = "";String value = "";String name = getName().replaceAll("\\s", "");

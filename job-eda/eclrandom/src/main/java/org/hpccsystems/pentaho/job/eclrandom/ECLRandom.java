@@ -109,10 +109,11 @@ public class ECLRandom extends ECLJobEntry{//extends JobEntryBase implements Clo
 
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
-    	Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         if(result.isStopped()){
         	return result;
-        }
+       }
+
         else{
         	
         	int seed_int = Integer.parseInt(seed);
@@ -144,22 +145,34 @@ public class ECLRandom extends ECLJobEntry{//extends JobEntryBase implements Clo
             
             sb.append(this.resultDataset).append(" := project(").append(datasetName).append(",").append(transform).append("(LEFT");
             
-            if(seed_int==0)
-            sb.append(", RANDOM())); \r\n");
-            else
-                sb.append(", COUNTER,"+seed_int+")); \r\n");
-            
+            if(seed_int==0){
+            	if(persist.equalsIgnoreCase("true")){
+            		if(outputName != null && !(outputName.trim().equals(""))){
+            			sb.append(", RANDOM())) : PERSIST('~eda::"+outputName+"::random'); \r\n");
+            		}else{
+            			sb.append(", RANDOM())) : PERSIST('~eda::"+defJobName+"::random'); \r\n");            			
+            		}
+            	}
+            	else{
+            		sb.append(", RANDOM())); \r\n");
+            	}
+            	
+            }
+            else{
+            	if(persist.equalsIgnoreCase("true")){
+            		if(outputName != null && !(outputName.trim().equals(""))){
+            			sb.append(", COUNTER,"+seed_int+")) : PERSIST('~eda::"+outputName+"::random'); \r\n");
+            		}else{
+            			sb.append(", COUNTER,"+seed_int+")) : PERSIST('~eda::"+defJobName+"::random'); \r\n");            			
+            		}
+            	}
+            	else{
+            		sb.append(", COUNTER,"+seed_int+")); \r\n");
+            	}
+                
+            }
             project = sb.toString();
-            if(persist.equalsIgnoreCase("true")){
-        		if(outputName != null && !(outputName.trim().equals(""))){
-        			project += "OUTPUT("+this.getDatasetName()+"_with_random"+",,'~eda::"+outputName+"::random', __compressed__, overwrite,NAMED('Random'))"+";\n";
-        		}else{
-        			project += "OUTPUT("+this.getDatasetName()+"_with_random"+",,'~eda::"+defJobName+"::random', __compressed__, overwrite,NAMED('Random'))"+";\n";
-        		}
-        	}
-        	else{
-        		project += "OUTPUT("+this.getDatasetName()+"_with_random,NAMED('Random'));\n";
-        	}
+            
            
             //project += "OUTPUT("+this.getDatasetName()+"_with_random,THOR);\n";
             logBasic("Random Job =" + project); 
@@ -216,7 +229,7 @@ public class ECLRandom extends ECLJobEntry{//extends JobEntryBase implements Clo
         retval += super.getXML();
       
         retval += "		<dataset_name ><![CDATA[" + datasetName + "]]></dataset_name>" + Const.CR;
-        retval += "		<resultdataset eclIsGraphable=\"true\"><![CDATA[" + resultDataset + "]]></resultdataset>" + Const.CR;
+        retval += "		<resultdataset eclIsDef=\"true\" eclType=\"dataset\"><![CDATA[" + resultDataset + "]]></resultdataset>" + Const.CR;
         retval += "		<seed ><![CDATA[" + seed + "]]></seed>" + Const.CR;
         retval += "		<randomtype ><![CDATA[" + randomtype + "]]></randomtype>" + Const.CR;
         retval += "		<label><![CDATA[" + label + "]]></label>" + Const.CR;

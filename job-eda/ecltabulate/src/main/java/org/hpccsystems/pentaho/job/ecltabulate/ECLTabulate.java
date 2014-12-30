@@ -157,10 +157,10 @@ public class ECLTabulate extends ECLJobEntry{//extends JobEntryBase implements C
     public Result execute(Result prevResult, int k) throws KettleException {
     	
     	
-        Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         if(result.isStopped()){
         	return result;
-        }
+       }
         else{
         	String ecl = "";int cnt = 0;String layer = "";String group = "";String join =""; 
         	boolean parent = settings.contains("parent");

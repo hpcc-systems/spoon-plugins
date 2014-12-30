@@ -70,10 +70,11 @@ public class ECLGiniCoefficient extends ECLJobEntry{//extends JobEntryBase imple
 
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
-    	Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         if(result.isStopped()){
-        	return result;
-        }
+        return result;
+       }
+
         else{	
 
         	
