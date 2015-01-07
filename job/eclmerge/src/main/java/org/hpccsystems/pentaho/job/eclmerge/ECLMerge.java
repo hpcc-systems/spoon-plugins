@@ -27,7 +27,7 @@ public class ECLMerge extends ECLJobEntry{//extends JobEntryBase implements Clon
 	private String recordsetName; // Output Recordset Name
 	private String recordsetList;
 	private String recordsetSet;
-	private String fieldList;
+	private String fieldList = "";
 	private Boolean dedup = false;
 	private Boolean runLocal = false;
 	

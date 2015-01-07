@@ -51,7 +51,13 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-
+	
+	<repositories>
+		<repository>
+  	  		<id>portfolio-non-maven-dependencies</id>
+   	 		<url>http://buchen.github.io/maven-repo</url>
+		</repository>
+	</repositories>
 	<profiles>
         <profile>
             <id>run-once</id>
@@ -185,7 +191,7 @@
 			<dependency>
 				<groupId>jfree</groupId>
 				<artifactId>jfreechart</artifactId>
-				<version>1.0.12</version>
+				<version>1.0.13</version>
 			</dependency>
 			<dependency>
 				<groupId>jfree</groupId>
@@ -195,9 +201,13 @@
 			<dependency>
 				<groupId>jfree</groupId>
 				<artifactId>jfreechart-swt</artifactId>
-				<version>1.0.3</version>
+				<version>1.0.9</version>
 			</dependency>
-			
+			<dependency>
+  				<groupId>org.swtchart</groupId>
+  				<artifactId>org.swtchart</artifactId>
+ 				<version>0.9.0</version>
+			</dependency>
 
 				</dependencies>
 			</dependencyManagement>
@@ -242,7 +252,10 @@
 					<artifactId>jfreechart-swt</artifactId>
 				
 				</dependency>
-
+				<dependency>
+  					<groupId>org.swtchart</groupId>
+  					<artifactId>org.swtchart</artifactId>
+				</dependency>
 			</dependencies>
 		</profile>
 		<profile>

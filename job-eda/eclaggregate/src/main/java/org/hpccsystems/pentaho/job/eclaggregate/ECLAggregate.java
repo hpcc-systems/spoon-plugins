@@ -118,8 +118,7 @@ public class ECLAggregate extends ECLJobEntry{//extends JobEntryBase implements 
     	Result result = modifyResults(prevResult);
         if(result.isStopped()){
         	return result;
-        }
-        else{
+ 		}
         	String name = getName().replaceAll("\\s", "");  
         	String ecl = name+"AggRec := RECORD\n";String grprec = "";boolean flag = false;
         	if(group.size() > 0){
@@ -174,7 +173,7 @@ public class ECLAggregate extends ECLJobEntry{//extends JobEntryBase implements 
         		}
             }
             else{
-            	ecl += "OUTPUT("+OutName+",THOR);\n";
+            	//ecl += "OUTPUT("+OutName+",THOR);\n";
             }	
         	
         	result.setResult(true);
@@ -187,10 +186,10 @@ public class ECLAggregate extends ECLJobEntry{//extends JobEntryBase implements 
 	        list.add(data);
 	        String eclCode = parseEclFromRowData(list);
 	        result.setRows(list);
-	        result.setLogText("ECLUnivariate executed, ECL code added");
+	        result.setLogText("ECLAggregate executed, ECL code added");
         	return result;
 
-        }
+        
     }
 
     public String savePeople(){

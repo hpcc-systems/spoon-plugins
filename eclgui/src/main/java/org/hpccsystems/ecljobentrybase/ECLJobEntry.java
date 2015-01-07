@@ -183,7 +183,10 @@ return null;
  		                }
  		                if (code != null && status != null && !status.equals("true")) {
  		                	//need to check that code doesn't exist in eclCode... instring should work
- 		                    eclCode += code;
+ 		                	//todo:: is this a good idea, probably should add a id to the rows and use that not string compare
+ 		                    if(!eclCode.contains(code)){
+ 		                    	eclCode += code;
+ 		                    }
  		                }
  		                if(isExecute){
  		                	//list.get(i).addValue("ecl_used", Value.VALUE_TYPE_STRING, "true");
@@ -205,7 +208,7 @@ return null;
     	 String isMergePath = System.getProperty("multiPath");
          
          if(isMergePath != null && isMergePath.equals("true")){
-        	 inResult = new Result();
+        	 //inResult = new Result();
          	 inResult.setResult(true);
          	 System.setProperty("multiPath", "false");
          }

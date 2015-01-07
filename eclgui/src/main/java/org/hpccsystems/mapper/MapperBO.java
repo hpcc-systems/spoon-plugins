@@ -1,5 +1,9 @@
 package org.hpccsystems.mapper;
 
+import java.io.IOException;
+
+import au.com.bytecode.opencsv.CSVParser;
+
 public class MapperBO {
 	
 	public MapperBO(){
@@ -32,12 +36,43 @@ public class MapperBO {
 	}
 	
 	public String toCSV(){
-        return opVariable + "," + expression;
+		String str = "";
+		if(opVariable.contains(",")){
+			str = "\"" + opVariable + "\"";
+		}else{
+			str = opVariable;
+		}
+		str += ",";
+		if(expression.contains(",")){
+			str += "\"" + expression + "\"";
+		}else{
+			str += expression;
+		}
+        return str;
     }
 	
     public void fromCSV(String in){
-        String[] strArr = in.split("[,]");//"\\,"
-        opVariable = strArr[0];
-        expression = strArr[1];
+        //String[] strArr = in.split("[,]");//"\\,"
+        //String regex = "(?:(?<=\")([^\"]*)(?=\"))|(?<=,|^)([^,]*)(?=,|$)";
+       // String regex = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
+        //String[] strArr = in.split(regex);//"\\,
+        CSVParser csvP = new CSVParser();
+        String[] strArr = null;
+		try {
+			strArr = csvP.parseLine(in);
+			if(strArr.length >= 1)
+				opVariable = strArr[0];
+			else
+				opVariable = "";
+			if(strArr.length >= 2)
+				expression = strArr[1];
+			else
+				expression = "";
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        
     }
 }

@@ -151,7 +151,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
 
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
 
-        shell.setLayout(new FillLayout(SWT.VERTICAL));
+        
         shell.setText("Define an ECL Output");
         props.setLook(shell);
         JobDialog.setShellImage(shell, jobEntry);
@@ -164,8 +164,8 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
         };
 
         backupChanged = jobEntry.hasChanged();
-        
-        createContents(shell, lsMod);
+        final Composite comp = new Composite(shell, SWT.NONE);
+        createContents(comp, lsMod);
         shell.addShellListener(new ShellAdapter() {
 
             public void shellClosed(ShellEvent e) {
@@ -188,7 +188,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
     
     }
     
-    private void createContents(Composite shell, final ModifyListener lsMod) {
+    private void createContents(Composite comp, final ModifyListener lsMod) {
         /*
         final String datasets[] = new String[]{"", "a", "b"};
         Display display = new Display();
@@ -199,6 +199,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
         int middle = props.getMiddlePct();
         int margin = Const.MARGIN;
         
+        comp.setLayout(new FillLayout(SWT.VERTICAL));
         
         AutoPopulate ap = new AutoPopulate();
         try{
@@ -213,10 +214,10 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
         
         
         
-        shell.setBackground(new Color(shell.getDisplay(),255,255,255));
+        comp.setBackground(new Color(shell.getDisplay(),255,255,255));
         GridLayout fl = new GridLayout(2,false);
         
-        shell.setLayout(fl);
+        comp.setLayout(fl);
         GridData gd = new GridData();
         gd.horizontalSpan = 2;
 
@@ -227,7 +228,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
         groupLayout.marginHeight = 10;
         
 
-        final ScrolledComposite sc1 = new ScrolledComposite(shell, SWT.V_SCROLL | SWT.BORDER | SWT.SHADOW_OUT);
+        final ScrolledComposite sc1 = new ScrolledComposite(comp, SWT.V_SCROLL | SWT.BORDER | SWT.SHADOW_OUT);
         
         sc1.setBackground(new Color(sc1.getDisplay(),255,255,255));
         sc1.setLayoutData(gd);
@@ -261,7 +262,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
  */       
         
         
-        wOK = new Button(shell, SWT.PUSH);
+        wOK = new Button(comp, SWT.PUSH);
         wOK.setText("OK");
         
         GridData okGrid = new GridData();
@@ -272,7 +273,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
         wOK.setLayoutData(okGrid);
         
         
-        wCancel = new Button(shell, SWT.PUSH);
+        wCancel = new Button(comp, SWT.PUSH);
         wCancel.setText("Cancel");
         
         GridData cancelGrid = new GridData();
@@ -306,7 +307,7 @@ public class ECLOutputDialog extends ECLJobEntryDialog implements JobEntryDialog
             }
         };
 
-        shell.setSize(600, 500);
+        comp.setSize(600, 500);
          
         
         

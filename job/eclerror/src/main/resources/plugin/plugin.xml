@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin id="ECLError"
-	iconfile="icon.png"
+	iconfile="error.png"
 	description="Error"
 	tooltip="Error" 
 	category="HPCC Systems"
