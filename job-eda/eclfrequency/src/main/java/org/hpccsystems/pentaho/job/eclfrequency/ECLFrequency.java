@@ -695,7 +695,7 @@ public class ECLFrequency extends ECLJobEntry{//extends JobEntryBase implements 
         								frequency += "FreqRecNum"+name+" Trans"+cols[0]+"(sort"+cols[0]+" L, sort"+cols[0]+" R) := TRANSFORM\n";
         								frequency += "SELF.Cumulative := L.Cumulative + R.Percent;\n	SELF := R;\nEND;\n";
     	        						frequency += "Cumulative_Freq"+cols[0]+":=ITERATE(sort"+cols[0]+", Trans"+cols[0]+"(LEFT,RIGHT));\n";	        					        						    	        					
-    	        						frequency += cols[0]+"_Frequency:=TABLE(Cumulative_Freq"+cols[0]+"(field = \'"+cols[0]+"\'),{value;frequency;Percent;Cumulative});\n";
+    	        						frequency += cols[0]+"_Frequency:=TABLE(Cumulative_Freq"+cols[0]+"(field = \'"+cols[0]+"\' ),{value;frequency;Percent;Cumulative});\n";
         							}
 	        						else
 	        							frequency += cols[0]+"_Frequency:=SORT(TABLE(Frequency2"+name+"(field = \'"+cols[0]+"\'),{value;frequency;Percent}),-frequency);\n";

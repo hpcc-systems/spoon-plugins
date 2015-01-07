@@ -167,7 +167,7 @@ public class ECLRandom extends ECLJobEntry{//extends JobEntryBase implements Clo
             		}
             	}
             	else{
-            		sb.append(", COUNTER,"+seed_int+")); \r\n");
+            		sb.append(", COUNTER,"+seed_int+")); \r\n" );
             	}
                 
             }
