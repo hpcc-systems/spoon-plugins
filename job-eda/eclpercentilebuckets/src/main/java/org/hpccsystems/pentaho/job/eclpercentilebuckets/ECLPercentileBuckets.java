@@ -135,10 +135,11 @@ public class ECLPercentileBuckets extends ECLJobEntry{//extends JobEntryBase imp
     public Result execute(Result prevResult, int k) throws KettleException {
     	
     	
-        Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         if(result.isStopped()){
-        	return result;
-        }
+        return result;
+       }
+
         else{
         	String ecl = "";String field = "";String value = "";String[] norm = normList.split("-");String buck = "";String Uname = getName().replaceAll("\\s", "");
         	String new_record = "";String rule = "";

@@ -86,10 +86,11 @@ public class ECLTStat extends ECLJobEntry {// extends JobEntryBase implements
 
 	@Override
 	public Result execute(Result prevResult, int k) throws KettleException {
-		Result result = prevResult;
-		if (result.isStopped()) {
-			return result;
-		} else {
+		Result result = modifyResults(prevResult);
+        if(result.isStopped()){
+        return result;
+       }
+        else {
 			String tstat = "";
 			if(!X2.equalsIgnoreCase("0")){
 				if(getPaired().equalsIgnoreCase("Unpaired")){

@@ -198,10 +198,10 @@ public class ECLGraph extends ECLJobEntry{//extends JobEntryBase implements Clon
     public Result execute(Result prevResult, int k) throws KettleException {
     	
     	
-        Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         if(result.isStopped()){
-        	return result;
-        }
+        return result;
+       }
         else{        		
         		logBasic(FilePath);
         		String[] path = FilePath.split("\"");String pname = getName().replaceAll("\\s", "");

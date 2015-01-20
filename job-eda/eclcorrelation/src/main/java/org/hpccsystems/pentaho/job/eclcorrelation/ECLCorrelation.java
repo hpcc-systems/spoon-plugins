@@ -124,10 +124,10 @@ public class ECLCorrelation extends ECLJobEntry{//extends JobEntryBase implement
 
     @Override
     public Result execute(Result prevResult, int k) throws KettleException {
-    	Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         if(result.isStopped()){
         	return result;
-        }
+       }
         else{	
         	String ecl = "";int idx = 1;String Rec = "";String choose = "";String valChoose = "";String recChoose = "";int cnt = 0;
         	String name = getName().replaceAll("\\s","");

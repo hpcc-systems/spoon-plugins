@@ -174,10 +174,10 @@ public class ECLFrequencyGroup extends ECLJobEntry{//extends JobEntryBase implem
     public Result execute(Result prevResult, int k) throws KettleException {
     	
     	
-        Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         if(result.isStopped()){
         	return result;
-        }
+       }
         else{
         	//String sort = Sort;
 	        String fieldStr = ""; String frequency = "";String[] norm = this.normList.split("-");String valueStr = "";String[] dataT = data_type.toLowerCase().split(",");

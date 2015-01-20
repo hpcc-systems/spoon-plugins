@@ -113,9 +113,9 @@ public class ECLFStatistic extends ECLJobEntry{//extends JobEntryBase implements
     public Result execute(Result prevResult, int k) throws KettleException {
         
     	Result result = modifyResults(prevResult);
-    	if(result.isStopped()){
+        if(result.isStopped()){
         	return result;
- 		}
+       }
         FStatistic fstat = new FStatistic();
         //sort.setFields(getFields());
         fstat.setDatasetName(getDatasetName());

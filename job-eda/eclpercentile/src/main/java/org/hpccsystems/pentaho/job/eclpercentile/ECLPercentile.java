@@ -147,10 +147,11 @@ public class ECLPercentile extends ECLJobEntry{//extends JobEntryBase implements
 
     	
     	
-        Result result = prevResult;
+    	Result result = modifyResults(prevResult);
         if(result.isStopped()){
-        	return result;
-        }
+        return result;
+       }
+
         else{
 	        String percentile = "";String[] norm = this.normList.split("#");String value = "";String field = "";String normString = "SET OF INTEGER buckets:=[";
 	        String percents = "";String normalize = "";int high = 0;String filter = "(";String name = getName().replaceAll("\\s","");
