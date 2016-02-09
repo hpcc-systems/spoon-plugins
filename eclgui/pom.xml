@@ -14,24 +14,24 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>pentaho-kettle</groupId>
-				<artifactId>kettle-core</artifactId>
-				<version>4.2.0-GA</version>
+			  <groupId>pentaho-kettle</groupId>
+			  <artifactId>kettle-core</artifactId>
+			  <version>5.2.1.0-148</version>
 			</dependency>
 			<dependency>
 				<groupId>pentaho-kettle</groupId>
 				<artifactId>kettle-engine</artifactId>
-				<version>4.2.1-GA</version>
+				<version>5.2.1.0-148</version>
 			</dependency>
 			<dependency>
 				<groupId>pentaho-kettle</groupId>
 				<artifactId>kettle-ui-swt</artifactId>
-				<version>4.2.1-GA</version>
+				<version>5.2.1.0-148</version>
 			</dependency>
 			<dependency>
 				<groupId>pentaho-kettle</groupId>
 				<artifactId>kettle-db</artifactId>
-				<version>4.2.1-GA</version>
+				<version>4.4.3.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse</groupId>
